@@ -21,9 +21,11 @@ func init() {
 	DeclFunc("RandomMagSeed", RandomMagSeed, "Random magnetization with given seed")
 	DeclFunc("Conical", Conical, "Conical state for given wave vector, cone direction, and cone angle")
 	DeclFunc("Helical", Helical, "Helical state for given wave vector")
-	DeclFunc("GaussianSpherical", GaussianSpherical, "Gaussian pulse with sherical symmetry")
-	DeclFunc("GaussianSpherical_outplane", GaussianSpherical_outplane, "Gaussian pulse with sherical distribution out of plane")
+	DeclFunc("GaussianSpherical", GaussianSpherical, "Gaussian pulse with spherical symmetry")
+	DeclFunc("GaussianSpherical_outplane", GaussianSpherical_outplane, "Gaussian pulse with spherical distribution out of plane")
 	DeclFunc("GaussianUniform", GaussianUniform, "Gaussian pulse in one direction")
+	DeclFunc("RotationField", RotationField, "Vectorfield that rotates homogeniously around the position defined by the radius and the angle.")
+	DeclFunc("ArtificialVortex", ArtificialVortex, "Vectorfield mimics a vortex in the elastic part by making use of a gaussian.")
 }
 
 // Magnetic configuration returns m vector for position (x,y,z)
@@ -106,6 +108,30 @@ func GaussianUniform(A, pos, sig, angle1, angle2 float64) Config {
 		uy := math.Sin(angle2) * norm
 		uz := 0.0
 		return data.Vector{ux, uy, uz}
+	}
+}
+
+func RotationField(A, pos_center_r, pos_center_phi float64) Config {
+	return func(x, y, z float64) data.Vector {
+		pos_center_phi_rad := pos_center_phi * 3.1415 / 180
+		ux := (-y - pos_center_r * math.Sin(pos_center_phi_rad))
+		uy := (x - pos_center_r * math.Cos(pos_center_phi_rad))
+		uz := 0.0
+		norm := math.Sqrt(math.Pow(ux, 2) + math.Pow(uy, 2) + math.Pow(uz, 2))
+		return data.Vector{A*ux/norm, A*uy/norm, A*uz/norm}
+	}
+}
+
+func ArtificialVortex(A, pos_center_r, pos_center_phi, sig_x, sig_y float64) Config {
+	return func(x, y, z float64) data.Vector {
+		pos_center_phi_rad := pos_center_phi * 3.1415 / 180
+		pos_x := pos_center_r * math.Cos(pos_center_phi_rad)
+		pos_y := pos_center_r * math.Sin(pos_center_phi_rad)
+		ux := (-y - pos_y)
+		uy := (x - pos_x)
+		uz := math.Exp(-((x-pos_x)*(x-pos_x)/(2*sig_x*sig_x) + (y-pos_y)*(y-pos_y)/(2*sig_y*sig_y)))
+		norm := math.Sqrt(math.Pow(ux, 2) + math.Pow(uy, 2) + math.Pow(uz, 2))
+		return data.Vector{A*ux/norm, A*uy/norm, A*uz/norm}
 	}
 }
 
