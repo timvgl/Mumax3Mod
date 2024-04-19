@@ -155,7 +155,7 @@ getmagnetoelasticforce(float* __restrict__  fx, float* __restrict__  fy, float* 
     }
 
 
-	// ∂u/∂z
+	// ∂m/∂z
     {
 	    float3 m_m2 = make_float3(0.0f, 0.0f, 0.0f);
 	    i_ = idx(ix, iy, lclampz(iz-2));
@@ -226,5 +226,3 @@ getmagnetoelasticforce(float* __restrict__  fx, float* __restrict__  fy, float* 
     fy[I] = 2.0f*B1*m0.y*dmdy.y + B2*(m0.x*dmdx.y + m0.y*(dmdx.x + dmdz.z) + m0.z*dmdz.y);
     fz[I] = 2.0f*B1*m0.z*dmdz.z + B2*(m0.x*dmdx.z + m0.y*dmdy.z + m0.z*(dmdx.x + dmdy.y));
 }
-
-

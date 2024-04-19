@@ -47,6 +47,7 @@ func SetMesh(Nx, Ny, Nz int, cellSizeX, cellSizeY, cellSizeZ float64, pbcx, pbcy
 		U.alloc()
 		DU.alloc()
 		regions.alloc()
+		//UOVERLAY.alloc()
 	} else {
 		// here be dragons
 		LogOut("resizing...")
@@ -64,6 +65,7 @@ func SetMesh(Nx, Ny, Nz int, cellSizeX, cellSizeY, cellSizeZ float64, pbcx, pbcy
 		U.resize()
 		DU.resize()
 		regions.resize()
+		//UOVERLAY.resize()
 		geometry.buffer.Free()
 		geometry.buffer = data.NilSlice(1, Mesh().Size())
 		geometry.setGeom(geometry.shape)

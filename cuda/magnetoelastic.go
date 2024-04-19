@@ -41,3 +41,22 @@ func GetMagnetoelasticForceDensity(out, m *data.Slice, B1, B2 MSlice, mesh *data
 		N[X], N[Y], N[Z],
 		mesh.PBC_code(), cfg)
 }
+
+func GetElasticForceDensity(out, norm, shear *data.Slice, mesh *data.Mesh) {
+	util.Argument(out.Size() == mesh.Size())
+
+	cellsize := mesh.CellSize()
+	N := mesh.Size()
+	cfg := make3DConf(N)
+
+	rcsx := float32(1.0 / cellsize[X])
+	rcsy := float32(1.0 / cellsize[Y])
+	rcsz := float32(1.0 / cellsize[Z])
+
+	k_getelasticforce_async(out.DevPtr(X), out.DevPtr(Y), out.DevPtr(Z),
+		norm.DevPtr(X), norm.DevPtr(Y), norm.DevPtr(Z),
+		shear.DevPtr(X), shear.DevPtr(Y), shear.DevPtr(Z),
+		rcsx, rcsy, rcsz,
+		N[X], N[Y], N[Z],
+		mesh.PBC_code(), cfg)
+}

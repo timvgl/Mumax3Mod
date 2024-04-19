@@ -12,22 +12,26 @@ import (
 
 // Solver globals
 var (
-	Time                    float64                      // time in seconds
-	alarm                   float64                      // alarm clock marks end time of run, dt adaptation must not cross it!
-	pause                   = true                       // set pause at any time to stop running after the current step
-	postStep                []func()                     // called on after every full time step
-	Inject                           = make(chan func()) // injects code in between time steps. Used by web interface.
-	Dt_si                   float64  = 1e-15             // time step = dt_si (seconds) *dt_mul, which should be nice float32
-	MinDt, MaxDt            float64                      // minimum and maximum time step
-	MaxErr                  float64  = 1e-5              // maximum error/step
-	Headroom                float64  = 0.8               // solver headroom, (Gustafsson, 1992, Control of Error and Convergence in ODE Solvers)
-	LastErr, PeakErr        float64                      // error of last step, highest error ever
-	LastTorque              float64                      // maxTorque of last time step
-	NSteps, NUndone, NEvals int                          // number of good steps, undone steps
-	FixDt                   float64                      // fixed time step?
-	stepper                 Stepper                      // generic step, can be EulerStep, HeunStep, etc
-	solvertype              int
-	CorePosRT						  = make([]float64, 3)//core Position of Vortex
+	Time                    			float64                      // time in seconds
+	alarm                   			float64                      // alarm clock marks end time of run, dt adaptation must not cross it!
+	pause                   			= true                       // set pause at any time to stop running after the current step
+	postStep                			[]func()                     // called on after every full time step
+	Inject                           		 	 = make(chan func()) // injects code in between time steps. Used by web interface.
+	Dt_si                   			float64  = 1e-15             // time step = dt_si (seconds) *dt_mul, which should be nice float32
+	MinDt, MaxDt            			float64                      // minimum and maximum time step
+	MaxErr                  			float64  = 1e-5              // maximum error/step
+	Headroom                			float64  = 0.8               // solver headroom, (Gustafsson, 1992, Control of Error and Convergence in ODE Solvers)
+	LastErr, PeakErr        			float64                      // error of last step, highest error ever
+	LastTorque              			float64                      // maxTorque of last time step
+	NSteps, NUndone, NEvals 			int                          // number of good steps, undone steps
+	FixDt                   			float64                      // fixed time step?
+	stepper                 			Stepper                      // generic step, can be EulerStep, HeunStep, etc
+	solvertype              			int
+	CorePosRT						  			= make([]float64, 3) //core Position of Vortex
+	BoolAllowInhomogeniousMECoupling	bool 	= false
+	//InsertTimeDepDisplacement 			int		= 0					 //1 for True, 0 for False
+	//InsertTimeDepDisplacementFunc 		func(arg1, arg2, arg3, arg4, arg5 float64) Config //func for calc displacement that is supposed to be added
+	//InsertTimeDepDisplacementFuncArgs	[]func(t float64) float64	 //slices of funcs that are going to be used as args for InsertTimeDepDisplacementFunc
 )
 
 func init() {
@@ -36,6 +40,8 @@ func init() {
 	DeclFunc("RunWhile", RunWhile, "Run while condition function is true")
 	DeclFunc("SetSolver", SetSolver, "Set solver type. 1:Euler, 2:Heun, 3:Bogaki-Shampine, 4: Runge-Kutta (RK45), 5: Dormand-Prince, 6: Fehlberg, -1: Backward Euler")
 	DeclFunc("Activate_corePosScriptAccess", Activate_corePosScriptAccess, "Activates the availability of the vortex core position as live data")
+	//DeclFunc("Set_InsertTimeDepDisplacement_to", Set_InsertTimeDepDisplacement_to, "Activates the insertion of timedep displacement into MAGELAS_RUNGEKUTTA")
+	DeclFunc("AllowInhomogeniousMECoupling", AllowInhomogeniousMECoupling, "Bypasses an error that is going to be raised if B1 or B2 is inhomogenious")
 	DeclVar("CorePosRT", &CorePosRT, "Vortex core position in real time")
 	DeclTVar("t", &Time, "Total simulated time (s)")
 	DeclVar("step", &NSteps, "Total number of time steps taken")
@@ -45,11 +51,13 @@ func init() {
 	DeclVar("Headroom", &Headroom, "Solver headroom (default = 0.8)")
 	DeclVar("FixDt", &FixDt, "Set a fixed time step, 0 disables fixed step (which is the default)")
 	DeclFunc("Exit", Exit, "Exit from the program")
+	//DeclVar("BoolAllowInhomogeniousMECoupling", BoolAllowInhomogeniousMECoupling, "Bypasses an error that is going to be raised if B1 or B2 is inhomogenious, bool")
 	SetSolver(DORMANDPRINCE)
 	_ = NewScalarValue("dt", "s", "Time Step", func() float64 { return Dt_si })
 	_ = NewScalarValue("LastErr", "", "Error of last step", func() float64 { return LastErr })
 	_ = NewScalarValue("PeakErr", "", "Overall maxium error per step", func() float64 { return PeakErr })
 	_ = NewScalarValue("NEval", "", "Total number of torque evaluations", func() float64 { return float64(NEvals) })
+	//_ = NewScalarValue("InsertTimeDepDisplacement", "", "Wherether time and space dependent displacement should be inserted", func() float64 { return float64(InsertTimeDepDisplacement)})
 }
 
 // Time stepper like Euler, Heun, RK23
@@ -250,6 +258,17 @@ func SanityCheck() {
 func Activate_corePosScriptAccess() {
 	PostStep(func() {CorePosRT = corePos()})
 }
+
+func AllowInhomogeniousMECoupling() {
+	BoolAllowInhomogeniousMECoupling = !BoolAllowInhomogeniousMECoupling
+}
+
+/*
+func Set_InsertTimeDepDisplacement_to(stat int, cfg func(arg1, arg2, arg3, arg4, arg5 float64) Config, args []func(t float64) float64) {
+	InsertTimeDepDisplacement = stat
+	InsertTimeDepDisplacementFunc = cfg
+	InsertTimeDepDisplacementFuncArgs = args
+}*/
 
 func Exit() {
 	Close()

@@ -9,8 +9,12 @@ import (
 )
 
 var U displacement // displacement [m]
+//var UOVERLAY displacement
 
-func init() { DeclLValue("u", &U, `displacement [m]`) }
+func init() { 
+	DeclLValue("u", &U, `displacement [m]`)
+	//DeclLValue("uOverlay", &UOVERLAY, `displacement [m] added after each step`)
+}
 
 // Special buffered quantity to store displacement
 // makes sure it's normalized etc.

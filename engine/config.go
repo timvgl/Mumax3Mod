@@ -56,7 +56,7 @@ func randomDir(rng *rand.Rand) data.Vector {
 }
 
 // Returns a uniform magnetization state. E.g.:
-// 	M = Uniform(1, 0, 0)) // saturated along X
+// 	M = Uniform(1, 0, 0) // saturated along X
 func Uniform(mx, my, mz float64) Config {
 	return func(x, y, z float64) data.Vector {
 		return data.Vector{mx, my, mz}

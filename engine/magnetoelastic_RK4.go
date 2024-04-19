@@ -22,6 +22,10 @@ func (_ *magelasRK4) Step() {
 
 	//#################################
 	//Initialisation:
+	/*
+	if InsertTimeDepDisplacement == 1 {
+		U.Set(Uniform(0, 0, 0))
+	}*/
 	u := U.Buffer()
 	size := u.Size()
 
@@ -30,6 +34,16 @@ func (_ *magelasRK4) Step() {
 	u0 := cuda.Buffer(3, size)
 	defer cuda.Recycle(u0)
 	data.Copy(u0, u)
+
+	/*if InsertTimeDepDisplacement == 1 {
+		var funcResults []float64
+		for _, function := range InsertTimeDepDisplacementFuncArgs {
+			funcResults = append(funcResults, function(Time))
+		}
+		fmt.Println(funcResults[0], funcResults[1], funcResults[2], funcResults[3], funcResults[4], "\n")
+		UOVERLAY.Set(InsertTimeDepDisplacementFunc(funcResults[0], funcResults[1], funcResults[2], funcResults[3], funcResults[4]))
+		cuda.Add(u0, u0, UOVERLAY.Buffer())
+	}*/
 
 	m := M.Buffer()
 	m0 := cuda.Buffer(3, size)
@@ -88,6 +102,7 @@ func (_ *magelasRK4) Step() {
 	//Stage 2:
 	//u = u0*1 + k1*dt/2
 	Time = t0 + (1./2.)*Dt_si
+
 	cuda.Madd2(u, u0, ku1, 1, (1./2.)*dt)
 	// calcBndry()
 	cuda.Madd2(v, v0, kv1, 1, (1./2.)*dt)

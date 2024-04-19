@@ -19,6 +19,9 @@ var (
 	eyz       = NewScalarExcitation("eyz", "", "eyz component of the strain tensor")
 	B_mel     = NewVectorField("B_mel", "T", "Magneto-elastic filed", AddMagnetoelasticField)
 	F_mel     = NewVectorField("F_mel", "N/m3", "Magneto-elastic force density", GetMagnetoelasticForceDensity)
+	F_el	  = NewVectorField("F_el", "N/m3", "Elastic force density", GetElasticForceDensity)
+	rhod2udt2 = NewVectorField("rhod2udt2", "N/m3", "Force of displacement", GetDisplacementForceDensity)
+	etadudt   = NewVectorField("etadudt", "N/m3", "Force of displacement due to speed", GetDisplacementSpeedForceDensity)
 	Edens_mel = NewScalarField("Edens_mel", "J/m3", "Magneto-elastic energy density", AddMagnetoelasticEnergyDensity)
 	E_mel     = NewScalarValue("E_mel", "J", "Magneto-elastic energy", GetMagnetoelasticEnergy)
 )
@@ -63,7 +66,9 @@ func GetMagnetoelasticForceDensity(dst *data.Slice) {
 		return
 	}
 
-	util.AssertMsg(B1.IsUniform() && B2.IsUniform(), "Magnetoelastic: B1, B2 must be uniform")
+	if !BoolAllowInhomogeniousMECoupling {
+		util.AssertMsg(B1.IsUniform() && B2.IsUniform(), "Magnetoelastic: B1, B2 must be uniform")
+	}
 
 	b1 := B1.MSlice()
 	defer b1.Recycle()
@@ -73,6 +78,67 @@ func GetMagnetoelasticForceDensity(dst *data.Slice) {
 
 	cuda.GetMagnetoelasticForceDensity(dst, M.Buffer(),
 		b1, b2, M.Mesh())
+}
+
+func GetElasticForceDensity(dst *data.Slice) {
+	haveMel := B1.nonZero() || B2.nonZero()
+	if !haveMel {
+		return
+	}
+
+	if !BoolAllowInhomogeniousMECoupling {
+		util.AssertMsg(B1.IsUniform() && B2.IsUniform(), "Magnetoelastic: B1, B2 must be uniform")
+	}
+
+	stress_norm := ValueOf(norm_stress.Quantity)
+	defer cuda.Recycle(stress_norm)
+
+	stress_shear := ValueOf(shear_stress.Quantity)
+	defer cuda.Recycle(stress_shear)
+
+	cuda.GetElasticForceDensity(dst,
+		stress_norm, stress_shear, M.Mesh())
+}
+
+func GetDisplacementSpeedForceDensity(dst *data.Slice) {
+	haveMel := B1.nonZero() || B2.nonZero()
+	if !haveMel {
+		return
+	}
+
+	if !BoolAllowInhomogeniousMECoupling {
+		util.AssertMsg(B1.IsUniform() && B2.IsUniform(), "Magnetoelastic: B1, B2 must be uniform")
+	}
+
+	eta, _ := Eta.Slice()
+	defer cuda.Recycle(eta)
+
+	cuda.Mul(dst, DU.Buffer(), eta)
+}
+
+func GetDisplacementForceDensity(dst *data.Slice) {
+	haveMel := B1.nonZero() || B2.nonZero()
+	if !haveMel {
+		return
+	}
+
+	if !BoolAllowInhomogeniousMECoupling {
+		util.AssertMsg(B1.IsUniform() && B2.IsUniform(), "Magnetoelastic: B1, B2 must be uniform")
+	}
+
+	F_elRef := ValueOf(F_el.Quantity)
+	defer cuda.Recycle(F_elRef)
+
+	F_melRef := ValueOf(F_mel.Quantity)
+	defer cuda.Recycle(F_melRef)
+
+	etadudtRef := ValueOf(etadudt.Quantity)
+	defer cuda.Recycle(etadudtRef)
+
+	bf, _ := Bf.Slice()
+	defer cuda.Recycle(bf)
+
+	cuda.Madd4(dst, F_elRef, F_melRef, bf, etadudtRef, 1, 1, 1, -1)
 }
 
 func AddMagnetoelasticEnergyDensity(dst *data.Slice) {

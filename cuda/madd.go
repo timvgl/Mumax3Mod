@@ -6,15 +6,23 @@ import (
 )
 
 // multiply: dst[i] = a[i] * b[i]
-// a and b must have the same number of components
+// a and b must either have the same number of components
+// or a can have an arbitrary amount of components, while b has one component
 func Mul(dst, a, b *data.Slice) {
 	N := dst.Len()
 	nComp := dst.NComp()
-	util.Assert(a.Len() == N && a.NComp() == nComp && b.Len() == N && b.NComp() == nComp)
+	util.Assert(a.Len() == N && a.NComp() == nComp && b.Len() == N && b.NComp() == nComp || a.Len() == N && a.NComp() == nComp && b.Len() == N && b.NComp() == 1)
 	cfg := make1DConf(N)
-	for c := 0; c < nComp; c++ {
-		k_mul_async(dst.DevPtr(c), a.DevPtr(c), b.DevPtr(c), N, cfg)
+	if b.NComp() == a.NComp() {
+		for c := 0; c < nComp; c++ {
+			k_mul_async(dst.DevPtr(c), a.DevPtr(c), b.DevPtr(c), N, cfg)
+		}
 	}
+	if b.NComp() != a.NComp() && b.NComp() == 1 {
+		for c := 0; c < nComp; c++ {
+			k_mul_async(dst.DevPtr(c), a.DevPtr(c), b.DevPtr(0), N, cfg)
+		}
+	} 
 }
 
 // divide: dst[i] = a[i] / b[i]
