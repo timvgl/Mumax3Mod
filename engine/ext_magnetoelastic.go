@@ -20,6 +20,7 @@ var (
 	B_mel     = NewVectorField("B_mel", "T", "Magneto-elastic filed", AddMagnetoelasticField)
 	F_mel     = NewVectorField("F_mel", "N/m3", "Magneto-elastic force density", GetMagnetoelasticForceDensity)
 	F_el	  = NewVectorField("F_el", "N/m3", "Elastic force density", GetElasticForceDensity)
+	F_elsys   = NewVectorField("F_elsys", "N/m3", "Elastic force density", GetSumElasticForces)
 	rhod2udt2 = NewVectorField("rhod2udt2", "N/m3", "Force of displacement", GetDisplacementForceDensity)
 	etadudt   = NewVectorField("etadudt", "N/m3", "Force of displacement due to speed", GetDisplacementSpeedForceDensity)
 	Edens_mel = NewScalarField("Edens_mel", "J/m3", "Magneto-elastic energy density", AddMagnetoelasticEnergyDensity)
@@ -32,6 +33,7 @@ var (
 
 func init() {
 	registerEnergy(GetMagnetoelasticEnergy, AddMagnetoelasticEnergyDensity)
+	registerEnergyElastic(GetMagnetoelasticEnergy, AddMagnetoelasticEnergyDensity)
 }
 
 func AddMagnetoelasticField(dst *data.Slice) {
@@ -141,6 +143,15 @@ func GetDisplacementForceDensity(dst *data.Slice) {
 	cuda.Madd4(dst, F_elRef, F_melRef, bf, etadudtRef, 1, 1, 1, -1)
 }
 
+func GetMaxDisplacementForceDensity() float64 {
+	buf := cuda.Buffer(3, Mesh().Size())
+	defer cuda.Recycle(buf)
+	cuda.Zero(buf)
+	GetDisplacementForceDensity(buf)
+	return cuda.MaxVecNorm(buf)
+
+}
+
 func AddMagnetoelasticEnergyDensity(dst *data.Slice) {
 	haveMel := B1.nonZero() || B2.nonZero()
 	if !haveMel {
@@ -201,3 +212,21 @@ func GetMagnetoelasticEnergy() float64 {
 	AddMagnetoelasticEnergyDensity(buf)
 	return cellVolume() * float64(cuda.Sum(buf))
 }
+
+func GetSumElasticForces(dst *data.Slice) {
+	buf := cuda.Buffer(3, Mesh().Size())
+	defer cuda.Recycle(buf)
+	cuda.Zero(buf)
+	GetDisplacementForceDensity(dst)
+	GetDisplacementSpeedForceDensity(buf)
+	cuda.Madd2(dst, dst, buf, 1, 1)
+	GetElasticForceDensity(buf)
+	cuda.Madd2(dst, dst, buf, 1, -1)
+	GetMagnetoelasticForceDensity(buf)
+	cuda.Madd2(dst, dst, buf, 1, -1)
+	bf, _ := Bf.Slice()
+	defer cuda.Recycle(bf)
+	cuda.Madd2(dst, dst, bf, 1, -1)
+}
+
+

@@ -6,6 +6,7 @@ import (
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/data"
 	"github.com/mumax/3/util"
+	"math"
 )
 
 var (
@@ -122,6 +123,13 @@ func GetMaxTorque() float64 {
 	torque := ValueOf(Torque)
 	defer cuda.Recycle(torque)
 	return cuda.MaxVecNorm(torque)
+}
+
+func GetAverageTorque() float32 {
+	torque := ValueOf(Torque)
+	defer cuda.Recycle(torque)
+	avergeTorque := sAverageMagnet(torque)
+	return float32(math.Sqrt(math.Pow(avergeTorque[0], 2) + math.Pow(avergeTorque[1], 2) + math.Pow(avergeTorque[2], 2)))
 }
 
 type FixedLayerPosition int

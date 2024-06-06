@@ -10,6 +10,10 @@ var (
 	E_el     = NewScalarValue("E_el", "J", "Elastic energy", GetTotElasticEnergy)
 )
 
+func init() {
+	registerEnergyElastic(GetTotElasticEnergy, GetElasticEnergy)
+}
+
 func GetElasticEnergy(dst *data.Slice) {
 	ElasticEnergyDens(dst, norm_strain.Quantity, shear_strain.Quantity, C11, C12, C44)
 }

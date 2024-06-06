@@ -22,7 +22,7 @@
 
 SHELL = /bin/bash
 
-export CUDA_CC=30 32 35 37 50 52 53 60 61 62 70
+export CUDA_CC=30 32 35 37 50 52 53 60 61 62 70 80
 
 # When CUDA_HOME is not an environment variable and is not set on the command line, use the nvcc compiler
 # from the PATH
