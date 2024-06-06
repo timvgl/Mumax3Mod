@@ -10,6 +10,10 @@ var (
 	E_kin     = NewScalarValue("E_kin", "J", "Kinetic energy", GetTotKineticEnergy)
 )
 
+func init() {
+	registerEnergyElastic(GetTotKineticEnergy, GetKineticEnergy)
+}
+
 func GetKineticEnergy(dst *data.Slice) {
 	KineticEnergyDens(dst, DU, Rho)
 }

@@ -9,7 +9,16 @@ import (
 )
 
 // Classical 4th order RK solver.
-type elasRK4 struct{}
+type elasRK4 struct{
+	ku1 *data.Slice
+	ku2 *data.Slice
+	ku3 *data.Slice
+	ku4 *data.Slice
+	kv1 *data.Slice
+	kv2 *data.Slice
+	kv3 *data.Slice
+	kv4 *data.Slice
+}
 
 func (_ *elasRK4) Step() {
 
@@ -159,4 +168,21 @@ func (_ *elasRK4) Step() {
 	}
 }
 
-func (_ *elasRK4) Free() {}
+func (elas *elasRK4) Free() {
+	elas.kv1.Free()
+	elas.kv1 = nil
+	elas.kv2.Free()
+	elas.kv2 = nil
+	elas.kv3.Free()
+	elas.kv3 = nil
+	elas.kv4.Free()
+	elas.kv4 = nil
+	elas.ku1.Free()
+	elas.ku1 = nil
+	elas.ku2.Free()
+	elas.ku2 = nil
+	elas.ku3.Free()
+	elas.ku3 = nil
+	elas.ku4.Free()
+	elas.ku4 = nil
+}

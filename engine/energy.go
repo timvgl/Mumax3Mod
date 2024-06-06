@@ -11,16 +11,39 @@ import (
 // TODO: consistent naming SetEdensTotal, ...
 
 var (
-	energyTerms []func() float64        // all contributions to total energy
-	edensTerms  []func(dst *data.Slice) // all contributions to total energy density (add to dst)
-	Edens_total = NewScalarField("Edens_total", "J/m3", "Total energy density", SetTotalEdens)
-	E_total     = NewScalarValue("E_total", "J", "total energy", GetTotalEnergy)
+	energyTerms 		[]func() float64        // all contributions to total energy
+	edensTerms  		[]func(dst *data.Slice) // all contributions to total energy density (add to dst)
+	Edens_total 		= NewScalarField("Edens_total", "J/m3", "Total energy density", SetTotalEdens)
+	E_total     		= NewScalarValue("E_total", "J", "total energy", GetTotalEnergy)
+	energyTermsElastic 	[]func() float64        // all contributions to total energy of system - elastic and magnetic
+	edensTermsElastic	[]func(dst *data.Slice) // all contributions to total energy density (add to dst)
+	E_elastic 			= NewScalarValue("E_elastic", "J", "total energy of elstic system", GetTotalEnergyElastic)
+	E_System 			= NewScalarValue("E_System", "J", "total energy of magnetic and elstic system", GetTotalEnergySystem)
+
 )
 
 // add energy term to global energy
 func registerEnergy(term func() float64, dens func(*data.Slice)) {
 	energyTerms = append(energyTerms, term)
 	edensTerms = append(edensTerms, dens)
+}
+
+func registerEnergyElastic(term func() float64, dens func(*data.Slice)) {
+	energyTermsElastic = append(energyTermsElastic, term)
+	edensTermsElastic = append(edensTermsElastic, dens)
+}
+
+func GetTotalEnergySystem() float64 {
+	return GetTotalEnergyElastic() + GetTotalEnergy() - GetMagnetoelasticEnergy() //remove ME energy because it would be in there twice otherwise.
+}
+
+func GetTotalEnergyElastic() float64 {
+	E := 0.
+	for _, f := range energyTermsElastic {
+		E += f()
+	}
+	checkNaN1(E)
+	return E
 }
 
 // Returns the total energy in J.

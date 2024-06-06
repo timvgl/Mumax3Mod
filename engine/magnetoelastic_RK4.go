@@ -9,7 +9,12 @@ import (
 )
 
 // Classical 4th order RK solver.
-type magelasRK4 struct{}
+type magelasRK4 struct{
+	kv1 *data.Slice
+	kv2 *data.Slice
+	kv3 *data.Slice
+	kv4 *data.Slice
+}
 
 func (_ *magelasRK4) Step() {
 
@@ -142,6 +147,7 @@ func (_ *magelasRK4) Step() {
 	//Error calculation
 	err := cuda.MaxVecDiff(ku1, ku4)
 	err2 := cuda.MaxVecDiff(kv1, kv4)
+
 	//err3 := cuda.MaxVecDiff(km1, km4) * float64(dt) * GammaLL
 
 	if err != 0.0 {
@@ -208,4 +214,13 @@ func (_ *magelasRK4) Step() {
 	}
 }
 
-func (_ *magelasRK4) Free() {}
+func (magelasRK4 *magelasRK4) Free() {
+	//magelasRK4.kv1.Free()
+	//magelasRK4.kv1 = nil
+	//magelasRK4.kv2.Free()
+	//magelasRK4.kv2 = nil
+	//magelasRK4.kv3.Free()
+	//magelasRK4.kv3 = nil
+	//magelasRK4.kv4.Free()
+	//magelasRK4.kv4 = nil
+}

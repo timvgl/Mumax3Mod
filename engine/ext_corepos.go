@@ -1,14 +1,21 @@
 package engine
 
+import (
+	"github.com/mumax/3/cuda"
+	"math"
+)
+
 var CorePos = NewVectorValue("ext_corepos", "m", "Vortex core position (x,y) + polarization (z)", corePos)
 
 func corePos() []float64 {
-	m := M.Buffer()
+	m := ValueOf(M_full)
+	defer cuda.Recycle(m)
+
 	m_z := m.Comp(Z).HostCopy().Scalars()
 	s := m.Size()
 	Nx, Ny, Nz := s[X], s[Y], s[Z]
 
-	max := float32(-1.0)
+	max := float32(math.Inf(-1))
 	var maxX, maxY, maxZ int
 
 	for z := 0; z < Nz; z++ {
