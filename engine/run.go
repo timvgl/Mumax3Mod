@@ -28,8 +28,9 @@ var (
 	stepper                 			Stepper                      // generic step, can be EulerStep, HeunStep, etc
 	solvertype              			int
 	CorePosRT						  			= make([]float64, 3) //core Position of Vortex
+	CorePosRTR							float64
 	BoolAllowInhomogeniousMECoupling	bool 	= false
-	useSolvedElasticPDE					bool
+	useBoundaries						bool 	= false
 	//InsertTimeDepDisplacement 			int		= 0					 //1 for True, 0 for False
 	//InsertTimeDepDisplacementFunc 		func(arg1, arg2, arg3, arg4, arg5 float64) Config //func for calc displacement that is supposed to be added
 	//InsertTimeDepDisplacementFuncArgs	[]func(t float64) float64	 //slices of funcs that are going to be used as args for InsertTimeDepDisplacementFunc
@@ -41,9 +42,13 @@ func init() {
 	DeclFunc("RunWhile", RunWhile, "Run while condition function is true")
 	DeclFunc("SetSolver", SetSolver, "Set solver type. 1:Euler, 2:Heun, 3:Bogaki-Shampine, 4: Runge-Kutta (RK45), 5: Dormand-Prince, 6: Fehlberg, -1: Backward Euler")
 	DeclFunc("Activate_corePosScriptAccess", Activate_corePosScriptAccess, "Activates the availability of the vortex core position as live data")
+	DeclFunc("Activate_corePosScriptAccessR", Activate_corePosScriptAccessR, "")
 	//DeclFunc("Set_InsertTimeDepDisplacement_to", Set_InsertTimeDepDisplacement_to, "Activates the insertion of timedep displacement into MAGELAS_RUNGEKUTTA")
 	DeclFunc("AllowInhomogeniousMECoupling", AllowInhomogeniousMECoupling, "Bypasses an error that is going to be raised if B1 or B2 is inhomogenious")
 	DeclVar("CorePosRT", &CorePosRT, "Vortex core position in real time")
+	DeclVar("CorePosRTR", &CorePosRTR, "Radius of CorePosRT")
+	NewScalarValue("CorePosR", "m", "Radius of CorePosRT", func() float64 { return getRadiusVortexCore() })
+	DeclVar("useBoundaries", &useBoundaries, "")
 	DeclTVar("t", &Time, "Total simulated time (s)")
 	DeclVar("step", &NSteps, "Total number of time steps taken")
 	DeclVar("MinDt", &MinDt, "Minimum time step the solver can take (s)")
@@ -94,40 +99,28 @@ func SetSolver(typ int) {
 		util.Fatalf("SetSolver: unknown solver type: %v", typ)
 	case BACKWARD_EULER:
 		stepper = new(BackwardEuler)
-		useSolvedElasticPDE = true
 	case EULER:
 		stepper = new(Euler)
-		useSolvedElasticPDE = true
 	case HEUN:
 		stepper = new(Heun)
-		useSolvedElasticPDE = true
 	case BOGAKISHAMPINE:
 		stepper = new(RK23)
-		useSolvedElasticPDE = true
 	case RUNGEKUTTA:
 		stepper = new(RK4)
-		useSolvedElasticPDE = true
 	case DORMANDPRINCE:
 		stepper = new(RK45DP)
-		useSolvedElasticPDE = true
 	case FEHLBERG:
 		stepper = new(RK56)
-		useSolvedElasticPDE = true
 	case SECONDDERIV:
 		stepper = new(secondHeun)
-		useSolvedElasticPDE = true
 	case ELAS_RUNGEKUTTA:
 		stepper = new(elasRK4)
-		useSolvedElasticPDE = false
 	case MAGELAS_RUNGEKUTTA:
 		stepper = new(magelasRK4)
-		useSolvedElasticPDE = false
 	case ELAS_LEAPFROG:
 		stepper = new(elasLF)
-		useSolvedElasticPDE = false
 	case ELAS_YOSH:
 		stepper = new(elasYOSH)
-		useSolvedElasticPDE = false
 	}
 	solvertype = typ
 }
@@ -208,20 +201,6 @@ func Steps(n int) {
 	RunWhile(func() bool { return NSteps < stop })
 }
 
-func RunWhileRelax(condition func() bool, prefix string) {
-	const output = true
-	DoOutputPrefix(prefix) // allow t=0 output
-	for condition() && !pause {
-		select {
-		default:
-			stepPrefix(output, prefix)
-		// accept tasks form Inject channel
-		case f := <-Inject:
-			f()
-		}
-	}
-}
-
 // Runs as long as condition returns true, saves output.
 func RunWhile(condition func() bool) {
 	SanityCheck()
@@ -261,16 +240,6 @@ func step(output bool) {
 	}
 }
 
-func stepPrefix(output bool, prefix string) {
-	stepper.Step()
-	for _, f := range postStep {
-		f()
-	}
-	if output {
-		DoOutputPrefix(prefix)
-	}
-}
-
 // Register function f to be called after every time step.
 // Typically used, e.g., to manipulate the magnetization.
 func PostStep(f func()) {
@@ -295,6 +264,17 @@ func SanityCheck() {
 
 func Activate_corePosScriptAccess() {
 	PostStep(func() {CorePosRT = corePos()})
+}
+
+func getRadiusVortexCore() float64 {
+	CorePosRT = corePos()
+	return math.Sqrt(math.Pow(CorePosRT[0], 2) + math.Pow(CorePosRT[1], 2))
+}
+
+func Activate_corePosScriptAccessR() {
+	PostStep(func() {
+		CorePosRTR = getRadiusVortexCore()	
+	})
 }
 
 func AllowInhomogeniousMECoupling() {

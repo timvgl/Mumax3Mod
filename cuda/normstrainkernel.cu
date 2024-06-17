@@ -26,9 +26,9 @@ NormStrain(float* __restrict__ ex, float* __restrict__ ey, float* __restrict__ e
     int I_ = idx(ix, iy, iz);
     float C_ = amul(C1_, C1_mul, I_);
 
-    ex[I] = 0.0;
-    ey[I] = 0.0;
-    ez[I] = 0.0;
+    ex[I] = 0.0f;
+    ey[I] = 0.0f;
+    ez[I] = 0.0f;
  
     //X-direction
     if (ix==0) {

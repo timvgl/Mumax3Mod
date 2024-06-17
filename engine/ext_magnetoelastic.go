@@ -19,12 +19,16 @@ var (
 	eyz       = NewScalarExcitation("eyz", "", "eyz component of the strain tensor")
 	B_mel     = NewVectorField("B_mel", "T", "Magneto-elastic filed", AddMagnetoelasticField)
 	F_mel     = NewVectorField("F_mel", "N/m3", "Magneto-elastic force density", GetMagnetoelasticForceDensity)
+	F_melM     = NewVectorField("F_melM", "N/m3", "Magneto-elastic force density", GetMagnetoelasticForceDensityM)
 	F_el	  = NewVectorField("F_el", "N/m3", "Elastic force density", GetElasticForceDensity)
 	F_elsys   = NewVectorField("F_elsys", "N/m3", "Elastic force density", GetSumElasticForces)
 	rhod2udt2 = NewVectorField("rhod2udt2", "N/m3", "Force of displacement", GetDisplacementForceDensity)
 	etadudt   = NewVectorField("etadudt", "N/m3", "Force of displacement due to speed", GetDisplacementSpeedForceDensity)
 	Edens_mel = NewScalarField("Edens_mel", "J/m3", "Magneto-elastic energy density", AddMagnetoelasticEnergyDensity)
 	E_mel     = NewScalarValue("E_mel", "J", "Magneto-elastic energy", GetMagnetoelasticEnergy)
+	GradMx	  = NewVectorField("GradMx", "J", "", GetGradMx)
+	GradMy	  = NewVectorField("GradMy", "J", "", GetGradMy)
+	GradMz	  = NewVectorField("GradMz", "J", "", GetGradMz)
 )
 
 var (
@@ -229,4 +233,26 @@ func GetSumElasticForces(dst *data.Slice) {
 	cuda.Madd2(dst, dst, bf, 1, -1)
 }
 
+func GetMagnetoelasticForceDensityM(dst *data.Slice) {
+	Edens_melV := ValueOf(Edens_mel)
+	defer cuda.Recycle(Edens_melV)
 
+	buf := cuda.Buffer(1, Mesh().Size())
+	defer cuda.Recycle(buf)
+
+	cuda.MOne(buf)
+	cuda.Mul(dst, dst, buf)
+	cuda.Grad(dst, Edens_melV, B_mel.Mesh())
+}
+
+func GetGradMx(dst *data.Slice) {
+	cuda.Grad(dst, M.Buffer(), M.Mesh())
+}
+
+func GetGradMy(dst *data.Slice) {
+	cuda.Grad2(dst, M.Buffer(), M.Mesh())
+}
+
+func GetGradMz(dst *data.Slice) {
+	cuda.Grad3(dst, M.Buffer(), M.Mesh())
+}

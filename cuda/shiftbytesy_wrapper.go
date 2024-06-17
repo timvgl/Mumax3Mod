@@ -83,13 +83,12 @@ var shiftbytesy_map = map[int]string{0: "",
 	60: shiftbytesy_ptx_60,
 	61: shiftbytesy_ptx_61,
 	62: shiftbytesy_ptx_62,
-	70: shiftbytesy_ptx_70,
-	80: shiftbytesy_ptx_80}
+	70: shiftbytesy_ptx_70}
 
 // shiftbytesy PTX code for various compute capabilities.
 const (
 	shiftbytesy_ptx_35 = `
-.version 7.4
+.version 7.7
 .target sm_35
 .address_size 64
 
@@ -146,17 +145,17 @@ const (
 
 	add.s32 	%r19, %r4, %r5;
 	mad.lo.s32 	%r20, %r19, %r6, %r1;
-	cvta.to.global.u64 	%rd3, %rd2;
-	cvt.s64.s32 	%rd4, %r20;
-	add.s64 	%rd5, %rd3, %rd4;
+	cvt.s64.s32 	%rd3, %r20;
+	cvta.to.global.u64 	%rd4, %rd2;
+	add.s64 	%rd5, %rd4, %rd3;
 	ld.global.nc.u8 	%rs4, [%rd5];
 
 $L__BB0_3:
 	add.s32 	%r21, %r5, %r2;
 	mad.lo.s32 	%r22, %r21, %r6, %r1;
-	cvta.to.global.u64 	%rd6, %rd1;
-	cvt.s64.s32 	%rd7, %r22;
-	add.s64 	%rd8, %rd6, %rd7;
+	cvt.s64.s32 	%rd6, %r22;
+	cvta.to.global.u64 	%rd7, %rd1;
+	add.s64 	%rd8, %rd7, %rd6;
 	st.global.u8 	[%rd8], %rs4;
 
 $L__BB0_4:
@@ -166,7 +165,7 @@ $L__BB0_4:
 
 `
 	shiftbytesy_ptx_37 = `
-.version 7.4
+.version 7.7
 .target sm_37
 .address_size 64
 
@@ -223,17 +222,17 @@ $L__BB0_4:
 
 	add.s32 	%r19, %r4, %r5;
 	mad.lo.s32 	%r20, %r19, %r6, %r1;
-	cvta.to.global.u64 	%rd3, %rd2;
-	cvt.s64.s32 	%rd4, %r20;
-	add.s64 	%rd5, %rd3, %rd4;
+	cvt.s64.s32 	%rd3, %r20;
+	cvta.to.global.u64 	%rd4, %rd2;
+	add.s64 	%rd5, %rd4, %rd3;
 	ld.global.nc.u8 	%rs4, [%rd5];
 
 $L__BB0_3:
 	add.s32 	%r21, %r5, %r2;
 	mad.lo.s32 	%r22, %r21, %r6, %r1;
-	cvta.to.global.u64 	%rd6, %rd1;
-	cvt.s64.s32 	%rd7, %r22;
-	add.s64 	%rd8, %rd6, %rd7;
+	cvt.s64.s32 	%rd6, %r22;
+	cvta.to.global.u64 	%rd7, %rd1;
+	add.s64 	%rd8, %rd7, %rd6;
 	st.global.u8 	[%rd8], %rs4;
 
 $L__BB0_4:
@@ -243,7 +242,7 @@ $L__BB0_4:
 
 `
 	shiftbytesy_ptx_50 = `
-.version 7.4
+.version 7.7
 .target sm_50
 .address_size 64
 
@@ -300,17 +299,17 @@ $L__BB0_4:
 
 	add.s32 	%r19, %r4, %r5;
 	mad.lo.s32 	%r20, %r19, %r6, %r1;
-	cvta.to.global.u64 	%rd3, %rd2;
-	cvt.s64.s32 	%rd4, %r20;
-	add.s64 	%rd5, %rd3, %rd4;
+	cvt.s64.s32 	%rd3, %r20;
+	cvta.to.global.u64 	%rd4, %rd2;
+	add.s64 	%rd5, %rd4, %rd3;
 	ld.global.nc.u8 	%rs4, [%rd5];
 
 $L__BB0_3:
 	add.s32 	%r21, %r5, %r2;
 	mad.lo.s32 	%r22, %r21, %r6, %r1;
-	cvta.to.global.u64 	%rd6, %rd1;
-	cvt.s64.s32 	%rd7, %r22;
-	add.s64 	%rd8, %rd6, %rd7;
+	cvt.s64.s32 	%rd6, %r22;
+	cvta.to.global.u64 	%rd7, %rd1;
+	add.s64 	%rd8, %rd7, %rd6;
 	st.global.u8 	[%rd8], %rs4;
 
 $L__BB0_4:
@@ -320,7 +319,7 @@ $L__BB0_4:
 
 `
 	shiftbytesy_ptx_52 = `
-.version 7.4
+.version 7.7
 .target sm_52
 .address_size 64
 
@@ -377,17 +376,17 @@ $L__BB0_4:
 
 	add.s32 	%r19, %r4, %r5;
 	mad.lo.s32 	%r20, %r19, %r6, %r1;
-	cvta.to.global.u64 	%rd3, %rd2;
-	cvt.s64.s32 	%rd4, %r20;
-	add.s64 	%rd5, %rd3, %rd4;
+	cvt.s64.s32 	%rd3, %r20;
+	cvta.to.global.u64 	%rd4, %rd2;
+	add.s64 	%rd5, %rd4, %rd3;
 	ld.global.nc.u8 	%rs4, [%rd5];
 
 $L__BB0_3:
 	add.s32 	%r21, %r5, %r2;
 	mad.lo.s32 	%r22, %r21, %r6, %r1;
-	cvta.to.global.u64 	%rd6, %rd1;
-	cvt.s64.s32 	%rd7, %r22;
-	add.s64 	%rd8, %rd6, %rd7;
+	cvt.s64.s32 	%rd6, %r22;
+	cvta.to.global.u64 	%rd7, %rd1;
+	add.s64 	%rd8, %rd7, %rd6;
 	st.global.u8 	[%rd8], %rs4;
 
 $L__BB0_4:
@@ -397,7 +396,7 @@ $L__BB0_4:
 
 `
 	shiftbytesy_ptx_53 = `
-.version 7.4
+.version 7.7
 .target sm_53
 .address_size 64
 
@@ -454,17 +453,17 @@ $L__BB0_4:
 
 	add.s32 	%r19, %r4, %r5;
 	mad.lo.s32 	%r20, %r19, %r6, %r1;
-	cvta.to.global.u64 	%rd3, %rd2;
-	cvt.s64.s32 	%rd4, %r20;
-	add.s64 	%rd5, %rd3, %rd4;
+	cvt.s64.s32 	%rd3, %r20;
+	cvta.to.global.u64 	%rd4, %rd2;
+	add.s64 	%rd5, %rd4, %rd3;
 	ld.global.nc.u8 	%rs4, [%rd5];
 
 $L__BB0_3:
 	add.s32 	%r21, %r5, %r2;
 	mad.lo.s32 	%r22, %r21, %r6, %r1;
-	cvta.to.global.u64 	%rd6, %rd1;
-	cvt.s64.s32 	%rd7, %r22;
-	add.s64 	%rd8, %rd6, %rd7;
+	cvt.s64.s32 	%rd6, %r22;
+	cvta.to.global.u64 	%rd7, %rd1;
+	add.s64 	%rd8, %rd7, %rd6;
 	st.global.u8 	[%rd8], %rs4;
 
 $L__BB0_4:
@@ -474,7 +473,7 @@ $L__BB0_4:
 
 `
 	shiftbytesy_ptx_60 = `
-.version 7.4
+.version 7.7
 .target sm_60
 .address_size 64
 
@@ -531,17 +530,17 @@ $L__BB0_4:
 
 	add.s32 	%r19, %r4, %r5;
 	mad.lo.s32 	%r20, %r19, %r6, %r1;
-	cvta.to.global.u64 	%rd3, %rd2;
-	cvt.s64.s32 	%rd4, %r20;
-	add.s64 	%rd5, %rd3, %rd4;
+	cvt.s64.s32 	%rd3, %r20;
+	cvta.to.global.u64 	%rd4, %rd2;
+	add.s64 	%rd5, %rd4, %rd3;
 	ld.global.nc.u8 	%rs4, [%rd5];
 
 $L__BB0_3:
 	add.s32 	%r21, %r5, %r2;
 	mad.lo.s32 	%r22, %r21, %r6, %r1;
-	cvta.to.global.u64 	%rd6, %rd1;
-	cvt.s64.s32 	%rd7, %r22;
-	add.s64 	%rd8, %rd6, %rd7;
+	cvt.s64.s32 	%rd6, %r22;
+	cvta.to.global.u64 	%rd7, %rd1;
+	add.s64 	%rd8, %rd7, %rd6;
 	st.global.u8 	[%rd8], %rs4;
 
 $L__BB0_4:
@@ -551,7 +550,7 @@ $L__BB0_4:
 
 `
 	shiftbytesy_ptx_61 = `
-.version 7.4
+.version 7.7
 .target sm_61
 .address_size 64
 
@@ -608,17 +607,17 @@ $L__BB0_4:
 
 	add.s32 	%r19, %r4, %r5;
 	mad.lo.s32 	%r20, %r19, %r6, %r1;
-	cvta.to.global.u64 	%rd3, %rd2;
-	cvt.s64.s32 	%rd4, %r20;
-	add.s64 	%rd5, %rd3, %rd4;
+	cvt.s64.s32 	%rd3, %r20;
+	cvta.to.global.u64 	%rd4, %rd2;
+	add.s64 	%rd5, %rd4, %rd3;
 	ld.global.nc.u8 	%rs4, [%rd5];
 
 $L__BB0_3:
 	add.s32 	%r21, %r5, %r2;
 	mad.lo.s32 	%r22, %r21, %r6, %r1;
-	cvta.to.global.u64 	%rd6, %rd1;
-	cvt.s64.s32 	%rd7, %r22;
-	add.s64 	%rd8, %rd6, %rd7;
+	cvt.s64.s32 	%rd6, %r22;
+	cvta.to.global.u64 	%rd7, %rd1;
+	add.s64 	%rd8, %rd7, %rd6;
 	st.global.u8 	[%rd8], %rs4;
 
 $L__BB0_4:
@@ -628,7 +627,7 @@ $L__BB0_4:
 
 `
 	shiftbytesy_ptx_62 = `
-.version 7.4
+.version 7.7
 .target sm_62
 .address_size 64
 
@@ -685,17 +684,17 @@ $L__BB0_4:
 
 	add.s32 	%r19, %r4, %r5;
 	mad.lo.s32 	%r20, %r19, %r6, %r1;
-	cvta.to.global.u64 	%rd3, %rd2;
-	cvt.s64.s32 	%rd4, %r20;
-	add.s64 	%rd5, %rd3, %rd4;
+	cvt.s64.s32 	%rd3, %r20;
+	cvta.to.global.u64 	%rd4, %rd2;
+	add.s64 	%rd5, %rd4, %rd3;
 	ld.global.nc.u8 	%rs4, [%rd5];
 
 $L__BB0_3:
 	add.s32 	%r21, %r5, %r2;
 	mad.lo.s32 	%r22, %r21, %r6, %r1;
-	cvta.to.global.u64 	%rd6, %rd1;
-	cvt.s64.s32 	%rd7, %r22;
-	add.s64 	%rd8, %rd6, %rd7;
+	cvt.s64.s32 	%rd6, %r22;
+	cvta.to.global.u64 	%rd7, %rd1;
+	add.s64 	%rd8, %rd7, %rd6;
 	st.global.u8 	[%rd8], %rs4;
 
 $L__BB0_4:
@@ -705,7 +704,7 @@ $L__BB0_4:
 
 `
 	shiftbytesy_ptx_70 = `
-.version 7.4
+.version 7.7
 .target sm_70
 .address_size 64
 
@@ -762,94 +761,17 @@ $L__BB0_4:
 
 	add.s32 	%r19, %r4, %r5;
 	mad.lo.s32 	%r20, %r19, %r6, %r1;
-	cvta.to.global.u64 	%rd3, %rd2;
-	cvt.s64.s32 	%rd4, %r20;
-	add.s64 	%rd5, %rd3, %rd4;
+	cvt.s64.s32 	%rd3, %r20;
+	cvta.to.global.u64 	%rd4, %rd2;
+	add.s64 	%rd5, %rd4, %rd3;
 	ld.global.nc.u8 	%rs4, [%rd5];
 
 $L__BB0_3:
 	add.s32 	%r21, %r5, %r2;
 	mad.lo.s32 	%r22, %r21, %r6, %r1;
-	cvta.to.global.u64 	%rd6, %rd1;
-	cvt.s64.s32 	%rd7, %r22;
-	add.s64 	%rd8, %rd6, %rd7;
-	st.global.u8 	[%rd8], %rs4;
-
-$L__BB0_4:
-	ret;
-
-}
-
-`
-	shiftbytesy_ptx_80 = `
-.version 7.4
-.target sm_80
-.address_size 64
-
-	// .globl	shiftbytesy
-
-.visible .entry shiftbytesy(
-	.param .u64 shiftbytesy_param_0,
-	.param .u64 shiftbytesy_param_1,
-	.param .u32 shiftbytesy_param_2,
-	.param .u32 shiftbytesy_param_3,
-	.param .u32 shiftbytesy_param_4,
-	.param .u32 shiftbytesy_param_5,
-	.param .u8 shiftbytesy_param_6
-)
-{
-	.reg .pred 	%p<9>;
-	.reg .b16 	%rs<5>;
-	.reg .b32 	%r<23>;
-	.reg .b64 	%rd<9>;
-
-
-	ld.param.u8 	%rs4, [shiftbytesy_param_6];
-	ld.param.u64 	%rd1, [shiftbytesy_param_0];
-	ld.param.u64 	%rd2, [shiftbytesy_param_1];
-	ld.param.u32 	%r6, [shiftbytesy_param_2];
-	ld.param.u32 	%r7, [shiftbytesy_param_3];
-	ld.param.u32 	%r9, [shiftbytesy_param_4];
-	ld.param.u32 	%r8, [shiftbytesy_param_5];
-	mov.u32 	%r10, %ntid.x;
-	mov.u32 	%r11, %ctaid.x;
-	mov.u32 	%r12, %tid.x;
-	mad.lo.s32 	%r1, %r11, %r10, %r12;
-	mov.u32 	%r13, %ntid.y;
-	mov.u32 	%r14, %ctaid.y;
-	mov.u32 	%r15, %tid.y;
-	mad.lo.s32 	%r2, %r14, %r13, %r15;
-	mov.u32 	%r16, %ntid.z;
-	mov.u32 	%r17, %ctaid.z;
-	mov.u32 	%r18, %tid.z;
-	mad.lo.s32 	%r3, %r17, %r16, %r18;
-	setp.ge.s32 	%p1, %r1, %r6;
-	setp.ge.s32 	%p2, %r2, %r7;
-	or.pred  	%p3, %p1, %p2;
-	setp.ge.s32 	%p4, %r3, %r9;
-	or.pred  	%p5, %p3, %p4;
-	@%p5 bra 	$L__BB0_4;
-
-	sub.s32 	%r4, %r2, %r8;
-	setp.lt.s32 	%p6, %r4, 0;
-	setp.ge.s32 	%p7, %r4, %r7;
-	or.pred  	%p8, %p6, %p7;
-	mul.lo.s32 	%r5, %r3, %r7;
-	@%p8 bra 	$L__BB0_3;
-
-	add.s32 	%r19, %r4, %r5;
-	mad.lo.s32 	%r20, %r19, %r6, %r1;
-	cvta.to.global.u64 	%rd3, %rd2;
-	cvt.s64.s32 	%rd4, %r20;
-	add.s64 	%rd5, %rd3, %rd4;
-	ld.global.nc.u8 	%rs4, [%rd5];
-
-$L__BB0_3:
-	add.s32 	%r21, %r5, %r2;
-	mad.lo.s32 	%r22, %r21, %r6, %r1;
-	cvta.to.global.u64 	%rd6, %rd1;
-	cvt.s64.s32 	%rd7, %r22;
-	add.s64 	%rd8, %rd6, %rd7;
+	cvt.s64.s32 	%rd6, %r22;
+	cvta.to.global.u64 	%rd7, %rd1;
+	add.s64 	%rd8, %rd7, %rd6;
 	st.global.u8 	[%rd8], %rs4;
 
 $L__BB0_4:
