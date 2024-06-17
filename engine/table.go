@@ -97,7 +97,7 @@ func TableSave() {
 }
 
 func TableAutoSave(period float64) {
-	Table.autosave = autosave{period, Time, -1, nil, nil} // count -1 allows output on t=0
+	Table.autosave = autosave{period, Time, -1, nil} // count -1 allows output on t=0
 }
 
 func (t *DataTable) Add(output Quantity) {
@@ -116,30 +116,6 @@ func (t *DataTable) Save() {
 	}
 	t.init()
 	fprint(t, Time)
-	for _, o := range t.outputs {
-		vec := AverageOf(o)
-		for _, v := range vec {
-			fprint(t, "\t", float32(v))
-		}
-	}
-	fprintln(t)
-	//t.flush()
-	t.count++
-
-	if cuda.Synchronous {
-		timer.Stop("io")
-	}
-}
-
-func (t *DataTable) SavePrefix(prefix string) {
-	t.flushlock.Lock() // flush during write gives errShortWrite
-	defer t.flushlock.Unlock()
-
-	if cuda.Synchronous {
-		timer.Start("io")
-	}
-	t.init()
-	fprint(t, prefix + "_", Time)
 	for _, o := range t.outputs {
 		vec := AverageOf(o)
 		for _, v := range vec {

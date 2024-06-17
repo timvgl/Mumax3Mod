@@ -58,13 +58,6 @@ func Save(q Quantity) {
 	autonum[qname]++
 }
 
-func savePrefix(q Quantity, prefix string) {
-	qname := NameOf(q)
-	fname := autoFnamePrefix(prefix, NameOf(q), outputFormat, autonumPrefix[qname])
-	SaveAs(q, fname)
-	autonumPrefix[qname]++
-}
-
 // Save under given file name (transparent async I/O).
 func SaveAs(q Quantity, fname string) {
 

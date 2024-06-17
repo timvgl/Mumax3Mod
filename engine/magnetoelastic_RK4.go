@@ -109,7 +109,9 @@ func (_ *magelasRK4) Step() {
 	Time = t0 + (1./2.)*Dt_si
 
 	cuda.Madd2(u, u0, ku1, 1, (1./2.)*dt)
-	// calcBndry()
+	if useBoundaries == true {
+		calcBndry()
+	}
 	cuda.Madd2(v, v0, kv1, 1, (1./2.)*dt)
 	cuda.Madd2(m, m, km1, 1, (1./2.)*dt*float32(GammaLL))
 	M.normalize()
@@ -121,7 +123,9 @@ func (_ *magelasRK4) Step() {
 	//Stage 3:
 	//u = u0*1 + k2*dt/2
 	cuda.Madd2(u, u0, ku2, 1, (1./2.)*dt)
-	// calcBndry()
+	if useBoundaries == true {
+		calcBndry()
+	}
 	cuda.Madd2(v, v0, kv2, 1, (1./2.)*dt)
 	cuda.Madd2(m, m0, km2, 1, (1./2.)*dt*float32(GammaLL))
 	M.normalize()
@@ -134,7 +138,9 @@ func (_ *magelasRK4) Step() {
 	//u = u0*1 + k3*dt
 	Time = t0 + Dt_si
 	cuda.Madd2(u, u0, ku3, 1, 1.*dt)
-	// calcBndry()
+	if useBoundaries == true {
+		calcBndry()
+	}
 	cuda.Madd2(v, v0, kv3, 1, 1.*dt)
 	cuda.Madd2(m, m0, km3, 1, 1.*dt*float32(GammaLL))
 	M.normalize()
@@ -177,7 +183,9 @@ func (_ *magelasRK4) Step() {
 		// 4th order solution
 
 		cuda.Madd5(u, u0, ku1, ku2, ku3, ku4, 1, (1./6.)*dt, (1./3.)*dt, (1./3.)*dt, (1./6.)*dt)
-		// calcBndry()
+		if useBoundaries == true {
+			calcBndry()
+		}
 		cuda.Madd5(v, v0, kv1, kv2, kv3, kv4, 1, (1./6.)*dt, (1./3.)*dt, (1./3.)*dt, (1./6.)*dt)
 		cuda.Madd5(m, m0, km1, km2, km3, km4, 1, (1./6.)*dt*float32(GammaLL), (1./3.)*dt*float32(GammaLL), (1./3.)*dt*float32(GammaLL), (1./6.)*dt*float32(GammaLL))
 

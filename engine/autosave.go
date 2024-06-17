@@ -7,7 +7,6 @@ import "fmt"
 var (
 	output  = make(map[Quantity]*autosave) // when to save quantities
 	autonum = make(map[string]int)         // auto number for out file
-	autonumPrefix = make(map[string]int)
 )
 
 func init() {
@@ -28,18 +27,6 @@ func DoOutput() {
 	}
 }
 
-func DoOutputPrefix(prefix string) {
-	for q, a := range output {
-		if a.needSave() {
-			a.savePrefix(q, prefix)
-			a.count++
-		}
-	}
-	if Table.needSave() {
-		Table.SavePrefix(prefix)
-	}
-}
-
 // Register quant to be auto-saved every period.
 // period == 0 stops autosaving.
 func AutoSave(q Quantity, period float64) {
@@ -56,7 +43,7 @@ func autoSave(q Quantity, period float64, save func(Quantity)) {
 	if period == 0 {
 		delete(output, q)
 	} else {
-		output[q] = &autosave{period, Time, -1, save, savePrefix} // init count to -1 allows save at t=0
+		output[q] = &autosave{period, Time, -1, save} // init count to -1 allows save at t=0
 	}
 }
 
@@ -66,17 +53,12 @@ func autoFname(name string, format OutputFormat, num int) string {
 	return fmt.Sprintf(OD()+FilenameFormat+"."+StringFromOutputFormat[format], name, num)
 }
 
-func autoFnamePrefix(prefix, name string, format OutputFormat, num int) string {
-	return fmt.Sprintf(OD()+FilenameFormat+"."+StringFromOutputFormat[format], prefix + "_" + name, num)
-}
-
 // keeps info needed to decide when a quantity needs to be periodically saved
 type autosave struct {
 	period float64        // How often to save
 	start  float64        // Starting point
 	count  int            // Number of times it has been autosaved
 	save   func(Quantity) // called to do the actual save
-	savePrefix   func(Quantity, string)
 }
 
 // returns true when the time is right to save.
