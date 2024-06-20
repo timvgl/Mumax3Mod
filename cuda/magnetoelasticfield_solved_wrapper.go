@@ -12,14 +12,14 @@ import (
 	"unsafe"
 )
 
-// CUDA handle for getmagnetoelasticforce kernel
-var getmagnetoelasticforce_code cu.Function
+// CUDA handle for addmagnetoelasticfield_solved kernel
+var addmagnetoelasticfield_solved_code cu.Function
 
-// Stores the arguments for getmagnetoelasticforce kernel invocation
-type getmagnetoelasticforce_args_t struct {
-	arg_fx     unsafe.Pointer
-	arg_fy     unsafe.Pointer
-	arg_fz     unsafe.Pointer
+// Stores the arguments for addmagnetoelasticfield_solved kernel invocation
+type addmagnetoelasticfield_solved_args_t struct {
+	arg_Bx     unsafe.Pointer
+	arg_By     unsafe.Pointer
+	arg_Bz     unsafe.Pointer
 	arg_mx     unsafe.Pointer
 	arg_my     unsafe.Pointer
 	arg_mz     unsafe.Pointer
@@ -38,111 +38,111 @@ type getmagnetoelasticforce_args_t struct {
 	sync.Mutex
 }
 
-// Stores the arguments for getmagnetoelasticforce kernel invocation
-var getmagnetoelasticforce_args getmagnetoelasticforce_args_t
+// Stores the arguments for addmagnetoelasticfield_solved kernel invocation
+var addmagnetoelasticfield_solved_args addmagnetoelasticfield_solved_args_t
 
 func init() {
 	// CUDA driver kernel call wants pointers to arguments, set them up once.
-	getmagnetoelasticforce_args.argptr[0] = unsafe.Pointer(&getmagnetoelasticforce_args.arg_fx)
-	getmagnetoelasticforce_args.argptr[1] = unsafe.Pointer(&getmagnetoelasticforce_args.arg_fy)
-	getmagnetoelasticforce_args.argptr[2] = unsafe.Pointer(&getmagnetoelasticforce_args.arg_fz)
-	getmagnetoelasticforce_args.argptr[3] = unsafe.Pointer(&getmagnetoelasticforce_args.arg_mx)
-	getmagnetoelasticforce_args.argptr[4] = unsafe.Pointer(&getmagnetoelasticforce_args.arg_my)
-	getmagnetoelasticforce_args.argptr[5] = unsafe.Pointer(&getmagnetoelasticforce_args.arg_mz)
-	getmagnetoelasticforce_args.argptr[6] = unsafe.Pointer(&getmagnetoelasticforce_args.arg_B1_)
-	getmagnetoelasticforce_args.argptr[7] = unsafe.Pointer(&getmagnetoelasticforce_args.arg_B1_mul)
-	getmagnetoelasticforce_args.argptr[8] = unsafe.Pointer(&getmagnetoelasticforce_args.arg_B2_)
-	getmagnetoelasticforce_args.argptr[9] = unsafe.Pointer(&getmagnetoelasticforce_args.arg_B2_mul)
-	getmagnetoelasticforce_args.argptr[10] = unsafe.Pointer(&getmagnetoelasticforce_args.arg_rcsx)
-	getmagnetoelasticforce_args.argptr[11] = unsafe.Pointer(&getmagnetoelasticforce_args.arg_rcsy)
-	getmagnetoelasticforce_args.argptr[12] = unsafe.Pointer(&getmagnetoelasticforce_args.arg_rcsz)
-	getmagnetoelasticforce_args.argptr[13] = unsafe.Pointer(&getmagnetoelasticforce_args.arg_Nx)
-	getmagnetoelasticforce_args.argptr[14] = unsafe.Pointer(&getmagnetoelasticforce_args.arg_Ny)
-	getmagnetoelasticforce_args.argptr[15] = unsafe.Pointer(&getmagnetoelasticforce_args.arg_Nz)
-	getmagnetoelasticforce_args.argptr[16] = unsafe.Pointer(&getmagnetoelasticforce_args.arg_PBC)
+	addmagnetoelasticfield_solved_args.argptr[0] = unsafe.Pointer(&addmagnetoelasticfield_solved_args.arg_Bx)
+	addmagnetoelasticfield_solved_args.argptr[1] = unsafe.Pointer(&addmagnetoelasticfield_solved_args.arg_By)
+	addmagnetoelasticfield_solved_args.argptr[2] = unsafe.Pointer(&addmagnetoelasticfield_solved_args.arg_Bz)
+	addmagnetoelasticfield_solved_args.argptr[3] = unsafe.Pointer(&addmagnetoelasticfield_solved_args.arg_mx)
+	addmagnetoelasticfield_solved_args.argptr[4] = unsafe.Pointer(&addmagnetoelasticfield_solved_args.arg_my)
+	addmagnetoelasticfield_solved_args.argptr[5] = unsafe.Pointer(&addmagnetoelasticfield_solved_args.arg_mz)
+	addmagnetoelasticfield_solved_args.argptr[6] = unsafe.Pointer(&addmagnetoelasticfield_solved_args.arg_B1_)
+	addmagnetoelasticfield_solved_args.argptr[7] = unsafe.Pointer(&addmagnetoelasticfield_solved_args.arg_B1_mul)
+	addmagnetoelasticfield_solved_args.argptr[8] = unsafe.Pointer(&addmagnetoelasticfield_solved_args.arg_B2_)
+	addmagnetoelasticfield_solved_args.argptr[9] = unsafe.Pointer(&addmagnetoelasticfield_solved_args.arg_B2_mul)
+	addmagnetoelasticfield_solved_args.argptr[10] = unsafe.Pointer(&addmagnetoelasticfield_solved_args.arg_rcsx)
+	addmagnetoelasticfield_solved_args.argptr[11] = unsafe.Pointer(&addmagnetoelasticfield_solved_args.arg_rcsy)
+	addmagnetoelasticfield_solved_args.argptr[12] = unsafe.Pointer(&addmagnetoelasticfield_solved_args.arg_rcsz)
+	addmagnetoelasticfield_solved_args.argptr[13] = unsafe.Pointer(&addmagnetoelasticfield_solved_args.arg_Nx)
+	addmagnetoelasticfield_solved_args.argptr[14] = unsafe.Pointer(&addmagnetoelasticfield_solved_args.arg_Ny)
+	addmagnetoelasticfield_solved_args.argptr[15] = unsafe.Pointer(&addmagnetoelasticfield_solved_args.arg_Nz)
+	addmagnetoelasticfield_solved_args.argptr[16] = unsafe.Pointer(&addmagnetoelasticfield_solved_args.arg_PBC)
 }
 
-// Wrapper for getmagnetoelasticforce CUDA kernel, asynchronous.
-func k_getmagnetoelasticforce_async(fx unsafe.Pointer, fy unsafe.Pointer, fz unsafe.Pointer, mx unsafe.Pointer, my unsafe.Pointer, mz unsafe.Pointer, B1_ unsafe.Pointer, B1_mul float32, B2_ unsafe.Pointer, B2_mul float32, rcsx float32, rcsy float32, rcsz float32, Nx int, Ny int, Nz int, PBC byte, cfg *config) {
+// Wrapper for addmagnetoelasticfield_solved CUDA kernel, asynchronous.
+func k_addmagnetoelasticfield_solved_async(Bx unsafe.Pointer, By unsafe.Pointer, Bz unsafe.Pointer, mx unsafe.Pointer, my unsafe.Pointer, mz unsafe.Pointer, B1_ unsafe.Pointer, B1_mul float32, B2_ unsafe.Pointer, B2_mul float32, rcsx float32, rcsy float32, rcsz float32, Nx int, Ny int, Nz int, PBC byte, cfg *config) {
 	if Synchronous { // debug
 		Sync()
-		timer.Start("getmagnetoelasticforce")
+		timer.Start("addmagnetoelasticfield_solved")
 	}
 
-	getmagnetoelasticforce_args.Lock()
-	defer getmagnetoelasticforce_args.Unlock()
+	addmagnetoelasticfield_solved_args.Lock()
+	defer addmagnetoelasticfield_solved_args.Unlock()
 
-	if getmagnetoelasticforce_code == 0 {
-		getmagnetoelasticforce_code = fatbinLoad(getmagnetoelasticforce_map, "getmagnetoelasticforce")
+	if addmagnetoelasticfield_solved_code == 0 {
+		addmagnetoelasticfield_solved_code = fatbinLoad(addmagnetoelasticfield_solved_map, "addmagnetoelasticfield_solved")
 	}
 
-	getmagnetoelasticforce_args.arg_fx = fx
-	getmagnetoelasticforce_args.arg_fy = fy
-	getmagnetoelasticforce_args.arg_fz = fz
-	getmagnetoelasticforce_args.arg_mx = mx
-	getmagnetoelasticforce_args.arg_my = my
-	getmagnetoelasticforce_args.arg_mz = mz
-	getmagnetoelasticforce_args.arg_B1_ = B1_
-	getmagnetoelasticforce_args.arg_B1_mul = B1_mul
-	getmagnetoelasticforce_args.arg_B2_ = B2_
-	getmagnetoelasticforce_args.arg_B2_mul = B2_mul
-	getmagnetoelasticforce_args.arg_rcsx = rcsx
-	getmagnetoelasticforce_args.arg_rcsy = rcsy
-	getmagnetoelasticforce_args.arg_rcsz = rcsz
-	getmagnetoelasticforce_args.arg_Nx = Nx
-	getmagnetoelasticforce_args.arg_Ny = Ny
-	getmagnetoelasticforce_args.arg_Nz = Nz
-	getmagnetoelasticforce_args.arg_PBC = PBC
+	addmagnetoelasticfield_solved_args.arg_Bx = Bx
+	addmagnetoelasticfield_solved_args.arg_By = By
+	addmagnetoelasticfield_solved_args.arg_Bz = Bz
+	addmagnetoelasticfield_solved_args.arg_mx = mx
+	addmagnetoelasticfield_solved_args.arg_my = my
+	addmagnetoelasticfield_solved_args.arg_mz = mz
+	addmagnetoelasticfield_solved_args.arg_B1_ = B1_
+	addmagnetoelasticfield_solved_args.arg_B1_mul = B1_mul
+	addmagnetoelasticfield_solved_args.arg_B2_ = B2_
+	addmagnetoelasticfield_solved_args.arg_B2_mul = B2_mul
+	addmagnetoelasticfield_solved_args.arg_rcsx = rcsx
+	addmagnetoelasticfield_solved_args.arg_rcsy = rcsy
+	addmagnetoelasticfield_solved_args.arg_rcsz = rcsz
+	addmagnetoelasticfield_solved_args.arg_Nx = Nx
+	addmagnetoelasticfield_solved_args.arg_Ny = Ny
+	addmagnetoelasticfield_solved_args.arg_Nz = Nz
+	addmagnetoelasticfield_solved_args.arg_PBC = PBC
 
-	args := getmagnetoelasticforce_args.argptr[:]
-	cu.LaunchKernel(getmagnetoelasticforce_code, cfg.Grid.X, cfg.Grid.Y, cfg.Grid.Z, cfg.Block.X, cfg.Block.Y, cfg.Block.Z, 0, stream0, args)
+	args := addmagnetoelasticfield_solved_args.argptr[:]
+	cu.LaunchKernel(addmagnetoelasticfield_solved_code, cfg.Grid.X, cfg.Grid.Y, cfg.Grid.Z, cfg.Block.X, cfg.Block.Y, cfg.Block.Z, 0, stream0, args)
 
 	if Synchronous { // debug
 		Sync()
-		timer.Stop("getmagnetoelasticforce")
+		timer.Stop("addmagnetoelasticfield_solved")
 	}
 }
 
-// maps compute capability on PTX code for getmagnetoelasticforce kernel.
-var getmagnetoelasticforce_map = map[int]string{0: "",
-	35: getmagnetoelasticforce_ptx_35,
-	37: getmagnetoelasticforce_ptx_37,
-	50: getmagnetoelasticforce_ptx_50,
-	52: getmagnetoelasticforce_ptx_52,
-	53: getmagnetoelasticforce_ptx_53,
-	60: getmagnetoelasticforce_ptx_60,
-	61: getmagnetoelasticforce_ptx_61,
-	62: getmagnetoelasticforce_ptx_62,
-	70: getmagnetoelasticforce_ptx_70,
-	80: getmagnetoelasticforce_ptx_80}
+// maps compute capability on PTX code for addmagnetoelasticfield_solved kernel.
+var addmagnetoelasticfield_solved_map = map[int]string{0: "",
+	35: addmagnetoelasticfield_solved_ptx_35,
+	37: addmagnetoelasticfield_solved_ptx_37,
+	50: addmagnetoelasticfield_solved_ptx_50,
+	52: addmagnetoelasticfield_solved_ptx_52,
+	53: addmagnetoelasticfield_solved_ptx_53,
+	60: addmagnetoelasticfield_solved_ptx_60,
+	61: addmagnetoelasticfield_solved_ptx_61,
+	62: addmagnetoelasticfield_solved_ptx_62,
+	70: addmagnetoelasticfield_solved_ptx_70,
+	80: addmagnetoelasticfield_solved_ptx_80}
 
-// getmagnetoelasticforce PTX code for various compute capabilities.
+// addmagnetoelasticfield_solved PTX code for various compute capabilities.
 const (
-	getmagnetoelasticforce_ptx_35 = `
+	addmagnetoelasticfield_solved_ptx_35 = `
 .version 7.4
 .target sm_35
 .address_size 64
 
-	// .globl	getmagnetoelasticforce
+	// .globl	addmagnetoelasticfield_solved
 
-.visible .entry getmagnetoelasticforce(
-	.param .u64 getmagnetoelasticforce_param_0,
-	.param .u64 getmagnetoelasticforce_param_1,
-	.param .u64 getmagnetoelasticforce_param_2,
-	.param .u64 getmagnetoelasticforce_param_3,
-	.param .u64 getmagnetoelasticforce_param_4,
-	.param .u64 getmagnetoelasticforce_param_5,
-	.param .u64 getmagnetoelasticforce_param_6,
-	.param .f32 getmagnetoelasticforce_param_7,
-	.param .u64 getmagnetoelasticforce_param_8,
-	.param .f32 getmagnetoelasticforce_param_9,
-	.param .f32 getmagnetoelasticforce_param_10,
-	.param .f32 getmagnetoelasticforce_param_11,
-	.param .f32 getmagnetoelasticforce_param_12,
-	.param .u32 getmagnetoelasticforce_param_13,
-	.param .u32 getmagnetoelasticforce_param_14,
-	.param .u32 getmagnetoelasticforce_param_15,
-	.param .u8 getmagnetoelasticforce_param_16
+.visible .entry addmagnetoelasticfield_solved(
+	.param .u64 addmagnetoelasticfield_solved_param_0,
+	.param .u64 addmagnetoelasticfield_solved_param_1,
+	.param .u64 addmagnetoelasticfield_solved_param_2,
+	.param .u64 addmagnetoelasticfield_solved_param_3,
+	.param .u64 addmagnetoelasticfield_solved_param_4,
+	.param .u64 addmagnetoelasticfield_solved_param_5,
+	.param .u64 addmagnetoelasticfield_solved_param_6,
+	.param .f32 addmagnetoelasticfield_solved_param_7,
+	.param .u64 addmagnetoelasticfield_solved_param_8,
+	.param .f32 addmagnetoelasticfield_solved_param_9,
+	.param .f32 addmagnetoelasticfield_solved_param_10,
+	.param .f32 addmagnetoelasticfield_solved_param_11,
+	.param .f32 addmagnetoelasticfield_solved_param_12,
+	.param .u32 addmagnetoelasticfield_solved_param_13,
+	.param .u32 addmagnetoelasticfield_solved_param_14,
+	.param .u32 addmagnetoelasticfield_solved_param_15,
+	.param .u8 addmagnetoelasticfield_solved_param_16
 )
 {
 	.reg .pred 	%p<116>;
@@ -152,23 +152,23 @@ const (
 	.reg .b64 	%rd<77>;
 
 
-	ld.param.u8 	%rs4, [getmagnetoelasticforce_param_16];
-	ld.param.u64 	%rd4, [getmagnetoelasticforce_param_0];
-	ld.param.u64 	%rd5, [getmagnetoelasticforce_param_1];
-	ld.param.u64 	%rd6, [getmagnetoelasticforce_param_2];
-	ld.param.u64 	%rd9, [getmagnetoelasticforce_param_3];
-	ld.param.u64 	%rd10, [getmagnetoelasticforce_param_4];
-	ld.param.u64 	%rd11, [getmagnetoelasticforce_param_5];
-	ld.param.u64 	%rd7, [getmagnetoelasticforce_param_6];
-	ld.param.f32 	%f460, [getmagnetoelasticforce_param_7];
-	ld.param.u64 	%rd8, [getmagnetoelasticforce_param_8];
-	ld.param.f32 	%f461, [getmagnetoelasticforce_param_9];
-	ld.param.f32 	%f193, [getmagnetoelasticforce_param_10];
-	ld.param.f32 	%f194, [getmagnetoelasticforce_param_11];
-	ld.param.f32 	%f195, [getmagnetoelasticforce_param_12];
-	ld.param.u32 	%r58, [getmagnetoelasticforce_param_13];
-	ld.param.u32 	%r59, [getmagnetoelasticforce_param_14];
-	ld.param.u32 	%r60, [getmagnetoelasticforce_param_15];
+	ld.param.u8 	%rs4, [addmagnetoelasticfield_solved_param_16];
+	ld.param.u64 	%rd4, [addmagnetoelasticfield_solved_param_0];
+	ld.param.u64 	%rd5, [addmagnetoelasticfield_solved_param_1];
+	ld.param.u64 	%rd6, [addmagnetoelasticfield_solved_param_2];
+	ld.param.u64 	%rd9, [addmagnetoelasticfield_solved_param_3];
+	ld.param.u64 	%rd10, [addmagnetoelasticfield_solved_param_4];
+	ld.param.u64 	%rd11, [addmagnetoelasticfield_solved_param_5];
+	ld.param.u64 	%rd7, [addmagnetoelasticfield_solved_param_6];
+	ld.param.f32 	%f460, [addmagnetoelasticfield_solved_param_7];
+	ld.param.u64 	%rd8, [addmagnetoelasticfield_solved_param_8];
+	ld.param.f32 	%f461, [addmagnetoelasticfield_solved_param_9];
+	ld.param.f32 	%f193, [addmagnetoelasticfield_solved_param_10];
+	ld.param.f32 	%f194, [addmagnetoelasticfield_solved_param_11];
+	ld.param.f32 	%f195, [addmagnetoelasticfield_solved_param_12];
+	ld.param.u32 	%r58, [addmagnetoelasticfield_solved_param_13];
+	ld.param.u32 	%r59, [addmagnetoelasticfield_solved_param_14];
+	ld.param.u32 	%r60, [addmagnetoelasticfield_solved_param_15];
 	cvta.to.global.u64 	%rd1, %rd11;
 	cvta.to.global.u64 	%rd2, %rd10;
 	cvta.to.global.u64 	%rd3, %rd9;
@@ -1055,31 +1055,31 @@ $L__BB0_108:
 }
 
 `
-	getmagnetoelasticforce_ptx_37 = `
+	addmagnetoelasticfield_solved_ptx_37 = `
 .version 7.4
 .target sm_37
 .address_size 64
 
-	// .globl	getmagnetoelasticforce
+	// .globl	addmagnetoelasticfield_solved
 
-.visible .entry getmagnetoelasticforce(
-	.param .u64 getmagnetoelasticforce_param_0,
-	.param .u64 getmagnetoelasticforce_param_1,
-	.param .u64 getmagnetoelasticforce_param_2,
-	.param .u64 getmagnetoelasticforce_param_3,
-	.param .u64 getmagnetoelasticforce_param_4,
-	.param .u64 getmagnetoelasticforce_param_5,
-	.param .u64 getmagnetoelasticforce_param_6,
-	.param .f32 getmagnetoelasticforce_param_7,
-	.param .u64 getmagnetoelasticforce_param_8,
-	.param .f32 getmagnetoelasticforce_param_9,
-	.param .f32 getmagnetoelasticforce_param_10,
-	.param .f32 getmagnetoelasticforce_param_11,
-	.param .f32 getmagnetoelasticforce_param_12,
-	.param .u32 getmagnetoelasticforce_param_13,
-	.param .u32 getmagnetoelasticforce_param_14,
-	.param .u32 getmagnetoelasticforce_param_15,
-	.param .u8 getmagnetoelasticforce_param_16
+.visible .entry addmagnetoelasticfield_solved(
+	.param .u64 addmagnetoelasticfield_solved_param_0,
+	.param .u64 addmagnetoelasticfield_solved_param_1,
+	.param .u64 addmagnetoelasticfield_solved_param_2,
+	.param .u64 addmagnetoelasticfield_solved_param_3,
+	.param .u64 addmagnetoelasticfield_solved_param_4,
+	.param .u64 addmagnetoelasticfield_solved_param_5,
+	.param .u64 addmagnetoelasticfield_solved_param_6,
+	.param .f32 addmagnetoelasticfield_solved_param_7,
+	.param .u64 addmagnetoelasticfield_solved_param_8,
+	.param .f32 addmagnetoelasticfield_solved_param_9,
+	.param .f32 addmagnetoelasticfield_solved_param_10,
+	.param .f32 addmagnetoelasticfield_solved_param_11,
+	.param .f32 addmagnetoelasticfield_solved_param_12,
+	.param .u32 addmagnetoelasticfield_solved_param_13,
+	.param .u32 addmagnetoelasticfield_solved_param_14,
+	.param .u32 addmagnetoelasticfield_solved_param_15,
+	.param .u8 addmagnetoelasticfield_solved_param_16
 )
 {
 	.reg .pred 	%p<116>;
@@ -1089,23 +1089,23 @@ $L__BB0_108:
 	.reg .b64 	%rd<77>;
 
 
-	ld.param.u8 	%rs4, [getmagnetoelasticforce_param_16];
-	ld.param.u64 	%rd4, [getmagnetoelasticforce_param_0];
-	ld.param.u64 	%rd5, [getmagnetoelasticforce_param_1];
-	ld.param.u64 	%rd6, [getmagnetoelasticforce_param_2];
-	ld.param.u64 	%rd9, [getmagnetoelasticforce_param_3];
-	ld.param.u64 	%rd10, [getmagnetoelasticforce_param_4];
-	ld.param.u64 	%rd11, [getmagnetoelasticforce_param_5];
-	ld.param.u64 	%rd7, [getmagnetoelasticforce_param_6];
-	ld.param.f32 	%f460, [getmagnetoelasticforce_param_7];
-	ld.param.u64 	%rd8, [getmagnetoelasticforce_param_8];
-	ld.param.f32 	%f461, [getmagnetoelasticforce_param_9];
-	ld.param.f32 	%f193, [getmagnetoelasticforce_param_10];
-	ld.param.f32 	%f194, [getmagnetoelasticforce_param_11];
-	ld.param.f32 	%f195, [getmagnetoelasticforce_param_12];
-	ld.param.u32 	%r58, [getmagnetoelasticforce_param_13];
-	ld.param.u32 	%r59, [getmagnetoelasticforce_param_14];
-	ld.param.u32 	%r60, [getmagnetoelasticforce_param_15];
+	ld.param.u8 	%rs4, [addmagnetoelasticfield_solved_param_16];
+	ld.param.u64 	%rd4, [addmagnetoelasticfield_solved_param_0];
+	ld.param.u64 	%rd5, [addmagnetoelasticfield_solved_param_1];
+	ld.param.u64 	%rd6, [addmagnetoelasticfield_solved_param_2];
+	ld.param.u64 	%rd9, [addmagnetoelasticfield_solved_param_3];
+	ld.param.u64 	%rd10, [addmagnetoelasticfield_solved_param_4];
+	ld.param.u64 	%rd11, [addmagnetoelasticfield_solved_param_5];
+	ld.param.u64 	%rd7, [addmagnetoelasticfield_solved_param_6];
+	ld.param.f32 	%f460, [addmagnetoelasticfield_solved_param_7];
+	ld.param.u64 	%rd8, [addmagnetoelasticfield_solved_param_8];
+	ld.param.f32 	%f461, [addmagnetoelasticfield_solved_param_9];
+	ld.param.f32 	%f193, [addmagnetoelasticfield_solved_param_10];
+	ld.param.f32 	%f194, [addmagnetoelasticfield_solved_param_11];
+	ld.param.f32 	%f195, [addmagnetoelasticfield_solved_param_12];
+	ld.param.u32 	%r58, [addmagnetoelasticfield_solved_param_13];
+	ld.param.u32 	%r59, [addmagnetoelasticfield_solved_param_14];
+	ld.param.u32 	%r60, [addmagnetoelasticfield_solved_param_15];
 	cvta.to.global.u64 	%rd1, %rd11;
 	cvta.to.global.u64 	%rd2, %rd10;
 	cvta.to.global.u64 	%rd3, %rd9;
@@ -1992,31 +1992,31 @@ $L__BB0_108:
 }
 
 `
-	getmagnetoelasticforce_ptx_50 = `
+	addmagnetoelasticfield_solved_ptx_50 = `
 .version 7.4
 .target sm_50
 .address_size 64
 
-	// .globl	getmagnetoelasticforce
+	// .globl	addmagnetoelasticfield_solved
 
-.visible .entry getmagnetoelasticforce(
-	.param .u64 getmagnetoelasticforce_param_0,
-	.param .u64 getmagnetoelasticforce_param_1,
-	.param .u64 getmagnetoelasticforce_param_2,
-	.param .u64 getmagnetoelasticforce_param_3,
-	.param .u64 getmagnetoelasticforce_param_4,
-	.param .u64 getmagnetoelasticforce_param_5,
-	.param .u64 getmagnetoelasticforce_param_6,
-	.param .f32 getmagnetoelasticforce_param_7,
-	.param .u64 getmagnetoelasticforce_param_8,
-	.param .f32 getmagnetoelasticforce_param_9,
-	.param .f32 getmagnetoelasticforce_param_10,
-	.param .f32 getmagnetoelasticforce_param_11,
-	.param .f32 getmagnetoelasticforce_param_12,
-	.param .u32 getmagnetoelasticforce_param_13,
-	.param .u32 getmagnetoelasticforce_param_14,
-	.param .u32 getmagnetoelasticforce_param_15,
-	.param .u8 getmagnetoelasticforce_param_16
+.visible .entry addmagnetoelasticfield_solved(
+	.param .u64 addmagnetoelasticfield_solved_param_0,
+	.param .u64 addmagnetoelasticfield_solved_param_1,
+	.param .u64 addmagnetoelasticfield_solved_param_2,
+	.param .u64 addmagnetoelasticfield_solved_param_3,
+	.param .u64 addmagnetoelasticfield_solved_param_4,
+	.param .u64 addmagnetoelasticfield_solved_param_5,
+	.param .u64 addmagnetoelasticfield_solved_param_6,
+	.param .f32 addmagnetoelasticfield_solved_param_7,
+	.param .u64 addmagnetoelasticfield_solved_param_8,
+	.param .f32 addmagnetoelasticfield_solved_param_9,
+	.param .f32 addmagnetoelasticfield_solved_param_10,
+	.param .f32 addmagnetoelasticfield_solved_param_11,
+	.param .f32 addmagnetoelasticfield_solved_param_12,
+	.param .u32 addmagnetoelasticfield_solved_param_13,
+	.param .u32 addmagnetoelasticfield_solved_param_14,
+	.param .u32 addmagnetoelasticfield_solved_param_15,
+	.param .u8 addmagnetoelasticfield_solved_param_16
 )
 {
 	.reg .pred 	%p<116>;
@@ -2026,23 +2026,23 @@ $L__BB0_108:
 	.reg .b64 	%rd<77>;
 
 
-	ld.param.u8 	%rs4, [getmagnetoelasticforce_param_16];
-	ld.param.u64 	%rd4, [getmagnetoelasticforce_param_0];
-	ld.param.u64 	%rd5, [getmagnetoelasticforce_param_1];
-	ld.param.u64 	%rd6, [getmagnetoelasticforce_param_2];
-	ld.param.u64 	%rd9, [getmagnetoelasticforce_param_3];
-	ld.param.u64 	%rd10, [getmagnetoelasticforce_param_4];
-	ld.param.u64 	%rd11, [getmagnetoelasticforce_param_5];
-	ld.param.u64 	%rd7, [getmagnetoelasticforce_param_6];
-	ld.param.f32 	%f460, [getmagnetoelasticforce_param_7];
-	ld.param.u64 	%rd8, [getmagnetoelasticforce_param_8];
-	ld.param.f32 	%f461, [getmagnetoelasticforce_param_9];
-	ld.param.f32 	%f193, [getmagnetoelasticforce_param_10];
-	ld.param.f32 	%f194, [getmagnetoelasticforce_param_11];
-	ld.param.f32 	%f195, [getmagnetoelasticforce_param_12];
-	ld.param.u32 	%r58, [getmagnetoelasticforce_param_13];
-	ld.param.u32 	%r59, [getmagnetoelasticforce_param_14];
-	ld.param.u32 	%r60, [getmagnetoelasticforce_param_15];
+	ld.param.u8 	%rs4, [addmagnetoelasticfield_solved_param_16];
+	ld.param.u64 	%rd4, [addmagnetoelasticfield_solved_param_0];
+	ld.param.u64 	%rd5, [addmagnetoelasticfield_solved_param_1];
+	ld.param.u64 	%rd6, [addmagnetoelasticfield_solved_param_2];
+	ld.param.u64 	%rd9, [addmagnetoelasticfield_solved_param_3];
+	ld.param.u64 	%rd10, [addmagnetoelasticfield_solved_param_4];
+	ld.param.u64 	%rd11, [addmagnetoelasticfield_solved_param_5];
+	ld.param.u64 	%rd7, [addmagnetoelasticfield_solved_param_6];
+	ld.param.f32 	%f460, [addmagnetoelasticfield_solved_param_7];
+	ld.param.u64 	%rd8, [addmagnetoelasticfield_solved_param_8];
+	ld.param.f32 	%f461, [addmagnetoelasticfield_solved_param_9];
+	ld.param.f32 	%f193, [addmagnetoelasticfield_solved_param_10];
+	ld.param.f32 	%f194, [addmagnetoelasticfield_solved_param_11];
+	ld.param.f32 	%f195, [addmagnetoelasticfield_solved_param_12];
+	ld.param.u32 	%r58, [addmagnetoelasticfield_solved_param_13];
+	ld.param.u32 	%r59, [addmagnetoelasticfield_solved_param_14];
+	ld.param.u32 	%r60, [addmagnetoelasticfield_solved_param_15];
 	cvta.to.global.u64 	%rd1, %rd11;
 	cvta.to.global.u64 	%rd2, %rd10;
 	cvta.to.global.u64 	%rd3, %rd9;
@@ -2929,31 +2929,31 @@ $L__BB0_108:
 }
 
 `
-	getmagnetoelasticforce_ptx_52 = `
+	addmagnetoelasticfield_solved_ptx_52 = `
 .version 7.4
 .target sm_52
 .address_size 64
 
-	// .globl	getmagnetoelasticforce
+	// .globl	addmagnetoelasticfield_solved
 
-.visible .entry getmagnetoelasticforce(
-	.param .u64 getmagnetoelasticforce_param_0,
-	.param .u64 getmagnetoelasticforce_param_1,
-	.param .u64 getmagnetoelasticforce_param_2,
-	.param .u64 getmagnetoelasticforce_param_3,
-	.param .u64 getmagnetoelasticforce_param_4,
-	.param .u64 getmagnetoelasticforce_param_5,
-	.param .u64 getmagnetoelasticforce_param_6,
-	.param .f32 getmagnetoelasticforce_param_7,
-	.param .u64 getmagnetoelasticforce_param_8,
-	.param .f32 getmagnetoelasticforce_param_9,
-	.param .f32 getmagnetoelasticforce_param_10,
-	.param .f32 getmagnetoelasticforce_param_11,
-	.param .f32 getmagnetoelasticforce_param_12,
-	.param .u32 getmagnetoelasticforce_param_13,
-	.param .u32 getmagnetoelasticforce_param_14,
-	.param .u32 getmagnetoelasticforce_param_15,
-	.param .u8 getmagnetoelasticforce_param_16
+.visible .entry addmagnetoelasticfield_solved(
+	.param .u64 addmagnetoelasticfield_solved_param_0,
+	.param .u64 addmagnetoelasticfield_solved_param_1,
+	.param .u64 addmagnetoelasticfield_solved_param_2,
+	.param .u64 addmagnetoelasticfield_solved_param_3,
+	.param .u64 addmagnetoelasticfield_solved_param_4,
+	.param .u64 addmagnetoelasticfield_solved_param_5,
+	.param .u64 addmagnetoelasticfield_solved_param_6,
+	.param .f32 addmagnetoelasticfield_solved_param_7,
+	.param .u64 addmagnetoelasticfield_solved_param_8,
+	.param .f32 addmagnetoelasticfield_solved_param_9,
+	.param .f32 addmagnetoelasticfield_solved_param_10,
+	.param .f32 addmagnetoelasticfield_solved_param_11,
+	.param .f32 addmagnetoelasticfield_solved_param_12,
+	.param .u32 addmagnetoelasticfield_solved_param_13,
+	.param .u32 addmagnetoelasticfield_solved_param_14,
+	.param .u32 addmagnetoelasticfield_solved_param_15,
+	.param .u8 addmagnetoelasticfield_solved_param_16
 )
 {
 	.reg .pred 	%p<116>;
@@ -2963,23 +2963,23 @@ $L__BB0_108:
 	.reg .b64 	%rd<77>;
 
 
-	ld.param.u8 	%rs4, [getmagnetoelasticforce_param_16];
-	ld.param.u64 	%rd4, [getmagnetoelasticforce_param_0];
-	ld.param.u64 	%rd5, [getmagnetoelasticforce_param_1];
-	ld.param.u64 	%rd6, [getmagnetoelasticforce_param_2];
-	ld.param.u64 	%rd9, [getmagnetoelasticforce_param_3];
-	ld.param.u64 	%rd10, [getmagnetoelasticforce_param_4];
-	ld.param.u64 	%rd11, [getmagnetoelasticforce_param_5];
-	ld.param.u64 	%rd7, [getmagnetoelasticforce_param_6];
-	ld.param.f32 	%f460, [getmagnetoelasticforce_param_7];
-	ld.param.u64 	%rd8, [getmagnetoelasticforce_param_8];
-	ld.param.f32 	%f461, [getmagnetoelasticforce_param_9];
-	ld.param.f32 	%f193, [getmagnetoelasticforce_param_10];
-	ld.param.f32 	%f194, [getmagnetoelasticforce_param_11];
-	ld.param.f32 	%f195, [getmagnetoelasticforce_param_12];
-	ld.param.u32 	%r58, [getmagnetoelasticforce_param_13];
-	ld.param.u32 	%r59, [getmagnetoelasticforce_param_14];
-	ld.param.u32 	%r60, [getmagnetoelasticforce_param_15];
+	ld.param.u8 	%rs4, [addmagnetoelasticfield_solved_param_16];
+	ld.param.u64 	%rd4, [addmagnetoelasticfield_solved_param_0];
+	ld.param.u64 	%rd5, [addmagnetoelasticfield_solved_param_1];
+	ld.param.u64 	%rd6, [addmagnetoelasticfield_solved_param_2];
+	ld.param.u64 	%rd9, [addmagnetoelasticfield_solved_param_3];
+	ld.param.u64 	%rd10, [addmagnetoelasticfield_solved_param_4];
+	ld.param.u64 	%rd11, [addmagnetoelasticfield_solved_param_5];
+	ld.param.u64 	%rd7, [addmagnetoelasticfield_solved_param_6];
+	ld.param.f32 	%f460, [addmagnetoelasticfield_solved_param_7];
+	ld.param.u64 	%rd8, [addmagnetoelasticfield_solved_param_8];
+	ld.param.f32 	%f461, [addmagnetoelasticfield_solved_param_9];
+	ld.param.f32 	%f193, [addmagnetoelasticfield_solved_param_10];
+	ld.param.f32 	%f194, [addmagnetoelasticfield_solved_param_11];
+	ld.param.f32 	%f195, [addmagnetoelasticfield_solved_param_12];
+	ld.param.u32 	%r58, [addmagnetoelasticfield_solved_param_13];
+	ld.param.u32 	%r59, [addmagnetoelasticfield_solved_param_14];
+	ld.param.u32 	%r60, [addmagnetoelasticfield_solved_param_15];
 	cvta.to.global.u64 	%rd1, %rd11;
 	cvta.to.global.u64 	%rd2, %rd10;
 	cvta.to.global.u64 	%rd3, %rd9;
@@ -3866,31 +3866,31 @@ $L__BB0_108:
 }
 
 `
-	getmagnetoelasticforce_ptx_53 = `
+	addmagnetoelasticfield_solved_ptx_53 = `
 .version 7.4
 .target sm_53
 .address_size 64
 
-	// .globl	getmagnetoelasticforce
+	// .globl	addmagnetoelasticfield_solved
 
-.visible .entry getmagnetoelasticforce(
-	.param .u64 getmagnetoelasticforce_param_0,
-	.param .u64 getmagnetoelasticforce_param_1,
-	.param .u64 getmagnetoelasticforce_param_2,
-	.param .u64 getmagnetoelasticforce_param_3,
-	.param .u64 getmagnetoelasticforce_param_4,
-	.param .u64 getmagnetoelasticforce_param_5,
-	.param .u64 getmagnetoelasticforce_param_6,
-	.param .f32 getmagnetoelasticforce_param_7,
-	.param .u64 getmagnetoelasticforce_param_8,
-	.param .f32 getmagnetoelasticforce_param_9,
-	.param .f32 getmagnetoelasticforce_param_10,
-	.param .f32 getmagnetoelasticforce_param_11,
-	.param .f32 getmagnetoelasticforce_param_12,
-	.param .u32 getmagnetoelasticforce_param_13,
-	.param .u32 getmagnetoelasticforce_param_14,
-	.param .u32 getmagnetoelasticforce_param_15,
-	.param .u8 getmagnetoelasticforce_param_16
+.visible .entry addmagnetoelasticfield_solved(
+	.param .u64 addmagnetoelasticfield_solved_param_0,
+	.param .u64 addmagnetoelasticfield_solved_param_1,
+	.param .u64 addmagnetoelasticfield_solved_param_2,
+	.param .u64 addmagnetoelasticfield_solved_param_3,
+	.param .u64 addmagnetoelasticfield_solved_param_4,
+	.param .u64 addmagnetoelasticfield_solved_param_5,
+	.param .u64 addmagnetoelasticfield_solved_param_6,
+	.param .f32 addmagnetoelasticfield_solved_param_7,
+	.param .u64 addmagnetoelasticfield_solved_param_8,
+	.param .f32 addmagnetoelasticfield_solved_param_9,
+	.param .f32 addmagnetoelasticfield_solved_param_10,
+	.param .f32 addmagnetoelasticfield_solved_param_11,
+	.param .f32 addmagnetoelasticfield_solved_param_12,
+	.param .u32 addmagnetoelasticfield_solved_param_13,
+	.param .u32 addmagnetoelasticfield_solved_param_14,
+	.param .u32 addmagnetoelasticfield_solved_param_15,
+	.param .u8 addmagnetoelasticfield_solved_param_16
 )
 {
 	.reg .pred 	%p<116>;
@@ -3900,23 +3900,23 @@ $L__BB0_108:
 	.reg .b64 	%rd<77>;
 
 
-	ld.param.u8 	%rs4, [getmagnetoelasticforce_param_16];
-	ld.param.u64 	%rd4, [getmagnetoelasticforce_param_0];
-	ld.param.u64 	%rd5, [getmagnetoelasticforce_param_1];
-	ld.param.u64 	%rd6, [getmagnetoelasticforce_param_2];
-	ld.param.u64 	%rd9, [getmagnetoelasticforce_param_3];
-	ld.param.u64 	%rd10, [getmagnetoelasticforce_param_4];
-	ld.param.u64 	%rd11, [getmagnetoelasticforce_param_5];
-	ld.param.u64 	%rd7, [getmagnetoelasticforce_param_6];
-	ld.param.f32 	%f460, [getmagnetoelasticforce_param_7];
-	ld.param.u64 	%rd8, [getmagnetoelasticforce_param_8];
-	ld.param.f32 	%f461, [getmagnetoelasticforce_param_9];
-	ld.param.f32 	%f193, [getmagnetoelasticforce_param_10];
-	ld.param.f32 	%f194, [getmagnetoelasticforce_param_11];
-	ld.param.f32 	%f195, [getmagnetoelasticforce_param_12];
-	ld.param.u32 	%r58, [getmagnetoelasticforce_param_13];
-	ld.param.u32 	%r59, [getmagnetoelasticforce_param_14];
-	ld.param.u32 	%r60, [getmagnetoelasticforce_param_15];
+	ld.param.u8 	%rs4, [addmagnetoelasticfield_solved_param_16];
+	ld.param.u64 	%rd4, [addmagnetoelasticfield_solved_param_0];
+	ld.param.u64 	%rd5, [addmagnetoelasticfield_solved_param_1];
+	ld.param.u64 	%rd6, [addmagnetoelasticfield_solved_param_2];
+	ld.param.u64 	%rd9, [addmagnetoelasticfield_solved_param_3];
+	ld.param.u64 	%rd10, [addmagnetoelasticfield_solved_param_4];
+	ld.param.u64 	%rd11, [addmagnetoelasticfield_solved_param_5];
+	ld.param.u64 	%rd7, [addmagnetoelasticfield_solved_param_6];
+	ld.param.f32 	%f460, [addmagnetoelasticfield_solved_param_7];
+	ld.param.u64 	%rd8, [addmagnetoelasticfield_solved_param_8];
+	ld.param.f32 	%f461, [addmagnetoelasticfield_solved_param_9];
+	ld.param.f32 	%f193, [addmagnetoelasticfield_solved_param_10];
+	ld.param.f32 	%f194, [addmagnetoelasticfield_solved_param_11];
+	ld.param.f32 	%f195, [addmagnetoelasticfield_solved_param_12];
+	ld.param.u32 	%r58, [addmagnetoelasticfield_solved_param_13];
+	ld.param.u32 	%r59, [addmagnetoelasticfield_solved_param_14];
+	ld.param.u32 	%r60, [addmagnetoelasticfield_solved_param_15];
 	cvta.to.global.u64 	%rd1, %rd11;
 	cvta.to.global.u64 	%rd2, %rd10;
 	cvta.to.global.u64 	%rd3, %rd9;
@@ -4803,31 +4803,31 @@ $L__BB0_108:
 }
 
 `
-	getmagnetoelasticforce_ptx_60 = `
+	addmagnetoelasticfield_solved_ptx_60 = `
 .version 7.4
 .target sm_60
 .address_size 64
 
-	// .globl	getmagnetoelasticforce
+	// .globl	addmagnetoelasticfield_solved
 
-.visible .entry getmagnetoelasticforce(
-	.param .u64 getmagnetoelasticforce_param_0,
-	.param .u64 getmagnetoelasticforce_param_1,
-	.param .u64 getmagnetoelasticforce_param_2,
-	.param .u64 getmagnetoelasticforce_param_3,
-	.param .u64 getmagnetoelasticforce_param_4,
-	.param .u64 getmagnetoelasticforce_param_5,
-	.param .u64 getmagnetoelasticforce_param_6,
-	.param .f32 getmagnetoelasticforce_param_7,
-	.param .u64 getmagnetoelasticforce_param_8,
-	.param .f32 getmagnetoelasticforce_param_9,
-	.param .f32 getmagnetoelasticforce_param_10,
-	.param .f32 getmagnetoelasticforce_param_11,
-	.param .f32 getmagnetoelasticforce_param_12,
-	.param .u32 getmagnetoelasticforce_param_13,
-	.param .u32 getmagnetoelasticforce_param_14,
-	.param .u32 getmagnetoelasticforce_param_15,
-	.param .u8 getmagnetoelasticforce_param_16
+.visible .entry addmagnetoelasticfield_solved(
+	.param .u64 addmagnetoelasticfield_solved_param_0,
+	.param .u64 addmagnetoelasticfield_solved_param_1,
+	.param .u64 addmagnetoelasticfield_solved_param_2,
+	.param .u64 addmagnetoelasticfield_solved_param_3,
+	.param .u64 addmagnetoelasticfield_solved_param_4,
+	.param .u64 addmagnetoelasticfield_solved_param_5,
+	.param .u64 addmagnetoelasticfield_solved_param_6,
+	.param .f32 addmagnetoelasticfield_solved_param_7,
+	.param .u64 addmagnetoelasticfield_solved_param_8,
+	.param .f32 addmagnetoelasticfield_solved_param_9,
+	.param .f32 addmagnetoelasticfield_solved_param_10,
+	.param .f32 addmagnetoelasticfield_solved_param_11,
+	.param .f32 addmagnetoelasticfield_solved_param_12,
+	.param .u32 addmagnetoelasticfield_solved_param_13,
+	.param .u32 addmagnetoelasticfield_solved_param_14,
+	.param .u32 addmagnetoelasticfield_solved_param_15,
+	.param .u8 addmagnetoelasticfield_solved_param_16
 )
 {
 	.reg .pred 	%p<116>;
@@ -4837,23 +4837,23 @@ $L__BB0_108:
 	.reg .b64 	%rd<77>;
 
 
-	ld.param.u8 	%rs4, [getmagnetoelasticforce_param_16];
-	ld.param.u64 	%rd4, [getmagnetoelasticforce_param_0];
-	ld.param.u64 	%rd5, [getmagnetoelasticforce_param_1];
-	ld.param.u64 	%rd6, [getmagnetoelasticforce_param_2];
-	ld.param.u64 	%rd9, [getmagnetoelasticforce_param_3];
-	ld.param.u64 	%rd10, [getmagnetoelasticforce_param_4];
-	ld.param.u64 	%rd11, [getmagnetoelasticforce_param_5];
-	ld.param.u64 	%rd7, [getmagnetoelasticforce_param_6];
-	ld.param.f32 	%f460, [getmagnetoelasticforce_param_7];
-	ld.param.u64 	%rd8, [getmagnetoelasticforce_param_8];
-	ld.param.f32 	%f461, [getmagnetoelasticforce_param_9];
-	ld.param.f32 	%f193, [getmagnetoelasticforce_param_10];
-	ld.param.f32 	%f194, [getmagnetoelasticforce_param_11];
-	ld.param.f32 	%f195, [getmagnetoelasticforce_param_12];
-	ld.param.u32 	%r58, [getmagnetoelasticforce_param_13];
-	ld.param.u32 	%r59, [getmagnetoelasticforce_param_14];
-	ld.param.u32 	%r60, [getmagnetoelasticforce_param_15];
+	ld.param.u8 	%rs4, [addmagnetoelasticfield_solved_param_16];
+	ld.param.u64 	%rd4, [addmagnetoelasticfield_solved_param_0];
+	ld.param.u64 	%rd5, [addmagnetoelasticfield_solved_param_1];
+	ld.param.u64 	%rd6, [addmagnetoelasticfield_solved_param_2];
+	ld.param.u64 	%rd9, [addmagnetoelasticfield_solved_param_3];
+	ld.param.u64 	%rd10, [addmagnetoelasticfield_solved_param_4];
+	ld.param.u64 	%rd11, [addmagnetoelasticfield_solved_param_5];
+	ld.param.u64 	%rd7, [addmagnetoelasticfield_solved_param_6];
+	ld.param.f32 	%f460, [addmagnetoelasticfield_solved_param_7];
+	ld.param.u64 	%rd8, [addmagnetoelasticfield_solved_param_8];
+	ld.param.f32 	%f461, [addmagnetoelasticfield_solved_param_9];
+	ld.param.f32 	%f193, [addmagnetoelasticfield_solved_param_10];
+	ld.param.f32 	%f194, [addmagnetoelasticfield_solved_param_11];
+	ld.param.f32 	%f195, [addmagnetoelasticfield_solved_param_12];
+	ld.param.u32 	%r58, [addmagnetoelasticfield_solved_param_13];
+	ld.param.u32 	%r59, [addmagnetoelasticfield_solved_param_14];
+	ld.param.u32 	%r60, [addmagnetoelasticfield_solved_param_15];
 	cvta.to.global.u64 	%rd1, %rd11;
 	cvta.to.global.u64 	%rd2, %rd10;
 	cvta.to.global.u64 	%rd3, %rd9;
@@ -5740,31 +5740,31 @@ $L__BB0_108:
 }
 
 `
-	getmagnetoelasticforce_ptx_61 = `
+	addmagnetoelasticfield_solved_ptx_61 = `
 .version 7.4
 .target sm_61
 .address_size 64
 
-	// .globl	getmagnetoelasticforce
+	// .globl	addmagnetoelasticfield_solved
 
-.visible .entry getmagnetoelasticforce(
-	.param .u64 getmagnetoelasticforce_param_0,
-	.param .u64 getmagnetoelasticforce_param_1,
-	.param .u64 getmagnetoelasticforce_param_2,
-	.param .u64 getmagnetoelasticforce_param_3,
-	.param .u64 getmagnetoelasticforce_param_4,
-	.param .u64 getmagnetoelasticforce_param_5,
-	.param .u64 getmagnetoelasticforce_param_6,
-	.param .f32 getmagnetoelasticforce_param_7,
-	.param .u64 getmagnetoelasticforce_param_8,
-	.param .f32 getmagnetoelasticforce_param_9,
-	.param .f32 getmagnetoelasticforce_param_10,
-	.param .f32 getmagnetoelasticforce_param_11,
-	.param .f32 getmagnetoelasticforce_param_12,
-	.param .u32 getmagnetoelasticforce_param_13,
-	.param .u32 getmagnetoelasticforce_param_14,
-	.param .u32 getmagnetoelasticforce_param_15,
-	.param .u8 getmagnetoelasticforce_param_16
+.visible .entry addmagnetoelasticfield_solved(
+	.param .u64 addmagnetoelasticfield_solved_param_0,
+	.param .u64 addmagnetoelasticfield_solved_param_1,
+	.param .u64 addmagnetoelasticfield_solved_param_2,
+	.param .u64 addmagnetoelasticfield_solved_param_3,
+	.param .u64 addmagnetoelasticfield_solved_param_4,
+	.param .u64 addmagnetoelasticfield_solved_param_5,
+	.param .u64 addmagnetoelasticfield_solved_param_6,
+	.param .f32 addmagnetoelasticfield_solved_param_7,
+	.param .u64 addmagnetoelasticfield_solved_param_8,
+	.param .f32 addmagnetoelasticfield_solved_param_9,
+	.param .f32 addmagnetoelasticfield_solved_param_10,
+	.param .f32 addmagnetoelasticfield_solved_param_11,
+	.param .f32 addmagnetoelasticfield_solved_param_12,
+	.param .u32 addmagnetoelasticfield_solved_param_13,
+	.param .u32 addmagnetoelasticfield_solved_param_14,
+	.param .u32 addmagnetoelasticfield_solved_param_15,
+	.param .u8 addmagnetoelasticfield_solved_param_16
 )
 {
 	.reg .pred 	%p<116>;
@@ -5774,23 +5774,23 @@ $L__BB0_108:
 	.reg .b64 	%rd<77>;
 
 
-	ld.param.u8 	%rs4, [getmagnetoelasticforce_param_16];
-	ld.param.u64 	%rd4, [getmagnetoelasticforce_param_0];
-	ld.param.u64 	%rd5, [getmagnetoelasticforce_param_1];
-	ld.param.u64 	%rd6, [getmagnetoelasticforce_param_2];
-	ld.param.u64 	%rd9, [getmagnetoelasticforce_param_3];
-	ld.param.u64 	%rd10, [getmagnetoelasticforce_param_4];
-	ld.param.u64 	%rd11, [getmagnetoelasticforce_param_5];
-	ld.param.u64 	%rd7, [getmagnetoelasticforce_param_6];
-	ld.param.f32 	%f460, [getmagnetoelasticforce_param_7];
-	ld.param.u64 	%rd8, [getmagnetoelasticforce_param_8];
-	ld.param.f32 	%f461, [getmagnetoelasticforce_param_9];
-	ld.param.f32 	%f193, [getmagnetoelasticforce_param_10];
-	ld.param.f32 	%f194, [getmagnetoelasticforce_param_11];
-	ld.param.f32 	%f195, [getmagnetoelasticforce_param_12];
-	ld.param.u32 	%r58, [getmagnetoelasticforce_param_13];
-	ld.param.u32 	%r59, [getmagnetoelasticforce_param_14];
-	ld.param.u32 	%r60, [getmagnetoelasticforce_param_15];
+	ld.param.u8 	%rs4, [addmagnetoelasticfield_solved_param_16];
+	ld.param.u64 	%rd4, [addmagnetoelasticfield_solved_param_0];
+	ld.param.u64 	%rd5, [addmagnetoelasticfield_solved_param_1];
+	ld.param.u64 	%rd6, [addmagnetoelasticfield_solved_param_2];
+	ld.param.u64 	%rd9, [addmagnetoelasticfield_solved_param_3];
+	ld.param.u64 	%rd10, [addmagnetoelasticfield_solved_param_4];
+	ld.param.u64 	%rd11, [addmagnetoelasticfield_solved_param_5];
+	ld.param.u64 	%rd7, [addmagnetoelasticfield_solved_param_6];
+	ld.param.f32 	%f460, [addmagnetoelasticfield_solved_param_7];
+	ld.param.u64 	%rd8, [addmagnetoelasticfield_solved_param_8];
+	ld.param.f32 	%f461, [addmagnetoelasticfield_solved_param_9];
+	ld.param.f32 	%f193, [addmagnetoelasticfield_solved_param_10];
+	ld.param.f32 	%f194, [addmagnetoelasticfield_solved_param_11];
+	ld.param.f32 	%f195, [addmagnetoelasticfield_solved_param_12];
+	ld.param.u32 	%r58, [addmagnetoelasticfield_solved_param_13];
+	ld.param.u32 	%r59, [addmagnetoelasticfield_solved_param_14];
+	ld.param.u32 	%r60, [addmagnetoelasticfield_solved_param_15];
 	cvta.to.global.u64 	%rd1, %rd11;
 	cvta.to.global.u64 	%rd2, %rd10;
 	cvta.to.global.u64 	%rd3, %rd9;
@@ -6677,31 +6677,31 @@ $L__BB0_108:
 }
 
 `
-	getmagnetoelasticforce_ptx_62 = `
+	addmagnetoelasticfield_solved_ptx_62 = `
 .version 7.4
 .target sm_62
 .address_size 64
 
-	// .globl	getmagnetoelasticforce
+	// .globl	addmagnetoelasticfield_solved
 
-.visible .entry getmagnetoelasticforce(
-	.param .u64 getmagnetoelasticforce_param_0,
-	.param .u64 getmagnetoelasticforce_param_1,
-	.param .u64 getmagnetoelasticforce_param_2,
-	.param .u64 getmagnetoelasticforce_param_3,
-	.param .u64 getmagnetoelasticforce_param_4,
-	.param .u64 getmagnetoelasticforce_param_5,
-	.param .u64 getmagnetoelasticforce_param_6,
-	.param .f32 getmagnetoelasticforce_param_7,
-	.param .u64 getmagnetoelasticforce_param_8,
-	.param .f32 getmagnetoelasticforce_param_9,
-	.param .f32 getmagnetoelasticforce_param_10,
-	.param .f32 getmagnetoelasticforce_param_11,
-	.param .f32 getmagnetoelasticforce_param_12,
-	.param .u32 getmagnetoelasticforce_param_13,
-	.param .u32 getmagnetoelasticforce_param_14,
-	.param .u32 getmagnetoelasticforce_param_15,
-	.param .u8 getmagnetoelasticforce_param_16
+.visible .entry addmagnetoelasticfield_solved(
+	.param .u64 addmagnetoelasticfield_solved_param_0,
+	.param .u64 addmagnetoelasticfield_solved_param_1,
+	.param .u64 addmagnetoelasticfield_solved_param_2,
+	.param .u64 addmagnetoelasticfield_solved_param_3,
+	.param .u64 addmagnetoelasticfield_solved_param_4,
+	.param .u64 addmagnetoelasticfield_solved_param_5,
+	.param .u64 addmagnetoelasticfield_solved_param_6,
+	.param .f32 addmagnetoelasticfield_solved_param_7,
+	.param .u64 addmagnetoelasticfield_solved_param_8,
+	.param .f32 addmagnetoelasticfield_solved_param_9,
+	.param .f32 addmagnetoelasticfield_solved_param_10,
+	.param .f32 addmagnetoelasticfield_solved_param_11,
+	.param .f32 addmagnetoelasticfield_solved_param_12,
+	.param .u32 addmagnetoelasticfield_solved_param_13,
+	.param .u32 addmagnetoelasticfield_solved_param_14,
+	.param .u32 addmagnetoelasticfield_solved_param_15,
+	.param .u8 addmagnetoelasticfield_solved_param_16
 )
 {
 	.reg .pred 	%p<116>;
@@ -6711,23 +6711,23 @@ $L__BB0_108:
 	.reg .b64 	%rd<77>;
 
 
-	ld.param.u8 	%rs4, [getmagnetoelasticforce_param_16];
-	ld.param.u64 	%rd4, [getmagnetoelasticforce_param_0];
-	ld.param.u64 	%rd5, [getmagnetoelasticforce_param_1];
-	ld.param.u64 	%rd6, [getmagnetoelasticforce_param_2];
-	ld.param.u64 	%rd9, [getmagnetoelasticforce_param_3];
-	ld.param.u64 	%rd10, [getmagnetoelasticforce_param_4];
-	ld.param.u64 	%rd11, [getmagnetoelasticforce_param_5];
-	ld.param.u64 	%rd7, [getmagnetoelasticforce_param_6];
-	ld.param.f32 	%f460, [getmagnetoelasticforce_param_7];
-	ld.param.u64 	%rd8, [getmagnetoelasticforce_param_8];
-	ld.param.f32 	%f461, [getmagnetoelasticforce_param_9];
-	ld.param.f32 	%f193, [getmagnetoelasticforce_param_10];
-	ld.param.f32 	%f194, [getmagnetoelasticforce_param_11];
-	ld.param.f32 	%f195, [getmagnetoelasticforce_param_12];
-	ld.param.u32 	%r58, [getmagnetoelasticforce_param_13];
-	ld.param.u32 	%r59, [getmagnetoelasticforce_param_14];
-	ld.param.u32 	%r60, [getmagnetoelasticforce_param_15];
+	ld.param.u8 	%rs4, [addmagnetoelasticfield_solved_param_16];
+	ld.param.u64 	%rd4, [addmagnetoelasticfield_solved_param_0];
+	ld.param.u64 	%rd5, [addmagnetoelasticfield_solved_param_1];
+	ld.param.u64 	%rd6, [addmagnetoelasticfield_solved_param_2];
+	ld.param.u64 	%rd9, [addmagnetoelasticfield_solved_param_3];
+	ld.param.u64 	%rd10, [addmagnetoelasticfield_solved_param_4];
+	ld.param.u64 	%rd11, [addmagnetoelasticfield_solved_param_5];
+	ld.param.u64 	%rd7, [addmagnetoelasticfield_solved_param_6];
+	ld.param.f32 	%f460, [addmagnetoelasticfield_solved_param_7];
+	ld.param.u64 	%rd8, [addmagnetoelasticfield_solved_param_8];
+	ld.param.f32 	%f461, [addmagnetoelasticfield_solved_param_9];
+	ld.param.f32 	%f193, [addmagnetoelasticfield_solved_param_10];
+	ld.param.f32 	%f194, [addmagnetoelasticfield_solved_param_11];
+	ld.param.f32 	%f195, [addmagnetoelasticfield_solved_param_12];
+	ld.param.u32 	%r58, [addmagnetoelasticfield_solved_param_13];
+	ld.param.u32 	%r59, [addmagnetoelasticfield_solved_param_14];
+	ld.param.u32 	%r60, [addmagnetoelasticfield_solved_param_15];
 	cvta.to.global.u64 	%rd1, %rd11;
 	cvta.to.global.u64 	%rd2, %rd10;
 	cvta.to.global.u64 	%rd3, %rd9;
@@ -7614,31 +7614,31 @@ $L__BB0_108:
 }
 
 `
-	getmagnetoelasticforce_ptx_70 = `
+	addmagnetoelasticfield_solved_ptx_70 = `
 .version 7.4
 .target sm_70
 .address_size 64
 
-	// .globl	getmagnetoelasticforce
+	// .globl	addmagnetoelasticfield_solved
 
-.visible .entry getmagnetoelasticforce(
-	.param .u64 getmagnetoelasticforce_param_0,
-	.param .u64 getmagnetoelasticforce_param_1,
-	.param .u64 getmagnetoelasticforce_param_2,
-	.param .u64 getmagnetoelasticforce_param_3,
-	.param .u64 getmagnetoelasticforce_param_4,
-	.param .u64 getmagnetoelasticforce_param_5,
-	.param .u64 getmagnetoelasticforce_param_6,
-	.param .f32 getmagnetoelasticforce_param_7,
-	.param .u64 getmagnetoelasticforce_param_8,
-	.param .f32 getmagnetoelasticforce_param_9,
-	.param .f32 getmagnetoelasticforce_param_10,
-	.param .f32 getmagnetoelasticforce_param_11,
-	.param .f32 getmagnetoelasticforce_param_12,
-	.param .u32 getmagnetoelasticforce_param_13,
-	.param .u32 getmagnetoelasticforce_param_14,
-	.param .u32 getmagnetoelasticforce_param_15,
-	.param .u8 getmagnetoelasticforce_param_16
+.visible .entry addmagnetoelasticfield_solved(
+	.param .u64 addmagnetoelasticfield_solved_param_0,
+	.param .u64 addmagnetoelasticfield_solved_param_1,
+	.param .u64 addmagnetoelasticfield_solved_param_2,
+	.param .u64 addmagnetoelasticfield_solved_param_3,
+	.param .u64 addmagnetoelasticfield_solved_param_4,
+	.param .u64 addmagnetoelasticfield_solved_param_5,
+	.param .u64 addmagnetoelasticfield_solved_param_6,
+	.param .f32 addmagnetoelasticfield_solved_param_7,
+	.param .u64 addmagnetoelasticfield_solved_param_8,
+	.param .f32 addmagnetoelasticfield_solved_param_9,
+	.param .f32 addmagnetoelasticfield_solved_param_10,
+	.param .f32 addmagnetoelasticfield_solved_param_11,
+	.param .f32 addmagnetoelasticfield_solved_param_12,
+	.param .u32 addmagnetoelasticfield_solved_param_13,
+	.param .u32 addmagnetoelasticfield_solved_param_14,
+	.param .u32 addmagnetoelasticfield_solved_param_15,
+	.param .u8 addmagnetoelasticfield_solved_param_16
 )
 {
 	.reg .pred 	%p<116>;
@@ -7648,23 +7648,23 @@ $L__BB0_108:
 	.reg .b64 	%rd<77>;
 
 
-	ld.param.u8 	%rs4, [getmagnetoelasticforce_param_16];
-	ld.param.u64 	%rd4, [getmagnetoelasticforce_param_0];
-	ld.param.u64 	%rd5, [getmagnetoelasticforce_param_1];
-	ld.param.u64 	%rd6, [getmagnetoelasticforce_param_2];
-	ld.param.u64 	%rd9, [getmagnetoelasticforce_param_3];
-	ld.param.u64 	%rd10, [getmagnetoelasticforce_param_4];
-	ld.param.u64 	%rd11, [getmagnetoelasticforce_param_5];
-	ld.param.u64 	%rd7, [getmagnetoelasticforce_param_6];
-	ld.param.f32 	%f460, [getmagnetoelasticforce_param_7];
-	ld.param.u64 	%rd8, [getmagnetoelasticforce_param_8];
-	ld.param.f32 	%f461, [getmagnetoelasticforce_param_9];
-	ld.param.f32 	%f193, [getmagnetoelasticforce_param_10];
-	ld.param.f32 	%f194, [getmagnetoelasticforce_param_11];
-	ld.param.f32 	%f195, [getmagnetoelasticforce_param_12];
-	ld.param.u32 	%r58, [getmagnetoelasticforce_param_13];
-	ld.param.u32 	%r59, [getmagnetoelasticforce_param_14];
-	ld.param.u32 	%r60, [getmagnetoelasticforce_param_15];
+	ld.param.u8 	%rs4, [addmagnetoelasticfield_solved_param_16];
+	ld.param.u64 	%rd4, [addmagnetoelasticfield_solved_param_0];
+	ld.param.u64 	%rd5, [addmagnetoelasticfield_solved_param_1];
+	ld.param.u64 	%rd6, [addmagnetoelasticfield_solved_param_2];
+	ld.param.u64 	%rd9, [addmagnetoelasticfield_solved_param_3];
+	ld.param.u64 	%rd10, [addmagnetoelasticfield_solved_param_4];
+	ld.param.u64 	%rd11, [addmagnetoelasticfield_solved_param_5];
+	ld.param.u64 	%rd7, [addmagnetoelasticfield_solved_param_6];
+	ld.param.f32 	%f460, [addmagnetoelasticfield_solved_param_7];
+	ld.param.u64 	%rd8, [addmagnetoelasticfield_solved_param_8];
+	ld.param.f32 	%f461, [addmagnetoelasticfield_solved_param_9];
+	ld.param.f32 	%f193, [addmagnetoelasticfield_solved_param_10];
+	ld.param.f32 	%f194, [addmagnetoelasticfield_solved_param_11];
+	ld.param.f32 	%f195, [addmagnetoelasticfield_solved_param_12];
+	ld.param.u32 	%r58, [addmagnetoelasticfield_solved_param_13];
+	ld.param.u32 	%r59, [addmagnetoelasticfield_solved_param_14];
+	ld.param.u32 	%r60, [addmagnetoelasticfield_solved_param_15];
 	cvta.to.global.u64 	%rd1, %rd11;
 	cvta.to.global.u64 	%rd2, %rd10;
 	cvta.to.global.u64 	%rd3, %rd9;
@@ -8551,31 +8551,31 @@ $L__BB0_108:
 }
 
 `
-	getmagnetoelasticforce_ptx_80 = `
+	addmagnetoelasticfield_solved_ptx_80 = `
 .version 7.4
 .target sm_80
 .address_size 64
 
-	// .globl	getmagnetoelasticforce
+	// .globl	addmagnetoelasticfield_solved
 
-.visible .entry getmagnetoelasticforce(
-	.param .u64 getmagnetoelasticforce_param_0,
-	.param .u64 getmagnetoelasticforce_param_1,
-	.param .u64 getmagnetoelasticforce_param_2,
-	.param .u64 getmagnetoelasticforce_param_3,
-	.param .u64 getmagnetoelasticforce_param_4,
-	.param .u64 getmagnetoelasticforce_param_5,
-	.param .u64 getmagnetoelasticforce_param_6,
-	.param .f32 getmagnetoelasticforce_param_7,
-	.param .u64 getmagnetoelasticforce_param_8,
-	.param .f32 getmagnetoelasticforce_param_9,
-	.param .f32 getmagnetoelasticforce_param_10,
-	.param .f32 getmagnetoelasticforce_param_11,
-	.param .f32 getmagnetoelasticforce_param_12,
-	.param .u32 getmagnetoelasticforce_param_13,
-	.param .u32 getmagnetoelasticforce_param_14,
-	.param .u32 getmagnetoelasticforce_param_15,
-	.param .u8 getmagnetoelasticforce_param_16
+.visible .entry addmagnetoelasticfield_solved(
+	.param .u64 addmagnetoelasticfield_solved_param_0,
+	.param .u64 addmagnetoelasticfield_solved_param_1,
+	.param .u64 addmagnetoelasticfield_solved_param_2,
+	.param .u64 addmagnetoelasticfield_solved_param_3,
+	.param .u64 addmagnetoelasticfield_solved_param_4,
+	.param .u64 addmagnetoelasticfield_solved_param_5,
+	.param .u64 addmagnetoelasticfield_solved_param_6,
+	.param .f32 addmagnetoelasticfield_solved_param_7,
+	.param .u64 addmagnetoelasticfield_solved_param_8,
+	.param .f32 addmagnetoelasticfield_solved_param_9,
+	.param .f32 addmagnetoelasticfield_solved_param_10,
+	.param .f32 addmagnetoelasticfield_solved_param_11,
+	.param .f32 addmagnetoelasticfield_solved_param_12,
+	.param .u32 addmagnetoelasticfield_solved_param_13,
+	.param .u32 addmagnetoelasticfield_solved_param_14,
+	.param .u32 addmagnetoelasticfield_solved_param_15,
+	.param .u8 addmagnetoelasticfield_solved_param_16
 )
 {
 	.reg .pred 	%p<116>;
@@ -8585,23 +8585,23 @@ $L__BB0_108:
 	.reg .b64 	%rd<77>;
 
 
-	ld.param.u8 	%rs4, [getmagnetoelasticforce_param_16];
-	ld.param.u64 	%rd4, [getmagnetoelasticforce_param_0];
-	ld.param.u64 	%rd5, [getmagnetoelasticforce_param_1];
-	ld.param.u64 	%rd6, [getmagnetoelasticforce_param_2];
-	ld.param.u64 	%rd9, [getmagnetoelasticforce_param_3];
-	ld.param.u64 	%rd10, [getmagnetoelasticforce_param_4];
-	ld.param.u64 	%rd11, [getmagnetoelasticforce_param_5];
-	ld.param.u64 	%rd7, [getmagnetoelasticforce_param_6];
-	ld.param.f32 	%f460, [getmagnetoelasticforce_param_7];
-	ld.param.u64 	%rd8, [getmagnetoelasticforce_param_8];
-	ld.param.f32 	%f461, [getmagnetoelasticforce_param_9];
-	ld.param.f32 	%f193, [getmagnetoelasticforce_param_10];
-	ld.param.f32 	%f194, [getmagnetoelasticforce_param_11];
-	ld.param.f32 	%f195, [getmagnetoelasticforce_param_12];
-	ld.param.u32 	%r58, [getmagnetoelasticforce_param_13];
-	ld.param.u32 	%r59, [getmagnetoelasticforce_param_14];
-	ld.param.u32 	%r60, [getmagnetoelasticforce_param_15];
+	ld.param.u8 	%rs4, [addmagnetoelasticfield_solved_param_16];
+	ld.param.u64 	%rd4, [addmagnetoelasticfield_solved_param_0];
+	ld.param.u64 	%rd5, [addmagnetoelasticfield_solved_param_1];
+	ld.param.u64 	%rd6, [addmagnetoelasticfield_solved_param_2];
+	ld.param.u64 	%rd9, [addmagnetoelasticfield_solved_param_3];
+	ld.param.u64 	%rd10, [addmagnetoelasticfield_solved_param_4];
+	ld.param.u64 	%rd11, [addmagnetoelasticfield_solved_param_5];
+	ld.param.u64 	%rd7, [addmagnetoelasticfield_solved_param_6];
+	ld.param.f32 	%f460, [addmagnetoelasticfield_solved_param_7];
+	ld.param.u64 	%rd8, [addmagnetoelasticfield_solved_param_8];
+	ld.param.f32 	%f461, [addmagnetoelasticfield_solved_param_9];
+	ld.param.f32 	%f193, [addmagnetoelasticfield_solved_param_10];
+	ld.param.f32 	%f194, [addmagnetoelasticfield_solved_param_11];
+	ld.param.f32 	%f195, [addmagnetoelasticfield_solved_param_12];
+	ld.param.u32 	%r58, [addmagnetoelasticfield_solved_param_13];
+	ld.param.u32 	%r59, [addmagnetoelasticfield_solved_param_14];
+	ld.param.u32 	%r60, [addmagnetoelasticfield_solved_param_15];
 	cvta.to.global.u64 	%rd1, %rd11;
 	cvta.to.global.u64 	%rd2, %rd10;
 	cvta.to.global.u64 	%rd3, %rd9;
