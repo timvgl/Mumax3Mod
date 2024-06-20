@@ -222,7 +222,7 @@ addmagnetoelasticfield_solved(float* __restrict__ Bx, float* __restrict__ By, fl
 	float B1 = amul(B1_, B1_mul, I);
 	float B2 = amul(B2_, B2_mul, I);
 
-    fx[I] = 2.0f*B1*m0.x*dmdx.x + B2*(m0.x*(dmdy.y + dmdz.z) + m0.y*dmdy.x + m0.z*dmdz.x);
-    fy[I] = 2.0f*B1*m0.y*dmdy.y + B2*(m0.x*dmdx.y + m0.y*(dmdx.x + dmdz.z) + m0.z*dmdz.y);
-    fz[I] = 2.0f*B1*m0.z*dmdz.z + B2*(m0.x*dmdx.z + m0.y*dmdy.z + m0.z*(dmdx.x + dmdy.y));
+    Bx[I] = 2.0f*B1*m0.x*dmdx.x + B2*(m0.x*(dmdy.y + dmdz.z) + m0.y*dmdy.x + m0.z*dmdz.x);
+    By[I] = 2.0f*B1*m0.y*dmdy.y + B2*(m0.x*dmdx.y + m0.y*(dmdx.x + dmdz.z) + m0.z*dmdz.y);
+    Bz[I] = 2.0f*B1*m0.z*dmdz.z + B2*(m0.x*dmdx.z + m0.y*dmdy.z + m0.z*(dmdx.x + dmdy.y));
 }
