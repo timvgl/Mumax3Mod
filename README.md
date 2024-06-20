@@ -1,3 +1,5 @@
+*IMPORTANT NOTE: this repository is not the official mumax3-me repository. The official mumax3 repository can be found [here](https://github.com/Fredericvdv/Magnetoelasticity_MuMax3).*
+
 *IMPORTANT NOTE: this repository is not the official mumax3 repository. The official mumax3 repository can be found [here](https://github.com/mumax/3).*
 
 

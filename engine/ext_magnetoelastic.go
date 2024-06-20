@@ -256,5 +256,3 @@ func GetGradMy(dst *data.Slice) {
 func GetGradMz(dst *data.Slice) {
 	cuda.Grad3(dst, M.Buffer(), M.Mesh())
 }
-
-
