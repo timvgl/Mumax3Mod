@@ -17,6 +17,10 @@ func prod3(x, y, z int) int {
 	return x * y * z
 }
 
+func prod4(x, y, z, t int) int {
+	return x * y * z * t
+}
+
 // Releases all resources associated with the FFT plan.
 func (p *fftplan) Free() {
 	if p.handle != 0 {

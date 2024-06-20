@@ -6,7 +6,7 @@ import (
 	"github.com/mumax/3/cuda"
 	"math"
 	"github.com/mumax/3/util"
-	//"fmt"
+	"fmt"
 	//"github.com/progressbar"
 )
 
@@ -15,13 +15,20 @@ import (
 var (
 	RelaxTorqueThreshold 		float64 = -1.
 	RelaxFullCoupled 			bool = false
+	outputRelax					bool = false
 	IterativeHalfing			int
 	SlopeTresholdEnergyRelax	float64
+	prefix						string = "relax"
+	printEnergySlope			bool = false
 )
 
 func init() {
 	DeclFunc("Relax", Relax, "Try to minimize the total energy")
-	DeclFunc("RelaxOutput", RelaxOutput, "Try to minimize the total energy")
+	DeclVar("outputRelax", &outputRelax, "")
+	DeclVar("__prefix_relax__", &prefix, "")
+	DeclVar("__precess__", &Precess, "")
+	DeclVar("__relaxing__", &relaxing, "")
+	DeclVar("__printEnergySlope__", &printEnergySlope, "")
 	DeclVar("RelaxFullCoupled", &RelaxFullCoupled, "")
 	DeclVar("IterativeHalfing", &IterativeHalfing, "Half FixDtCoupledRelaxEnergyE n times an calculate minima for energy and force")
 	DeclVar("SlopeTresholdEnergyRelax", &SlopeTresholdEnergyRelax, "")
@@ -31,7 +38,7 @@ func init() {
 // are we relaxing?
 var relaxing = false
 
-func RelaxOutput() {
+func RelaxMagOutput() {
 	SanityCheck()
 	pause = false
 
@@ -41,6 +48,21 @@ func RelaxOutput() {
 	prevFixDt := FixDt
 	prevPrecess := Precess
 
+	var (
+		countOutputOvf = make(map[Quantity]int)
+		startOutputOvf = make(map[Quantity]float64)
+
+		countOutputTable int
+		startOutputTable float64
+	)
+
+	for q, outputElement := range output {
+		countOutputOvf[q] = outputElement.count
+		startOutputOvf[q] = outputElement.start
+	}
+	countOutputTable = Table.autosave.count
+	startOutputTable = Table.autosave.start
+	t_1 := Time
 	// ...to restore them later
 	defer func() {
 		SetSolver(prevType)
@@ -51,24 +73,69 @@ func RelaxOutput() {
 		//	Temp.upd_reg = prevTemp
 		//	Temp.invalidate()
 		//	Temp.update()
+		for q, outputElement := range output {
+			outputElement.count = countOutputOvf[q]
+			outputElement.start = startOutputOvf[q]
+		}
+		Table.autosave.count = countOutputTable
+		Table.autosave.start = startOutputTable
+		Time = t_1
 	}()
 	SetSolver(BOGAKISHAMPINE)
-
 	FixDt = 0
-	Precess = true
 	relaxing = false
 
 
 	// Minimize energy: take steps as long as energy goes down.
 	// This stops when energy reaches the numerical noise floor.
 	const N = 3 // evaluate energy (expensive) every N steps
-	relaxStepsOutput(N)
+	relaxStepsOutput(N, prefix)
 	E0 := GetTotalEnergy()
-	relaxStepsOutput(N)
+	relaxStepsOutput(N, prefix)
 	E1 := GetTotalEnergy()
 	for E1 < E0 && !pause {
-		relaxStepsOutput(N)
+		relaxStepsOutput(N, prefix)
 		E0, E1 = E1, GetTotalEnergy()
+	}
+	for IterativeHalfingIt := 0; IterativeHalfingIt < IterativeHalfing +1; IterativeHalfingIt++ {
+		relaxStepsOutput(N, prefix)
+		t0 := Time
+		E0 := GetTotalEnergy()
+		relaxStepsOutput(N, prefix)
+		t1 := Time
+		E1 := GetTotalEnergy()
+		relaxStepsOutput(N, prefix)
+		t2 := Time
+		E2 := GetTotalEnergy()
+		slope0 := (2*E1-E2-E0) / (2*N*FixDt)
+		slope1 := math.NaN()
+		slope2 := math.NaN()
+		slopesLoaded := false
+		//check if energy is extreme point and if it is a minimum
+		//check if average of slope is also lower than treshold -> noise leads to problems otherwise
+		for (math.Abs(2*E1-E2-E0) / (t2-t0) > 2* SlopeTresholdEnergyRelax / float64(((IterativeHalfingIt +1)*2)) || (math.Abs(slope0) + math.Abs(slope1) + math.Abs(slope2)) / 3 > 2*SlopeTresholdEnergyRelax / float64(((IterativeHalfingIt +1)*2)) || (2*slope1-slope2-slope0) / (t2-t0) < 0|| math.IsNaN(slope1) || math.IsNaN(slope2)) && !pause {
+			relaxStepsOutput(N, prefix)
+			E0, E1, E2 = E1, E2, GetTotalEnergy()
+			//fmt.Println("slope", math.Abs(2*E1-E2-E0) / (2*N*FixDt))
+			if (math.IsNaN(slope1) && !slopesLoaded) {
+				slope1 = (2*E1-E2-E0) / (t2-t0)
+			} else if (math.IsNaN(slope2) && !slopesLoaded) {
+				slope2 = (2*E1-E2-E0) / (t2-t0)
+				slopesLoaded = true
+			} else if (math.IsNaN(slope1) && slopesLoaded) {
+				slope2 = math.NaN()
+				slopesLoaded = false
+			} else if (math.IsNaN(slope2) && slopesLoaded) {
+				slope1 = math.NaN()
+				slopesLoaded = false
+			} else {
+				slope0, slope1, slope2 = slope1, slope2, (2*E1-E2-E0) / (t2-t0)
+				t0, t1, t2 = t1, t2, Time
+			}
+			//fmt.Println("slopeAv", (math.Abs(slope0) + math.Abs(slope1) + math.Abs(slope2)) / 3)
+			//fmt.Println("slope", math.Abs(slope2))
+			//fmt.Println("slope2", (2*slope1-slope2-slope0) / (2*N*FixDt))
+		}
 	}
 
 	// Now we are already close to equilibrium, but energy is too noisy to be used any further.
@@ -88,7 +155,7 @@ func RelaxOutput() {
 		// run as long as the max torque is above threshold. Then increase the accuracy and step more.
 		for !pause {
 			for maxTorque() > RelaxTorqueThreshold && !pause {
-				relaxStepsOutput(N)
+				relaxStepsOutput(N, prefix)
 			}
 			MaxErr /= math.Sqrt2
 			if MaxErr < 1e-9 {
@@ -102,10 +169,10 @@ func RelaxOutput() {
 		// Step as long as torque goes down. Then increase the accuracy and step more.
 		for MaxErr > 1e-9 && !pause {
 			MaxErr /= math.Sqrt2
-			relaxStepsOutput(N) // TODO: Play with other values
+			relaxStepsOutput(N, prefix) // TODO: Play with other values
 			T0, T1 = T1, avgTorque()
 			for T1 < T0 && !pause {
-				relaxStepsOutput(N) // TODO: Play with other values
+				relaxStepsOutput(N, prefix) // TODO: Play with other values
 				T0, T1 = T1, avgTorque()
 			}
 		}
@@ -113,11 +180,157 @@ func RelaxOutput() {
 	pause = true
 }
 
-func Relax() {
-	if RelaxFullCoupled == false {
-		RelaxMag()
+func RelaxCoupledOutput() {
+	SanityCheck()
+	pause = false
+
+	// Save the settings we are changing...
+	prevType := solvertype
+	prevErr := MaxErr
+	prevFixDt := FixDt
+	prevPrecess := Precess
+
+	var (
+		countOutputOvf = make(map[Quantity]int)
+		startOutputOvf = make(map[Quantity]float64)
+
+		countOutputTable int
+		startOutputTable float64
+	)
+
+	for q, outputElement := range output {
+		countOutputOvf[q] = outputElement.count
+		startOutputOvf[q] = outputElement.start
+	}
+	countOutputTable = Table.autosave.count
+	startOutputTable = Table.autosave.start
+	t_1 := Time
+
+	// ...to restore them later
+	defer func() {
+		SetSolver(prevType)
+		MaxErr = prevErr
+		FixDt = prevFixDt
+		Precess = prevPrecess
+		relaxing = false
+		//	Temp.upd_reg = prevTemp
+		//	Temp.invalidate()
+		//	Temp.update()
+		for q, outputElement := range output {
+			outputElement.count = countOutputOvf[q]
+			outputElement.start = startOutputOvf[q]
+		}
+		Table.autosave.count = countOutputTable
+		Table.autosave.start = startOutputTable
+		Time = t_1
+	}()
+	SetSolver(MAGELAS_RUNGEKUTTA)
+
+	//FixDt = 0
+	util.AssertMsg(FixDt != 0, "FixDt has to be defined before Relax() if RelaxFullCoupled = true.")
+	Precess = false
+	relaxing = true
+
+
+	// Minimize energy: take steps as long as energy goes down.
+	// This stops when energy reaches the numerical noise floor.
+	const N = 3 // evaluate energy (expensive) every N steps
+	FixDtOrg := FixDt
+	FixDt *= 2
+	for IterativeHalfingIt := 0; IterativeHalfingIt < IterativeHalfing +1; IterativeHalfingIt++ {
+		FixDt /= 2
+		relaxStepsOutput(N, prefix)
+		E0 := GetTotalEnergySystem()
+		relaxStepsOutput(N, prefix)
+		E1 := GetTotalEnergySystem()
+		relaxStepsOutput(N, prefix)
+		E2 := GetTotalEnergySystem()
+		slope0 := (2*E1-E2-E0) / (2*N*FixDt)
+		slope1 := math.NaN()
+		slope2 := math.NaN()
+		slopesLoaded := false
+		//check if energy is extreme point and if it is a minimum
+		//check if average of slope is also lower than treshold -> noise leads to problems otherwise
+		for (math.Abs(2*E1-E2-E0) / (2*N*FixDt) > 2* SlopeTresholdEnergyRelax / float64(((IterativeHalfingIt +1)*2)) || (math.Abs(slope0) + math.Abs(slope1) + math.Abs(slope2)) / 3 > 2*SlopeTresholdEnergyRelax / float64(((IterativeHalfingIt +1)*2)) || (2*slope1-slope2-slope0) / (2*N*FixDt) < 0|| math.IsNaN(slope1) || math.IsNaN(slope2)) && !pause {
+			relaxStepsOutput(N, prefix)
+			E0, E1, E2 = E1, E2, GetTotalEnergySystem()
+			//fmt.Println("slope", math.Abs(2*E1-E2-E0) / (2*N*FixDt))
+			if (math.IsNaN(slope1) && !slopesLoaded) {
+				slope1 = (2*E1-E2-E0) / (2*N*FixDt)
+			} else if (math.IsNaN(slope2) && !slopesLoaded) {
+				slope2 = (2*E1-E2-E0) / (2*N*FixDt)
+				slopesLoaded = true
+			} else if (math.IsNaN(slope1) && slopesLoaded) {
+				slope2 = math.NaN()
+				slopesLoaded = false
+			} else if (math.IsNaN(slope2) && slopesLoaded) {
+				slope1 = math.NaN()
+				slopesLoaded = false
+			} else {
+				slope0, slope1, slope2 = slope1, slope2, (2*E1-E2-E0) / (2*N*FixDt)
+			}
+			//fmt.Println("slopeAv", (math.Abs(slope0) + math.Abs(slope1) + math.Abs(slope2)) / 3)
+			//fmt.Println("slope", math.Abs(slope2))
+			//fmt.Println("slope2", (2*slope1-slope2-slope0) / (2*N*FixDt))
+		}
+	}
+	FixDt = FixDtOrg
+	// Now we are already close to equilibrium, but energy is too noisy to be used any further.
+	// So now we minimize the torque which is less noisy.
+	defer stepper.Free() // purge previous rk.k1 because FSAL will be dead wrong.
+
+	if RelaxTorqueThreshold > 0 {
+		// run as long as the max torque is above threshold. Then increase the accuracy and step more.
+		FixDt *= 2
+		for IterativeHalfingIt := 0; IterativeHalfingIt < IterativeHalfing +1; IterativeHalfingIt++ {
+			FixDt /= 2
+			for !pause {
+				for GetMaxTorque() > RelaxTorqueThreshold && !pause {
+					relaxStepsOutput(N, prefix)
+				}
+				MaxErr /= math.Sqrt2
+				if MaxErr < 1e-9 {
+					break
+				}
+			}
+		}
+		FixDt = FixDtOrg
 	} else {
-		RelaxCoupled()
+		// previous (<jan2018) behaviour: run as long as torque goes down. Then increase the accuracy and step more.
+		// if MaxErr < 1e-9, this code won't run.
+		var T0, T1 float32 = 0, GetAverageTorque()
+		// Step as long as torque goes down. Then increase the accuracy and step more.
+		FixDt *= 2
+		for IterativeHalfingIt := 0; IterativeHalfingIt < IterativeHalfing +1; IterativeHalfingIt++ {
+			FixDt /= 2
+			for MaxErr > 1e-9 && !pause {
+				MaxErr /= math.Sqrt2
+				relaxStepsOutput(N, prefix) // TODO: Play with other values
+				T0, T1 = T1, GetAverageTorque()
+				for T1 < T0 && !pause {
+					relaxStepsOutput(N, prefix) // TODO: Play with other values
+					T0, T1 = T1, GetAverageTorque()
+				}
+			}
+		}
+		FixDt = FixDtOrg
+	}
+	pause = true
+}
+
+func Relax() {
+	if outputRelax == false {
+		if RelaxFullCoupled == false {
+			RelaxMag()
+		} else {
+			RelaxCoupled()
+		}
+	} else {
+		if RelaxFullCoupled == false {
+			RelaxMagOutput()
+		} else {
+			RelaxCoupledOutput()
+		}
 	}
 }
 
@@ -169,7 +382,7 @@ func RelaxCoupled() {
 		slopesLoaded := false
 		//check if energy is extreme point and if it is a minimum
 		//check if average of slope is also lower than treshold -> noise leads to problems otherwise
-		for (math.Abs(2*E1-E2-E0) / (2*N*FixDt) > 2* SlopeTresholdEnergyRelax / float64(((IterativeHalfingIt +1)*2)) || (math.Abs(slope0) + math.Abs(slope1) + math.Abs(slope2)) / 3 > 2*SlopeTresholdEnergyRelax / float64(((IterativeHalfingIt +1)*2)) || (2*slope1-slope2-slope0) / (2*N*FixDt) < 0|| math.IsNaN(slope1) || math.IsNaN(slope2)) && !pause {
+		for (math.Abs(2*E1-E2-E0) / (2*N*FixDt) > 2* SlopeTresholdEnergyRelax / float64(((IterativeHalfingIt +1)*2)) || (math.Abs(slope0) + math.Abs(slope1) + math.Abs(slope2)) / 3 > 2*SlopeTresholdEnergyRelax / float64(((IterativeHalfingIt +1)*2)) || (2*slope1-slope2-slope0) / (2*N*FixDt) < 0 || math.IsNaN(slope1) || math.IsNaN(slope2)) && !pause {
 			relaxSteps(N)
 			E0, E1, E2 = E1, E2, GetTotalEnergySystem()
 			//fmt.Println("slope", math.Abs(2*E1-E2-E0) / (2*N*FixDt))
@@ -186,6 +399,9 @@ func RelaxCoupled() {
 				slopesLoaded = false
 			} else {
 				slope0, slope1, slope2 = slope1, slope2, (2*E1-E2-E0) / (2*N*FixDt)
+			}
+			if printEnergySlope == true {
+				fmt.Printf("\r%e", slope2)
 			}
 			//fmt.Println("slopeAv", (math.Abs(slope0) + math.Abs(slope1) + math.Abs(slope2)) / 3)
 			//fmt.Println("slope", math.Abs(slope2))
@@ -319,13 +535,13 @@ func RelaxMag() {
 	pause = true
 }
 
-func relaxStepsOutput(n int) {
-	t0 := Time
+func relaxStepsOutput(n int, prefix string) {
+	//t0 := Time
 	stop := NSteps + n
 	cond := func() bool { return NSteps < stop }
 	const output = true
-	runWhile(cond, output)
-	Time = t0
+	RunWhileRelax(cond, prefix)
+	//Time = t0
 }
 
 // take n steps without setting pause when done or advancing time

@@ -224,6 +224,30 @@ func runWhile(condition func() bool, output bool) {
 	}
 }
 
+func RunWhileRelax(condition func() bool, prefix string) {
+	const output = true
+	DoOutputPrefix(prefix) // allow t=0 output
+	for condition() && !pause {
+		select {
+		default:
+			stepPrefix(output, prefix)
+		// accept tasks form Inject channel
+		case f := <-Inject:
+			f()
+		}
+	}
+}
+
+func stepPrefix(output bool, prefix string) {
+	stepper.Step()
+	for _, f := range postStep {
+		f()
+	}
+	if output {
+		DoOutputPrefix(prefix)
+	}
+}
+
 // Runs as long as browser is connected to gui.
 func RunInteractive() {
 	gui_.RunInteractive()
