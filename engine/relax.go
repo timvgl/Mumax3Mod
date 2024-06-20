@@ -63,6 +63,7 @@ func RelaxMagOutput() {
 	countOutputTable = Table.autosave.count
 	startOutputTable = Table.autosave.start
 	t_1 := Time
+
 	// ...to restore them later
 	defer func() {
 		SetSolver(prevType)
@@ -82,8 +83,10 @@ func RelaxMagOutput() {
 		Time = t_1
 	}()
 	SetSolver(BOGAKISHAMPINE)
+
 	FixDt = 0
-	relaxing = false
+	Precess = false
+	relaxing = true
 
 
 	// Minimize energy: take steps as long as energy goes down.
@@ -96,46 +99,6 @@ func RelaxMagOutput() {
 	for E1 < E0 && !pause {
 		relaxStepsOutput(N, prefix)
 		E0, E1 = E1, GetTotalEnergy()
-	}
-	for IterativeHalfingIt := 0; IterativeHalfingIt < IterativeHalfing +1; IterativeHalfingIt++ {
-		relaxStepsOutput(N, prefix)
-		t0 := Time
-		E0 := GetTotalEnergy()
-		relaxStepsOutput(N, prefix)
-		t1 := Time
-		E1 := GetTotalEnergy()
-		relaxStepsOutput(N, prefix)
-		t2 := Time
-		E2 := GetTotalEnergy()
-		slope0 := (2*E1-E2-E0) / (2*N*FixDt)
-		slope1 := math.NaN()
-		slope2 := math.NaN()
-		slopesLoaded := false
-		//check if energy is extreme point and if it is a minimum
-		//check if average of slope is also lower than treshold -> noise leads to problems otherwise
-		for (math.Abs(2*E1-E2-E0) / (t2-t0) > 2* SlopeTresholdEnergyRelax / float64(((IterativeHalfingIt +1)*2)) || (math.Abs(slope0) + math.Abs(slope1) + math.Abs(slope2)) / 3 > 2*SlopeTresholdEnergyRelax / float64(((IterativeHalfingIt +1)*2)) || (2*slope1-slope2-slope0) / (t2-t0) < 0|| math.IsNaN(slope1) || math.IsNaN(slope2)) && !pause {
-			relaxStepsOutput(N, prefix)
-			E0, E1, E2 = E1, E2, GetTotalEnergy()
-			//fmt.Println("slope", math.Abs(2*E1-E2-E0) / (2*N*FixDt))
-			if (math.IsNaN(slope1) && !slopesLoaded) {
-				slope1 = (2*E1-E2-E0) / (t2-t0)
-			} else if (math.IsNaN(slope2) && !slopesLoaded) {
-				slope2 = (2*E1-E2-E0) / (t2-t0)
-				slopesLoaded = true
-			} else if (math.IsNaN(slope1) && slopesLoaded) {
-				slope2 = math.NaN()
-				slopesLoaded = false
-			} else if (math.IsNaN(slope2) && slopesLoaded) {
-				slope1 = math.NaN()
-				slopesLoaded = false
-			} else {
-				slope0, slope1, slope2 = slope1, slope2, (2*E1-E2-E0) / (t2-t0)
-				t0, t1, t2 = t1, t2, Time
-			}
-			//fmt.Println("slopeAv", (math.Abs(slope0) + math.Abs(slope1) + math.Abs(slope2)) / 3)
-			//fmt.Println("slope", math.Abs(slope2))
-			//fmt.Println("slope2", (2*slope1-slope2-slope0) / (2*N*FixDt))
-		}
 	}
 
 	// Now we are already close to equilibrium, but energy is too noisy to be used any further.
