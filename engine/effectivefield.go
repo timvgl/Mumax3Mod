@@ -13,7 +13,11 @@ func SetEffectiveField(dst *data.Slice) {
 	SetDemagField(dst)    // set to B_demag...
 	AddExchangeField(dst) // ...then add other terms
 	AddAnisotropyField(dst)
-	AddMagnetoelasticField(dst)
+	if (useSolvedElasticPDE == false) {
+		AddMagnetoelasticField(dst)
+	} else {
+		//AddMagnetoelasticField_solved(dst)
+	}
 	B_ext.AddTo(dst)
 	if !relaxing {
 		B_therm.AddTo(dst)

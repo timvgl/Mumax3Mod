@@ -110,12 +110,13 @@ var madd7_map = map[int]string{0: "",
 	60: madd7_ptx_60,
 	61: madd7_ptx_61,
 	62: madd7_ptx_62,
-	70: madd7_ptx_70}
+	70: madd7_ptx_70,
+	80: madd7_ptx_80}
 
 // madd7 PTX code for various compute capabilities.
 const (
 	madd7_ptx_35 = `
-.version 7.7
+.version 7.4
 .target sm_35
 .address_size 64
 
@@ -212,7 +213,7 @@ $L__BB0_2:
 
 `
 	madd7_ptx_37 = `
-.version 7.7
+.version 7.4
 .target sm_37
 .address_size 64
 
@@ -309,7 +310,7 @@ $L__BB0_2:
 
 `
 	madd7_ptx_50 = `
-.version 7.7
+.version 7.4
 .target sm_50
 .address_size 64
 
@@ -406,7 +407,7 @@ $L__BB0_2:
 
 `
 	madd7_ptx_52 = `
-.version 7.7
+.version 7.4
 .target sm_52
 .address_size 64
 
@@ -503,7 +504,7 @@ $L__BB0_2:
 
 `
 	madd7_ptx_53 = `
-.version 7.7
+.version 7.4
 .target sm_53
 .address_size 64
 
@@ -600,7 +601,7 @@ $L__BB0_2:
 
 `
 	madd7_ptx_60 = `
-.version 7.7
+.version 7.4
 .target sm_60
 .address_size 64
 
@@ -697,7 +698,7 @@ $L__BB0_2:
 
 `
 	madd7_ptx_61 = `
-.version 7.7
+.version 7.4
 .target sm_61
 .address_size 64
 
@@ -794,7 +795,7 @@ $L__BB0_2:
 
 `
 	madd7_ptx_62 = `
-.version 7.7
+.version 7.4
 .target sm_62
 .address_size 64
 
@@ -891,8 +892,105 @@ $L__BB0_2:
 
 `
 	madd7_ptx_70 = `
-.version 7.7
+.version 7.4
 .target sm_70
+.address_size 64
+
+	// .globl	madd7
+
+.visible .entry madd7(
+	.param .u64 madd7_param_0,
+	.param .u64 madd7_param_1,
+	.param .f32 madd7_param_2,
+	.param .u64 madd7_param_3,
+	.param .f32 madd7_param_4,
+	.param .u64 madd7_param_5,
+	.param .f32 madd7_param_6,
+	.param .u64 madd7_param_7,
+	.param .f32 madd7_param_8,
+	.param .u64 madd7_param_9,
+	.param .f32 madd7_param_10,
+	.param .u64 madd7_param_11,
+	.param .f32 madd7_param_12,
+	.param .u64 madd7_param_13,
+	.param .f32 madd7_param_14,
+	.param .u32 madd7_param_15
+)
+{
+	.reg .pred 	%p<2>;
+	.reg .f32 	%f<22>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<26>;
+
+
+	ld.param.u64 	%rd1, [madd7_param_0];
+	ld.param.u64 	%rd2, [madd7_param_1];
+	ld.param.f32 	%f1, [madd7_param_2];
+	ld.param.u64 	%rd3, [madd7_param_3];
+	ld.param.f32 	%f2, [madd7_param_4];
+	ld.param.u64 	%rd4, [madd7_param_5];
+	ld.param.f32 	%f3, [madd7_param_6];
+	ld.param.u64 	%rd5, [madd7_param_7];
+	ld.param.f32 	%f4, [madd7_param_8];
+	ld.param.u64 	%rd6, [madd7_param_9];
+	ld.param.f32 	%f5, [madd7_param_10];
+	ld.param.u64 	%rd7, [madd7_param_11];
+	ld.param.f32 	%f6, [madd7_param_12];
+	ld.param.u64 	%rd8, [madd7_param_13];
+	ld.param.f32 	%f7, [madd7_param_14];
+	ld.param.u32 	%r2, [madd7_param_15];
+	mov.u32 	%r3, %ctaid.y;
+	mov.u32 	%r4, %nctaid.x;
+	mov.u32 	%r5, %ctaid.x;
+	mad.lo.s32 	%r6, %r3, %r4, %r5;
+	mov.u32 	%r7, %ntid.x;
+	mov.u32 	%r8, %tid.x;
+	mad.lo.s32 	%r1, %r6, %r7, %r8;
+	setp.ge.s32 	%p1, %r1, %r2;
+	@%p1 bra 	$L__BB0_2;
+
+	cvta.to.global.u64 	%rd9, %rd2;
+	mul.wide.s32 	%rd10, %r1, 4;
+	add.s64 	%rd11, %rd9, %rd10;
+	ld.global.nc.f32 	%f8, [%rd11];
+	cvta.to.global.u64 	%rd12, %rd3;
+	add.s64 	%rd13, %rd12, %rd10;
+	ld.global.nc.f32 	%f9, [%rd13];
+	mul.f32 	%f10, %f9, %f2;
+	fma.rn.f32 	%f11, %f8, %f1, %f10;
+	cvta.to.global.u64 	%rd14, %rd4;
+	add.s64 	%rd15, %rd14, %rd10;
+	ld.global.nc.f32 	%f12, [%rd15];
+	fma.rn.f32 	%f13, %f12, %f3, %f11;
+	cvta.to.global.u64 	%rd16, %rd5;
+	add.s64 	%rd17, %rd16, %rd10;
+	ld.global.nc.f32 	%f14, [%rd17];
+	fma.rn.f32 	%f15, %f14, %f4, %f13;
+	cvta.to.global.u64 	%rd18, %rd6;
+	add.s64 	%rd19, %rd18, %rd10;
+	ld.global.nc.f32 	%f16, [%rd19];
+	fma.rn.f32 	%f17, %f16, %f5, %f15;
+	cvta.to.global.u64 	%rd20, %rd7;
+	add.s64 	%rd21, %rd20, %rd10;
+	ld.global.nc.f32 	%f18, [%rd21];
+	fma.rn.f32 	%f19, %f18, %f6, %f17;
+	cvta.to.global.u64 	%rd22, %rd8;
+	add.s64 	%rd23, %rd22, %rd10;
+	ld.global.nc.f32 	%f20, [%rd23];
+	fma.rn.f32 	%f21, %f20, %f7, %f19;
+	cvta.to.global.u64 	%rd24, %rd1;
+	add.s64 	%rd25, %rd24, %rd10;
+	st.global.f32 	[%rd25], %f21;
+
+$L__BB0_2:
+	ret;
+
+}
+
+`
+	madd7_ptx_80 = `
+.version 7.4
+.target sm_80
 .address_size 64
 
 	// .globl	madd7

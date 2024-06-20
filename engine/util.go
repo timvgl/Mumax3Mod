@@ -94,20 +94,6 @@ func LoadFile(fname string) *data.Slice {
 	return s
 }
 
-func LoadFileMeta(fname string) (*data.Slice, data.Meta) {
-	in, err := httpfs.Open(fname)
-	util.FatalErr(err)
-	var d *data.Slice
-	var s data.Meta
-	if path.Ext(fname) == ".dump" {
-		d, s, err = dump.Read(in)
-	} else {
-		d, s, err = oommf.Read(in)
-	}
-	util.FatalErr(err)
-	return d, s
-}
-
 // Download a quantity to host,
 // or just return its data when already on host.
 func Download(q Quantity) *data.Slice {
