@@ -226,3 +226,4 @@ addmagnetoelasticfield_solved(float* __restrict__ Bx, float* __restrict__ By, fl
     By[I] = 2.0f*B1*m0.y*dmdy.y + B2*(m0.x*dmdx.y + m0.y*(dmdx.x + dmdz.z) + m0.z*dmdz.y);
     Bz[I] = 2.0f*B1*m0.z*dmdz.z + B2*(m0.x*dmdx.z + m0.y*dmdy.z + m0.z*(dmdx.x + dmdy.y));
 }
+
