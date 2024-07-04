@@ -62,6 +62,20 @@ func (u *displacement) LoadFile(fname string) {
 	u.SetArray(LoadFile(fname))
 }
 
+func (u *displacement) SetTime(fname string) {
+	var meta data.Meta
+	_, meta = LoadFileMeta(fname)
+	Time = meta.Time
+}
+
+func (u *displacement) LoadFileSetTime(fname string) {
+	var meta data.Meta
+	var d *data.Slice
+	d, meta = LoadFileMeta(fname)
+	u.SetArray(d)
+	Time = meta.Time
+}
+
 func (u *displacement) Slice() (s *data.Slice, recycle bool) {
 	return u.Buffer(), false
 }

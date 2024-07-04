@@ -82,6 +82,16 @@ func Zero(s *data.Slice) {
 	Memset(s, make([]float32, s.NComp())...)
 }
 
+func SetConstValue(s *data.Slice, v float32) {
+	var array = make([]float32, s.NComp())
+	array[0] = v
+	Memset(s, array...)
+}
+
+func MOne(s *data.Slice) {
+	SetConstValue(s, -1)
+}
+
 func SetCell(s *data.Slice, comp int, ix, iy, iz int, value float32) {
 	SetElem(s, comp, s.Index(ix, iy, iz), value)
 }

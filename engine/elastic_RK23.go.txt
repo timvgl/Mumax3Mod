@@ -9,18 +9,9 @@ import (
 )
 
 // Classical 4th order RK solver.
-type elasRK4 struct{
-	ku1 *data.Slice
-	ku2 *data.Slice
-	ku3 *data.Slice
-	ku4 *data.Slice
-	kv1 *data.Slice
-	kv2 *data.Slice
-	kv3 *data.Slice
-	kv4 *data.Slice
-}
+type elasRK23 struct{}
 
-func (_ *elasRK4) Step() {
+func (_ *elasRK23) Step() {
 
 	//################
 	// Differential equation:
@@ -79,8 +70,8 @@ func (_ *elasRK4) Step() {
 	// dv/dt = right(t) ~ kv
 
 	//Stage 1:
-	calcRhs(kv1, f, v)
 	ku1 = v0
+	calcRhs(kv1, f, v)
 
 	//Stage 2:
 	//u = u0*1 + k1*dt/2
@@ -92,12 +83,12 @@ func (_ *elasRK4) Step() {
 	cuda.Madd2(ku2, v0, kv1, 1, (1./2.)*dt)
 
 	//Stage 3:
-	//u = u0*1 + k2*dt/2
-	cuda.Madd2(u, u0, ku2, 1, (1./2.)*dt)
-	cuda.Madd2(v, v0, kv2, 1, (1./2.)*dt)
+	//u = u0*1 + 3*k2*dt/4
+	cuda.Madd2(u, u0, ku2, 1, (3./4.)*dt)
+	cuda.Madd2(v, v0, kv2, 1, (3./4.)*dt)
 	//calcBndry()
 	calcRhs(kv3, f, v)
-	cuda.Madd2(ku3, v0, kv2, 1, (1./2.)*dt)
+	cuda.Madd2(ku3, v0, kv2, 1, (3./4.)*dt)
 
 	//Stage 4:
 	//u = u0*1 + k3*dt
@@ -106,7 +97,7 @@ func (_ *elasRK4) Step() {
 	cuda.Madd2(v, v0, kv3, 1, 1.*dt)
 	//calcBndry()
 	calcRhs(kv4, f, v)
-	cuda.Madd2(ku4, v0, kv3, 1, 1.*dt)
+	cuda.Madd4(ku4, v0, kv1, kv2, kv3, 1, (2./9.)*dt, (1./3.)*dt, (4./9.)*dt)
 
 	//###############################
 	//Error calculation
@@ -168,21 +159,4 @@ func (_ *elasRK4) Step() {
 	}
 }
 
-func (elas *elasRK4) Free() {
-	elas.kv1.Free()
-	elas.kv1 = nil
-	elas.kv2.Free()
-	elas.kv2 = nil
-	elas.kv3.Free()
-	elas.kv3 = nil
-	elas.kv4.Free()
-	elas.kv4 = nil
-	elas.ku1.Free()
-	elas.ku1 = nil
-	elas.ku2.Free()
-	elas.ku2 = nil
-	elas.ku3.Free()
-	elas.ku3 = nil
-	elas.ku4.Free()
-	elas.ku4 = nil
-}
+func (_ *elasRK4) Free() {}

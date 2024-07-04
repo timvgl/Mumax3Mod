@@ -9,7 +9,12 @@ import (
 )
 
 // Classical 4th order RK solver.
-type magelasRK4 struct{}
+type magelasRK4 struct{
+	kv1 *data.Slice
+	kv2 *data.Slice
+	kv3 *data.Slice
+	kv4 *data.Slice
+}
 
 func (_ *magelasRK4) Step() {
 
@@ -104,7 +109,9 @@ func (_ *magelasRK4) Step() {
 	Time = t0 + (1./2.)*Dt_si
 
 	cuda.Madd2(u, u0, ku1, 1, (1./2.)*dt)
-	// calcBndry()
+	if useBoundaries == true {
+		calcBndry()
+	}
 	cuda.Madd2(v, v0, kv1, 1, (1./2.)*dt)
 	cuda.Madd2(m, m, km1, 1, (1./2.)*dt*float32(GammaLL))
 	M.normalize()
@@ -116,7 +123,9 @@ func (_ *magelasRK4) Step() {
 	//Stage 3:
 	//u = u0*1 + k2*dt/2
 	cuda.Madd2(u, u0, ku2, 1, (1./2.)*dt)
-	// calcBndry()
+	if useBoundaries == true {
+		calcBndry()
+	}
 	cuda.Madd2(v, v0, kv2, 1, (1./2.)*dt)
 	cuda.Madd2(m, m0, km2, 1, (1./2.)*dt*float32(GammaLL))
 	M.normalize()
@@ -129,7 +138,9 @@ func (_ *magelasRK4) Step() {
 	//u = u0*1 + k3*dt
 	Time = t0 + Dt_si
 	cuda.Madd2(u, u0, ku3, 1, 1.*dt)
-	// calcBndry()
+	if useBoundaries == true {
+		calcBndry()
+	}
 	cuda.Madd2(v, v0, kv3, 1, 1.*dt)
 	cuda.Madd2(m, m0, km3, 1, 1.*dt*float32(GammaLL))
 	M.normalize()
@@ -142,6 +153,7 @@ func (_ *magelasRK4) Step() {
 	//Error calculation
 	err := cuda.MaxVecDiff(ku1, ku4)
 	err2 := cuda.MaxVecDiff(kv1, kv4)
+
 	//err3 := cuda.MaxVecDiff(km1, km4) * float64(dt) * GammaLL
 
 	if err != 0.0 {
@@ -171,7 +183,9 @@ func (_ *magelasRK4) Step() {
 		// 4th order solution
 
 		cuda.Madd5(u, u0, ku1, ku2, ku3, ku4, 1, (1./6.)*dt, (1./3.)*dt, (1./3.)*dt, (1./6.)*dt)
-		// calcBndry()
+		if useBoundaries == true {
+			calcBndry()
+		}
 		cuda.Madd5(v, v0, kv1, kv2, kv3, kv4, 1, (1./6.)*dt, (1./3.)*dt, (1./3.)*dt, (1./6.)*dt)
 		cuda.Madd5(m, m0, km1, km2, km3, km4, 1, (1./6.)*dt*float32(GammaLL), (1./3.)*dt*float32(GammaLL), (1./3.)*dt*float32(GammaLL), (1./6.)*dt*float32(GammaLL))
 
@@ -208,4 +222,13 @@ func (_ *magelasRK4) Step() {
 	}
 }
 
-func (_ *magelasRK4) Free() {}
+func (magelasRK4 *magelasRK4) Free() {
+	//magelasRK4.kv1.Free()
+	//magelasRK4.kv1 = nil
+	//magelasRK4.kv2.Free()
+	//magelasRK4.kv2 = nil
+	//magelasRK4.kv3.Free()
+	//magelasRK4.kv3 = nil
+	//magelasRK4.kv4.Free()
+	//magelasRK4.kv4 = nil
+}

@@ -5,6 +5,7 @@ import (
 	"github.com/mumax/3/data"
 	"github.com/mumax/3/util"
 	"reflect"
+	"math"
 )
 
 var DU firstDerivative // firstDerivative (unit [m/s])
@@ -73,6 +74,7 @@ func (du *firstDerivative) SetCell(ix, iy, iz int, v data.Vector) {
 		cuda.SetCell(du.Buffer(), c, ix, iy, iz, float32(v[c]))
 	}
 }
+
 
 // Get the value of one cell.
 func (du *firstDerivative) GetCell(ix, iy, iz int) data.Vector {
@@ -145,4 +147,17 @@ func (du *firstDerivative) resize() {
 	du.buffer_.Free()
 	du.buffer_ = cuda.NewSlice(VECTOR, s2)
 	data.Copy(du.buffer_, resized)
+}
+
+func GetMaxDU() float64 {
+	du := DU.Buffer()
+	//defer cuda.Recycle(du)
+	return cuda.MaxVecNorm(du)
+}
+
+func GetAverageDU() float64 {
+	du := DU.Buffer()
+	//defer cuda.Recycle(du)
+	averageDU := sAverageMagnet(du)
+	return float64(math.Sqrt(math.Pow(averageDU[0], 2) + math.Pow(averageDU[1], 2) + math.Pow(averageDU[2], 2)))
 }

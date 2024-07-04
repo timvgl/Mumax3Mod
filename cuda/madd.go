@@ -30,11 +30,18 @@ func Mul(dst, a, b *data.Slice) {
 func Div(dst, a, b *data.Slice) {
 	N := dst.Len()
 	nComp := dst.NComp()
-	util.Assert(a.Len() == N && a.NComp() == nComp && b.Len() == N && b.NComp() == nComp)
+	util.Assert(a.Len() == N && a.NComp() == nComp && b.Len() == N && b.NComp() == nComp || a.Len() == N && a.NComp() == nComp && b.Len() == N && b.NComp() == 1)
 	cfg := make1DConf(N)
-	for c := 0; c < nComp; c++ {
-		k_pointwise_div_async(dst.DevPtr(c), a.DevPtr(c), b.DevPtr(c), N, cfg)
+	if b.NComp() == a.NComp() {
+		for c := 0; c < nComp; c++ {
+			k_pointwise_div_async(dst.DevPtr(c), a.DevPtr(c), b.DevPtr(c), N, cfg)
+		}
 	}
+	if b.NComp() != a.NComp() && b.NComp() == 1 {
+		for c := 0; c < nComp; c++ {
+			k_pointwise_div_async(dst.DevPtr(c), a.DevPtr(c), b.DevPtr(0), N, cfg)
+		}
+	} 
 }
 
 // Add: dst = src1 + src2.

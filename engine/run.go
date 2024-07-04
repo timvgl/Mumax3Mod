@@ -28,7 +28,9 @@ var (
 	stepper                 			Stepper                      // generic step, can be EulerStep, HeunStep, etc
 	solvertype              			int
 	CorePosRT						  			= make([]float64, 3) //core Position of Vortex
+	CorePosRTR							float64
 	BoolAllowInhomogeniousMECoupling	bool 	= false
+	useBoundaries						bool 	= false
 	//InsertTimeDepDisplacement 			int		= 0					 //1 for True, 0 for False
 	//InsertTimeDepDisplacementFunc 		func(arg1, arg2, arg3, arg4, arg5 float64) Config //func for calc displacement that is supposed to be added
 	//InsertTimeDepDisplacementFuncArgs	[]func(t float64) float64	 //slices of funcs that are going to be used as args for InsertTimeDepDisplacementFunc
@@ -40,9 +42,13 @@ func init() {
 	DeclFunc("RunWhile", RunWhile, "Run while condition function is true")
 	DeclFunc("SetSolver", SetSolver, "Set solver type. 1:Euler, 2:Heun, 3:Bogaki-Shampine, 4: Runge-Kutta (RK45), 5: Dormand-Prince, 6: Fehlberg, -1: Backward Euler")
 	DeclFunc("Activate_corePosScriptAccess", Activate_corePosScriptAccess, "Activates the availability of the vortex core position as live data")
+	DeclFunc("Activate_corePosScriptAccessR", Activate_corePosScriptAccessR, "")
 	//DeclFunc("Set_InsertTimeDepDisplacement_to", Set_InsertTimeDepDisplacement_to, "Activates the insertion of timedep displacement into MAGELAS_RUNGEKUTTA")
 	DeclFunc("AllowInhomogeniousMECoupling", AllowInhomogeniousMECoupling, "Bypasses an error that is going to be raised if B1 or B2 is inhomogenious")
 	DeclVar("CorePosRT", &CorePosRT, "Vortex core position in real time")
+	DeclVar("CorePosRTR", &CorePosRTR, "Radius of CorePosRT")
+	NewScalarValue("CorePosR", "m", "Radius of CorePosRT", func() float64 { return getRadiusVortexCore() })
+	DeclVar("useBoundaries", &useBoundaries, "")
 	DeclTVar("t", &Time, "Total simulated time (s)")
 	DeclVar("step", &NSteps, "Total number of time steps taken")
 	DeclVar("MinDt", &MinDt, "Minimum time step the solver can take (s)")
@@ -50,6 +56,7 @@ func init() {
 	DeclVar("MaxErr", &MaxErr, "Maximum error per step the solver can tolerate (default = 1e-5)")
 	DeclVar("Headroom", &Headroom, "Solver headroom (default = 0.8)")
 	DeclVar("FixDt", &FixDt, "Set a fixed time step, 0 disables fixed step (which is the default)")
+
 	DeclFunc("Exit", Exit, "Exit from the program")
 	//DeclVar("BoolAllowInhomogeniousMECoupling", BoolAllowInhomogeniousMECoupling, "Bypasses an error that is going to be raised if B1 or B2 is inhomogenious, bool")
 	SetSolver(DORMANDPRINCE)
@@ -154,7 +161,7 @@ func adaptDt(corr float64) {
 		corr = 1
 	}
 
-	util.AssertMsg(corr != 0, "Time step too small, check if parameters are sensible")
+	util.AssertMsg(corr != 0, "Time step too small, check if parameters are sensible: ")
 	corr *= Headroom
 	if corr > 2 {
 		corr = 2
@@ -217,6 +224,30 @@ func runWhile(condition func() bool, output bool) {
 	}
 }
 
+func RunWhileRelax(condition func() bool, prefix string) {
+	const output = true
+	DoOutputPrefix(prefix) // allow t=0 output
+	for condition() && !pause {
+		select {
+		default:
+			stepPrefix(output, prefix)
+		// accept tasks form Inject channel
+		case f := <-Inject:
+			f()
+		}
+	}
+}
+
+func stepPrefix(output bool, prefix string) {
+	stepper.Step()
+	for _, f := range postStep {
+		f()
+	}
+	if output {
+		DoOutputPrefix(prefix)
+	}
+}
+
 // Runs as long as browser is connected to gui.
 func RunInteractive() {
 	gui_.RunInteractive()
@@ -257,6 +288,17 @@ func SanityCheck() {
 
 func Activate_corePosScriptAccess() {
 	PostStep(func() {CorePosRT = corePos()})
+}
+
+func getRadiusVortexCore() float64 {
+	CorePosRT = corePos()
+	return math.Sqrt(math.Pow(CorePosRT[0], 2) + math.Pow(CorePosRT[1], 2))
+}
+
+func Activate_corePosScriptAccessR() {
+	PostStep(func() {
+		CorePosRTR = getRadiusVortexCore()	
+	})
 }
 
 func AllowInhomogeniousMECoupling() {

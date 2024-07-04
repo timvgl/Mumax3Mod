@@ -55,6 +55,20 @@ func (m *varVectorField) LoadFile(fname string) {
 	m.SetArray(LoadFile(fname))
 }
 
+func (m *varVectorField) SetTime(fname string) {
+	var meta data.Meta
+	_, meta = LoadFileMeta(fname)
+	Time = meta.Time
+}
+
+func (m *varVectorField) LoadFileSetTime(fname string) {
+	var meta data.Meta
+	var d *data.Slice
+	d, meta = LoadFileMeta(fname)
+	m.SetArray(d)
+	Time = meta.Time
+}
+
 func (m *varVectorField) Slice() (s *data.Slice, recycle bool) {
 	return m.Buffer(), false
 }

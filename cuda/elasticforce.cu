@@ -122,9 +122,9 @@ getelasticforce(float* __restrict__  fx, float* __restrict__  fy, float* __restr
 	float3 deltaNormY = make_float3(0.0f, 0.0f, 0.0f);
 	float3 deltaNormZ = make_float3(0.0f, 0.0f, 0.0f); 
 
-	deltaNormX = 2*norm -x_norm_m1 -x_norm_p1;
-	deltaNormY = 2*norm -y_norm_m1 -y_norm_p1;
-	deltaNormZ = 2*norm -z_norm_m1 -z_norm_p1;
+	deltaNormX = 2.0f*norm -x_norm_m1 -x_norm_p1;
+	deltaNormY = 2.0f*norm -y_norm_m1 -y_norm_p1;
+	deltaNormZ = 2.0f*norm -z_norm_m1 -z_norm_p1;
 
 	float3 deltaShearX = make_float3(0.0f, 0.0f, 0.0f); 
 	float3 deltaShearY = make_float3(0.0f, 0.0f, 0.0f);
@@ -139,4 +139,6 @@ getelasticforce(float* __restrict__  fx, float* __restrict__  fy, float* __restr
 	fx[I] = half * deltaNormX.x * rcsx + half * deltaShearX.x * rcsy + half * deltaShearX.z * rcsz;
 	fy[I] = half * deltaNormY.y * rcsy + half * deltaShearX.x * rcsx + half * deltaShearZ.y * rcsz;
 	fz[I] = half * deltaNormZ.z * rcsz + half * deltaShearY.y * rcsy + half * deltaShearX.z * rcsx;
+
+	//float3 shear = make_float3(sxy[I], syz[I], sxz[I]);
 }

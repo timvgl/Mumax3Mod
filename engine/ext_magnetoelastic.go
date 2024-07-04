@@ -6,6 +6,7 @@ import (
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/data"
 	"github.com/mumax/3/util"
+	"math"
 )
 
 var (
@@ -19,11 +20,16 @@ var (
 	eyz       = NewScalarExcitation("eyz", "", "eyz component of the strain tensor")
 	B_mel     = NewVectorField("B_mel", "T", "Magneto-elastic filed", AddMagnetoelasticField)
 	F_mel     = NewVectorField("F_mel", "N/m3", "Magneto-elastic force density", GetMagnetoelasticForceDensity)
+	F_melM     = NewVectorField("F_melM", "N/m3", "Magneto-elastic force density", GetMagnetoelasticForceDensityM)
 	F_el	  = NewVectorField("F_el", "N/m3", "Elastic force density", GetElasticForceDensity)
+	F_elsys   = NewVectorField("F_elsys", "N/m3", "Elastic force density", GetSumElasticForces)
 	rhod2udt2 = NewVectorField("rhod2udt2", "N/m3", "Force of displacement", GetDisplacementForceDensity)
 	etadudt   = NewVectorField("etadudt", "N/m3", "Force of displacement due to speed", GetDisplacementSpeedForceDensity)
 	Edens_mel = NewScalarField("Edens_mel", "J/m3", "Magneto-elastic energy density", AddMagnetoelasticEnergyDensity)
 	E_mel     = NewScalarValue("E_mel", "J", "Magneto-elastic energy", GetMagnetoelasticEnergy)
+	GradMx	  = NewVectorField("GradMx", "J", "", GetGradMx)
+	GradMy	  = NewVectorField("GradMy", "J", "", GetGradMy)
+	GradMz	  = NewVectorField("GradMz", "J", "", GetGradMz)
 )
 
 var (
@@ -32,6 +38,7 @@ var (
 
 func init() {
 	registerEnergy(GetMagnetoelasticEnergy, AddMagnetoelasticEnergyDensity)
+	registerEnergyElastic(GetMagnetoelasticEnergy, AddMagnetoelasticEnergyDensity)
 }
 
 func AddMagnetoelasticField(dst *data.Slice) {
@@ -141,6 +148,38 @@ func GetDisplacementForceDensity(dst *data.Slice) {
 	cuda.Madd4(dst, F_elRef, F_melRef, bf, etadudtRef, 1, 1, 1, -1)
 }
 
+func GetMaxDisplacementForceDensity() float64 {
+	buf := cuda.Buffer(3, Mesh().Size())
+	defer cuda.Recycle(buf)
+	cuda.Zero(buf)
+	GetDisplacementForceDensity(buf)
+	return cuda.MaxVecNorm(buf)
+}
+
+func GetDisplacementAcceleration(dst *data.Slice) {
+	GetDisplacementForceDensity(dst)
+	rho, _ := Rho.Slice()
+	defer cuda.Recycle(rho)
+	cuda.Div(dst, dst, rho)
+}
+
+func GetMaxDisplacementAcceleration() float64 {
+	buf := cuda.Buffer(3, Mesh().Size())
+	defer cuda.Recycle(buf)
+	cuda.Zero(buf)
+	GetDisplacementAcceleration(buf)
+	return cuda.MaxVecNorm(buf)
+}
+
+func GetAverageDisplacementAcceleration() float64 {
+	buf := cuda.Buffer(3, Mesh().Size())
+	defer cuda.Recycle(buf)
+	cuda.Zero(buf)
+	GetDisplacementAcceleration(buf)
+	avergeDDU := sAverageMagnet(buf)
+	return float64(math.Sqrt(math.Pow(avergeDDU[0], 2) + math.Pow(avergeDDU[1], 2) + math.Pow(avergeDDU[2], 2)))
+}
+
 func AddMagnetoelasticEnergyDensity(dst *data.Slice) {
 	haveMel := B1.nonZero() || B2.nonZero()
 	if !haveMel {
@@ -200,4 +239,44 @@ func GetMagnetoelasticEnergy() float64 {
 	cuda.Zero(buf)
 	AddMagnetoelasticEnergyDensity(buf)
 	return cellVolume() * float64(cuda.Sum(buf))
+}
+
+func GetSumElasticForces(dst *data.Slice) {
+	buf := cuda.Buffer(3, Mesh().Size())
+	defer cuda.Recycle(buf)
+	cuda.Zero(buf)
+	GetDisplacementForceDensity(dst)
+	GetDisplacementSpeedForceDensity(buf)
+	cuda.Madd2(dst, dst, buf, 1, 1)
+	GetElasticForceDensity(buf)
+	cuda.Madd2(dst, dst, buf, 1, -1)
+	GetMagnetoelasticForceDensity(buf)
+	cuda.Madd2(dst, dst, buf, 1, -1)
+	bf, _ := Bf.Slice()
+	defer cuda.Recycle(bf)
+	cuda.Madd2(dst, dst, bf, 1, -1)
+}
+
+func GetMagnetoelasticForceDensityM(dst *data.Slice) {
+	Edens_melV := ValueOf(Edens_mel)
+	defer cuda.Recycle(Edens_melV)
+
+	buf := cuda.Buffer(1, Mesh().Size())
+	defer cuda.Recycle(buf)
+
+	cuda.MOne(buf)
+	cuda.Mul(dst, dst, buf)
+	cuda.Grad(dst, Edens_melV, B_mel.Mesh())
+}
+
+func GetGradMx(dst *data.Slice) {
+	cuda.Grad(dst, M.Buffer(), M.Mesh())
+}
+
+func GetGradMy(dst *data.Slice) {
+	cuda.Grad2(dst, M.Buffer(), M.Mesh())
+}
+
+func GetGradMz(dst *data.Slice) {
+	cuda.Grad3(dst, M.Buffer(), M.Mesh())
 }
