@@ -15,11 +15,6 @@ func NewSlice(nComp int, size [3]int) *data.Slice {
 	return newSlice(nComp, size, MemAlloc, data.GPUMemory)
 }
 
-// Make a GPU Slice with nComp components each of size length.
-//func NewUnifiedSlice(nComp int, m *data.Mesh) *data.Slice {
-//	return newSlice(nComp, m, cu.MemAllocHost, data.UnifiedMemory)
-//}
-
 func newSlice(nComp int, size [3]int, alloc func(int64) unsafe.Pointer, memType int8) *data.Slice {
 	data.EnableGPU(memFree, cu.MemFreeHost, MemCpy, MemCpyDtoH, MemCpyHtoD)
 	length := prod(size)
@@ -31,6 +26,28 @@ func newSlice(nComp int, size [3]int, alloc func(int64) unsafe.Pointer, memType 
 	}
 	return data.SliceFromPtrs(size, memType, ptrs)
 }
+
+func NewSliceInt(nComp int, size [3]int) *data.Slice {
+	return newSliceInt(nComp, size, MemAlloc, data.GPUMemory)
+}
+
+func newSliceInt(nComp int, size [3]int, alloc func(int64) unsafe.Pointer, memType int8) *data.Slice {
+	data.EnableGPU(memFree, cu.MemFreeHost, MemCpy, MemCpyDtoH, MemCpyHtoD)
+	length := prod(size)
+	bytes := int64(length) * cu.SIZEOF_INT
+	ptrs := make([]unsafe.Pointer, nComp)
+	for c := range ptrs {
+		ptrs[c] = unsafe.Pointer(alloc(bytes))
+		cu.MemsetD32(cu.DevicePtr(uintptr(ptrs[c])), 0, int64(length))
+	}
+	return data.SliceFromPtrs(size, memType, ptrs)
+}
+
+// Make a GPU Slice with nComp components each of size length.
+//func NewUnifiedSlice(nComp int, m *data.Mesh) *data.Slice {
+//	return newSlice(nComp, m, cu.MemAllocHost, data.UnifiedMemory)
+//}
+
 
 // wrappers for data.EnableGPU arguments
 

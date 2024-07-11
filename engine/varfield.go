@@ -30,6 +30,7 @@ func (m *varVectorField) average() []float64      { return sAverageMagnet(M.Buff
 func (m *varVectorField) Average() data.Vector    { return unslice(m.average()) }
 func (m *varVectorField) normalize()              { cuda.Normalize(m.Buffer(), geometry.Gpu()) }
 
+
 // allocate storage (not done by init, as mesh size may not yet be known then)
 func (m *varVectorField) alloc() {
 	m.buffer_ = cuda.NewSlice(3, m.Mesh().Size())
@@ -52,7 +53,7 @@ func (m *varVectorField) Set(c Config) {
 }
 
 func (m *varVectorField) LoadFile(fname string) {
-	m.SetArray(LoadFile(fname))
+	m.SetArray(LoadFileDSlice(fname))
 }
 
 func (m *varVectorField) SetTime(fname string) {

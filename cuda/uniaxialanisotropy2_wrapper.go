@@ -119,7 +119,8 @@ var adduniaxialanisotropy2_map = map[int]string{0: "",
 	60: adduniaxialanisotropy2_ptx_60,
 	61: adduniaxialanisotropy2_ptx_61,
 	62: adduniaxialanisotropy2_ptx_62,
-	70: adduniaxialanisotropy2_ptx_70}
+	70: adduniaxialanisotropy2_ptx_70,
+	80: adduniaxialanisotropy2_ptx_80}
 
 // adduniaxialanisotropy2 PTX code for various compute capabilities.
 const (
@@ -1686,6 +1687,201 @@ $L__BB0_18:
 	adduniaxialanisotropy2_ptx_70 = `
 .version 7.7
 .target sm_70
+.address_size 64
+
+	// .globl	adduniaxialanisotropy2
+
+.visible .entry adduniaxialanisotropy2(
+	.param .u64 adduniaxialanisotropy2_param_0,
+	.param .u64 adduniaxialanisotropy2_param_1,
+	.param .u64 adduniaxialanisotropy2_param_2,
+	.param .u64 adduniaxialanisotropy2_param_3,
+	.param .u64 adduniaxialanisotropy2_param_4,
+	.param .u64 adduniaxialanisotropy2_param_5,
+	.param .u64 adduniaxialanisotropy2_param_6,
+	.param .f32 adduniaxialanisotropy2_param_7,
+	.param .u64 adduniaxialanisotropy2_param_8,
+	.param .f32 adduniaxialanisotropy2_param_9,
+	.param .u64 adduniaxialanisotropy2_param_10,
+	.param .f32 adduniaxialanisotropy2_param_11,
+	.param .u64 adduniaxialanisotropy2_param_12,
+	.param .f32 adduniaxialanisotropy2_param_13,
+	.param .u64 adduniaxialanisotropy2_param_14,
+	.param .f32 adduniaxialanisotropy2_param_15,
+	.param .u64 adduniaxialanisotropy2_param_16,
+	.param .f32 adduniaxialanisotropy2_param_17,
+	.param .u32 adduniaxialanisotropy2_param_18
+)
+{
+	.reg .pred 	%p<10>;
+	.reg .f32 	%f<72>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<45>;
+
+
+	ld.param.u64 	%rd2, [adduniaxialanisotropy2_param_0];
+	ld.param.u64 	%rd3, [adduniaxialanisotropy2_param_1];
+	ld.param.u64 	%rd4, [adduniaxialanisotropy2_param_2];
+	ld.param.u64 	%rd5, [adduniaxialanisotropy2_param_3];
+	ld.param.u64 	%rd6, [adduniaxialanisotropy2_param_4];
+	ld.param.u64 	%rd7, [adduniaxialanisotropy2_param_5];
+	ld.param.u64 	%rd8, [adduniaxialanisotropy2_param_6];
+	ld.param.f32 	%f68, [adduniaxialanisotropy2_param_7];
+	ld.param.u64 	%rd9, [adduniaxialanisotropy2_param_8];
+	ld.param.f32 	%f70, [adduniaxialanisotropy2_param_9];
+	ld.param.u64 	%rd10, [adduniaxialanisotropy2_param_10];
+	ld.param.f32 	%f71, [adduniaxialanisotropy2_param_11];
+	ld.param.u64 	%rd11, [adduniaxialanisotropy2_param_12];
+	ld.param.f32 	%f64, [adduniaxialanisotropy2_param_13];
+	ld.param.u64 	%rd12, [adduniaxialanisotropy2_param_14];
+	ld.param.f32 	%f65, [adduniaxialanisotropy2_param_15];
+	ld.param.u64 	%rd13, [adduniaxialanisotropy2_param_16];
+	ld.param.f32 	%f66, [adduniaxialanisotropy2_param_17];
+	ld.param.u32 	%r2, [adduniaxialanisotropy2_param_18];
+	mov.u32 	%r3, %nctaid.x;
+	mov.u32 	%r4, %ctaid.y;
+	mov.u32 	%r5, %ctaid.x;
+	mad.lo.s32 	%r6, %r4, %r3, %r5;
+	mov.u32 	%r7, %ntid.x;
+	mov.u32 	%r8, %tid.x;
+	mad.lo.s32 	%r1, %r6, %r7, %r8;
+	setp.ge.s32 	%p1, %r1, %r2;
+	@%p1 bra 	$L__BB0_18;
+
+	setp.eq.s64 	%p2, %rd11, 0;
+	@%p2 bra 	$L__BB0_3;
+
+	cvta.to.global.u64 	%rd14, %rd11;
+	mul.wide.s32 	%rd15, %r1, 4;
+	add.s64 	%rd16, %rd14, %rd15;
+	ld.global.nc.f32 	%f27, [%rd16];
+	mul.f32 	%f64, %f27, %f64;
+
+$L__BB0_3:
+	setp.eq.s64 	%p3, %rd12, 0;
+	@%p3 bra 	$L__BB0_5;
+
+	cvta.to.global.u64 	%rd17, %rd12;
+	mul.wide.s32 	%rd18, %r1, 4;
+	add.s64 	%rd19, %rd17, %rd18;
+	ld.global.nc.f32 	%f28, [%rd19];
+	mul.f32 	%f65, %f28, %f65;
+
+$L__BB0_5:
+	setp.eq.s64 	%p4, %rd13, 0;
+	@%p4 bra 	$L__BB0_7;
+
+	cvta.to.global.u64 	%rd20, %rd13;
+	mul.wide.s32 	%rd21, %r1, 4;
+	add.s64 	%rd22, %rd20, %rd21;
+	ld.global.nc.f32 	%f29, [%rd22];
+	mul.f32 	%f66, %f29, %f66;
+
+$L__BB0_7:
+	mul.f32 	%f31, %f65, %f65;
+	fma.rn.f32 	%f32, %f64, %f64, %f31;
+	fma.rn.f32 	%f33, %f66, %f66, %f32;
+	sqrt.rn.f32 	%f7, %f33;
+	setp.eq.f32 	%p5, %f7, 0f00000000;
+	mov.f32 	%f67, 0f00000000;
+	@%p5 bra 	$L__BB0_9;
+
+	rcp.rn.f32 	%f67, %f7;
+
+$L__BB0_9:
+	mul.f32 	%f10, %f64, %f67;
+	mul.f32 	%f11, %f65, %f67;
+	mul.f32 	%f12, %f66, %f67;
+	setp.eq.s64 	%p6, %rd8, 0;
+	@%p6 bra 	$L__BB0_11;
+
+	cvta.to.global.u64 	%rd23, %rd8;
+	mul.wide.s32 	%rd24, %r1, 4;
+	add.s64 	%rd25, %rd23, %rd24;
+	ld.global.nc.f32 	%f34, [%rd25];
+	mul.f32 	%f68, %f34, %f68;
+
+$L__BB0_11:
+	setp.eq.f32 	%p7, %f68, 0f00000000;
+	mov.f32 	%f69, 0f00000000;
+	@%p7 bra 	$L__BB0_13;
+
+	rcp.rn.f32 	%f69, %f68;
+
+$L__BB0_13:
+	setp.eq.s64 	%p8, %rd9, 0;
+	@%p8 bra 	$L__BB0_15;
+
+	cvta.to.global.u64 	%rd26, %rd9;
+	mul.wide.s32 	%rd27, %r1, 4;
+	add.s64 	%rd28, %rd26, %rd27;
+	ld.global.nc.f32 	%f36, [%rd28];
+	mul.f32 	%f70, %f36, %f70;
+
+$L__BB0_15:
+	cvt.s64.s32 	%rd1, %r1;
+	setp.eq.s64 	%p9, %rd10, 0;
+	@%p9 bra 	$L__BB0_17;
+
+	cvta.to.global.u64 	%rd29, %rd10;
+	shl.b64 	%rd30, %rd1, 2;
+	add.s64 	%rd31, %rd29, %rd30;
+	ld.global.nc.f32 	%f37, [%rd31];
+	mul.f32 	%f71, %f37, %f71;
+
+$L__BB0_17:
+	cvta.to.global.u64 	%rd32, %rd5;
+	shl.b64 	%rd33, %rd1, 2;
+	add.s64 	%rd34, %rd32, %rd33;
+	ld.global.nc.f32 	%f38, [%rd34];
+	cvta.to.global.u64 	%rd35, %rd6;
+	add.s64 	%rd36, %rd35, %rd33;
+	ld.global.nc.f32 	%f39, [%rd36];
+	mul.f32 	%f40, %f11, %f39;
+	fma.rn.f32 	%f41, %f10, %f38, %f40;
+	cvta.to.global.u64 	%rd37, %rd7;
+	add.s64 	%rd38, %rd37, %rd33;
+	ld.global.nc.f32 	%f42, [%rd38];
+	fma.rn.f32 	%f43, %f12, %f42, %f41;
+	mul.f32 	%f44, %f69, %f70;
+	fma.rn.f32 	%f45, %f69, %f70, %f44;
+	mul.f32 	%f46, %f45, %f43;
+	mul.f32 	%f47, %f69, %f71;
+	mul.f32 	%f48, %f47, 0f40800000;
+	mul.f32 	%f49, %f43, %f43;
+	mul.f32 	%f50, %f43, %f49;
+	mul.f32 	%f51, %f48, %f50;
+	mul.f32 	%f52, %f10, %f51;
+	mul.f32 	%f53, %f11, %f51;
+	mul.f32 	%f54, %f12, %f51;
+	fma.rn.f32 	%f55, %f10, %f46, %f52;
+	fma.rn.f32 	%f56, %f11, %f46, %f53;
+	fma.rn.f32 	%f57, %f12, %f46, %f54;
+	cvta.to.global.u64 	%rd39, %rd2;
+	add.s64 	%rd40, %rd39, %rd33;
+	ld.global.f32 	%f58, [%rd40];
+	add.f32 	%f59, %f58, %f55;
+	st.global.f32 	[%rd40], %f59;
+	cvta.to.global.u64 	%rd41, %rd3;
+	add.s64 	%rd42, %rd41, %rd33;
+	ld.global.f32 	%f60, [%rd42];
+	add.f32 	%f61, %f60, %f56;
+	st.global.f32 	[%rd42], %f61;
+	cvta.to.global.u64 	%rd43, %rd4;
+	add.s64 	%rd44, %rd43, %rd33;
+	ld.global.f32 	%f62, [%rd44];
+	add.f32 	%f63, %f62, %f57;
+	st.global.f32 	[%rd44], %f63;
+
+$L__BB0_18:
+	ret;
+
+}
+
+`
+	adduniaxialanisotropy2_ptx_80 = `
+.version 7.7
+.target sm_80
 .address_size 64
 
 	// .globl	adduniaxialanisotropy2

@@ -6,6 +6,14 @@ import (
 )
 
 var (
+	loadNormStress bool = false
+	loadNormStressPath string
+	loadShearStress bool = false
+	loadShearStressPath string
+	loadNormStressConfig bool = false
+	normStressConfig Config
+	loadShearStressConfig bool = false
+	shearStressConfig Config
 	norm_stress  = NewVectorField("normStress", "", "Normal stress components", setNormStress)
 	shear_stress = NewVectorField("shearStress", "", "Shear stress components", setShearStress)
 )
@@ -13,11 +21,37 @@ var (
 //###################
 //Strain
 func setNormStress(dst *data.Slice) {
-	NormStress(dst, norm_strain.Quantity, C11, C12)
+	if loadNormStress == false && loadNormStressConfig == false {
+		NormStress(dst, norm_strain.Quantity, C11, C12)
+	} else if loadNormStress == true && loadNormStressConfig == false{
+		var d *data.Slice
+		d = LoadFileDSlice(loadNormStressPath)
+		SetArray(dst, d)
+		loadNormStress = false
+		loadNormStressPath = ""
+	} else if loadNormStress == false && loadNormStressConfig == true {
+		SetInShape(dst, nil, normStressConfig)
+		loadNormStressConfig = false
+	} else {
+		panic("Cannot load file for normStress and set configuration for normStress in parallel.")
+	}
 }
 
 func setShearStress(dst *data.Slice) {
-	ShearStress(dst, shear_strain.Quantity, C44)
+	if loadShearStress == false && loadShearStressConfig == false {
+		ShearStress(dst, shear_strain.Quantity, C44)
+	} else if loadShearStress == true && loadShearStressConfig == false{
+		var d *data.Slice
+		d = LoadFileDSlice(loadShearStressPath)
+		SetArray(dst, d)
+		loadShearStress = false
+		loadShearStressPath = ""
+	} else if loadShearStress == false && loadShearStressConfig == true {
+		SetInShape(dst, nil, shearStressConfig)
+		loadShearStressConfig = false
+	} else {
+		panic("Cannot load file for shearStress and set configuration for shearStress in parallel.")
+	}
 }
 
 func NormStress(dst *data.Slice, eNorm Quantity, C11, C12 *RegionwiseScalar) {

@@ -29,6 +29,42 @@ func MustCreate(URL string) WriteCloseFlusher {
 	return f
 }
 
+func Modify(URL string) (WriteCloseFlusher, error) {
+	reader, err := Open(URL)
+	if err != nil {
+		return nil, err
+	}
+	var buf bytes.Buffer
+
+    // Use io.TeeReader to read and copy the data simultaneously
+    tee := io.TeeReader(reader, &buf)
+
+    // Read all the data to calculate the size
+    data, err := ioutil.ReadAll(tee)
+    if err != nil {
+        return nil, err
+    }
+	return &bufWriter{bufio.NewWriterSize(&appendWriter{URL, int64(len(data))}, BUFSIZE)}, nil
+}
+
+func MustModify(URL string) WriteCloseFlusher {
+	reader, err := Open(URL)
+	if err != nil {
+		panic(err)
+	}
+	var buf bytes.Buffer
+
+    // Use io.TeeReader to read and copy the data simultaneously
+    tee := io.TeeReader(reader, &buf)
+
+    // Read all the data to calculate the size
+    data, err := ioutil.ReadAll(tee)
+    if err != nil {
+        panic(err)
+    }
+	return &bufWriter{bufio.NewWriterSize(&appendWriter{URL, int64(len(data))}, BUFSIZE)}
+}
+
 type WriteCloseFlusher interface {
 	io.WriteCloser
 	Flush() error

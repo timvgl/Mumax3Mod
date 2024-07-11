@@ -18,6 +18,7 @@ var (
 	Synchronous   bool       // for debug: synchronize stream0 at every kernel launch
 	cudaCtx       cu.Context // global CUDA context
 	cudaCC        int        // compute capablity (used for fatbin)
+	GPUIndex	  int
 )
 
 // Locks to an OS thread and initializes CUDA for that thread.
@@ -46,7 +47,7 @@ func Init(gpu int) {
 	if Synchronous {
 		log.Println("DEBUG: synchronized CUDA calls")
 	}
-
+	GPUIndex = gpu
 	// test PTX load so that we can catch CUDA_ERROR_NO_BINARY_FOR_GPU early
 	fatbinLoad(madd2_map, "madd2")
 }

@@ -165,6 +165,7 @@ func goServeGUI() string {
 func printVersion() {
 	engine.LogOut(engine.UNAME)
 	engine.LogOut(fmt.Sprintf("GPU info: %s, using cc=%d PTX", cuda.GPUInfo, cuda.UseCC))
+	engine.LogOut(fmt.Sprintf("Running on GPU %v", cuda.GPUIndex))
 	engine.LogOut("(c) Arne Vansteenkiste, Dynamat LAB, Ghent University, Belgium")
 	engine.LogOut("This is free software without any warranty. See license.txt")
 	engine.LogOut("********************************************************************//")

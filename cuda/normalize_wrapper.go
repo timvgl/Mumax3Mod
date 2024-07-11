@@ -77,7 +77,8 @@ var normalize_map = map[int]string{0: "",
 	60: normalize_ptx_60,
 	61: normalize_ptx_61,
 	62: normalize_ptx_62,
-	70: normalize_ptx_70}
+	70: normalize_ptx_70,
+	80: normalize_ptx_80}
 
 // normalize PTX code for various compute capabilities.
 const (
@@ -756,6 +757,90 @@ $L__BB0_6:
 	normalize_ptx_70 = `
 .version 7.7
 .target sm_70
+.address_size 64
+
+	// .globl	normalize
+
+.visible .entry normalize(
+	.param .u64 normalize_param_0,
+	.param .u64 normalize_param_1,
+	.param .u64 normalize_param_2,
+	.param .u64 normalize_param_3,
+	.param .u32 normalize_param_4
+)
+{
+	.reg .pred 	%p<4>;
+	.reg .f32 	%f<22>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<16>;
+
+
+	ld.param.u64 	%rd5, [normalize_param_0];
+	ld.param.u64 	%rd6, [normalize_param_1];
+	ld.param.u64 	%rd7, [normalize_param_2];
+	ld.param.u64 	%rd8, [normalize_param_3];
+	ld.param.u32 	%r2, [normalize_param_4];
+	mov.u32 	%r3, %nctaid.x;
+	mov.u32 	%r4, %ctaid.y;
+	mov.u32 	%r5, %ctaid.x;
+	mad.lo.s32 	%r6, %r4, %r3, %r5;
+	mov.u32 	%r7, %ntid.x;
+	mov.u32 	%r8, %tid.x;
+	mad.lo.s32 	%r1, %r6, %r7, %r8;
+	setp.ge.s32 	%p1, %r1, %r2;
+	@%p1 bra 	$L__BB0_6;
+
+	setp.eq.s64 	%p2, %rd8, 0;
+	cvt.s64.s32 	%rd1, %r1;
+	mov.f32 	%f20, 0f3F800000;
+	@%p2 bra 	$L__BB0_3;
+
+	cvta.to.global.u64 	%rd9, %rd8;
+	shl.b64 	%rd10, %rd1, 2;
+	add.s64 	%rd11, %rd9, %rd10;
+	ld.global.nc.f32 	%f20, [%rd11];
+
+$L__BB0_3:
+	cvta.to.global.u64 	%rd12, %rd5;
+	shl.b64 	%rd13, %rd1, 2;
+	add.s64 	%rd2, %rd12, %rd13;
+	ld.global.f32 	%f11, [%rd2];
+	mul.f32 	%f3, %f20, %f11;
+	cvta.to.global.u64 	%rd14, %rd6;
+	add.s64 	%rd3, %rd14, %rd13;
+	ld.global.f32 	%f12, [%rd3];
+	mul.f32 	%f4, %f20, %f12;
+	cvta.to.global.u64 	%rd15, %rd7;
+	add.s64 	%rd4, %rd15, %rd13;
+	ld.global.f32 	%f13, [%rd4];
+	mul.f32 	%f5, %f20, %f13;
+	mul.f32 	%f14, %f4, %f4;
+	fma.rn.f32 	%f15, %f3, %f3, %f14;
+	fma.rn.f32 	%f16, %f5, %f5, %f15;
+	sqrt.rn.f32 	%f6, %f16;
+	setp.eq.f32 	%p3, %f6, 0f00000000;
+	mov.f32 	%f21, 0f00000000;
+	@%p3 bra 	$L__BB0_5;
+
+	rcp.rn.f32 	%f21, %f6;
+
+$L__BB0_5:
+	mul.f32 	%f17, %f3, %f21;
+	st.global.f32 	[%rd2], %f17;
+	mul.f32 	%f18, %f4, %f21;
+	st.global.f32 	[%rd3], %f18;
+	mul.f32 	%f19, %f5, %f21;
+	st.global.f32 	[%rd4], %f19;
+
+$L__BB0_6:
+	ret;
+
+}
+
+`
+	normalize_ptx_80 = `
+.version 7.7
+.target sm_80
 .address_size 64
 
 	// .globl	normalize

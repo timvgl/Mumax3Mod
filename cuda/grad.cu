@@ -10,7 +10,6 @@ pointwise_grad(float* __restrict__  dstx, float* __restrict__  dsty, float* __re
                       float rcsx, float rcsy, float rcsz,
 					  int Nx, int Ny, int Nz, 
                       uint8_t PBC) {
-
     int ix = blockIdx.x * blockDim.x + threadIdx.x;
     int iy = blockIdx.y * blockDim.y + threadIdx.y;
     int iz = blockIdx.z * blockDim.z + threadIdx.z;

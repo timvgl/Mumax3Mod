@@ -53,7 +53,7 @@ func (du *firstDerivative) Set(c Config) {
 }
 
 func (du *firstDerivative) LoadFile(fname string) {
-	du.SetArray(LoadFile(fname))
+	du.SetArray(LoadFileDSlice(fname))
 }
 
 func (du *firstDerivative) Slice() (s *data.Slice, recycle bool) {

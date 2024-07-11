@@ -27,8 +27,7 @@ var (
 	FixDt                   			float64                      // fixed time step?
 	stepper                 			Stepper                      // generic step, can be EulerStep, HeunStep, etc
 	solvertype              			int
-	CorePosRT						  			= make([]float64, 3) //core Position of Vortex
-	CorePosRTR							float64
+
 	BoolAllowInhomogeniousMECoupling	bool 	= false
 	useBoundaries						bool 	= false
 	//InsertTimeDepDisplacement 			int		= 0					 //1 for True, 0 for False
@@ -41,13 +40,8 @@ func init() {
 	DeclFunc("Steps", Steps, "Run the simulation for a number of time steps")
 	DeclFunc("RunWhile", RunWhile, "Run while condition function is true")
 	DeclFunc("SetSolver", SetSolver, "Set solver type. 1:Euler, 2:Heun, 3:Bogaki-Shampine, 4: Runge-Kutta (RK45), 5: Dormand-Prince, 6: Fehlberg, -1: Backward Euler")
-	DeclFunc("Activate_corePosScriptAccess", Activate_corePosScriptAccess, "Activates the availability of the vortex core position as live data")
-	DeclFunc("Activate_corePosScriptAccessR", Activate_corePosScriptAccessR, "")
 	//DeclFunc("Set_InsertTimeDepDisplacement_to", Set_InsertTimeDepDisplacement_to, "Activates the insertion of timedep displacement into MAGELAS_RUNGEKUTTA")
 	DeclFunc("AllowInhomogeniousMECoupling", AllowInhomogeniousMECoupling, "Bypasses an error that is going to be raised if B1 or B2 is inhomogenious")
-	DeclVar("CorePosRT", &CorePosRT, "Vortex core position in real time")
-	DeclVar("CorePosRTR", &CorePosRTR, "Radius of CorePosRT")
-	NewScalarValue("CorePosR", "m", "Radius of CorePosRT", func() float64 { return getRadiusVortexCore() })
 	DeclVar("useBoundaries", &useBoundaries, "")
 	DeclTVar("t", &Time, "Total simulated time (s)")
 	DeclVar("step", &NSteps, "Total number of time steps taken")
@@ -270,6 +264,17 @@ func PostStep(f func()) {
 	postStep = append(postStep, f)
 }
 
+func RemovePostStep(f func()) {
+	var index int
+	for i, step := range postStep {
+		if fmt.Sprintf("%v", step) == fmt.Sprintf("%v", f) {
+			index = i
+			break
+		}
+	}
+	postStep = append(postStep[:index], postStep[index+1:]...)
+}
+
 // inject code into engine and wait for it to complete.
 func InjectAndWait(task func()) {
 	ready := make(chan int)
@@ -284,21 +289,6 @@ func SanityCheck() {
 	if Aex.isZero() {
 		util.Log("Note: Aex = 0")
 	}
-}
-
-func Activate_corePosScriptAccess() {
-	PostStep(func() {CorePosRT = corePos()})
-}
-
-func getRadiusVortexCore() float64 {
-	CorePosRT = corePos()
-	return math.Sqrt(math.Pow(CorePosRT[0], 2) + math.Pow(CorePosRT[1], 2))
-}
-
-func Activate_corePosScriptAccessR() {
-	PostStep(func() {
-		CorePosRTR = getRadiusVortexCore()	
-	})
 }
 
 func AllowInhomogeniousMECoupling() {

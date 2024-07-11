@@ -11,8 +11,22 @@ var (
 )
 
 func init() {
+	DeclFunc("SetAutoNumPrefixTo", SetAutoNumPrefixTo, "")
+	DeclFunc("SetAutoNumTo", SetAutoNumTo, "")
 	DeclFunc("AutoSave", AutoSave, "Auto save space-dependent quantity every period (s).")
 	DeclFunc("AutoSnapshot", AutoSnapshot, "Auto save image of quantity every period (s).")
+}
+
+func SetAutoNumTo(v int) {
+	for key, _ := range autonum {
+		autonum[key] = v
+	}
+}
+
+func SetAutoNumPrefixTo(v int) {
+	for key, _ := range autonumPrefix {
+		autonumPrefix[key] = v
+	}
 }
 
 // Periodically called by run loop to save everything that's needed at this time.

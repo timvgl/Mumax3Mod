@@ -5,6 +5,10 @@ import "math"
 // 3-component vector
 type Vector [3]float64
 
+func New_dataVector(x, y, z float64) Vector {
+	return [3]float64{x, y, z}
+}
+
 func (v Vector) X() float64 { return v[0] }
 func (v Vector) Y() float64 { return v[1] }
 func (v Vector) Z() float64 { return v[2] }

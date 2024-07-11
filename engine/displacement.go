@@ -59,7 +59,7 @@ func (u *displacement) Set(c Config) {
 }
 
 func (u *displacement) LoadFile(fname string) {
-	u.SetArray(LoadFile(fname))
+	u.SetArray(LoadFileDSlice(fname))
 }
 
 func (u *displacement) SetTime(fname string) {

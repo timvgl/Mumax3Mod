@@ -6,68 +6,51 @@ import (
 )
 
 var (
-	useLoadedStrain				bool = false
-	useLoadedStrainNorm			bool = false
-	useLoadedStrainShear		bool = false
-	setShearStrainZero			bool = false
-	setNormStrainZero			bool = false
-	normStrainFile				string
-	shearStrainFile				string
-	useTimeFromLoadedStrain		bool = false
+	loadNormStrain bool = false
+	loadNormStrainPath string
+	loadShearStrain bool = false
+	loadShearStrainPath string
+	loadNormStrainConfig bool = false
+	normStrainConfig Config
+	loadShearStrainConfig bool = false
+	shearStrainConfig Config
 	norm_strain  = NewVectorField("normStrain", "", "Normal strain components", setNormStrain)
 	shear_strain = NewVectorField("shearStrain", "", "Shear strain components", setShearStrain)
 )
 
-func init() {
-	DeclVar("useLoadedStrain", &useLoadedStrain, "Dont calc strain from u, but take loaded strain")
-	DeclVar("useLoadedStrainNorm", &useLoadedStrainNorm, "")
-	DeclVar("useLoadedStrainShear", &useLoadedStrainShear, "")
-	DeclVar("useTimeFromLoadedStrain", &useTimeFromLoadedStrain, "")
-	DeclVar("normStrainFile", &normStrainFile, "")
-	DeclVar("shearStrainFile", &shearStrainFile, "")
-	DeclVar("setShearStrainZero", &setShearStrainZero, "")
-	DeclVar("setNormStrainZero", &setNormStrainZero, "")
-}
-
 //###################
 //Strain
 func setNormStrain(dst *data.Slice) {
-	if useLoadedStrain == false && useLoadedStrainNorm == false{
+	if loadNormStrain == false && loadNormStrainConfig == false {
 		NormStrain(dst, U, C11)
-	} else if setNormStrainZero == false {
-		if useTimeFromLoadedStrain == false {
-			var d *data.Slice
-			d = LoadFile(normStrainFile)
-			SetArray(dst, d)
-		} else {
-			var meta data.Meta
-			var d *data.Slice
-			d, meta = LoadFileMeta(normStrainFile)
-			SetArray(dst, d)
-			Time = meta.Time
-		}
+	} else if loadNormStrain == true && loadNormStrainConfig == false{
+		var d *data.Slice
+		d = LoadFileDSlice(loadNormStrainPath)
+		SetArray(dst, d)
+		loadNormStrain = false
+		loadNormStrainPath = ""
+	} else if loadNormStrain == false && loadNormStrainConfig == true {
+		SetInShape(dst, nil, normStrainConfig)
+		loadNormStrainConfig = false
 	} else {
-		SetInShape(dst, nil, Uniform(0,0,0))
+		panic("Cannot load file for normStrain and set configuration for normStrain in parallel.")
 	}
 }
 
 func setShearStrain(dst *data.Slice) {
-	if useLoadedStrain == false && useLoadedStrainShear == false {
+	if loadShearStrain == false && loadShearStrainConfig == false {
 		ShearStrain(dst, U, C11)
-	} else if setShearStrainZero == false {
-		if useTimeFromLoadedStrain == false {
-			var d *data.Slice
-			d = LoadFile(shearStrainFile)
-			SetArray(dst, d)
-		} else {
-			var meta data.Meta
-			var d *data.Slice
-			d, meta = LoadFileMeta(shearStrainFile)
-			SetArray(dst, d)
-			Time = meta.Time
-		}
+	} else if loadShearStrain == true && loadShearStrainConfig == false{
+		var d *data.Slice
+		d = LoadFileDSlice(loadShearStrainPath)
+		SetArray(dst, d)
+		loadShearStrain = false
+		loadShearStrainPath = ""
+	} else if loadShearStrain == false && loadShearStrainConfig == true {
+		SetInShape(dst, nil, shearStrainConfig)
+		loadShearStrainConfig = false
 	} else {
-		SetInShape(dst, nil, Uniform(0,0,0))
+		panic("Cannot load file for shearStrain and set configuration for shearStrain in parallel.")
 	}
 }
 
@@ -96,31 +79,4 @@ func SetArray(dst, src *data.Slice,) {
 	}
 	data.Copy(dst, src)
 	//b.normalize()
-}
-
-func SetInShape(dst *data.Slice, region Shape, conf Config) {
-	checkMesh()
-
-	if region == nil {
-		region = universe
-	}
-	host := dst.HostCopy()
-	h := host.Vectors()
-	n := dst.Size()
-
-	for iz := 0; iz < n[Z]; iz++ {
-		for iy := 0; iy < n[Y]; iy++ {
-			for ix := 0; ix < n[X]; ix++ {
-				r := Index2Coord(ix, iy, iz)
-				x, y, z := r[X], r[Y], r[Z]
-				if region(x, y, z) { // inside
-					u := conf(x, y, z)
-					h[X][iz][iy][ix] = float32(u[X])
-					h[Y][iz][iy][ix] = float32(u[Y])
-					h[Z][iz][iy][ix] = float32(u[Z])
-				}
-			}
-		}
-	}
-	SetArray(dst, host)
 }

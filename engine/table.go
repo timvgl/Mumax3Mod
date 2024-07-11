@@ -13,10 +13,19 @@ import (
 	"time"
 )
 
-var Table = *newTable("table") // output handle for tabular data (average magnetization etc.)
 const TableAutoflushRate = 5   // auto-flush table every X seconds
+var (
+	createNewTable bool = true
+ 	rewriteHeaderTable bool = false
+ 	Table *DataTable
+)
 
 func init() {
+	DeclVar("createNewTable", &createNewTable, "")
+	DeclVar("rewriteHeaderTable", &rewriteHeaderTable, "")
+	if createNewTable == true {
+		Table = newTable("table") // output handle for tabular data (average magnetization etc.)
+	}
 	DeclFunc("TableAdd", TableAdd, "Add quantity as a column to the data table.")
 	DeclFunc("TableAddVar", TableAddVariable, "Add user-defined variable + name + unit to data table.")
 	DeclFunc("TableSave", TableSave, "Save the data table right now (appends one line).")
@@ -169,23 +178,31 @@ func (t *DataTable) init() {
 	if t.inited() {
 		return
 	}
-	f, err := httpfs.Create(OD() + t.name + ".txt")
-	util.FatalErr(err)
-	t.output = f
 
-	// write header
-	fprint(t, "# t (s)")
-	for _, o := range t.outputs {
-		if o.NComp() == 1 {
-			fprint(t, "\t", NameOf(o), " (", UnitOf(o), ")")
-		} else {
-			for c := 0; c < o.NComp(); c++ {
-				fprint(t, "\t", NameOf(o)+string('x'+c), " (", UnitOf(o), ")")
+	if createNewTable == true {
+		f, err := httpfs.Create(OD() + t.name + ".txt")
+		util.FatalErr(err)
+		t.output = f
+	} else {
+		f, err := httpfs.Modify(OD() + t.name + ".txt")
+		util.FatalErr(err)
+		t.output = f
+	}
+	if rewriteHeaderTable == true || createNewTable == true {	
+		// write header
+		fprint(t, "# t (s)")
+		for _, o := range t.outputs {
+			if o.NComp() == 1 {
+				fprint(t, "\t", NameOf(o), " (", UnitOf(o), ")")
+			} else {
+				for c := 0; c < o.NComp(); c++ {
+					fprint(t, "\t", NameOf(o)+string('x'+c), " (", UnitOf(o), ")")
+				}
 			}
 		}
+		fprintln(t)
+		t.Flush()
 	}
-	fprintln(t)
-	t.Flush()
 
 	// periodically flush so GUI shows graph,
 	// but don't flush after every output for performance

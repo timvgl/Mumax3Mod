@@ -86,7 +86,8 @@ var KineticEnergy_map = map[int]string{0: "",
 	60: KineticEnergy_ptx_60,
 	61: KineticEnergy_ptx_61,
 	62: KineticEnergy_ptx_62,
-	70: KineticEnergy_ptx_70}
+	70: KineticEnergy_ptx_70,
+	80: KineticEnergy_ptx_80}
 
 // KineticEnergy PTX code for various compute capabilities.
 const (
@@ -773,6 +774,91 @@ $L__BB0_2:
 	KineticEnergy_ptx_70 = `
 .version 7.7
 .target sm_70
+.address_size 64
+
+	// .globl	KineticEnergy
+
+.visible .entry KineticEnergy(
+	.param .u64 KineticEnergy_param_0,
+	.param .u64 KineticEnergy_param_1,
+	.param .u64 KineticEnergy_param_2,
+	.param .u64 KineticEnergy_param_3,
+	.param .u64 KineticEnergy_param_4,
+	.param .u32 KineticEnergy_param_5,
+	.param .u32 KineticEnergy_param_6,
+	.param .u32 KineticEnergy_param_7
+)
+{
+	.reg .pred 	%p<6>;
+	.reg .f32 	%f<9>;
+	.reg .b32 	%r<18>;
+	.reg .f64 	%fd<5>;
+	.reg .b64 	%rd<17>;
+
+
+	ld.param.u64 	%rd1, [KineticEnergy_param_0];
+	ld.param.u64 	%rd2, [KineticEnergy_param_1];
+	ld.param.u64 	%rd3, [KineticEnergy_param_2];
+	ld.param.u64 	%rd4, [KineticEnergy_param_3];
+	ld.param.u64 	%rd5, [KineticEnergy_param_4];
+	ld.param.u32 	%r4, [KineticEnergy_param_5];
+	ld.param.u32 	%r5, [KineticEnergy_param_6];
+	ld.param.u32 	%r6, [KineticEnergy_param_7];
+	mov.u32 	%r7, %ctaid.x;
+	mov.u32 	%r8, %ntid.x;
+	mov.u32 	%r9, %tid.x;
+	mad.lo.s32 	%r1, %r7, %r8, %r9;
+	mov.u32 	%r10, %ntid.y;
+	mov.u32 	%r11, %ctaid.y;
+	mov.u32 	%r12, %tid.y;
+	mad.lo.s32 	%r2, %r11, %r10, %r12;
+	mov.u32 	%r13, %ntid.z;
+	mov.u32 	%r14, %ctaid.z;
+	mov.u32 	%r15, %tid.z;
+	mad.lo.s32 	%r3, %r14, %r13, %r15;
+	setp.ge.s32 	%p1, %r1, %r4;
+	setp.ge.s32 	%p2, %r2, %r5;
+	or.pred  	%p3, %p1, %p2;
+	setp.ge.s32 	%p4, %r3, %r6;
+	or.pred  	%p5, %p3, %p4;
+	@%p5 bra 	$L__BB0_2;
+
+	cvta.to.global.u64 	%rd6, %rd2;
+	mad.lo.s32 	%r16, %r3, %r5, %r2;
+	mad.lo.s32 	%r17, %r16, %r4, %r1;
+	cvta.to.global.u64 	%rd7, %rd5;
+	mul.wide.s32 	%rd8, %r17, 4;
+	add.s64 	%rd9, %rd7, %rd8;
+	ld.global.nc.f32 	%f1, [%rd9];
+	cvt.f64.f32 	%fd1, %f1;
+	mul.f64 	%fd2, %fd1, 0d3FE0000000000000;
+	add.s64 	%rd10, %rd6, %rd8;
+	ld.global.nc.f32 	%f2, [%rd10];
+	cvta.to.global.u64 	%rd11, %rd3;
+	add.s64 	%rd12, %rd11, %rd8;
+	ld.global.nc.f32 	%f3, [%rd12];
+	mul.f32 	%f4, %f3, %f3;
+	fma.rn.f32 	%f5, %f2, %f2, %f4;
+	cvta.to.global.u64 	%rd13, %rd4;
+	add.s64 	%rd14, %rd13, %rd8;
+	ld.global.nc.f32 	%f6, [%rd14];
+	fma.rn.f32 	%f7, %f6, %f6, %f5;
+	cvt.f64.f32 	%fd3, %f7;
+	mul.f64 	%fd4, %fd2, %fd3;
+	cvt.rn.f32.f64 	%f8, %fd4;
+	cvta.to.global.u64 	%rd15, %rd1;
+	add.s64 	%rd16, %rd15, %rd8;
+	st.global.f32 	[%rd16], %f8;
+
+$L__BB0_2:
+	ret;
+
+}
+
+`
+	KineticEnergy_ptx_80 = `
+.version 7.7
+.target sm_80
 .address_size 64
 
 	// .globl	KineticEnergy

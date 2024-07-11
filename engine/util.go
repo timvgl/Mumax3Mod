@@ -17,6 +17,12 @@ import (
 	"github.com/mumax/3/util"
 )
 
+var (
+	GradMx	  = NewVectorField("GradMx", "J", "", GetGradMx)
+	GradMy	  = NewVectorField("GradMy", "J", "", GetGradMy)
+	GradMz	  = NewVectorField("GradMz", "J", "", GetGradMz)
+)
+
 func init() {
 	DeclFunc("Expect", Expect, "Used for automated tests: checks if a value is close enough to the expected value")
 	DeclFunc("ExpectV", ExpectV, "Used for automated tests: checks if a vector is close enough to the expected value")
@@ -25,7 +31,10 @@ func init() {
 	DeclFunc("Vector", Vector, "Constructs a vector with given components")
 	DeclConst("Mu0", mag.Mu0, "Permittivity of vaccum (Tm/A)")
 	DeclFunc("Print", myprint, "Print to standard output")
-	DeclFunc("LoadFile", LoadFile, "Load a data file (ovf or dump)")
+	DeclFunc("LoadFile", LoadFileDSlice, "Load a data file (ovf or dump)")
+	DeclFunc("LoadFileWithoutMem", LoadFileWithoutMem, "")
+	DeclFunc("SetQuantityWithoutMemToConfig", SetQuantityWithoutMemToConfig, "")
+	DeclFunc("LoadFileVector", LoadFileAsConfig, "")
 	DeclFunc("Index2Coord", Index2Coord, "Convert cell index to x,y,z coordinate in meter")
 	DeclFunc("NewSlice", NewSlice, "Makes a 4D array with a specified number of components (first argument) "+
 		"and a specified size nx,ny,nz (remaining arguments)")
@@ -81,7 +90,7 @@ func Fprintln(filename string, msg ...interface{}) {
 }
 
 // Read a magnetization state from .dump file.
-func LoadFile(fname string) *data.Slice {
+func LoadFileDSlice(fname string) *data.Slice {
 	in, err := httpfs.Open(fname)
 	util.FatalErr(err)
 	var s *data.Slice
@@ -107,6 +116,96 @@ func LoadFileMeta(fname string) (*data.Slice, data.Meta) {
 	util.FatalErr(err)
 	return d, s
 }
+
+func LoadFileAsConfig(fname string) Config {
+	var d, meta = LoadFileMeta(fname)
+	var vec = d.Vectors()
+	var xCellSize, yCellSize, zCellSize = meta.CellSize[0], meta.CellSize[1], meta.CellSize[2]
+	var size = M.Mesh().Size()
+	var xSize, ySize, zSize = float64(size[0]), float64(size[1]), float64(size[2])
+	return func(x, y, z float64) data.Vector {
+		var xIndex, yIndex, zIndex = int((x + xSize * xCellSize / 2) / xCellSize), int((y + ySize * yCellSize / 2)/yCellSize), int((z + zSize * zCellSize / 2)/zCellSize)
+		return data.New_dataVector(float64(vec[0][zIndex][yIndex][xIndex]), float64(vec[1][zIndex][yIndex][xIndex]), float64(vec[2][zIndex][yIndex][xIndex]))
+	}
+}
+
+func LoadFileWithoutMem(q Quantity, fname string) {
+	if NameOf(q) == "normStrain" {
+		loadNormStrain = true
+		loadNormStrainPath = fname
+	} else if NameOf(q) == "shearStrain" {
+		loadShearStrain = true
+		loadShearStrainPath = fname
+	} else if NameOf(q) == "normStress" {
+		loadNormStress = true
+		loadNormStressPath = fname
+	} else if NameOf(q) == "shearStress" {
+		loadShearStress = true
+		loadShearStressPath = fname
+	} else {
+		util.AssertMsg(true, "Loading file for " + NameOf(q) + " not yet supported.")
+	}
+	
+}
+
+func SetQuantityWithoutMemToConfig(q Quantity, cfg Config) {
+	if NameOf(q) == "normStrain" {
+		loadNormStrainConfig = true
+		normStrainConfig = cfg
+	} else if NameOf(q) == "shearStrain" {
+		loadShearStrainConfig = true
+		shearStrainConfig = cfg
+	} else if NameOf(q) == "normStress" {
+		loadNormStressConfig = true
+		normStressConfig = cfg
+	} else if NameOf(q) == "shearStress" {
+		loadShearStressConfig = true
+		shearStressConfig = cfg
+	} else {
+		util.AssertMsg(true, "Loading config for " + NameOf(q) + " not yet supported.")
+	}
+	
+}
+
+func SetInShape(dst *data.Slice, region Shape, conf Config) {
+	checkMesh()
+
+	if region == nil {
+		region = universe
+	}
+	host := dst.HostCopy()
+	h := host.Vectors()
+	n := dst.Size()
+
+	for iz := 0; iz < n[Z]; iz++ {
+		for iy := 0; iy < n[Y]; iy++ {
+			for ix := 0; ix < n[X]; ix++ {
+				r := Index2Coord(ix, iy, iz)
+				x, y, z := r[X], r[Y], r[Z]
+				if region(x, y, z) { // inside
+					u := conf(x, y, z)
+					h[X][iz][iy][ix] = float32(u[X])
+					h[Y][iz][iy][ix] = float32(u[Y])
+					h[Z][iz][iy][ix] = float32(u[Z])
+				}
+			}
+		}
+	}
+	SetArray(dst, host)
+}
+
+func GetGradMx(dst *data.Slice) {
+	cuda.Grad(dst, M.Buffer(), M.Mesh())
+}
+
+func GetGradMy(dst *data.Slice) {
+	cuda.Grad2(dst, M.Buffer(), M.Mesh())
+}
+
+func GetGradMz(dst *data.Slice) {
+	cuda.Grad3(dst, M.Buffer(), M.Mesh())
+}
+
 
 // Download a quantity to host,
 // or just return its data when already on host.
