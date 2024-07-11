@@ -159,6 +159,21 @@ func RelaxCoupledOutput() {
 	prevErr := MaxErr
 	prevFixDt := FixDt
 	prevPrecess := Precess
+	var (
+		countOutputOvf = make(map[Quantity]int)
+		startOutputOvf = make(map[Quantity]float64)
+
+		countOutputTable int
+		startOutputTable float64
+	)
+
+	for q, outputElement := range output {
+		countOutputOvf[q] = outputElement.count
+		startOutputOvf[q] = outputElement.start
+	}
+	countOutputTable = Table.autosave.count
+	startOutputTable = Table.autosave.start
+	
 	prevEta := Eta
 	t_1 := Time
 
@@ -173,6 +188,12 @@ func RelaxCoupledOutput() {
 		//	Temp.upd_reg = prevTemp
 		//	Temp.invalidate()
 		//	Temp.update()
+		for q, outputElement := range output {
+			outputElement.count = countOutputOvf[q]
+			outputElement.start = startOutputOvf[q]
+		}
+		Table.autosave.count = countOutputTable
+		Table.autosave.start = startOutputTable
 		Time = t_1
 	}()
 
