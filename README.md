@@ -59,6 +59,8 @@ Comment: Loading strains is highly experimental - if you want to use the strain 
     + __useBoundaries__ - activate boundaries for elastic system
     + __AllowInhomogeniousMECoupling__ - deactivate blocking of inhomogenious B1 and B2 values
 
+* Further useful commands:
+    + __RotVector__ - needs to be applied onto a vector. Rotates this vector around another vector b with the angle c. Args: b, c
   
 
 
