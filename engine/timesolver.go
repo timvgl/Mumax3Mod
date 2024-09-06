@@ -11,6 +11,7 @@ var Slvr *odeint.Solver
 func init() {
 	DeclFunc("InitTimeSolver", InitTimeSolver, "Initialize time solver")
 	DeclVar("TimeSolver", &Slvr, "The time solver")
+	DeclVar("Time", &Time, "")
 }
 
 // Returns the right hand side of the LLG equation.

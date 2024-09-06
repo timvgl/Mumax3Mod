@@ -5,13 +5,15 @@ package engine
 import (
 	"math"
 	"math/rand"
-
 	"github.com/mumax/3/data"
 )
 
 func init() {
 	DeclFunc("Uniform", Uniform, "Uniform magnetization in given direction")
 	DeclFunc("Vortex", Vortex, "Vortex magnetization with given circulation and core polarization")
+	DeclFunc("VortexAsym", VortexAsym, "Vortex magnetization with given circulation and core polarization")
+	DeclFunc("DisplacedVortex", DisplacedVortex, "")
+	DeclFunc("DisplacedVortexAsym", DisplacedVortexAsym, "")
 	DeclFunc("Antivortex", AntiVortex, "Antivortex magnetization with given circulation and core polarization")
 	DeclFunc("NeelSkyrmion", NeelSkyrmion, "Néél skyrmion magnetization with given charge and core polarization")
 	DeclFunc("BlochSkyrmion", BlochSkyrmion, "Bloch skyrmion magnetization with given chirality and core polarization")
@@ -73,6 +75,64 @@ func Vortex(circ, pol int) Config {
 		mx := -y * float64(circ) / r
 		my := x * float64(circ) / r
 		mz := 1.5 * float64(pol) * math.Exp(-r2/diam2)
+		return noNaN(data.Vector{mx, my, mz}, pol)
+	}
+}
+
+func VortexAsym(circ, pol int, diam2Prop, angle, openAngle float64) Config {
+	diam2 := 2 * sqr64(Mesh().CellSize()[X])
+	return func(x, y, z float64) data.Vector {
+		r2 := x*x + y*y
+		r := math.Sqrt(r2)
+		mz := 0.0
+		posAngle := float64(int(math.Atan2(y, x) * 180 / math.Pi + 360) % 360) * math.Pi / 180
+		if posAngle < angle + math.Pi / 4 && posAngle > angle - math.Pi / 4 {
+			if posAngle < angle + math.Pi / 4 && posAngle > angle {
+				mz = 1.5 * float64(pol) * math.Exp(-r2/(diam2 * (- (diam2Prop -1) / openAngle * posAngle + diam2Prop + (diam2Prop -1) / openAngle * angle)))
+
+			} else {
+				mz = 1.5 * float64(pol) * math.Exp(-r2/(diam2 * ((diam2Prop -1) / openAngle * posAngle + diam2Prop - (diam2Prop -1) / openAngle * angle)))
+			}
+		} else {
+			mz = 1.5 * float64(pol) * math.Exp(-r2/diam2)
+		}
+		mx := -y * float64(circ) / r
+		my := x * float64(circ) / r
+		return noNaN(data.Vector{mx, my, mz}, pol)
+	}
+}
+
+func DisplacedVortex(circ, pol int, deltaX, deltaY float64) Config {
+	diam2 := 2 * sqr64(Mesh().CellSize()[X])
+	return func(x, y, z float64) data.Vector {
+		r2 := math.Pow(x - deltaX, 2) + math.Pow(y - deltaY, 2)
+		r := math.Sqrt(r2)
+		mx := -(y - deltaY) * float64(circ) / r
+		my := (x - deltaX) * float64(circ) / r
+		mz := 1.5 * float64(pol) * math.Exp(-r2/diam2)
+		return noNaN(data.Vector{mx, my, mz}, pol)
+	}
+}
+
+func DisplacedVortexAsym(circ, pol int, deltaX, deltaY, diam2Prop, angle, openAngle float64) Config {
+	diam2 := 2 * sqr64(Mesh().CellSize()[X])
+	return func(x, y, z float64) data.Vector {
+		r2 := math.Pow(x - deltaX, 2) + math.Pow(y - deltaY, 2)
+		r := math.Sqrt(r2)
+		mz := 0.0
+		posAngle := float64(int(math.Atan2(y, x) * 180 / math.Pi + 360) % 360) * math.Pi / 180
+		if posAngle < angle + math.Pi / 4 && posAngle > angle - math.Pi / 4 {
+			if posAngle < angle + math.Pi / 4 && posAngle > angle {
+				mz = 1.5 * float64(pol) * math.Exp(-r2/(diam2 * (- (diam2Prop -1) / openAngle * posAngle + diam2Prop + (diam2Prop -1) / openAngle * angle)))
+
+			} else {
+				mz = 1.5 * float64(pol) * math.Exp(-r2/(diam2 * ((diam2Prop -1) / openAngle * posAngle + diam2Prop - (diam2Prop -1) / openAngle * angle)))
+			}
+		} else {
+			mz = 1.5 * float64(pol) * math.Exp(-r2/diam2)
+		}
+		mx := -(y - deltaY) * float64(circ) / r
+		my := (x - deltaX) * float64(circ) / r
 		return noNaN(data.Vector{mx, my, mz}, pol)
 	}
 }

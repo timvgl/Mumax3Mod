@@ -106,7 +106,7 @@ func TableSave() {
 }
 
 func TableAutoSave(period float64) {
-	Table.autosave = autosave{period, Time, -1, nil, nil} // count -1 allows output on t=0
+	Table.autosave = autosave{period, Time, -1, nil, nil, nil, nil, ""} // count -1 allows output on t=0
 }
 
 func (t *DataTable) SavePrefix(prefix string) {

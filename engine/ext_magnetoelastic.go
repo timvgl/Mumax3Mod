@@ -28,15 +28,16 @@ var (
 	Edens_mel = NewScalarField("Edens_mel", "J/m3", "Magneto-elastic energy density", AddMagnetoelasticEnergyDensity)
 	E_mel     = NewScalarValue("E_mel", "J", "Magneto-elastic energy", GetMagnetoelasticEnergy)
 	DDU	  	  = NewVectorField("ddu", "", "", GetDisplacementAcceleration)
-)
-
-var (
+	fixM bool = false
 	zeroMel = NewScalarParam("_zeroMel", "", "utility zero parameter")
+
 )
 
 func init() {
 	registerEnergy(GetMagnetoelasticEnergy, AddMagnetoelasticEnergyDensity)
 	registerEnergyElastic(GetMagnetoelasticEnergy, AddMagnetoelasticEnergyDensity)
+	DeclVar("fixM", &fixM, "only calculate elastic time evolution and keep m constant")
+
 }
 
 func AddMagnetoelasticField(dst *data.Slice) {

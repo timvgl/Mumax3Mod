@@ -58,12 +58,27 @@ func Save(q Quantity) {
 	autonum[qname]++
 }
 
-func savePrefix(q Quantity, prefix string) {
+func SavePrefix(q Quantity, prefix string) {
 	qname := NameOf(q)
 	fname := autoFnamePrefix(prefix, NameOf(q), outputFormat, autonumPrefix[qname])
 	SaveAs(q, fname)
 	autonumPrefix[qname]++
 }
+
+func SaveAsOverwrite(q Quantity, name string) {
+	qname := NameOf(q)
+	fname := autoFname(name, outputFormat, autonumAs[qname])
+	SaveAs(q, fname)
+	autonumAs[qname]++
+}
+
+func SaveAsOverwritePrefix(q Quantity, prefix, name string) {
+	qname := NameOf(q)
+	fname := autoFnamePrefix(prefix, name, outputFormat, autonumPrefixAs[qname])
+	SaveAs(q, fname)
+	autonumPrefixAs[qname]++
+}
+
 
 // Save under given file name (transparent async I/O).
 func SaveAs(q Quantity, fname string) {
@@ -85,12 +100,42 @@ func SaveAs(q Quantity, fname string) {
 // Save image once, with auto file name
 func Snapshot(q Quantity) {
 	qname := NameOf(q)
-	fname := fmt.Sprintf(OD()+FilenameFormat+"."+SnapshotFormat, qname, autonum[qname])
+	fname := fmt.Sprintf(OD()+FilenameFormat+"."+SnapshotFormat, qname, autonumSnapshots[qname])
 	s := ValueOf(q)
 	defer cuda.Recycle(s)
 	data := s.HostCopy() // must be copy (asyncio)
 	queOutput(func() { snapshot_sync(fname, data) })
-	autonum[qname]++
+	autonumSnapshots[qname]++
+} 
+
+func SnapshotPrefix(q Quantity, prefix string) {
+	qname := NameOf(q)
+	fname := fmt.Sprintf(OD()+FilenameFormat+"."+SnapshotFormat, prefix  + "_" + qname, autonumSnapshotsPrefix[qname])
+	s := ValueOf(q)
+	defer cuda.Recycle(s)
+	data := s.HostCopy() // must be copy (asyncio)
+	queOutput(func() { snapshot_sync(fname, data) })
+	autonumSnapshotsPrefix[qname]++
+}
+
+func SnapshotAsOverwrite(q Quantity, name string) {
+	qname := NameOf(q)
+	fname := fmt.Sprintf(OD()+FilenameFormat+"."+SnapshotFormat, name, autonumSnapshotsAs[qname])
+	s := ValueOf(q)
+	defer cuda.Recycle(s)
+	data := s.HostCopy() // must be copy (asyncio)
+	queOutput(func() { snapshot_sync(fname, data) })
+	autonumSnapshotsAs[qname]++
+}
+
+func SnapshotAsOverwritePrefix(q Quantity, prefix, name string) {
+	qname := NameOf(q)
+	fname := fmt.Sprintf(OD()+FilenameFormat+"."+SnapshotFormat, prefix + "_" + name, autonumSnapshotsPrefixAs[qname])
+	s := ValueOf(q)
+	defer cuda.Recycle(s)
+	data := s.HostCopy() // must be copy (asyncio)
+	queOutput(func() { snapshot_sync(fname, data) })
+	autonumSnapshotsPrefixAs[qname]++
 }
 
 func SnapshotAs(q Quantity, fname string) {

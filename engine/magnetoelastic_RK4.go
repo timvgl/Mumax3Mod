@@ -102,7 +102,9 @@ func (_ *magelasRK4) Step() {
 	//Stage 1:
 	calcRhs(kv1, f, v)
 	ku1 = v0
-	torqueFn(km1)
+	if (fixM == false) {
+		torqueFn(km1)
+	}
 
 	//Stage 2:
 	//u = u0*1 + k1*dt/2
@@ -113,12 +115,17 @@ func (_ *magelasRK4) Step() {
 		calcBndry()
 	}
 	cuda.Madd2(v, v0, kv1, 1, (1./2.)*dt)
-	cuda.Madd2(m, m, km1, 1, (1./2.)*dt*float32(GammaLL))
-	M.normalize()
+	if (fixM == false) {
+		cuda.Madd2(m, m, km1, 1, (1./2.)*dt*float32(GammaLL))
+		M.normalize()
+	}
+	
 
 	calcRhs(kv2, f, v)
 	cuda.Madd2(ku2, v0, kv1, 1, (1./2.)*dt)
-	torqueFn(km2)
+	if (fixM == false) {
+		torqueFn(km2)
+	}
 
 	//Stage 3:
 	//u = u0*1 + k2*dt/2
@@ -127,12 +134,16 @@ func (_ *magelasRK4) Step() {
 		calcBndry()
 	}
 	cuda.Madd2(v, v0, kv2, 1, (1./2.)*dt)
-	cuda.Madd2(m, m0, km2, 1, (1./2.)*dt*float32(GammaLL))
-	M.normalize()
+	if (fixM == false) {
+		cuda.Madd2(m, m0, km2, 1, (1./2.)*dt*float32(GammaLL))
+		M.normalize()
+	}
 
 	calcRhs(kv3, f, v)
 	cuda.Madd2(ku3, v0, kv2, 1, (1./2.)*dt)
-	torqueFn(km3)
+	if (fixM == false) {
+		torqueFn(km3)
+	}
 
 	//Stage 4:
 	//u = u0*1 + k3*dt
@@ -142,12 +153,16 @@ func (_ *magelasRK4) Step() {
 		calcBndry()
 	}
 	cuda.Madd2(v, v0, kv3, 1, 1.*dt)
-	cuda.Madd2(m, m0, km3, 1, 1.*dt*float32(GammaLL))
-	M.normalize()
+	if (fixM == false) {
+		cuda.Madd2(m, m0, km3, 1, 1.*dt*float32(GammaLL))
+		M.normalize()
+	}
 
 	calcRhs(kv4, f, v)
 	cuda.Madd2(ku4, v0, kv3, 1, 1.*dt)
-	torqueFn(km4)
+	if (fixM == false) {
+		torqueFn(km4)
+	}
 
 	//###############################
 	//Error calculation
@@ -187,10 +202,14 @@ func (_ *magelasRK4) Step() {
 			calcBndry()
 		}
 		cuda.Madd5(v, v0, kv1, kv2, kv3, kv4, 1, (1./6.)*dt, (1./3.)*dt, (1./3.)*dt, (1./6.)*dt)
-		cuda.Madd5(m, m0, km1, km2, km3, km4, 1, (1./6.)*dt*float32(GammaLL), (1./3.)*dt*float32(GammaLL), (1./3.)*dt*float32(GammaLL), (1./6.)*dt*float32(GammaLL))
-
-		//Post handlings
-		M.normalize()
+		if (fixM == false) {
+			cuda.Madd5(m, m0, km1, km2, km3, km4, 1, (1./6.)*dt*float32(GammaLL), (1./3.)*dt*float32(GammaLL), (1./3.)*dt*float32(GammaLL), (1./6.)*dt*float32(GammaLL))
+			//Post handlings
+			M.normalize()
+		} else {
+			data.Copy(m, m0)
+			M.normalize()
+		}
 		for i := 0; i < 3; i++ {
 			cuda.Scale(u, 1, U.average())
 		}
