@@ -61,6 +61,9 @@ Comment: Loading strains is highly experimental - if you want to use the strain 
 
 * Further useful commands:
     + __RotVector__ - needs to be applied onto a vector. Rotates this vector around another vector b with the angle c. Args: b, c
+ 
+* Further shapes:
+    + __IDT__ - generate one sided IDT. Args: IDTWidthFinger, IDTDistanceFinger, IDTFingerLength float64, AmountFingers int
   
 
 
