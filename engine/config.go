@@ -79,8 +79,8 @@ func Vortex(circ, pol int) Config {
 	}
 }
 
-func VortexAsym(circ, pol int, diam2Prop, angle, openAngle float64) Config {
-	diam2 := 2 * sqr64(Mesh().CellSize()[X])
+func VortexAsym(circ, pol int, diam2Prop, angle, openAngle, diam2BasicFac float64) Config {
+	diam2 := diam2BasicFac * 2 * sqr64(Mesh().CellSize()[X])
 	return func(x, y, z float64) data.Vector {
 		r2 := x*x + y*y
 		r := math.Sqrt(r2)
@@ -114,8 +114,8 @@ func DisplacedVortex(circ, pol int, deltaX, deltaY float64) Config {
 	}
 }
 
-func DisplacedVortexAsym(circ, pol int, deltaX, deltaY, diam2Prop, angle, openAngle float64) Config {
-	diam2 := 2 * sqr64(Mesh().CellSize()[X])
+func DisplacedVortexAsym(circ, pol int, deltaX, deltaY, diam2Prop, angle, openAngle, diam2BasicFac float64) Config {
+	diam2 := diam2BasicFac * 2 * sqr64(Mesh().CellSize()[X])
 	return func(x, y, z float64) data.Vector {
 		r2 := math.Pow(x - deltaX, 2) + math.Pow(y - deltaY, 2)
 		r := math.Sqrt(r2)

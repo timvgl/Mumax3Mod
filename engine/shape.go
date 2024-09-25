@@ -19,6 +19,7 @@ func init() {
 	DeclFunc("Cuboid", Cuboid, "Cuboid with sides in meter")
 	DeclFunc("Rect", Rect, "2D rectangle with size in meter")
 	DeclFunc("Square", Square, "2D square with size in meter")
+	DeclFunc("IDT", IDT, "2D IDT - only one side")
 	DeclFunc("XRange", XRange, "Part of space between x1 (inclusive) and x2 (exclusive), in meter")
 	DeclFunc("YRange", YRange, "Part of space between y1 (inclusive) and y2 (exclusive), in meter")
 	DeclFunc("ZRange", ZRange, "Part of space between z1 (inclusive) and z2 (exclusive), in meter")
@@ -307,3 +308,13 @@ func (a Shape) Xor(b Shape) Shape {
 }
 
 func sqr64(x float64) float64 { return x * x }
+
+
+func IDT(IDTWidthFinger, IDTDistanceFinger, IDTFingerLength float64, AmountFingers int) Shape {
+	idt := Rect(IDTWidthFinger, IDTFingerLength)
+	for i:= 0; i < AmountFingers -1; i++ {
+		idt = idt.Transl(-(IDTWidthFinger + IDTDistanceFinger), 0, 0)
+		idt = idt.Add(Rect(IDTWidthFinger, IDTFingerLength))
+	}
+	return idt.Transl((float64(AmountFingers) -1.)*(IDTWidthFinger + IDTDistanceFinger) / 2, 0, 0)
+}
