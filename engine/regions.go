@@ -107,7 +107,7 @@ func DefRegionCell(id int, x, y, z int) {
 // Load regions from ovf file, use first component.
 // Regions should be between 0 and 256
 func (r *Regions) LoadFile(fname string) {
-	inSlice := LoadFileDSlice(fname)
+	inSlice := LoadFileDSliceMyDir(fname)
 	n := r.Mesh().Size()
 	inSlice = data.Resample(inSlice, n)
 	inArr := inSlice.Tensors()[0]

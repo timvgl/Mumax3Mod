@@ -62,6 +62,10 @@ func (u *displacement) LoadFile(fname string) {
 	u.SetArray(LoadFileDSlice(fname))
 }
 
+func (u *displacement) LoadFileMyDir(fname string) {
+	u.SetArray(LoadFileDSliceMyDir(fname))
+}
+
 func (u *displacement) SetTime(fname string) {
 	var meta data.Meta
 	_, meta = LoadFileMeta(fname)

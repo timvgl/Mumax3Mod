@@ -78,8 +78,6 @@ func k_shiftz_async(dst unsafe.Pointer, src unsafe.Pointer, Nx int, Ny int, Nz i
 
 // maps compute capability on PTX code for shiftz kernel.
 var shiftz_map = map[int]string{0: "",
-	35: shiftz_ptx_35,
-	37: shiftz_ptx_37,
 	50: shiftz_ptx_50,
 	52: shiftz_ptx_52,
 	53: shiftz_ptx_53,
@@ -87,172 +85,14 @@ var shiftz_map = map[int]string{0: "",
 	61: shiftz_ptx_61,
 	62: shiftz_ptx_62,
 	70: shiftz_ptx_70,
+	72: shiftz_ptx_72,
+	75: shiftz_ptx_75,
 	80: shiftz_ptx_80}
 
 // shiftz PTX code for various compute capabilities.
 const (
-	shiftz_ptx_35 = `
-.version 7.7
-.target sm_35
-.address_size 64
-
-	// .globl	shiftz
-
-.visible .entry shiftz(
-	.param .u64 shiftz_param_0,
-	.param .u64 shiftz_param_1,
-	.param .u32 shiftz_param_2,
-	.param .u32 shiftz_param_3,
-	.param .u32 shiftz_param_4,
-	.param .u32 shiftz_param_5,
-	.param .f32 shiftz_param_6,
-	.param .f32 shiftz_param_7
-)
-{
-	.reg .pred 	%p<8>;
-	.reg .f32 	%f<6>;
-	.reg .b32 	%r<22>;
-	.reg .b64 	%rd<9>;
-
-
-	ld.param.u64 	%rd1, [shiftz_param_0];
-	ld.param.u64 	%rd2, [shiftz_param_1];
-	ld.param.u32 	%r5, [shiftz_param_2];
-	ld.param.u32 	%r6, [shiftz_param_3];
-	ld.param.u32 	%r7, [shiftz_param_4];
-	ld.param.u32 	%r8, [shiftz_param_5];
-	ld.param.f32 	%f5, [shiftz_param_6];
-	ld.param.f32 	%f4, [shiftz_param_7];
-	mov.u32 	%r9, %ntid.x;
-	mov.u32 	%r10, %ctaid.x;
-	mov.u32 	%r11, %tid.x;
-	mad.lo.s32 	%r1, %r10, %r9, %r11;
-	mov.u32 	%r12, %ntid.y;
-	mov.u32 	%r13, %ctaid.y;
-	mov.u32 	%r14, %tid.y;
-	mad.lo.s32 	%r2, %r13, %r12, %r14;
-	mov.u32 	%r15, %ntid.z;
-	mov.u32 	%r16, %ctaid.z;
-	mov.u32 	%r17, %tid.z;
-	mad.lo.s32 	%r3, %r16, %r15, %r17;
-	setp.ge.s32 	%p1, %r1, %r5;
-	setp.ge.s32 	%p2, %r2, %r6;
-	or.pred  	%p3, %p1, %p2;
-	setp.ge.s32 	%p4, %r3, %r7;
-	or.pred  	%p5, %p3, %p4;
-	@%p5 bra 	$L__BB0_5;
-
-	sub.s32 	%r4, %r3, %r8;
-	setp.lt.s32 	%p6, %r4, 0;
-	@%p6 bra 	$L__BB0_4;
-
-	setp.ge.s32 	%p7, %r4, %r7;
-	mov.f32 	%f5, %f4;
-	@%p7 bra 	$L__BB0_4;
-
-	mad.lo.s32 	%r18, %r4, %r6, %r2;
-	mad.lo.s32 	%r19, %r18, %r5, %r1;
-	cvta.to.global.u64 	%rd3, %rd2;
-	mul.wide.s32 	%rd4, %r19, 4;
-	add.s64 	%rd5, %rd3, %rd4;
-	ld.global.nc.f32 	%f5, [%rd5];
-
-$L__BB0_4:
-	mad.lo.s32 	%r20, %r3, %r6, %r2;
-	mad.lo.s32 	%r21, %r20, %r5, %r1;
-	cvta.to.global.u64 	%rd6, %rd1;
-	mul.wide.s32 	%rd7, %r21, 4;
-	add.s64 	%rd8, %rd6, %rd7;
-	st.global.f32 	[%rd8], %f5;
-
-$L__BB0_5:
-	ret;
-
-}
-
-`
-	shiftz_ptx_37 = `
-.version 7.7
-.target sm_37
-.address_size 64
-
-	// .globl	shiftz
-
-.visible .entry shiftz(
-	.param .u64 shiftz_param_0,
-	.param .u64 shiftz_param_1,
-	.param .u32 shiftz_param_2,
-	.param .u32 shiftz_param_3,
-	.param .u32 shiftz_param_4,
-	.param .u32 shiftz_param_5,
-	.param .f32 shiftz_param_6,
-	.param .f32 shiftz_param_7
-)
-{
-	.reg .pred 	%p<8>;
-	.reg .f32 	%f<6>;
-	.reg .b32 	%r<22>;
-	.reg .b64 	%rd<9>;
-
-
-	ld.param.u64 	%rd1, [shiftz_param_0];
-	ld.param.u64 	%rd2, [shiftz_param_1];
-	ld.param.u32 	%r5, [shiftz_param_2];
-	ld.param.u32 	%r6, [shiftz_param_3];
-	ld.param.u32 	%r7, [shiftz_param_4];
-	ld.param.u32 	%r8, [shiftz_param_5];
-	ld.param.f32 	%f5, [shiftz_param_6];
-	ld.param.f32 	%f4, [shiftz_param_7];
-	mov.u32 	%r9, %ntid.x;
-	mov.u32 	%r10, %ctaid.x;
-	mov.u32 	%r11, %tid.x;
-	mad.lo.s32 	%r1, %r10, %r9, %r11;
-	mov.u32 	%r12, %ntid.y;
-	mov.u32 	%r13, %ctaid.y;
-	mov.u32 	%r14, %tid.y;
-	mad.lo.s32 	%r2, %r13, %r12, %r14;
-	mov.u32 	%r15, %ntid.z;
-	mov.u32 	%r16, %ctaid.z;
-	mov.u32 	%r17, %tid.z;
-	mad.lo.s32 	%r3, %r16, %r15, %r17;
-	setp.ge.s32 	%p1, %r1, %r5;
-	setp.ge.s32 	%p2, %r2, %r6;
-	or.pred  	%p3, %p1, %p2;
-	setp.ge.s32 	%p4, %r3, %r7;
-	or.pred  	%p5, %p3, %p4;
-	@%p5 bra 	$L__BB0_5;
-
-	sub.s32 	%r4, %r3, %r8;
-	setp.lt.s32 	%p6, %r4, 0;
-	@%p6 bra 	$L__BB0_4;
-
-	setp.ge.s32 	%p7, %r4, %r7;
-	mov.f32 	%f5, %f4;
-	@%p7 bra 	$L__BB0_4;
-
-	mad.lo.s32 	%r18, %r4, %r6, %r2;
-	mad.lo.s32 	%r19, %r18, %r5, %r1;
-	cvta.to.global.u64 	%rd3, %rd2;
-	mul.wide.s32 	%rd4, %r19, 4;
-	add.s64 	%rd5, %rd3, %rd4;
-	ld.global.nc.f32 	%f5, [%rd5];
-
-$L__BB0_4:
-	mad.lo.s32 	%r20, %r3, %r6, %r2;
-	mad.lo.s32 	%r21, %r20, %r5, %r1;
-	cvta.to.global.u64 	%rd6, %rd1;
-	mul.wide.s32 	%rd7, %r21, 4;
-	add.s64 	%rd8, %rd6, %rd7;
-	st.global.f32 	[%rd8], %f5;
-
-$L__BB0_5:
-	ret;
-
-}
-
-`
 	shiftz_ptx_50 = `
-.version 7.7
+.version 8.2
 .target sm_50
 .address_size 64
 
@@ -332,7 +172,7 @@ $L__BB0_5:
 
 `
 	shiftz_ptx_52 = `
-.version 7.7
+.version 8.2
 .target sm_52
 .address_size 64
 
@@ -412,7 +252,7 @@ $L__BB0_5:
 
 `
 	shiftz_ptx_53 = `
-.version 7.7
+.version 8.2
 .target sm_53
 .address_size 64
 
@@ -492,7 +332,7 @@ $L__BB0_5:
 
 `
 	shiftz_ptx_60 = `
-.version 7.7
+.version 8.2
 .target sm_60
 .address_size 64
 
@@ -572,7 +412,7 @@ $L__BB0_5:
 
 `
 	shiftz_ptx_61 = `
-.version 7.7
+.version 8.2
 .target sm_61
 .address_size 64
 
@@ -652,7 +492,7 @@ $L__BB0_5:
 
 `
 	shiftz_ptx_62 = `
-.version 7.7
+.version 8.2
 .target sm_62
 .address_size 64
 
@@ -732,7 +572,7 @@ $L__BB0_5:
 
 `
 	shiftz_ptx_70 = `
-.version 7.7
+.version 8.2
 .target sm_70
 .address_size 64
 
@@ -811,8 +651,168 @@ $L__BB0_5:
 }
 
 `
+	shiftz_ptx_72 = `
+.version 8.2
+.target sm_72
+.address_size 64
+
+	// .globl	shiftz
+
+.visible .entry shiftz(
+	.param .u64 shiftz_param_0,
+	.param .u64 shiftz_param_1,
+	.param .u32 shiftz_param_2,
+	.param .u32 shiftz_param_3,
+	.param .u32 shiftz_param_4,
+	.param .u32 shiftz_param_5,
+	.param .f32 shiftz_param_6,
+	.param .f32 shiftz_param_7
+)
+{
+	.reg .pred 	%p<8>;
+	.reg .f32 	%f<6>;
+	.reg .b32 	%r<22>;
+	.reg .b64 	%rd<9>;
+
+
+	ld.param.u64 	%rd1, [shiftz_param_0];
+	ld.param.u64 	%rd2, [shiftz_param_1];
+	ld.param.u32 	%r5, [shiftz_param_2];
+	ld.param.u32 	%r6, [shiftz_param_3];
+	ld.param.u32 	%r7, [shiftz_param_4];
+	ld.param.u32 	%r8, [shiftz_param_5];
+	ld.param.f32 	%f5, [shiftz_param_6];
+	ld.param.f32 	%f4, [shiftz_param_7];
+	mov.u32 	%r9, %ntid.x;
+	mov.u32 	%r10, %ctaid.x;
+	mov.u32 	%r11, %tid.x;
+	mad.lo.s32 	%r1, %r10, %r9, %r11;
+	mov.u32 	%r12, %ntid.y;
+	mov.u32 	%r13, %ctaid.y;
+	mov.u32 	%r14, %tid.y;
+	mad.lo.s32 	%r2, %r13, %r12, %r14;
+	mov.u32 	%r15, %ntid.z;
+	mov.u32 	%r16, %ctaid.z;
+	mov.u32 	%r17, %tid.z;
+	mad.lo.s32 	%r3, %r16, %r15, %r17;
+	setp.ge.s32 	%p1, %r1, %r5;
+	setp.ge.s32 	%p2, %r2, %r6;
+	or.pred  	%p3, %p1, %p2;
+	setp.ge.s32 	%p4, %r3, %r7;
+	or.pred  	%p5, %p3, %p4;
+	@%p5 bra 	$L__BB0_5;
+
+	sub.s32 	%r4, %r3, %r8;
+	setp.lt.s32 	%p6, %r4, 0;
+	@%p6 bra 	$L__BB0_4;
+
+	setp.ge.s32 	%p7, %r4, %r7;
+	mov.f32 	%f5, %f4;
+	@%p7 bra 	$L__BB0_4;
+
+	mad.lo.s32 	%r18, %r4, %r6, %r2;
+	mad.lo.s32 	%r19, %r18, %r5, %r1;
+	cvta.to.global.u64 	%rd3, %rd2;
+	mul.wide.s32 	%rd4, %r19, 4;
+	add.s64 	%rd5, %rd3, %rd4;
+	ld.global.nc.f32 	%f5, [%rd5];
+
+$L__BB0_4:
+	mad.lo.s32 	%r20, %r3, %r6, %r2;
+	mad.lo.s32 	%r21, %r20, %r5, %r1;
+	cvta.to.global.u64 	%rd6, %rd1;
+	mul.wide.s32 	%rd7, %r21, 4;
+	add.s64 	%rd8, %rd6, %rd7;
+	st.global.f32 	[%rd8], %f5;
+
+$L__BB0_5:
+	ret;
+
+}
+
+`
+	shiftz_ptx_75 = `
+.version 8.2
+.target sm_75
+.address_size 64
+
+	// .globl	shiftz
+
+.visible .entry shiftz(
+	.param .u64 shiftz_param_0,
+	.param .u64 shiftz_param_1,
+	.param .u32 shiftz_param_2,
+	.param .u32 shiftz_param_3,
+	.param .u32 shiftz_param_4,
+	.param .u32 shiftz_param_5,
+	.param .f32 shiftz_param_6,
+	.param .f32 shiftz_param_7
+)
+{
+	.reg .pred 	%p<8>;
+	.reg .f32 	%f<6>;
+	.reg .b32 	%r<22>;
+	.reg .b64 	%rd<9>;
+
+
+	ld.param.u64 	%rd1, [shiftz_param_0];
+	ld.param.u64 	%rd2, [shiftz_param_1];
+	ld.param.u32 	%r5, [shiftz_param_2];
+	ld.param.u32 	%r6, [shiftz_param_3];
+	ld.param.u32 	%r7, [shiftz_param_4];
+	ld.param.u32 	%r8, [shiftz_param_5];
+	ld.param.f32 	%f5, [shiftz_param_6];
+	ld.param.f32 	%f4, [shiftz_param_7];
+	mov.u32 	%r9, %ntid.x;
+	mov.u32 	%r10, %ctaid.x;
+	mov.u32 	%r11, %tid.x;
+	mad.lo.s32 	%r1, %r10, %r9, %r11;
+	mov.u32 	%r12, %ntid.y;
+	mov.u32 	%r13, %ctaid.y;
+	mov.u32 	%r14, %tid.y;
+	mad.lo.s32 	%r2, %r13, %r12, %r14;
+	mov.u32 	%r15, %ntid.z;
+	mov.u32 	%r16, %ctaid.z;
+	mov.u32 	%r17, %tid.z;
+	mad.lo.s32 	%r3, %r16, %r15, %r17;
+	setp.ge.s32 	%p1, %r1, %r5;
+	setp.ge.s32 	%p2, %r2, %r6;
+	or.pred  	%p3, %p1, %p2;
+	setp.ge.s32 	%p4, %r3, %r7;
+	or.pred  	%p5, %p3, %p4;
+	@%p5 bra 	$L__BB0_5;
+
+	sub.s32 	%r4, %r3, %r8;
+	setp.lt.s32 	%p6, %r4, 0;
+	@%p6 bra 	$L__BB0_4;
+
+	setp.ge.s32 	%p7, %r4, %r7;
+	mov.f32 	%f5, %f4;
+	@%p7 bra 	$L__BB0_4;
+
+	mad.lo.s32 	%r18, %r4, %r6, %r2;
+	mad.lo.s32 	%r19, %r18, %r5, %r1;
+	cvta.to.global.u64 	%rd3, %rd2;
+	mul.wide.s32 	%rd4, %r19, 4;
+	add.s64 	%rd5, %rd3, %rd4;
+	ld.global.nc.f32 	%f5, [%rd5];
+
+$L__BB0_4:
+	mad.lo.s32 	%r20, %r3, %r6, %r2;
+	mad.lo.s32 	%r21, %r20, %r5, %r1;
+	cvta.to.global.u64 	%rd6, %rd1;
+	mul.wide.s32 	%rd7, %r21, 4;
+	add.s64 	%rd8, %rd6, %rd7;
+	st.global.f32 	[%rd8], %f5;
+
+$L__BB0_5:
+	ret;
+
+}
+
+`
 	shiftz_ptx_80 = `
-.version 7.7
+.version 8.2
 .target sm_80
 .address_size 64
 

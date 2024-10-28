@@ -78,8 +78,6 @@ func k_madd3_async(dst unsafe.Pointer, src1 unsafe.Pointer, fac1 float32, src2 u
 
 // maps compute capability on PTX code for madd3 kernel.
 var madd3_map = map[int]string{0: "",
-	35: madd3_ptx_35,
-	37: madd3_ptx_37,
 	50: madd3_ptx_50,
 	52: madd3_ptx_52,
 	53: madd3_ptx_53,
@@ -87,142 +85,14 @@ var madd3_map = map[int]string{0: "",
 	61: madd3_ptx_61,
 	62: madd3_ptx_62,
 	70: madd3_ptx_70,
+	72: madd3_ptx_72,
+	75: madd3_ptx_75,
 	80: madd3_ptx_80}
 
 // madd3 PTX code for various compute capabilities.
 const (
-	madd3_ptx_35 = `
-.version 7.7
-.target sm_35
-.address_size 64
-
-	// .globl	madd3
-
-.visible .entry madd3(
-	.param .u64 madd3_param_0,
-	.param .u64 madd3_param_1,
-	.param .f32 madd3_param_2,
-	.param .u64 madd3_param_3,
-	.param .f32 madd3_param_4,
-	.param .u64 madd3_param_5,
-	.param .f32 madd3_param_6,
-	.param .u32 madd3_param_7
-)
-{
-	.reg .pred 	%p<2>;
-	.reg .f32 	%f<10>;
-	.reg .b32 	%r<9>;
-	.reg .b64 	%rd<14>;
-
-
-	ld.param.u64 	%rd1, [madd3_param_0];
-	ld.param.u64 	%rd2, [madd3_param_1];
-	ld.param.f32 	%f1, [madd3_param_2];
-	ld.param.u64 	%rd3, [madd3_param_3];
-	ld.param.f32 	%f2, [madd3_param_4];
-	ld.param.u64 	%rd4, [madd3_param_5];
-	ld.param.f32 	%f3, [madd3_param_6];
-	ld.param.u32 	%r2, [madd3_param_7];
-	mov.u32 	%r3, %ctaid.y;
-	mov.u32 	%r4, %nctaid.x;
-	mov.u32 	%r5, %ctaid.x;
-	mad.lo.s32 	%r6, %r3, %r4, %r5;
-	mov.u32 	%r7, %ntid.x;
-	mov.u32 	%r8, %tid.x;
-	mad.lo.s32 	%r1, %r6, %r7, %r8;
-	setp.ge.s32 	%p1, %r1, %r2;
-	@%p1 bra 	$L__BB0_2;
-
-	cvta.to.global.u64 	%rd5, %rd2;
-	mul.wide.s32 	%rd6, %r1, 4;
-	add.s64 	%rd7, %rd5, %rd6;
-	ld.global.nc.f32 	%f4, [%rd7];
-	cvta.to.global.u64 	%rd8, %rd3;
-	add.s64 	%rd9, %rd8, %rd6;
-	ld.global.nc.f32 	%f5, [%rd9];
-	cvta.to.global.u64 	%rd10, %rd4;
-	add.s64 	%rd11, %rd10, %rd6;
-	ld.global.nc.f32 	%f6, [%rd11];
-	mul.f32 	%f7, %f6, %f3;
-	fma.rn.f32 	%f8, %f5, %f2, %f7;
-	fma.rn.f32 	%f9, %f4, %f1, %f8;
-	cvta.to.global.u64 	%rd12, %rd1;
-	add.s64 	%rd13, %rd12, %rd6;
-	st.global.f32 	[%rd13], %f9;
-
-$L__BB0_2:
-	ret;
-
-}
-
-`
-	madd3_ptx_37 = `
-.version 7.7
-.target sm_37
-.address_size 64
-
-	// .globl	madd3
-
-.visible .entry madd3(
-	.param .u64 madd3_param_0,
-	.param .u64 madd3_param_1,
-	.param .f32 madd3_param_2,
-	.param .u64 madd3_param_3,
-	.param .f32 madd3_param_4,
-	.param .u64 madd3_param_5,
-	.param .f32 madd3_param_6,
-	.param .u32 madd3_param_7
-)
-{
-	.reg .pred 	%p<2>;
-	.reg .f32 	%f<10>;
-	.reg .b32 	%r<9>;
-	.reg .b64 	%rd<14>;
-
-
-	ld.param.u64 	%rd1, [madd3_param_0];
-	ld.param.u64 	%rd2, [madd3_param_1];
-	ld.param.f32 	%f1, [madd3_param_2];
-	ld.param.u64 	%rd3, [madd3_param_3];
-	ld.param.f32 	%f2, [madd3_param_4];
-	ld.param.u64 	%rd4, [madd3_param_5];
-	ld.param.f32 	%f3, [madd3_param_6];
-	ld.param.u32 	%r2, [madd3_param_7];
-	mov.u32 	%r3, %ctaid.y;
-	mov.u32 	%r4, %nctaid.x;
-	mov.u32 	%r5, %ctaid.x;
-	mad.lo.s32 	%r6, %r3, %r4, %r5;
-	mov.u32 	%r7, %ntid.x;
-	mov.u32 	%r8, %tid.x;
-	mad.lo.s32 	%r1, %r6, %r7, %r8;
-	setp.ge.s32 	%p1, %r1, %r2;
-	@%p1 bra 	$L__BB0_2;
-
-	cvta.to.global.u64 	%rd5, %rd2;
-	mul.wide.s32 	%rd6, %r1, 4;
-	add.s64 	%rd7, %rd5, %rd6;
-	ld.global.nc.f32 	%f4, [%rd7];
-	cvta.to.global.u64 	%rd8, %rd3;
-	add.s64 	%rd9, %rd8, %rd6;
-	ld.global.nc.f32 	%f5, [%rd9];
-	cvta.to.global.u64 	%rd10, %rd4;
-	add.s64 	%rd11, %rd10, %rd6;
-	ld.global.nc.f32 	%f6, [%rd11];
-	mul.f32 	%f7, %f6, %f3;
-	fma.rn.f32 	%f8, %f5, %f2, %f7;
-	fma.rn.f32 	%f9, %f4, %f1, %f8;
-	cvta.to.global.u64 	%rd12, %rd1;
-	add.s64 	%rd13, %rd12, %rd6;
-	st.global.f32 	[%rd13], %f9;
-
-$L__BB0_2:
-	ret;
-
-}
-
-`
 	madd3_ptx_50 = `
-.version 7.7
+.version 8.2
 .target sm_50
 .address_size 64
 
@@ -287,7 +157,7 @@ $L__BB0_2:
 
 `
 	madd3_ptx_52 = `
-.version 7.7
+.version 8.2
 .target sm_52
 .address_size 64
 
@@ -352,7 +222,7 @@ $L__BB0_2:
 
 `
 	madd3_ptx_53 = `
-.version 7.7
+.version 8.2
 .target sm_53
 .address_size 64
 
@@ -417,7 +287,7 @@ $L__BB0_2:
 
 `
 	madd3_ptx_60 = `
-.version 7.7
+.version 8.2
 .target sm_60
 .address_size 64
 
@@ -482,7 +352,7 @@ $L__BB0_2:
 
 `
 	madd3_ptx_61 = `
-.version 7.7
+.version 8.2
 .target sm_61
 .address_size 64
 
@@ -547,7 +417,7 @@ $L__BB0_2:
 
 `
 	madd3_ptx_62 = `
-.version 7.7
+.version 8.2
 .target sm_62
 .address_size 64
 
@@ -612,7 +482,7 @@ $L__BB0_2:
 
 `
 	madd3_ptx_70 = `
-.version 7.7
+.version 8.2
 .target sm_70
 .address_size 64
 
@@ -676,8 +546,138 @@ $L__BB0_2:
 }
 
 `
+	madd3_ptx_72 = `
+.version 8.2
+.target sm_72
+.address_size 64
+
+	// .globl	madd3
+
+.visible .entry madd3(
+	.param .u64 madd3_param_0,
+	.param .u64 madd3_param_1,
+	.param .f32 madd3_param_2,
+	.param .u64 madd3_param_3,
+	.param .f32 madd3_param_4,
+	.param .u64 madd3_param_5,
+	.param .f32 madd3_param_6,
+	.param .u32 madd3_param_7
+)
+{
+	.reg .pred 	%p<2>;
+	.reg .f32 	%f<10>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<14>;
+
+
+	ld.param.u64 	%rd1, [madd3_param_0];
+	ld.param.u64 	%rd2, [madd3_param_1];
+	ld.param.f32 	%f1, [madd3_param_2];
+	ld.param.u64 	%rd3, [madd3_param_3];
+	ld.param.f32 	%f2, [madd3_param_4];
+	ld.param.u64 	%rd4, [madd3_param_5];
+	ld.param.f32 	%f3, [madd3_param_6];
+	ld.param.u32 	%r2, [madd3_param_7];
+	mov.u32 	%r3, %ctaid.y;
+	mov.u32 	%r4, %nctaid.x;
+	mov.u32 	%r5, %ctaid.x;
+	mad.lo.s32 	%r6, %r3, %r4, %r5;
+	mov.u32 	%r7, %ntid.x;
+	mov.u32 	%r8, %tid.x;
+	mad.lo.s32 	%r1, %r6, %r7, %r8;
+	setp.ge.s32 	%p1, %r1, %r2;
+	@%p1 bra 	$L__BB0_2;
+
+	cvta.to.global.u64 	%rd5, %rd2;
+	mul.wide.s32 	%rd6, %r1, 4;
+	add.s64 	%rd7, %rd5, %rd6;
+	ld.global.nc.f32 	%f4, [%rd7];
+	cvta.to.global.u64 	%rd8, %rd3;
+	add.s64 	%rd9, %rd8, %rd6;
+	ld.global.nc.f32 	%f5, [%rd9];
+	cvta.to.global.u64 	%rd10, %rd4;
+	add.s64 	%rd11, %rd10, %rd6;
+	ld.global.nc.f32 	%f6, [%rd11];
+	mul.f32 	%f7, %f6, %f3;
+	fma.rn.f32 	%f8, %f5, %f2, %f7;
+	fma.rn.f32 	%f9, %f4, %f1, %f8;
+	cvta.to.global.u64 	%rd12, %rd1;
+	add.s64 	%rd13, %rd12, %rd6;
+	st.global.f32 	[%rd13], %f9;
+
+$L__BB0_2:
+	ret;
+
+}
+
+`
+	madd3_ptx_75 = `
+.version 8.2
+.target sm_75
+.address_size 64
+
+	// .globl	madd3
+
+.visible .entry madd3(
+	.param .u64 madd3_param_0,
+	.param .u64 madd3_param_1,
+	.param .f32 madd3_param_2,
+	.param .u64 madd3_param_3,
+	.param .f32 madd3_param_4,
+	.param .u64 madd3_param_5,
+	.param .f32 madd3_param_6,
+	.param .u32 madd3_param_7
+)
+{
+	.reg .pred 	%p<2>;
+	.reg .f32 	%f<10>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<14>;
+
+
+	ld.param.u64 	%rd1, [madd3_param_0];
+	ld.param.u64 	%rd2, [madd3_param_1];
+	ld.param.f32 	%f1, [madd3_param_2];
+	ld.param.u64 	%rd3, [madd3_param_3];
+	ld.param.f32 	%f2, [madd3_param_4];
+	ld.param.u64 	%rd4, [madd3_param_5];
+	ld.param.f32 	%f3, [madd3_param_6];
+	ld.param.u32 	%r2, [madd3_param_7];
+	mov.u32 	%r3, %ctaid.y;
+	mov.u32 	%r4, %nctaid.x;
+	mov.u32 	%r5, %ctaid.x;
+	mad.lo.s32 	%r6, %r3, %r4, %r5;
+	mov.u32 	%r7, %ntid.x;
+	mov.u32 	%r8, %tid.x;
+	mad.lo.s32 	%r1, %r6, %r7, %r8;
+	setp.ge.s32 	%p1, %r1, %r2;
+	@%p1 bra 	$L__BB0_2;
+
+	cvta.to.global.u64 	%rd5, %rd2;
+	mul.wide.s32 	%rd6, %r1, 4;
+	add.s64 	%rd7, %rd5, %rd6;
+	ld.global.nc.f32 	%f4, [%rd7];
+	cvta.to.global.u64 	%rd8, %rd3;
+	add.s64 	%rd9, %rd8, %rd6;
+	ld.global.nc.f32 	%f5, [%rd9];
+	cvta.to.global.u64 	%rd10, %rd4;
+	add.s64 	%rd11, %rd10, %rd6;
+	ld.global.nc.f32 	%f6, [%rd11];
+	mul.f32 	%f7, %f6, %f3;
+	fma.rn.f32 	%f8, %f5, %f2, %f7;
+	fma.rn.f32 	%f9, %f4, %f1, %f8;
+	cvta.to.global.u64 	%rd12, %rd1;
+	add.s64 	%rd13, %rd12, %rd6;
+	st.global.f32 	[%rd13], %f9;
+
+$L__BB0_2:
+	ret;
+
+}
+
+`
 	madd3_ptx_80 = `
-.version 7.7
+.version 8.2
 .target sm_80
 .address_size 64
 

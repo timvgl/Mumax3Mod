@@ -26,6 +26,9 @@ var (
 	NSteps, NUndone, NEvals 			int                          // number of good steps, undone steps
 	FixDt                   			float64                      // fixed time step?
 	stepper                 			Stepper                      // generic step, can be EulerStep, HeunStep, etc
+	FixDtM                   			float64                      // fixed time step?
+	FixDtU                   			float64                      // fixed time step?
+
 	solvertype              			int
 
 	BoolAllowInhomogeniousMECoupling	bool 	= false
@@ -50,6 +53,8 @@ func init() {
 	DeclVar("MaxErr", &MaxErr, "Maximum error per step the solver can tolerate (default = 1e-5)")
 	DeclVar("Headroom", &Headroom, "Solver headroom (default = 0.8)")
 	DeclVar("FixDt", &FixDt, "Set a fixed time step, 0 disables fixed step (which is the default)")
+	DeclVar("FixDtU", &FixDtU, "Set a fixed time step, 0 disables fixed step (which is the default)")
+	DeclVar("FixDtM", &FixDtM, "Set a fixed time step, 0 disables fixed step (which is the default)")
 
 	DeclFunc("Exit", Exit, "Exit from the program")
 	//DeclVar("BoolAllowInhomogeniousMECoupling", BoolAllowInhomogeniousMECoupling, "Bypasses an error that is going to be raised if B1 or B2 is inhomogenious, bool")
@@ -81,6 +86,7 @@ const (
 	MAGELAS_RUNGEKUTTA = 9
 	ELAS_LEAPFROG      = 10
 	ELAS_YOSH          = 11
+	MAGELAS_RUNGEKUTTA_VARY_TIME = 12
 )
 
 func SetSolver(typ int) {
@@ -115,6 +121,8 @@ func SetSolver(typ int) {
 		stepper = new(elasLF)
 	case ELAS_YOSH:
 		stepper = new(elasYOSH)
+	case MAGELAS_RUNGEKUTTA_VARY_TIME:
+		stepper = new(magelasRK4_vary_time)
 	}
 	solvertype = typ
 }

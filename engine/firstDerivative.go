@@ -56,6 +56,10 @@ func (du *firstDerivative) LoadFile(fname string) {
 	du.SetArray(LoadFileDSlice(fname))
 }
 
+func (du *firstDerivative) LoadFileMyDir(fname string) {
+	du.SetArray(LoadFileDSliceMyDir(fname))
+}
+
 func (du *firstDerivative) Slice() (s *data.Slice, recycle bool) {
 	return du.Buffer(), false
 }

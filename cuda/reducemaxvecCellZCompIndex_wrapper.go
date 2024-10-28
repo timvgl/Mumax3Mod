@@ -72,8 +72,6 @@ func k_reducemaxvecCellZCompIndex_async(x unsafe.Pointer, y unsafe.Pointer, z un
 
 // maps compute capability on PTX code for reducemaxvecCellZCompIndex kernel.
 var reducemaxvecCellZCompIndex_map = map[int]string{0: "",
-	35: reducemaxvecCellZCompIndex_ptx_35,
-	37: reducemaxvecCellZCompIndex_ptx_37,
 	50: reducemaxvecCellZCompIndex_ptx_50,
 	52: reducemaxvecCellZCompIndex_ptx_52,
 	53: reducemaxvecCellZCompIndex_ptx_53,
@@ -81,432 +79,14 @@ var reducemaxvecCellZCompIndex_map = map[int]string{0: "",
 	61: reducemaxvecCellZCompIndex_ptx_61,
 	62: reducemaxvecCellZCompIndex_ptx_62,
 	70: reducemaxvecCellZCompIndex_ptx_70,
+	72: reducemaxvecCellZCompIndex_ptx_72,
+	75: reducemaxvecCellZCompIndex_ptx_75,
 	80: reducemaxvecCellZCompIndex_ptx_80}
 
 // reducemaxvecCellZCompIndex PTX code for various compute capabilities.
 const (
-	reducemaxvecCellZCompIndex_ptx_35 = `
-.version 7.7
-.target sm_35
-.address_size 64
-
-	// .globl	reducemaxvecCellZCompIndex
-.global .align 4 .b8 test[8];
-
-.visible .entry reducemaxvecCellZCompIndex(
-	.param .u64 reducemaxvecCellZCompIndex_param_0,
-	.param .u64 reducemaxvecCellZCompIndex_param_1,
-	.param .u64 reducemaxvecCellZCompIndex_param_2,
-	.param .u64 reducemaxvecCellZCompIndex_param_3,
-	.param .f32 reducemaxvecCellZCompIndex_param_4,
-	.param .u32 reducemaxvecCellZCompIndex_param_5
-)
-{
-	.reg .pred 	%p<13>;
-	.reg .f32 	%f<52>;
-	.reg .b32 	%r<189>;
-	.reg .b64 	%rd<17>;
-	// demoted variable
-	.shared .align 4 .b8 _ZZ26reducemaxvecCellZCompIndexE5sdata[2048];
-
-	ld.param.u64 	%rd3, [reducemaxvecCellZCompIndex_param_2];
-	ld.param.u64 	%rd4, [reducemaxvecCellZCompIndex_param_3];
-	ld.param.f32 	%f51, [reducemaxvecCellZCompIndex_param_4];
-	ld.param.u32 	%r31, [reducemaxvecCellZCompIndex_param_5];
-	mov.u32 	%r32, %tid.x;
-	mov.u32 	%r33, %ntid.y;
-	mov.u32 	%r34, %tid.z;
-	mov.u32 	%r35, %tid.y;
-	mov.u32 	%r36, %ctaid.y;
-	mad.lo.s32 	%r37, %r36, %r33, %r35;
-	mov.u32 	%r38, %ntid.z;
-	mov.u32 	%r39, %ctaid.z;
-	mad.lo.s32 	%r184, %r39, %r38, %r34;
-	mov.u32 	%r41, %nctaid.y;
-	mad.lo.s32 	%r42, %r184, %r41, %r37;
-	mov.u32 	%r43, %nctaid.x;
-	mov.u32 	%r44, %ctaid.x;
-	mad.lo.s32 	%r45, %r42, %r43, %r44;
-	mov.u32 	%r46, %ntid.x;
-	mad.lo.s32 	%r183, %r45, %r46, %r32;
-	setp.ge.s32 	%p1, %r183, %r31;
-	@%p1 bra 	$L__BB0_7;
-
-	mov.u32 	%r48, %nctaid.z;
-	mul.lo.s32 	%r50, %r38, %r48;
-	mul.lo.s32 	%r53, %r43, %r46;
-	mul.lo.s32 	%r55, %r53, %r41;
-	mul.lo.s32 	%r57, %r55, %r33;
-	mul.lo.s32 	%r58, %r50, %r57;
-	add.s32 	%r59, %r58, %r31;
-	mad.lo.s32 	%r61, %r33, %r48, %r39;
-	mad.lo.s32 	%r63, %r38, %r61, %r34;
-	mad.lo.s32 	%r67, %r41, %r63, %r37;
-	mad.lo.s32 	%r69, %r43, %r67, %r44;
-	mad.lo.s32 	%r179, %r46, %r69, %r32;
-	not.b32 	%r72, %r179;
-	add.s32 	%r73, %r59, %r72;
-	div.u32 	%r1, %r73, %r58;
-	add.s32 	%r74, %r1, 1;
-	and.b32  	%r182, %r74, 3;
-	setp.eq.s32 	%p2, %r182, 0;
-	@%p2 bra 	$L__BB0_4;
-
-	mad.lo.s32 	%r184, %r39, %r38, %r34;
-	mad.lo.s32 	%r86, %r184, %r41, %r37;
-	mad.lo.s32 	%r89, %r86, %r43, %r44;
-	mad.lo.s32 	%r183, %r89, %r46, %r32;
-	cvta.to.global.u64 	%rd5, %rd3;
-
-$L__BB0_3:
-	.pragma "nounroll";
-	mul.wide.s32 	%rd6, %r184, 4;
-	add.s64 	%rd7, %rd5, %rd6;
-	ld.global.nc.f32 	%f11, [%rd7];
-	mul.f32 	%f12, %f11, %f11;
-	max.f32 	%f51, %f51, %f12;
-	add.s32 	%r183, %r183, %r58;
-	div.u32 	%r184, %r179, %r57;
-	add.s32 	%r179, %r179, %r58;
-	add.s32 	%r182, %r182, -1;
-	setp.ne.s32 	%p3, %r182, 0;
-	@%p3 bra 	$L__BB0_3;
-
-$L__BB0_4:
-	setp.lt.u32 	%p4, %r1, 3;
-	@%p4 bra 	$L__BB0_7;
-
-	cvta.to.global.u64 	%rd1, %rd3;
-
-$L__BB0_6:
-	mul.wide.s32 	%rd8, %r184, 4;
-	add.s64 	%rd9, %rd1, %rd8;
-	ld.global.nc.f32 	%f13, [%rd9];
-	mul.f32 	%f14, %f13, %f13;
-	max.f32 	%f15, %f51, %f14;
-	add.s32 	%r118, %r183, %r58;
-	div.u32 	%r119, %r118, %r57;
-	mul.wide.s32 	%rd10, %r119, 4;
-	add.s64 	%rd11, %rd1, %rd10;
-	ld.global.nc.f32 	%f16, [%rd11];
-	mul.f32 	%f17, %f16, %f16;
-	max.f32 	%f18, %f15, %f17;
-	add.s32 	%r120, %r118, %r58;
-	div.u32 	%r121, %r120, %r57;
-	mul.wide.s32 	%rd12, %r121, 4;
-	add.s64 	%rd13, %rd1, %rd12;
-	ld.global.nc.f32 	%f19, [%rd13];
-	mul.f32 	%f20, %f19, %f19;
-	max.f32 	%f21, %f18, %f20;
-	add.s32 	%r122, %r120, %r58;
-	div.u32 	%r123, %r122, %r57;
-	mul.wide.s32 	%rd14, %r123, 4;
-	add.s64 	%rd15, %rd1, %rd14;
-	ld.global.nc.f32 	%f22, [%rd15];
-	mul.f32 	%f23, %f22, %f22;
-	max.f32 	%f51, %f21, %f23;
-	add.s32 	%r183, %r122, %r58;
-	div.u32 	%r184, %r183, %r57;
-	setp.lt.s32 	%p5, %r183, %r31;
-	@%p5 bra 	$L__BB0_6;
-
-$L__BB0_7:
-	mad.lo.s32 	%r127, %r33, %r34, %r35;
-	mad.lo.s32 	%r130, %r127, %r46, %r32;
-	shl.b32 	%r131, %r130, 2;
-	mov.u32 	%r132, _ZZ26reducemaxvecCellZCompIndexE5sdata;
-	add.s32 	%r133, %r132, %r131;
-	st.shared.f32 	[%r133], %f51;
-	bar.sync 	0;
-	mul.lo.s32 	%r134, %r46, %r33;
-	mul.lo.s32 	%r187, %r134, %r38;
-	setp.lt.u32 	%p6, %r187, 66;
-	@%p6 bra 	$L__BB0_12;
-
-$L__BB0_9:
-	shr.u32 	%r26, %r187, 1;
-	setp.ge.u32 	%p7, %r130, %r26;
-	@%p7 bra 	$L__BB0_11;
-
-	shl.b32 	%r153, %r26, 2;
-	add.s32 	%r154, %r133, %r153;
-	ld.shared.f32 	%f24, [%r154];
-	ld.shared.f32 	%f25, [%r133];
-	max.f32 	%f26, %f25, %f24;
-	st.shared.f32 	[%r133], %f26;
-
-$L__BB0_11:
-	bar.sync 	0;
-	setp.gt.u32 	%p8, %r187, 131;
-	mov.u32 	%r187, %r26;
-	@%p8 bra 	$L__BB0_9;
-
-$L__BB0_12:
-	setp.gt.s32 	%p9, %r130, 31;
-	@%p9 bra 	$L__BB0_14;
-
-	ld.volatile.shared.f32 	%f27, [%r133+128];
-	ld.volatile.shared.f32 	%f28, [%r133];
-	max.f32 	%f29, %f28, %f27;
-	st.volatile.shared.f32 	[%r133], %f29;
-	ld.volatile.shared.f32 	%f30, [%r133+64];
-	ld.volatile.shared.f32 	%f31, [%r133];
-	max.f32 	%f32, %f31, %f30;
-	st.volatile.shared.f32 	[%r133], %f32;
-	ld.volatile.shared.f32 	%f33, [%r133+32];
-	ld.volatile.shared.f32 	%f34, [%r133];
-	max.f32 	%f35, %f34, %f33;
-	st.volatile.shared.f32 	[%r133], %f35;
-	ld.volatile.shared.f32 	%f36, [%r133+16];
-	ld.volatile.shared.f32 	%f37, [%r133];
-	max.f32 	%f38, %f37, %f36;
-	st.volatile.shared.f32 	[%r133], %f38;
-	ld.volatile.shared.f32 	%f39, [%r133+8];
-	ld.volatile.shared.f32 	%f40, [%r133];
-	max.f32 	%f41, %f40, %f39;
-	st.volatile.shared.f32 	[%r133], %f41;
-	ld.volatile.shared.f32 	%f42, [%r133+4];
-	ld.volatile.shared.f32 	%f43, [%r133];
-	max.f32 	%f44, %f43, %f42;
-	st.volatile.shared.f32 	[%r133], %f44;
-
-$L__BB0_14:
-	setp.ne.s32 	%p10, %r130, 0;
-	@%p10 bra 	$L__BB0_18;
-
-	ld.shared.f32 	%f8, [_ZZ26reducemaxvecCellZCompIndexE5sdata];
-	cvta.to.global.u64 	%rd16, %rd4;
-	ld.global.u32 	%r188, [%rd16];
-	mov.b32 	%f45, %r188;
-	setp.leu.f32 	%p11, %f8, %f45;
-	@%p11 bra 	$L__BB0_18;
-
-	mov.b32 	%r28, %f8;
-
-$L__BB0_17:
-	atom.global.cas.b32 	%r188, [%rd16], %r188, %r28;
-	mov.b32 	%f46, %r188;
-	setp.gt.f32 	%p12, %f8, %f46;
-	@%p12 bra 	$L__BB0_17;
-
-$L__BB0_18:
-	ret;
-
-}
-
-`
-	reducemaxvecCellZCompIndex_ptx_37 = `
-.version 7.7
-.target sm_37
-.address_size 64
-
-	// .globl	reducemaxvecCellZCompIndex
-.global .align 4 .b8 test[8];
-
-.visible .entry reducemaxvecCellZCompIndex(
-	.param .u64 reducemaxvecCellZCompIndex_param_0,
-	.param .u64 reducemaxvecCellZCompIndex_param_1,
-	.param .u64 reducemaxvecCellZCompIndex_param_2,
-	.param .u64 reducemaxvecCellZCompIndex_param_3,
-	.param .f32 reducemaxvecCellZCompIndex_param_4,
-	.param .u32 reducemaxvecCellZCompIndex_param_5
-)
-{
-	.reg .pred 	%p<13>;
-	.reg .f32 	%f<52>;
-	.reg .b32 	%r<189>;
-	.reg .b64 	%rd<17>;
-	// demoted variable
-	.shared .align 4 .b8 _ZZ26reducemaxvecCellZCompIndexE5sdata[2048];
-
-	ld.param.u64 	%rd3, [reducemaxvecCellZCompIndex_param_2];
-	ld.param.u64 	%rd4, [reducemaxvecCellZCompIndex_param_3];
-	ld.param.f32 	%f51, [reducemaxvecCellZCompIndex_param_4];
-	ld.param.u32 	%r31, [reducemaxvecCellZCompIndex_param_5];
-	mov.u32 	%r32, %tid.x;
-	mov.u32 	%r33, %ntid.y;
-	mov.u32 	%r34, %tid.z;
-	mov.u32 	%r35, %tid.y;
-	mov.u32 	%r36, %ctaid.y;
-	mad.lo.s32 	%r37, %r36, %r33, %r35;
-	mov.u32 	%r38, %ntid.z;
-	mov.u32 	%r39, %ctaid.z;
-	mad.lo.s32 	%r184, %r39, %r38, %r34;
-	mov.u32 	%r41, %nctaid.y;
-	mad.lo.s32 	%r42, %r184, %r41, %r37;
-	mov.u32 	%r43, %nctaid.x;
-	mov.u32 	%r44, %ctaid.x;
-	mad.lo.s32 	%r45, %r42, %r43, %r44;
-	mov.u32 	%r46, %ntid.x;
-	mad.lo.s32 	%r183, %r45, %r46, %r32;
-	setp.ge.s32 	%p1, %r183, %r31;
-	@%p1 bra 	$L__BB0_7;
-
-	mov.u32 	%r48, %nctaid.z;
-	mul.lo.s32 	%r50, %r38, %r48;
-	mul.lo.s32 	%r53, %r43, %r46;
-	mul.lo.s32 	%r55, %r53, %r41;
-	mul.lo.s32 	%r57, %r55, %r33;
-	mul.lo.s32 	%r58, %r50, %r57;
-	add.s32 	%r59, %r58, %r31;
-	mad.lo.s32 	%r61, %r33, %r48, %r39;
-	mad.lo.s32 	%r63, %r38, %r61, %r34;
-	mad.lo.s32 	%r67, %r41, %r63, %r37;
-	mad.lo.s32 	%r69, %r43, %r67, %r44;
-	mad.lo.s32 	%r179, %r46, %r69, %r32;
-	not.b32 	%r72, %r179;
-	add.s32 	%r73, %r59, %r72;
-	div.u32 	%r1, %r73, %r58;
-	add.s32 	%r74, %r1, 1;
-	and.b32  	%r182, %r74, 3;
-	setp.eq.s32 	%p2, %r182, 0;
-	@%p2 bra 	$L__BB0_4;
-
-	mad.lo.s32 	%r184, %r39, %r38, %r34;
-	mad.lo.s32 	%r86, %r184, %r41, %r37;
-	mad.lo.s32 	%r89, %r86, %r43, %r44;
-	mad.lo.s32 	%r183, %r89, %r46, %r32;
-	cvta.to.global.u64 	%rd5, %rd3;
-
-$L__BB0_3:
-	.pragma "nounroll";
-	mul.wide.s32 	%rd6, %r184, 4;
-	add.s64 	%rd7, %rd5, %rd6;
-	ld.global.nc.f32 	%f11, [%rd7];
-	mul.f32 	%f12, %f11, %f11;
-	max.f32 	%f51, %f51, %f12;
-	add.s32 	%r183, %r183, %r58;
-	div.u32 	%r184, %r179, %r57;
-	add.s32 	%r179, %r179, %r58;
-	add.s32 	%r182, %r182, -1;
-	setp.ne.s32 	%p3, %r182, 0;
-	@%p3 bra 	$L__BB0_3;
-
-$L__BB0_4:
-	setp.lt.u32 	%p4, %r1, 3;
-	@%p4 bra 	$L__BB0_7;
-
-	cvta.to.global.u64 	%rd1, %rd3;
-
-$L__BB0_6:
-	mul.wide.s32 	%rd8, %r184, 4;
-	add.s64 	%rd9, %rd1, %rd8;
-	ld.global.nc.f32 	%f13, [%rd9];
-	mul.f32 	%f14, %f13, %f13;
-	max.f32 	%f15, %f51, %f14;
-	add.s32 	%r118, %r183, %r58;
-	div.u32 	%r119, %r118, %r57;
-	mul.wide.s32 	%rd10, %r119, 4;
-	add.s64 	%rd11, %rd1, %rd10;
-	ld.global.nc.f32 	%f16, [%rd11];
-	mul.f32 	%f17, %f16, %f16;
-	max.f32 	%f18, %f15, %f17;
-	add.s32 	%r120, %r118, %r58;
-	div.u32 	%r121, %r120, %r57;
-	mul.wide.s32 	%rd12, %r121, 4;
-	add.s64 	%rd13, %rd1, %rd12;
-	ld.global.nc.f32 	%f19, [%rd13];
-	mul.f32 	%f20, %f19, %f19;
-	max.f32 	%f21, %f18, %f20;
-	add.s32 	%r122, %r120, %r58;
-	div.u32 	%r123, %r122, %r57;
-	mul.wide.s32 	%rd14, %r123, 4;
-	add.s64 	%rd15, %rd1, %rd14;
-	ld.global.nc.f32 	%f22, [%rd15];
-	mul.f32 	%f23, %f22, %f22;
-	max.f32 	%f51, %f21, %f23;
-	add.s32 	%r183, %r122, %r58;
-	div.u32 	%r184, %r183, %r57;
-	setp.lt.s32 	%p5, %r183, %r31;
-	@%p5 bra 	$L__BB0_6;
-
-$L__BB0_7:
-	mad.lo.s32 	%r127, %r33, %r34, %r35;
-	mad.lo.s32 	%r130, %r127, %r46, %r32;
-	shl.b32 	%r131, %r130, 2;
-	mov.u32 	%r132, _ZZ26reducemaxvecCellZCompIndexE5sdata;
-	add.s32 	%r133, %r132, %r131;
-	st.shared.f32 	[%r133], %f51;
-	bar.sync 	0;
-	mul.lo.s32 	%r134, %r46, %r33;
-	mul.lo.s32 	%r187, %r134, %r38;
-	setp.lt.u32 	%p6, %r187, 66;
-	@%p6 bra 	$L__BB0_12;
-
-$L__BB0_9:
-	shr.u32 	%r26, %r187, 1;
-	setp.ge.u32 	%p7, %r130, %r26;
-	@%p7 bra 	$L__BB0_11;
-
-	shl.b32 	%r153, %r26, 2;
-	add.s32 	%r154, %r133, %r153;
-	ld.shared.f32 	%f24, [%r154];
-	ld.shared.f32 	%f25, [%r133];
-	max.f32 	%f26, %f25, %f24;
-	st.shared.f32 	[%r133], %f26;
-
-$L__BB0_11:
-	bar.sync 	0;
-	setp.gt.u32 	%p8, %r187, 131;
-	mov.u32 	%r187, %r26;
-	@%p8 bra 	$L__BB0_9;
-
-$L__BB0_12:
-	setp.gt.s32 	%p9, %r130, 31;
-	@%p9 bra 	$L__BB0_14;
-
-	ld.volatile.shared.f32 	%f27, [%r133+128];
-	ld.volatile.shared.f32 	%f28, [%r133];
-	max.f32 	%f29, %f28, %f27;
-	st.volatile.shared.f32 	[%r133], %f29;
-	ld.volatile.shared.f32 	%f30, [%r133+64];
-	ld.volatile.shared.f32 	%f31, [%r133];
-	max.f32 	%f32, %f31, %f30;
-	st.volatile.shared.f32 	[%r133], %f32;
-	ld.volatile.shared.f32 	%f33, [%r133+32];
-	ld.volatile.shared.f32 	%f34, [%r133];
-	max.f32 	%f35, %f34, %f33;
-	st.volatile.shared.f32 	[%r133], %f35;
-	ld.volatile.shared.f32 	%f36, [%r133+16];
-	ld.volatile.shared.f32 	%f37, [%r133];
-	max.f32 	%f38, %f37, %f36;
-	st.volatile.shared.f32 	[%r133], %f38;
-	ld.volatile.shared.f32 	%f39, [%r133+8];
-	ld.volatile.shared.f32 	%f40, [%r133];
-	max.f32 	%f41, %f40, %f39;
-	st.volatile.shared.f32 	[%r133], %f41;
-	ld.volatile.shared.f32 	%f42, [%r133+4];
-	ld.volatile.shared.f32 	%f43, [%r133];
-	max.f32 	%f44, %f43, %f42;
-	st.volatile.shared.f32 	[%r133], %f44;
-
-$L__BB0_14:
-	setp.ne.s32 	%p10, %r130, 0;
-	@%p10 bra 	$L__BB0_18;
-
-	ld.shared.f32 	%f8, [_ZZ26reducemaxvecCellZCompIndexE5sdata];
-	cvta.to.global.u64 	%rd16, %rd4;
-	ld.global.u32 	%r188, [%rd16];
-	mov.b32 	%f45, %r188;
-	setp.leu.f32 	%p11, %f8, %f45;
-	@%p11 bra 	$L__BB0_18;
-
-	mov.b32 	%r28, %f8;
-
-$L__BB0_17:
-	atom.global.cas.b32 	%r188, [%rd16], %r188, %r28;
-	mov.b32 	%f46, %r188;
-	setp.gt.f32 	%p12, %f8, %f46;
-	@%p12 bra 	$L__BB0_17;
-
-$L__BB0_18:
-	ret;
-
-}
-
-`
 	reducemaxvecCellZCompIndex_ptx_50 = `
-.version 7.7
+.version 8.2
 .target sm_50
 .address_size 64
 
@@ -641,12 +221,12 @@ $L__BB0_7:
 	mul.lo.s32 	%r134, %r46, %r33;
 	mul.lo.s32 	%r187, %r134, %r38;
 	setp.lt.u32 	%p6, %r187, 66;
-	@%p6 bra 	$L__BB0_12;
+	@%p6 bra 	$L__BB0_11;
 
-$L__BB0_9:
+$L__BB0_8:
 	shr.u32 	%r26, %r187, 1;
 	setp.ge.u32 	%p7, %r130, %r26;
-	@%p7 bra 	$L__BB0_11;
+	@%p7 bra 	$L__BB0_10;
 
 	shl.b32 	%r153, %r26, 2;
 	add.s32 	%r154, %r133, %r153;
@@ -655,15 +235,15 @@ $L__BB0_9:
 	max.f32 	%f26, %f25, %f24;
 	st.shared.f32 	[%r133], %f26;
 
-$L__BB0_11:
+$L__BB0_10:
 	bar.sync 	0;
 	setp.gt.u32 	%p8, %r187, 131;
 	mov.u32 	%r187, %r26;
-	@%p8 bra 	$L__BB0_9;
+	@%p8 bra 	$L__BB0_8;
 
-$L__BB0_12:
+$L__BB0_11:
 	setp.gt.s32 	%p9, %r130, 31;
-	@%p9 bra 	$L__BB0_14;
+	@%p9 bra 	$L__BB0_13;
 
 	ld.volatile.shared.f32 	%f27, [%r133+128];
 	ld.volatile.shared.f32 	%f28, [%r133];
@@ -690,33 +270,33 @@ $L__BB0_12:
 	max.f32 	%f44, %f43, %f42;
 	st.volatile.shared.f32 	[%r133], %f44;
 
-$L__BB0_14:
+$L__BB0_13:
 	setp.ne.s32 	%p10, %r130, 0;
-	@%p10 bra 	$L__BB0_18;
+	@%p10 bra 	$L__BB0_17;
 
 	ld.shared.f32 	%f8, [_ZZ26reducemaxvecCellZCompIndexE5sdata];
 	cvta.to.global.u64 	%rd16, %rd4;
 	ld.global.u32 	%r188, [%rd16];
 	mov.b32 	%f45, %r188;
 	setp.leu.f32 	%p11, %f8, %f45;
-	@%p11 bra 	$L__BB0_18;
+	@%p11 bra 	$L__BB0_17;
 
 	mov.b32 	%r28, %f8;
 
-$L__BB0_17:
+$L__BB0_16:
 	atom.global.cas.b32 	%r188, [%rd16], %r188, %r28;
 	mov.b32 	%f46, %r188;
 	setp.gt.f32 	%p12, %f8, %f46;
-	@%p12 bra 	$L__BB0_17;
+	@%p12 bra 	$L__BB0_16;
 
-$L__BB0_18:
+$L__BB0_17:
 	ret;
 
 }
 
 `
 	reducemaxvecCellZCompIndex_ptx_52 = `
-.version 7.7
+.version 8.2
 .target sm_52
 .address_size 64
 
@@ -851,12 +431,12 @@ $L__BB0_7:
 	mul.lo.s32 	%r134, %r46, %r33;
 	mul.lo.s32 	%r187, %r134, %r38;
 	setp.lt.u32 	%p6, %r187, 66;
-	@%p6 bra 	$L__BB0_12;
+	@%p6 bra 	$L__BB0_11;
 
-$L__BB0_9:
+$L__BB0_8:
 	shr.u32 	%r26, %r187, 1;
 	setp.ge.u32 	%p7, %r130, %r26;
-	@%p7 bra 	$L__BB0_11;
+	@%p7 bra 	$L__BB0_10;
 
 	shl.b32 	%r153, %r26, 2;
 	add.s32 	%r154, %r133, %r153;
@@ -865,15 +445,15 @@ $L__BB0_9:
 	max.f32 	%f26, %f25, %f24;
 	st.shared.f32 	[%r133], %f26;
 
-$L__BB0_11:
+$L__BB0_10:
 	bar.sync 	0;
 	setp.gt.u32 	%p8, %r187, 131;
 	mov.u32 	%r187, %r26;
-	@%p8 bra 	$L__BB0_9;
+	@%p8 bra 	$L__BB0_8;
 
-$L__BB0_12:
+$L__BB0_11:
 	setp.gt.s32 	%p9, %r130, 31;
-	@%p9 bra 	$L__BB0_14;
+	@%p9 bra 	$L__BB0_13;
 
 	ld.volatile.shared.f32 	%f27, [%r133+128];
 	ld.volatile.shared.f32 	%f28, [%r133];
@@ -900,33 +480,33 @@ $L__BB0_12:
 	max.f32 	%f44, %f43, %f42;
 	st.volatile.shared.f32 	[%r133], %f44;
 
-$L__BB0_14:
+$L__BB0_13:
 	setp.ne.s32 	%p10, %r130, 0;
-	@%p10 bra 	$L__BB0_18;
+	@%p10 bra 	$L__BB0_17;
 
 	ld.shared.f32 	%f8, [_ZZ26reducemaxvecCellZCompIndexE5sdata];
 	cvta.to.global.u64 	%rd16, %rd4;
 	ld.global.u32 	%r188, [%rd16];
 	mov.b32 	%f45, %r188;
 	setp.leu.f32 	%p11, %f8, %f45;
-	@%p11 bra 	$L__BB0_18;
+	@%p11 bra 	$L__BB0_17;
 
 	mov.b32 	%r28, %f8;
 
-$L__BB0_17:
+$L__BB0_16:
 	atom.global.cas.b32 	%r188, [%rd16], %r188, %r28;
 	mov.b32 	%f46, %r188;
 	setp.gt.f32 	%p12, %f8, %f46;
-	@%p12 bra 	$L__BB0_17;
+	@%p12 bra 	$L__BB0_16;
 
-$L__BB0_18:
+$L__BB0_17:
 	ret;
 
 }
 
 `
 	reducemaxvecCellZCompIndex_ptx_53 = `
-.version 7.7
+.version 8.2
 .target sm_53
 .address_size 64
 
@@ -1061,12 +641,12 @@ $L__BB0_7:
 	mul.lo.s32 	%r134, %r46, %r33;
 	mul.lo.s32 	%r187, %r134, %r38;
 	setp.lt.u32 	%p6, %r187, 66;
-	@%p6 bra 	$L__BB0_12;
+	@%p6 bra 	$L__BB0_11;
 
-$L__BB0_9:
+$L__BB0_8:
 	shr.u32 	%r26, %r187, 1;
 	setp.ge.u32 	%p7, %r130, %r26;
-	@%p7 bra 	$L__BB0_11;
+	@%p7 bra 	$L__BB0_10;
 
 	shl.b32 	%r153, %r26, 2;
 	add.s32 	%r154, %r133, %r153;
@@ -1075,15 +655,15 @@ $L__BB0_9:
 	max.f32 	%f26, %f25, %f24;
 	st.shared.f32 	[%r133], %f26;
 
-$L__BB0_11:
+$L__BB0_10:
 	bar.sync 	0;
 	setp.gt.u32 	%p8, %r187, 131;
 	mov.u32 	%r187, %r26;
-	@%p8 bra 	$L__BB0_9;
+	@%p8 bra 	$L__BB0_8;
 
-$L__BB0_12:
+$L__BB0_11:
 	setp.gt.s32 	%p9, %r130, 31;
-	@%p9 bra 	$L__BB0_14;
+	@%p9 bra 	$L__BB0_13;
 
 	ld.volatile.shared.f32 	%f27, [%r133+128];
 	ld.volatile.shared.f32 	%f28, [%r133];
@@ -1110,33 +690,33 @@ $L__BB0_12:
 	max.f32 	%f44, %f43, %f42;
 	st.volatile.shared.f32 	[%r133], %f44;
 
-$L__BB0_14:
+$L__BB0_13:
 	setp.ne.s32 	%p10, %r130, 0;
-	@%p10 bra 	$L__BB0_18;
+	@%p10 bra 	$L__BB0_17;
 
 	ld.shared.f32 	%f8, [_ZZ26reducemaxvecCellZCompIndexE5sdata];
 	cvta.to.global.u64 	%rd16, %rd4;
 	ld.global.u32 	%r188, [%rd16];
 	mov.b32 	%f45, %r188;
 	setp.leu.f32 	%p11, %f8, %f45;
-	@%p11 bra 	$L__BB0_18;
+	@%p11 bra 	$L__BB0_17;
 
 	mov.b32 	%r28, %f8;
 
-$L__BB0_17:
+$L__BB0_16:
 	atom.global.cas.b32 	%r188, [%rd16], %r188, %r28;
 	mov.b32 	%f46, %r188;
 	setp.gt.f32 	%p12, %f8, %f46;
-	@%p12 bra 	$L__BB0_17;
+	@%p12 bra 	$L__BB0_16;
 
-$L__BB0_18:
+$L__BB0_17:
 	ret;
 
 }
 
 `
 	reducemaxvecCellZCompIndex_ptx_60 = `
-.version 7.7
+.version 8.2
 .target sm_60
 .address_size 64
 
@@ -1271,12 +851,12 @@ $L__BB0_7:
 	mul.lo.s32 	%r134, %r46, %r33;
 	mul.lo.s32 	%r187, %r134, %r38;
 	setp.lt.u32 	%p6, %r187, 66;
-	@%p6 bra 	$L__BB0_12;
+	@%p6 bra 	$L__BB0_11;
 
-$L__BB0_9:
+$L__BB0_8:
 	shr.u32 	%r26, %r187, 1;
 	setp.ge.u32 	%p7, %r130, %r26;
-	@%p7 bra 	$L__BB0_11;
+	@%p7 bra 	$L__BB0_10;
 
 	shl.b32 	%r153, %r26, 2;
 	add.s32 	%r154, %r133, %r153;
@@ -1285,15 +865,15 @@ $L__BB0_9:
 	max.f32 	%f26, %f25, %f24;
 	st.shared.f32 	[%r133], %f26;
 
-$L__BB0_11:
+$L__BB0_10:
 	bar.sync 	0;
 	setp.gt.u32 	%p8, %r187, 131;
 	mov.u32 	%r187, %r26;
-	@%p8 bra 	$L__BB0_9;
+	@%p8 bra 	$L__BB0_8;
 
-$L__BB0_12:
+$L__BB0_11:
 	setp.gt.s32 	%p9, %r130, 31;
-	@%p9 bra 	$L__BB0_14;
+	@%p9 bra 	$L__BB0_13;
 
 	ld.volatile.shared.f32 	%f27, [%r133+128];
 	ld.volatile.shared.f32 	%f28, [%r133];
@@ -1320,33 +900,33 @@ $L__BB0_12:
 	max.f32 	%f44, %f43, %f42;
 	st.volatile.shared.f32 	[%r133], %f44;
 
-$L__BB0_14:
+$L__BB0_13:
 	setp.ne.s32 	%p10, %r130, 0;
-	@%p10 bra 	$L__BB0_18;
+	@%p10 bra 	$L__BB0_17;
 
 	ld.shared.f32 	%f8, [_ZZ26reducemaxvecCellZCompIndexE5sdata];
 	cvta.to.global.u64 	%rd16, %rd4;
 	ld.global.u32 	%r188, [%rd16];
 	mov.b32 	%f45, %r188;
 	setp.leu.f32 	%p11, %f8, %f45;
-	@%p11 bra 	$L__BB0_18;
+	@%p11 bra 	$L__BB0_17;
 
 	mov.b32 	%r28, %f8;
 
-$L__BB0_17:
+$L__BB0_16:
 	atom.global.cas.b32 	%r188, [%rd16], %r188, %r28;
 	mov.b32 	%f46, %r188;
 	setp.gt.f32 	%p12, %f8, %f46;
-	@%p12 bra 	$L__BB0_17;
+	@%p12 bra 	$L__BB0_16;
 
-$L__BB0_18:
+$L__BB0_17:
 	ret;
 
 }
 
 `
 	reducemaxvecCellZCompIndex_ptx_61 = `
-.version 7.7
+.version 8.2
 .target sm_61
 .address_size 64
 
@@ -1481,12 +1061,12 @@ $L__BB0_7:
 	mul.lo.s32 	%r134, %r46, %r33;
 	mul.lo.s32 	%r187, %r134, %r38;
 	setp.lt.u32 	%p6, %r187, 66;
-	@%p6 bra 	$L__BB0_12;
+	@%p6 bra 	$L__BB0_11;
 
-$L__BB0_9:
+$L__BB0_8:
 	shr.u32 	%r26, %r187, 1;
 	setp.ge.u32 	%p7, %r130, %r26;
-	@%p7 bra 	$L__BB0_11;
+	@%p7 bra 	$L__BB0_10;
 
 	shl.b32 	%r153, %r26, 2;
 	add.s32 	%r154, %r133, %r153;
@@ -1495,15 +1075,15 @@ $L__BB0_9:
 	max.f32 	%f26, %f25, %f24;
 	st.shared.f32 	[%r133], %f26;
 
-$L__BB0_11:
+$L__BB0_10:
 	bar.sync 	0;
 	setp.gt.u32 	%p8, %r187, 131;
 	mov.u32 	%r187, %r26;
-	@%p8 bra 	$L__BB0_9;
+	@%p8 bra 	$L__BB0_8;
 
-$L__BB0_12:
+$L__BB0_11:
 	setp.gt.s32 	%p9, %r130, 31;
-	@%p9 bra 	$L__BB0_14;
+	@%p9 bra 	$L__BB0_13;
 
 	ld.volatile.shared.f32 	%f27, [%r133+128];
 	ld.volatile.shared.f32 	%f28, [%r133];
@@ -1530,33 +1110,33 @@ $L__BB0_12:
 	max.f32 	%f44, %f43, %f42;
 	st.volatile.shared.f32 	[%r133], %f44;
 
-$L__BB0_14:
+$L__BB0_13:
 	setp.ne.s32 	%p10, %r130, 0;
-	@%p10 bra 	$L__BB0_18;
+	@%p10 bra 	$L__BB0_17;
 
 	ld.shared.f32 	%f8, [_ZZ26reducemaxvecCellZCompIndexE5sdata];
 	cvta.to.global.u64 	%rd16, %rd4;
 	ld.global.u32 	%r188, [%rd16];
 	mov.b32 	%f45, %r188;
 	setp.leu.f32 	%p11, %f8, %f45;
-	@%p11 bra 	$L__BB0_18;
+	@%p11 bra 	$L__BB0_17;
 
 	mov.b32 	%r28, %f8;
 
-$L__BB0_17:
+$L__BB0_16:
 	atom.global.cas.b32 	%r188, [%rd16], %r188, %r28;
 	mov.b32 	%f46, %r188;
 	setp.gt.f32 	%p12, %f8, %f46;
-	@%p12 bra 	$L__BB0_17;
+	@%p12 bra 	$L__BB0_16;
 
-$L__BB0_18:
+$L__BB0_17:
 	ret;
 
 }
 
 `
 	reducemaxvecCellZCompIndex_ptx_62 = `
-.version 7.7
+.version 8.2
 .target sm_62
 .address_size 64
 
@@ -1691,12 +1271,12 @@ $L__BB0_7:
 	mul.lo.s32 	%r134, %r46, %r33;
 	mul.lo.s32 	%r187, %r134, %r38;
 	setp.lt.u32 	%p6, %r187, 66;
-	@%p6 bra 	$L__BB0_12;
+	@%p6 bra 	$L__BB0_11;
 
-$L__BB0_9:
+$L__BB0_8:
 	shr.u32 	%r26, %r187, 1;
 	setp.ge.u32 	%p7, %r130, %r26;
-	@%p7 bra 	$L__BB0_11;
+	@%p7 bra 	$L__BB0_10;
 
 	shl.b32 	%r153, %r26, 2;
 	add.s32 	%r154, %r133, %r153;
@@ -1705,15 +1285,15 @@ $L__BB0_9:
 	max.f32 	%f26, %f25, %f24;
 	st.shared.f32 	[%r133], %f26;
 
-$L__BB0_11:
+$L__BB0_10:
 	bar.sync 	0;
 	setp.gt.u32 	%p8, %r187, 131;
 	mov.u32 	%r187, %r26;
-	@%p8 bra 	$L__BB0_9;
+	@%p8 bra 	$L__BB0_8;
 
-$L__BB0_12:
+$L__BB0_11:
 	setp.gt.s32 	%p9, %r130, 31;
-	@%p9 bra 	$L__BB0_14;
+	@%p9 bra 	$L__BB0_13;
 
 	ld.volatile.shared.f32 	%f27, [%r133+128];
 	ld.volatile.shared.f32 	%f28, [%r133];
@@ -1740,33 +1320,33 @@ $L__BB0_12:
 	max.f32 	%f44, %f43, %f42;
 	st.volatile.shared.f32 	[%r133], %f44;
 
-$L__BB0_14:
+$L__BB0_13:
 	setp.ne.s32 	%p10, %r130, 0;
-	@%p10 bra 	$L__BB0_18;
+	@%p10 bra 	$L__BB0_17;
 
 	ld.shared.f32 	%f8, [_ZZ26reducemaxvecCellZCompIndexE5sdata];
 	cvta.to.global.u64 	%rd16, %rd4;
 	ld.global.u32 	%r188, [%rd16];
 	mov.b32 	%f45, %r188;
 	setp.leu.f32 	%p11, %f8, %f45;
-	@%p11 bra 	$L__BB0_18;
+	@%p11 bra 	$L__BB0_17;
 
 	mov.b32 	%r28, %f8;
 
-$L__BB0_17:
+$L__BB0_16:
 	atom.global.cas.b32 	%r188, [%rd16], %r188, %r28;
 	mov.b32 	%f46, %r188;
 	setp.gt.f32 	%p12, %f8, %f46;
-	@%p12 bra 	$L__BB0_17;
+	@%p12 bra 	$L__BB0_16;
 
-$L__BB0_18:
+$L__BB0_17:
 	ret;
 
 }
 
 `
 	reducemaxvecCellZCompIndex_ptx_70 = `
-.version 7.7
+.version 8.2
 .target sm_70
 .address_size 64
 
@@ -1901,12 +1481,12 @@ $L__BB0_7:
 	mul.lo.s32 	%r134, %r46, %r33;
 	mul.lo.s32 	%r187, %r134, %r38;
 	setp.lt.u32 	%p6, %r187, 66;
-	@%p6 bra 	$L__BB0_12;
+	@%p6 bra 	$L__BB0_11;
 
-$L__BB0_9:
+$L__BB0_8:
 	shr.u32 	%r26, %r187, 1;
 	setp.ge.u32 	%p7, %r130, %r26;
-	@%p7 bra 	$L__BB0_11;
+	@%p7 bra 	$L__BB0_10;
 
 	shl.b32 	%r153, %r26, 2;
 	add.s32 	%r154, %r133, %r153;
@@ -1915,15 +1495,15 @@ $L__BB0_9:
 	max.f32 	%f26, %f25, %f24;
 	st.shared.f32 	[%r133], %f26;
 
-$L__BB0_11:
+$L__BB0_10:
 	bar.sync 	0;
 	setp.gt.u32 	%p8, %r187, 131;
 	mov.u32 	%r187, %r26;
-	@%p8 bra 	$L__BB0_9;
+	@%p8 bra 	$L__BB0_8;
 
-$L__BB0_12:
+$L__BB0_11:
 	setp.gt.s32 	%p9, %r130, 31;
-	@%p9 bra 	$L__BB0_14;
+	@%p9 bra 	$L__BB0_13;
 
 	ld.volatile.shared.f32 	%f27, [%r133+128];
 	ld.volatile.shared.f32 	%f28, [%r133];
@@ -1950,33 +1530,453 @@ $L__BB0_12:
 	max.f32 	%f44, %f43, %f42;
 	st.volatile.shared.f32 	[%r133], %f44;
 
-$L__BB0_14:
+$L__BB0_13:
 	setp.ne.s32 	%p10, %r130, 0;
-	@%p10 bra 	$L__BB0_18;
+	@%p10 bra 	$L__BB0_17;
 
 	ld.shared.f32 	%f8, [_ZZ26reducemaxvecCellZCompIndexE5sdata];
 	cvta.to.global.u64 	%rd16, %rd4;
 	ld.global.u32 	%r188, [%rd16];
 	mov.b32 	%f45, %r188;
 	setp.leu.f32 	%p11, %f8, %f45;
-	@%p11 bra 	$L__BB0_18;
+	@%p11 bra 	$L__BB0_17;
 
 	mov.b32 	%r28, %f8;
 
-$L__BB0_17:
+$L__BB0_16:
 	atom.global.cas.b32 	%r188, [%rd16], %r188, %r28;
 	mov.b32 	%f46, %r188;
 	setp.gt.f32 	%p12, %f8, %f46;
-	@%p12 bra 	$L__BB0_17;
+	@%p12 bra 	$L__BB0_16;
 
-$L__BB0_18:
+$L__BB0_17:
+	ret;
+
+}
+
+`
+	reducemaxvecCellZCompIndex_ptx_72 = `
+.version 8.2
+.target sm_72
+.address_size 64
+
+	// .globl	reducemaxvecCellZCompIndex
+.global .align 4 .b8 test[8];
+
+.visible .entry reducemaxvecCellZCompIndex(
+	.param .u64 reducemaxvecCellZCompIndex_param_0,
+	.param .u64 reducemaxvecCellZCompIndex_param_1,
+	.param .u64 reducemaxvecCellZCompIndex_param_2,
+	.param .u64 reducemaxvecCellZCompIndex_param_3,
+	.param .f32 reducemaxvecCellZCompIndex_param_4,
+	.param .u32 reducemaxvecCellZCompIndex_param_5
+)
+{
+	.reg .pred 	%p<13>;
+	.reg .f32 	%f<52>;
+	.reg .b32 	%r<189>;
+	.reg .b64 	%rd<17>;
+	// demoted variable
+	.shared .align 4 .b8 _ZZ26reducemaxvecCellZCompIndexE5sdata[2048];
+
+	ld.param.u64 	%rd3, [reducemaxvecCellZCompIndex_param_2];
+	ld.param.u64 	%rd4, [reducemaxvecCellZCompIndex_param_3];
+	ld.param.f32 	%f51, [reducemaxvecCellZCompIndex_param_4];
+	ld.param.u32 	%r31, [reducemaxvecCellZCompIndex_param_5];
+	mov.u32 	%r32, %tid.x;
+	mov.u32 	%r33, %ntid.y;
+	mov.u32 	%r34, %tid.z;
+	mov.u32 	%r35, %tid.y;
+	mov.u32 	%r36, %ctaid.y;
+	mad.lo.s32 	%r37, %r36, %r33, %r35;
+	mov.u32 	%r38, %ntid.z;
+	mov.u32 	%r39, %ctaid.z;
+	mad.lo.s32 	%r184, %r39, %r38, %r34;
+	mov.u32 	%r41, %nctaid.y;
+	mad.lo.s32 	%r42, %r184, %r41, %r37;
+	mov.u32 	%r43, %nctaid.x;
+	mov.u32 	%r44, %ctaid.x;
+	mad.lo.s32 	%r45, %r42, %r43, %r44;
+	mov.u32 	%r46, %ntid.x;
+	mad.lo.s32 	%r183, %r45, %r46, %r32;
+	setp.ge.s32 	%p1, %r183, %r31;
+	@%p1 bra 	$L__BB0_7;
+
+	mov.u32 	%r48, %nctaid.z;
+	mul.lo.s32 	%r50, %r38, %r48;
+	mul.lo.s32 	%r53, %r43, %r46;
+	mul.lo.s32 	%r55, %r53, %r41;
+	mul.lo.s32 	%r57, %r55, %r33;
+	mul.lo.s32 	%r58, %r50, %r57;
+	add.s32 	%r59, %r58, %r31;
+	mad.lo.s32 	%r61, %r33, %r48, %r39;
+	mad.lo.s32 	%r63, %r38, %r61, %r34;
+	mad.lo.s32 	%r67, %r41, %r63, %r37;
+	mad.lo.s32 	%r69, %r43, %r67, %r44;
+	mad.lo.s32 	%r179, %r46, %r69, %r32;
+	not.b32 	%r72, %r179;
+	add.s32 	%r73, %r59, %r72;
+	div.u32 	%r1, %r73, %r58;
+	add.s32 	%r74, %r1, 1;
+	and.b32  	%r182, %r74, 3;
+	setp.eq.s32 	%p2, %r182, 0;
+	@%p2 bra 	$L__BB0_4;
+
+	mad.lo.s32 	%r184, %r39, %r38, %r34;
+	mad.lo.s32 	%r86, %r184, %r41, %r37;
+	mad.lo.s32 	%r89, %r86, %r43, %r44;
+	mad.lo.s32 	%r183, %r89, %r46, %r32;
+	cvta.to.global.u64 	%rd5, %rd3;
+
+$L__BB0_3:
+	.pragma "nounroll";
+	mul.wide.s32 	%rd6, %r184, 4;
+	add.s64 	%rd7, %rd5, %rd6;
+	ld.global.nc.f32 	%f11, [%rd7];
+	mul.f32 	%f12, %f11, %f11;
+	max.f32 	%f51, %f51, %f12;
+	add.s32 	%r183, %r183, %r58;
+	div.u32 	%r184, %r179, %r57;
+	add.s32 	%r179, %r179, %r58;
+	add.s32 	%r182, %r182, -1;
+	setp.ne.s32 	%p3, %r182, 0;
+	@%p3 bra 	$L__BB0_3;
+
+$L__BB0_4:
+	setp.lt.u32 	%p4, %r1, 3;
+	@%p4 bra 	$L__BB0_7;
+
+	cvta.to.global.u64 	%rd1, %rd3;
+
+$L__BB0_6:
+	mul.wide.s32 	%rd8, %r184, 4;
+	add.s64 	%rd9, %rd1, %rd8;
+	ld.global.nc.f32 	%f13, [%rd9];
+	mul.f32 	%f14, %f13, %f13;
+	max.f32 	%f15, %f51, %f14;
+	add.s32 	%r118, %r183, %r58;
+	div.u32 	%r119, %r118, %r57;
+	mul.wide.s32 	%rd10, %r119, 4;
+	add.s64 	%rd11, %rd1, %rd10;
+	ld.global.nc.f32 	%f16, [%rd11];
+	mul.f32 	%f17, %f16, %f16;
+	max.f32 	%f18, %f15, %f17;
+	add.s32 	%r120, %r118, %r58;
+	div.u32 	%r121, %r120, %r57;
+	mul.wide.s32 	%rd12, %r121, 4;
+	add.s64 	%rd13, %rd1, %rd12;
+	ld.global.nc.f32 	%f19, [%rd13];
+	mul.f32 	%f20, %f19, %f19;
+	max.f32 	%f21, %f18, %f20;
+	add.s32 	%r122, %r120, %r58;
+	div.u32 	%r123, %r122, %r57;
+	mul.wide.s32 	%rd14, %r123, 4;
+	add.s64 	%rd15, %rd1, %rd14;
+	ld.global.nc.f32 	%f22, [%rd15];
+	mul.f32 	%f23, %f22, %f22;
+	max.f32 	%f51, %f21, %f23;
+	add.s32 	%r183, %r122, %r58;
+	div.u32 	%r184, %r183, %r57;
+	setp.lt.s32 	%p5, %r183, %r31;
+	@%p5 bra 	$L__BB0_6;
+
+$L__BB0_7:
+	mad.lo.s32 	%r127, %r33, %r34, %r35;
+	mad.lo.s32 	%r130, %r127, %r46, %r32;
+	shl.b32 	%r131, %r130, 2;
+	mov.u32 	%r132, _ZZ26reducemaxvecCellZCompIndexE5sdata;
+	add.s32 	%r133, %r132, %r131;
+	st.shared.f32 	[%r133], %f51;
+	bar.sync 	0;
+	mul.lo.s32 	%r134, %r46, %r33;
+	mul.lo.s32 	%r187, %r134, %r38;
+	setp.lt.u32 	%p6, %r187, 66;
+	@%p6 bra 	$L__BB0_11;
+
+$L__BB0_8:
+	shr.u32 	%r26, %r187, 1;
+	setp.ge.u32 	%p7, %r130, %r26;
+	@%p7 bra 	$L__BB0_10;
+
+	shl.b32 	%r153, %r26, 2;
+	add.s32 	%r154, %r133, %r153;
+	ld.shared.f32 	%f24, [%r154];
+	ld.shared.f32 	%f25, [%r133];
+	max.f32 	%f26, %f25, %f24;
+	st.shared.f32 	[%r133], %f26;
+
+$L__BB0_10:
+	bar.sync 	0;
+	setp.gt.u32 	%p8, %r187, 131;
+	mov.u32 	%r187, %r26;
+	@%p8 bra 	$L__BB0_8;
+
+$L__BB0_11:
+	setp.gt.s32 	%p9, %r130, 31;
+	@%p9 bra 	$L__BB0_13;
+
+	ld.volatile.shared.f32 	%f27, [%r133+128];
+	ld.volatile.shared.f32 	%f28, [%r133];
+	max.f32 	%f29, %f28, %f27;
+	st.volatile.shared.f32 	[%r133], %f29;
+	ld.volatile.shared.f32 	%f30, [%r133+64];
+	ld.volatile.shared.f32 	%f31, [%r133];
+	max.f32 	%f32, %f31, %f30;
+	st.volatile.shared.f32 	[%r133], %f32;
+	ld.volatile.shared.f32 	%f33, [%r133+32];
+	ld.volatile.shared.f32 	%f34, [%r133];
+	max.f32 	%f35, %f34, %f33;
+	st.volatile.shared.f32 	[%r133], %f35;
+	ld.volatile.shared.f32 	%f36, [%r133+16];
+	ld.volatile.shared.f32 	%f37, [%r133];
+	max.f32 	%f38, %f37, %f36;
+	st.volatile.shared.f32 	[%r133], %f38;
+	ld.volatile.shared.f32 	%f39, [%r133+8];
+	ld.volatile.shared.f32 	%f40, [%r133];
+	max.f32 	%f41, %f40, %f39;
+	st.volatile.shared.f32 	[%r133], %f41;
+	ld.volatile.shared.f32 	%f42, [%r133+4];
+	ld.volatile.shared.f32 	%f43, [%r133];
+	max.f32 	%f44, %f43, %f42;
+	st.volatile.shared.f32 	[%r133], %f44;
+
+$L__BB0_13:
+	setp.ne.s32 	%p10, %r130, 0;
+	@%p10 bra 	$L__BB0_17;
+
+	ld.shared.f32 	%f8, [_ZZ26reducemaxvecCellZCompIndexE5sdata];
+	cvta.to.global.u64 	%rd16, %rd4;
+	ld.global.u32 	%r188, [%rd16];
+	mov.b32 	%f45, %r188;
+	setp.leu.f32 	%p11, %f8, %f45;
+	@%p11 bra 	$L__BB0_17;
+
+	mov.b32 	%r28, %f8;
+
+$L__BB0_16:
+	atom.global.cas.b32 	%r188, [%rd16], %r188, %r28;
+	mov.b32 	%f46, %r188;
+	setp.gt.f32 	%p12, %f8, %f46;
+	@%p12 bra 	$L__BB0_16;
+
+$L__BB0_17:
+	ret;
+
+}
+
+`
+	reducemaxvecCellZCompIndex_ptx_75 = `
+.version 8.2
+.target sm_75
+.address_size 64
+
+	// .globl	reducemaxvecCellZCompIndex
+.global .align 4 .b8 test[8];
+
+.visible .entry reducemaxvecCellZCompIndex(
+	.param .u64 reducemaxvecCellZCompIndex_param_0,
+	.param .u64 reducemaxvecCellZCompIndex_param_1,
+	.param .u64 reducemaxvecCellZCompIndex_param_2,
+	.param .u64 reducemaxvecCellZCompIndex_param_3,
+	.param .f32 reducemaxvecCellZCompIndex_param_4,
+	.param .u32 reducemaxvecCellZCompIndex_param_5
+)
+{
+	.reg .pred 	%p<13>;
+	.reg .f32 	%f<52>;
+	.reg .b32 	%r<189>;
+	.reg .b64 	%rd<17>;
+	// demoted variable
+	.shared .align 4 .b8 _ZZ26reducemaxvecCellZCompIndexE5sdata[2048];
+
+	ld.param.u64 	%rd3, [reducemaxvecCellZCompIndex_param_2];
+	ld.param.u64 	%rd4, [reducemaxvecCellZCompIndex_param_3];
+	ld.param.f32 	%f51, [reducemaxvecCellZCompIndex_param_4];
+	ld.param.u32 	%r31, [reducemaxvecCellZCompIndex_param_5];
+	mov.u32 	%r32, %tid.x;
+	mov.u32 	%r33, %ntid.y;
+	mov.u32 	%r34, %tid.z;
+	mov.u32 	%r35, %tid.y;
+	mov.u32 	%r36, %ctaid.y;
+	mad.lo.s32 	%r37, %r36, %r33, %r35;
+	mov.u32 	%r38, %ntid.z;
+	mov.u32 	%r39, %ctaid.z;
+	mad.lo.s32 	%r184, %r39, %r38, %r34;
+	mov.u32 	%r41, %nctaid.y;
+	mad.lo.s32 	%r42, %r184, %r41, %r37;
+	mov.u32 	%r43, %nctaid.x;
+	mov.u32 	%r44, %ctaid.x;
+	mad.lo.s32 	%r45, %r42, %r43, %r44;
+	mov.u32 	%r46, %ntid.x;
+	mad.lo.s32 	%r183, %r45, %r46, %r32;
+	setp.ge.s32 	%p1, %r183, %r31;
+	@%p1 bra 	$L__BB0_7;
+
+	mov.u32 	%r48, %nctaid.z;
+	mul.lo.s32 	%r50, %r38, %r48;
+	mul.lo.s32 	%r53, %r43, %r46;
+	mul.lo.s32 	%r55, %r53, %r41;
+	mul.lo.s32 	%r57, %r55, %r33;
+	mul.lo.s32 	%r58, %r50, %r57;
+	add.s32 	%r59, %r58, %r31;
+	mad.lo.s32 	%r61, %r33, %r48, %r39;
+	mad.lo.s32 	%r63, %r38, %r61, %r34;
+	mad.lo.s32 	%r67, %r41, %r63, %r37;
+	mad.lo.s32 	%r69, %r43, %r67, %r44;
+	mad.lo.s32 	%r179, %r46, %r69, %r32;
+	not.b32 	%r72, %r179;
+	add.s32 	%r73, %r59, %r72;
+	div.u32 	%r1, %r73, %r58;
+	add.s32 	%r74, %r1, 1;
+	and.b32  	%r182, %r74, 3;
+	setp.eq.s32 	%p2, %r182, 0;
+	@%p2 bra 	$L__BB0_4;
+
+	mad.lo.s32 	%r184, %r39, %r38, %r34;
+	mad.lo.s32 	%r86, %r184, %r41, %r37;
+	mad.lo.s32 	%r89, %r86, %r43, %r44;
+	mad.lo.s32 	%r183, %r89, %r46, %r32;
+	cvta.to.global.u64 	%rd5, %rd3;
+
+$L__BB0_3:
+	.pragma "nounroll";
+	mul.wide.s32 	%rd6, %r184, 4;
+	add.s64 	%rd7, %rd5, %rd6;
+	ld.global.nc.f32 	%f11, [%rd7];
+	mul.f32 	%f12, %f11, %f11;
+	max.f32 	%f51, %f51, %f12;
+	add.s32 	%r183, %r183, %r58;
+	div.u32 	%r184, %r179, %r57;
+	add.s32 	%r179, %r179, %r58;
+	add.s32 	%r182, %r182, -1;
+	setp.ne.s32 	%p3, %r182, 0;
+	@%p3 bra 	$L__BB0_3;
+
+$L__BB0_4:
+	setp.lt.u32 	%p4, %r1, 3;
+	@%p4 bra 	$L__BB0_7;
+
+	cvta.to.global.u64 	%rd1, %rd3;
+
+$L__BB0_6:
+	mul.wide.s32 	%rd8, %r184, 4;
+	add.s64 	%rd9, %rd1, %rd8;
+	ld.global.nc.f32 	%f13, [%rd9];
+	mul.f32 	%f14, %f13, %f13;
+	max.f32 	%f15, %f51, %f14;
+	add.s32 	%r118, %r183, %r58;
+	div.u32 	%r119, %r118, %r57;
+	mul.wide.s32 	%rd10, %r119, 4;
+	add.s64 	%rd11, %rd1, %rd10;
+	ld.global.nc.f32 	%f16, [%rd11];
+	mul.f32 	%f17, %f16, %f16;
+	max.f32 	%f18, %f15, %f17;
+	add.s32 	%r120, %r118, %r58;
+	div.u32 	%r121, %r120, %r57;
+	mul.wide.s32 	%rd12, %r121, 4;
+	add.s64 	%rd13, %rd1, %rd12;
+	ld.global.nc.f32 	%f19, [%rd13];
+	mul.f32 	%f20, %f19, %f19;
+	max.f32 	%f21, %f18, %f20;
+	add.s32 	%r122, %r120, %r58;
+	div.u32 	%r123, %r122, %r57;
+	mul.wide.s32 	%rd14, %r123, 4;
+	add.s64 	%rd15, %rd1, %rd14;
+	ld.global.nc.f32 	%f22, [%rd15];
+	mul.f32 	%f23, %f22, %f22;
+	max.f32 	%f51, %f21, %f23;
+	add.s32 	%r183, %r122, %r58;
+	div.u32 	%r184, %r183, %r57;
+	setp.lt.s32 	%p5, %r183, %r31;
+	@%p5 bra 	$L__BB0_6;
+
+$L__BB0_7:
+	mad.lo.s32 	%r127, %r33, %r34, %r35;
+	mad.lo.s32 	%r130, %r127, %r46, %r32;
+	shl.b32 	%r131, %r130, 2;
+	mov.u32 	%r132, _ZZ26reducemaxvecCellZCompIndexE5sdata;
+	add.s32 	%r133, %r132, %r131;
+	st.shared.f32 	[%r133], %f51;
+	bar.sync 	0;
+	mul.lo.s32 	%r134, %r46, %r33;
+	mul.lo.s32 	%r187, %r134, %r38;
+	setp.lt.u32 	%p6, %r187, 66;
+	@%p6 bra 	$L__BB0_11;
+
+$L__BB0_8:
+	shr.u32 	%r26, %r187, 1;
+	setp.ge.u32 	%p7, %r130, %r26;
+	@%p7 bra 	$L__BB0_10;
+
+	shl.b32 	%r153, %r26, 2;
+	add.s32 	%r154, %r133, %r153;
+	ld.shared.f32 	%f24, [%r154];
+	ld.shared.f32 	%f25, [%r133];
+	max.f32 	%f26, %f25, %f24;
+	st.shared.f32 	[%r133], %f26;
+
+$L__BB0_10:
+	bar.sync 	0;
+	setp.gt.u32 	%p8, %r187, 131;
+	mov.u32 	%r187, %r26;
+	@%p8 bra 	$L__BB0_8;
+
+$L__BB0_11:
+	setp.gt.s32 	%p9, %r130, 31;
+	@%p9 bra 	$L__BB0_13;
+
+	ld.volatile.shared.f32 	%f27, [%r133+128];
+	ld.volatile.shared.f32 	%f28, [%r133];
+	max.f32 	%f29, %f28, %f27;
+	st.volatile.shared.f32 	[%r133], %f29;
+	ld.volatile.shared.f32 	%f30, [%r133+64];
+	ld.volatile.shared.f32 	%f31, [%r133];
+	max.f32 	%f32, %f31, %f30;
+	st.volatile.shared.f32 	[%r133], %f32;
+	ld.volatile.shared.f32 	%f33, [%r133+32];
+	ld.volatile.shared.f32 	%f34, [%r133];
+	max.f32 	%f35, %f34, %f33;
+	st.volatile.shared.f32 	[%r133], %f35;
+	ld.volatile.shared.f32 	%f36, [%r133+16];
+	ld.volatile.shared.f32 	%f37, [%r133];
+	max.f32 	%f38, %f37, %f36;
+	st.volatile.shared.f32 	[%r133], %f38;
+	ld.volatile.shared.f32 	%f39, [%r133+8];
+	ld.volatile.shared.f32 	%f40, [%r133];
+	max.f32 	%f41, %f40, %f39;
+	st.volatile.shared.f32 	[%r133], %f41;
+	ld.volatile.shared.f32 	%f42, [%r133+4];
+	ld.volatile.shared.f32 	%f43, [%r133];
+	max.f32 	%f44, %f43, %f42;
+	st.volatile.shared.f32 	[%r133], %f44;
+
+$L__BB0_13:
+	setp.ne.s32 	%p10, %r130, 0;
+	@%p10 bra 	$L__BB0_17;
+
+	ld.shared.f32 	%f8, [_ZZ26reducemaxvecCellZCompIndexE5sdata];
+	cvta.to.global.u64 	%rd16, %rd4;
+	ld.global.u32 	%r188, [%rd16];
+	mov.b32 	%f45, %r188;
+	setp.leu.f32 	%p11, %f8, %f45;
+	@%p11 bra 	$L__BB0_17;
+
+	mov.b32 	%r28, %f8;
+
+$L__BB0_16:
+	atom.global.cas.b32 	%r188, [%rd16], %r188, %r28;
+	mov.b32 	%f46, %r188;
+	setp.gt.f32 	%p12, %f8, %f46;
+	@%p12 bra 	$L__BB0_16;
+
+$L__BB0_17:
 	ret;
 
 }
 
 `
 	reducemaxvecCellZCompIndex_ptx_80 = `
-.version 7.7
+.version 8.2
 .target sm_80
 .address_size 64
 
@@ -2111,12 +2111,12 @@ $L__BB0_7:
 	mul.lo.s32 	%r134, %r46, %r33;
 	mul.lo.s32 	%r187, %r134, %r38;
 	setp.lt.u32 	%p6, %r187, 66;
-	@%p6 bra 	$L__BB0_12;
+	@%p6 bra 	$L__BB0_11;
 
-$L__BB0_9:
+$L__BB0_8:
 	shr.u32 	%r26, %r187, 1;
 	setp.ge.u32 	%p7, %r130, %r26;
-	@%p7 bra 	$L__BB0_11;
+	@%p7 bra 	$L__BB0_10;
 
 	shl.b32 	%r153, %r26, 2;
 	add.s32 	%r154, %r133, %r153;
@@ -2125,15 +2125,15 @@ $L__BB0_9:
 	max.f32 	%f26, %f25, %f24;
 	st.shared.f32 	[%r133], %f26;
 
-$L__BB0_11:
+$L__BB0_10:
 	bar.sync 	0;
 	setp.gt.u32 	%p8, %r187, 131;
 	mov.u32 	%r187, %r26;
-	@%p8 bra 	$L__BB0_9;
+	@%p8 bra 	$L__BB0_8;
 
-$L__BB0_12:
+$L__BB0_11:
 	setp.gt.s32 	%p9, %r130, 31;
-	@%p9 bra 	$L__BB0_14;
+	@%p9 bra 	$L__BB0_13;
 
 	ld.volatile.shared.f32 	%f27, [%r133+128];
 	ld.volatile.shared.f32 	%f28, [%r133];
@@ -2160,26 +2160,26 @@ $L__BB0_12:
 	max.f32 	%f44, %f43, %f42;
 	st.volatile.shared.f32 	[%r133], %f44;
 
-$L__BB0_14:
+$L__BB0_13:
 	setp.ne.s32 	%p10, %r130, 0;
-	@%p10 bra 	$L__BB0_18;
+	@%p10 bra 	$L__BB0_17;
 
 	ld.shared.f32 	%f8, [_ZZ26reducemaxvecCellZCompIndexE5sdata];
 	cvta.to.global.u64 	%rd16, %rd4;
 	ld.global.u32 	%r188, [%rd16];
 	mov.b32 	%f45, %r188;
 	setp.leu.f32 	%p11, %f8, %f45;
-	@%p11 bra 	$L__BB0_18;
+	@%p11 bra 	$L__BB0_17;
 
 	mov.b32 	%r28, %f8;
 
-$L__BB0_17:
+$L__BB0_16:
 	atom.global.cas.b32 	%r188, [%rd16], %r188, %r28;
 	mov.b32 	%f46, %r188;
 	setp.gt.f32 	%p12, %f8, %f46;
-	@%p12 bra 	$L__BB0_17;
+	@%p12 bra 	$L__BB0_16;
 
-$L__BB0_18:
+$L__BB0_17:
 	ret;
 
 }

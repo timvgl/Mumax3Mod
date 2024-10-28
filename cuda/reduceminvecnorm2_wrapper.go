@@ -72,8 +72,6 @@ func k_reduceminvecnorm2_async(x unsafe.Pointer, y unsafe.Pointer, z unsafe.Poin
 
 // maps compute capability on PTX code for reduceminvecnorm2 kernel.
 var reduceminvecnorm2_map = map[int]string{0: "",
-	35: reduceminvecnorm2_ptx_35,
-	37: reduceminvecnorm2_ptx_37,
 	50: reduceminvecnorm2_ptx_50,
 	52: reduceminvecnorm2_ptx_52,
 	53: reduceminvecnorm2_ptx_53,
@@ -81,414 +79,14 @@ var reduceminvecnorm2_map = map[int]string{0: "",
 	61: reduceminvecnorm2_ptx_61,
 	62: reduceminvecnorm2_ptx_62,
 	70: reduceminvecnorm2_ptx_70,
+	72: reduceminvecnorm2_ptx_72,
+	75: reduceminvecnorm2_ptx_75,
 	80: reduceminvecnorm2_ptx_80}
 
 // reduceminvecnorm2 PTX code for various compute capabilities.
 const (
-	reduceminvecnorm2_ptx_35 = `
-.version 7.7
-.target sm_35
-.address_size 64
-
-	// .globl	reduceminvecnorm2
-
-.visible .entry reduceminvecnorm2(
-	.param .u64 reduceminvecnorm2_param_0,
-	.param .u64 reduceminvecnorm2_param_1,
-	.param .u64 reduceminvecnorm2_param_2,
-	.param .u64 reduceminvecnorm2_param_3,
-	.param .f32 reduceminvecnorm2_param_4,
-	.param .u32 reduceminvecnorm2_param_5
-)
-{
-	.reg .pred 	%p<11>;
-	.reg .f32 	%f<71>;
-	.reg .b32 	%r<39>;
-	.reg .b64 	%rd<37>;
-	// demoted variable
-	.shared .align 4 .b8 _ZZ17reduceminvecnorm2E5sdata[2048];
-
-	ld.param.u64 	%rd16, [reduceminvecnorm2_param_0];
-	ld.param.u64 	%rd17, [reduceminvecnorm2_param_1];
-	ld.param.u64 	%rd18, [reduceminvecnorm2_param_2];
-	ld.param.u64 	%rd15, [reduceminvecnorm2_param_3];
-	ld.param.f32 	%f70, [reduceminvecnorm2_param_4];
-	ld.param.u32 	%r17, [reduceminvecnorm2_param_5];
-	cvta.to.global.u64 	%rd1, %rd18;
-	cvta.to.global.u64 	%rd2, %rd17;
-	cvta.to.global.u64 	%rd3, %rd16;
-	mov.u32 	%r38, %ntid.x;
-	mov.u32 	%r18, %ctaid.x;
-	mov.u32 	%r2, %tid.x;
-	mad.lo.s32 	%r36, %r18, %r38, %r2;
-	mov.u32 	%r19, %nctaid.x;
-	mul.lo.s32 	%r4, %r19, %r38;
-	setp.ge.s32 	%p1, %r36, %r17;
-	@%p1 bra 	$L__BB0_7;
-
-	add.s32 	%r20, %r4, %r17;
-	add.s32 	%r21, %r36, %r4;
-	not.b32 	%r22, %r21;
-	add.s32 	%r23, %r20, %r22;
-	div.u32 	%r5, %r23, %r4;
-	add.s32 	%r24, %r5, 1;
-	and.b32  	%r35, %r24, 3;
-	setp.eq.s32 	%p2, %r35, 0;
-	@%p2 bra 	$L__BB0_4;
-
-	mul.wide.s32 	%rd19, %r36, 4;
-	add.s64 	%rd36, %rd1, %rd19;
-	mul.wide.s32 	%rd5, %r4, 4;
-	add.s64 	%rd35, %rd2, %rd19;
-	add.s64 	%rd34, %rd3, %rd19;
-
-$L__BB0_3:
-	.pragma "nounroll";
-	ld.global.nc.f32 	%f10, [%rd34];
-	ld.global.nc.f32 	%f11, [%rd35];
-	mul.f32 	%f12, %f11, %f11;
-	fma.rn.f32 	%f13, %f10, %f10, %f12;
-	ld.global.nc.f32 	%f14, [%rd36];
-	fma.rn.f32 	%f15, %f14, %f14, %f13;
-	min.f32 	%f70, %f70, %f15;
-	add.s32 	%r36, %r36, %r4;
-	add.s64 	%rd36, %rd36, %rd5;
-	add.s64 	%rd35, %rd35, %rd5;
-	add.s64 	%rd34, %rd34, %rd5;
-	add.s32 	%r35, %r35, -1;
-	setp.ne.s32 	%p3, %r35, 0;
-	@%p3 bra 	$L__BB0_3;
-
-$L__BB0_4:
-	setp.lt.u32 	%p4, %r5, 3;
-	@%p4 bra 	$L__BB0_7;
-
-	mul.wide.s32 	%rd14, %r4, 4;
-
-$L__BB0_6:
-	mul.wide.s32 	%rd20, %r36, 4;
-	add.s64 	%rd21, %rd3, %rd20;
-	ld.global.nc.f32 	%f16, [%rd21];
-	add.s64 	%rd22, %rd2, %rd20;
-	ld.global.nc.f32 	%f17, [%rd22];
-	mul.f32 	%f18, %f17, %f17;
-	fma.rn.f32 	%f19, %f16, %f16, %f18;
-	add.s64 	%rd23, %rd1, %rd20;
-	ld.global.nc.f32 	%f20, [%rd23];
-	fma.rn.f32 	%f21, %f20, %f20, %f19;
-	min.f32 	%f22, %f70, %f21;
-	add.s64 	%rd24, %rd21, %rd14;
-	ld.global.nc.f32 	%f23, [%rd24];
-	add.s64 	%rd25, %rd22, %rd14;
-	ld.global.nc.f32 	%f24, [%rd25];
-	mul.f32 	%f25, %f24, %f24;
-	fma.rn.f32 	%f26, %f23, %f23, %f25;
-	add.s64 	%rd26, %rd23, %rd14;
-	ld.global.nc.f32 	%f27, [%rd26];
-	fma.rn.f32 	%f28, %f27, %f27, %f26;
-	min.f32 	%f29, %f22, %f28;
-	add.s32 	%r25, %r36, %r4;
-	add.s32 	%r26, %r25, %r4;
-	add.s64 	%rd27, %rd24, %rd14;
-	ld.global.nc.f32 	%f30, [%rd27];
-	add.s64 	%rd28, %rd25, %rd14;
-	ld.global.nc.f32 	%f31, [%rd28];
-	mul.f32 	%f32, %f31, %f31;
-	fma.rn.f32 	%f33, %f30, %f30, %f32;
-	add.s64 	%rd29, %rd26, %rd14;
-	ld.global.nc.f32 	%f34, [%rd29];
-	fma.rn.f32 	%f35, %f34, %f34, %f33;
-	min.f32 	%f36, %f29, %f35;
-	add.s32 	%r27, %r26, %r4;
-	add.s64 	%rd30, %rd27, %rd14;
-	ld.global.nc.f32 	%f37, [%rd30];
-	add.s64 	%rd31, %rd28, %rd14;
-	ld.global.nc.f32 	%f38, [%rd31];
-	mul.f32 	%f39, %f38, %f38;
-	fma.rn.f32 	%f40, %f37, %f37, %f39;
-	add.s64 	%rd32, %rd29, %rd14;
-	ld.global.nc.f32 	%f41, [%rd32];
-	fma.rn.f32 	%f42, %f41, %f41, %f40;
-	min.f32 	%f70, %f36, %f42;
-	add.s32 	%r36, %r27, %r4;
-	setp.lt.s32 	%p5, %r36, %r17;
-	@%p5 bra 	$L__BB0_6;
-
-$L__BB0_7:
-	shl.b32 	%r28, %r2, 2;
-	mov.u32 	%r29, _ZZ17reduceminvecnorm2E5sdata;
-	add.s32 	%r14, %r29, %r28;
-	st.shared.f32 	[%r14], %f70;
-	bar.sync 	0;
-	setp.lt.u32 	%p6, %r38, 66;
-	@%p6 bra 	$L__BB0_12;
-
-$L__BB0_9:
-	shr.u32 	%r16, %r38, 1;
-	setp.ge.u32 	%p7, %r2, %r16;
-	@%p7 bra 	$L__BB0_11;
-
-	ld.shared.f32 	%f43, [%r14];
-	shl.b32 	%r30, %r16, 2;
-	add.s32 	%r31, %r14, %r30;
-	ld.shared.f32 	%f44, [%r31];
-	min.f32 	%f45, %f43, %f44;
-	st.shared.f32 	[%r14], %f45;
-
-$L__BB0_11:
-	bar.sync 	0;
-	setp.gt.u32 	%p8, %r38, 131;
-	mov.u32 	%r38, %r16;
-	@%p8 bra 	$L__BB0_9;
-
-$L__BB0_12:
-	setp.gt.s32 	%p9, %r2, 31;
-	@%p9 bra 	$L__BB0_14;
-
-	ld.volatile.shared.f32 	%f46, [%r14];
-	ld.volatile.shared.f32 	%f47, [%r14+128];
-	min.f32 	%f48, %f46, %f47;
-	st.volatile.shared.f32 	[%r14], %f48;
-	ld.volatile.shared.f32 	%f49, [%r14+64];
-	ld.volatile.shared.f32 	%f50, [%r14];
-	min.f32 	%f51, %f50, %f49;
-	st.volatile.shared.f32 	[%r14], %f51;
-	ld.volatile.shared.f32 	%f52, [%r14+32];
-	ld.volatile.shared.f32 	%f53, [%r14];
-	min.f32 	%f54, %f53, %f52;
-	st.volatile.shared.f32 	[%r14], %f54;
-	ld.volatile.shared.f32 	%f55, [%r14+16];
-	ld.volatile.shared.f32 	%f56, [%r14];
-	min.f32 	%f57, %f56, %f55;
-	st.volatile.shared.f32 	[%r14], %f57;
-	ld.volatile.shared.f32 	%f58, [%r14+8];
-	ld.volatile.shared.f32 	%f59, [%r14];
-	min.f32 	%f60, %f59, %f58;
-	st.volatile.shared.f32 	[%r14], %f60;
-	ld.volatile.shared.f32 	%f61, [%r14+4];
-	ld.volatile.shared.f32 	%f62, [%r14];
-	min.f32 	%f63, %f62, %f61;
-	st.volatile.shared.f32 	[%r14], %f63;
-
-$L__BB0_14:
-	setp.ne.s32 	%p10, %r2, 0;
-	@%p10 bra 	$L__BB0_16;
-
-	ld.shared.f32 	%f64, [_ZZ17reduceminvecnorm2E5sdata];
-	abs.f32 	%f65, %f64;
-	mov.b32 	%r32, %f65;
-	cvta.to.global.u64 	%rd33, %rd15;
-	atom.global.min.s32 	%r33, [%rd33], %r32;
-
-$L__BB0_16:
-	ret;
-
-}
-
-`
-	reduceminvecnorm2_ptx_37 = `
-.version 7.7
-.target sm_37
-.address_size 64
-
-	// .globl	reduceminvecnorm2
-
-.visible .entry reduceminvecnorm2(
-	.param .u64 reduceminvecnorm2_param_0,
-	.param .u64 reduceminvecnorm2_param_1,
-	.param .u64 reduceminvecnorm2_param_2,
-	.param .u64 reduceminvecnorm2_param_3,
-	.param .f32 reduceminvecnorm2_param_4,
-	.param .u32 reduceminvecnorm2_param_5
-)
-{
-	.reg .pred 	%p<11>;
-	.reg .f32 	%f<71>;
-	.reg .b32 	%r<39>;
-	.reg .b64 	%rd<37>;
-	// demoted variable
-	.shared .align 4 .b8 _ZZ17reduceminvecnorm2E5sdata[2048];
-
-	ld.param.u64 	%rd16, [reduceminvecnorm2_param_0];
-	ld.param.u64 	%rd17, [reduceminvecnorm2_param_1];
-	ld.param.u64 	%rd18, [reduceminvecnorm2_param_2];
-	ld.param.u64 	%rd15, [reduceminvecnorm2_param_3];
-	ld.param.f32 	%f70, [reduceminvecnorm2_param_4];
-	ld.param.u32 	%r17, [reduceminvecnorm2_param_5];
-	cvta.to.global.u64 	%rd1, %rd18;
-	cvta.to.global.u64 	%rd2, %rd17;
-	cvta.to.global.u64 	%rd3, %rd16;
-	mov.u32 	%r38, %ntid.x;
-	mov.u32 	%r18, %ctaid.x;
-	mov.u32 	%r2, %tid.x;
-	mad.lo.s32 	%r36, %r18, %r38, %r2;
-	mov.u32 	%r19, %nctaid.x;
-	mul.lo.s32 	%r4, %r19, %r38;
-	setp.ge.s32 	%p1, %r36, %r17;
-	@%p1 bra 	$L__BB0_7;
-
-	add.s32 	%r20, %r4, %r17;
-	add.s32 	%r21, %r36, %r4;
-	not.b32 	%r22, %r21;
-	add.s32 	%r23, %r20, %r22;
-	div.u32 	%r5, %r23, %r4;
-	add.s32 	%r24, %r5, 1;
-	and.b32  	%r35, %r24, 3;
-	setp.eq.s32 	%p2, %r35, 0;
-	@%p2 bra 	$L__BB0_4;
-
-	mul.wide.s32 	%rd19, %r36, 4;
-	add.s64 	%rd36, %rd1, %rd19;
-	mul.wide.s32 	%rd5, %r4, 4;
-	add.s64 	%rd35, %rd2, %rd19;
-	add.s64 	%rd34, %rd3, %rd19;
-
-$L__BB0_3:
-	.pragma "nounroll";
-	ld.global.nc.f32 	%f10, [%rd34];
-	ld.global.nc.f32 	%f11, [%rd35];
-	mul.f32 	%f12, %f11, %f11;
-	fma.rn.f32 	%f13, %f10, %f10, %f12;
-	ld.global.nc.f32 	%f14, [%rd36];
-	fma.rn.f32 	%f15, %f14, %f14, %f13;
-	min.f32 	%f70, %f70, %f15;
-	add.s32 	%r36, %r36, %r4;
-	add.s64 	%rd36, %rd36, %rd5;
-	add.s64 	%rd35, %rd35, %rd5;
-	add.s64 	%rd34, %rd34, %rd5;
-	add.s32 	%r35, %r35, -1;
-	setp.ne.s32 	%p3, %r35, 0;
-	@%p3 bra 	$L__BB0_3;
-
-$L__BB0_4:
-	setp.lt.u32 	%p4, %r5, 3;
-	@%p4 bra 	$L__BB0_7;
-
-	mul.wide.s32 	%rd14, %r4, 4;
-
-$L__BB0_6:
-	mul.wide.s32 	%rd20, %r36, 4;
-	add.s64 	%rd21, %rd3, %rd20;
-	ld.global.nc.f32 	%f16, [%rd21];
-	add.s64 	%rd22, %rd2, %rd20;
-	ld.global.nc.f32 	%f17, [%rd22];
-	mul.f32 	%f18, %f17, %f17;
-	fma.rn.f32 	%f19, %f16, %f16, %f18;
-	add.s64 	%rd23, %rd1, %rd20;
-	ld.global.nc.f32 	%f20, [%rd23];
-	fma.rn.f32 	%f21, %f20, %f20, %f19;
-	min.f32 	%f22, %f70, %f21;
-	add.s64 	%rd24, %rd21, %rd14;
-	ld.global.nc.f32 	%f23, [%rd24];
-	add.s64 	%rd25, %rd22, %rd14;
-	ld.global.nc.f32 	%f24, [%rd25];
-	mul.f32 	%f25, %f24, %f24;
-	fma.rn.f32 	%f26, %f23, %f23, %f25;
-	add.s64 	%rd26, %rd23, %rd14;
-	ld.global.nc.f32 	%f27, [%rd26];
-	fma.rn.f32 	%f28, %f27, %f27, %f26;
-	min.f32 	%f29, %f22, %f28;
-	add.s32 	%r25, %r36, %r4;
-	add.s32 	%r26, %r25, %r4;
-	add.s64 	%rd27, %rd24, %rd14;
-	ld.global.nc.f32 	%f30, [%rd27];
-	add.s64 	%rd28, %rd25, %rd14;
-	ld.global.nc.f32 	%f31, [%rd28];
-	mul.f32 	%f32, %f31, %f31;
-	fma.rn.f32 	%f33, %f30, %f30, %f32;
-	add.s64 	%rd29, %rd26, %rd14;
-	ld.global.nc.f32 	%f34, [%rd29];
-	fma.rn.f32 	%f35, %f34, %f34, %f33;
-	min.f32 	%f36, %f29, %f35;
-	add.s32 	%r27, %r26, %r4;
-	add.s64 	%rd30, %rd27, %rd14;
-	ld.global.nc.f32 	%f37, [%rd30];
-	add.s64 	%rd31, %rd28, %rd14;
-	ld.global.nc.f32 	%f38, [%rd31];
-	mul.f32 	%f39, %f38, %f38;
-	fma.rn.f32 	%f40, %f37, %f37, %f39;
-	add.s64 	%rd32, %rd29, %rd14;
-	ld.global.nc.f32 	%f41, [%rd32];
-	fma.rn.f32 	%f42, %f41, %f41, %f40;
-	min.f32 	%f70, %f36, %f42;
-	add.s32 	%r36, %r27, %r4;
-	setp.lt.s32 	%p5, %r36, %r17;
-	@%p5 bra 	$L__BB0_6;
-
-$L__BB0_7:
-	shl.b32 	%r28, %r2, 2;
-	mov.u32 	%r29, _ZZ17reduceminvecnorm2E5sdata;
-	add.s32 	%r14, %r29, %r28;
-	st.shared.f32 	[%r14], %f70;
-	bar.sync 	0;
-	setp.lt.u32 	%p6, %r38, 66;
-	@%p6 bra 	$L__BB0_12;
-
-$L__BB0_9:
-	shr.u32 	%r16, %r38, 1;
-	setp.ge.u32 	%p7, %r2, %r16;
-	@%p7 bra 	$L__BB0_11;
-
-	ld.shared.f32 	%f43, [%r14];
-	shl.b32 	%r30, %r16, 2;
-	add.s32 	%r31, %r14, %r30;
-	ld.shared.f32 	%f44, [%r31];
-	min.f32 	%f45, %f43, %f44;
-	st.shared.f32 	[%r14], %f45;
-
-$L__BB0_11:
-	bar.sync 	0;
-	setp.gt.u32 	%p8, %r38, 131;
-	mov.u32 	%r38, %r16;
-	@%p8 bra 	$L__BB0_9;
-
-$L__BB0_12:
-	setp.gt.s32 	%p9, %r2, 31;
-	@%p9 bra 	$L__BB0_14;
-
-	ld.volatile.shared.f32 	%f46, [%r14];
-	ld.volatile.shared.f32 	%f47, [%r14+128];
-	min.f32 	%f48, %f46, %f47;
-	st.volatile.shared.f32 	[%r14], %f48;
-	ld.volatile.shared.f32 	%f49, [%r14+64];
-	ld.volatile.shared.f32 	%f50, [%r14];
-	min.f32 	%f51, %f50, %f49;
-	st.volatile.shared.f32 	[%r14], %f51;
-	ld.volatile.shared.f32 	%f52, [%r14+32];
-	ld.volatile.shared.f32 	%f53, [%r14];
-	min.f32 	%f54, %f53, %f52;
-	st.volatile.shared.f32 	[%r14], %f54;
-	ld.volatile.shared.f32 	%f55, [%r14+16];
-	ld.volatile.shared.f32 	%f56, [%r14];
-	min.f32 	%f57, %f56, %f55;
-	st.volatile.shared.f32 	[%r14], %f57;
-	ld.volatile.shared.f32 	%f58, [%r14+8];
-	ld.volatile.shared.f32 	%f59, [%r14];
-	min.f32 	%f60, %f59, %f58;
-	st.volatile.shared.f32 	[%r14], %f60;
-	ld.volatile.shared.f32 	%f61, [%r14+4];
-	ld.volatile.shared.f32 	%f62, [%r14];
-	min.f32 	%f63, %f62, %f61;
-	st.volatile.shared.f32 	[%r14], %f63;
-
-$L__BB0_14:
-	setp.ne.s32 	%p10, %r2, 0;
-	@%p10 bra 	$L__BB0_16;
-
-	ld.shared.f32 	%f64, [_ZZ17reduceminvecnorm2E5sdata];
-	abs.f32 	%f65, %f64;
-	mov.b32 	%r32, %f65;
-	cvta.to.global.u64 	%rd33, %rd15;
-	atom.global.min.s32 	%r33, [%rd33], %r32;
-
-$L__BB0_16:
-	ret;
-
-}
-
-`
 	reduceminvecnorm2_ptx_50 = `
-.version 7.7
+.version 8.2
 .target sm_50
 .address_size 64
 
@@ -623,12 +221,12 @@ $L__BB0_7:
 	st.shared.f32 	[%r14], %f70;
 	bar.sync 	0;
 	setp.lt.u32 	%p6, %r38, 66;
-	@%p6 bra 	$L__BB0_12;
+	@%p6 bra 	$L__BB0_11;
 
-$L__BB0_9:
+$L__BB0_8:
 	shr.u32 	%r16, %r38, 1;
 	setp.ge.u32 	%p7, %r2, %r16;
-	@%p7 bra 	$L__BB0_11;
+	@%p7 bra 	$L__BB0_10;
 
 	ld.shared.f32 	%f43, [%r14];
 	shl.b32 	%r30, %r16, 2;
@@ -637,15 +235,15 @@ $L__BB0_9:
 	min.f32 	%f45, %f43, %f44;
 	st.shared.f32 	[%r14], %f45;
 
-$L__BB0_11:
+$L__BB0_10:
 	bar.sync 	0;
 	setp.gt.u32 	%p8, %r38, 131;
 	mov.u32 	%r38, %r16;
-	@%p8 bra 	$L__BB0_9;
+	@%p8 bra 	$L__BB0_8;
 
-$L__BB0_12:
+$L__BB0_11:
 	setp.gt.s32 	%p9, %r2, 31;
-	@%p9 bra 	$L__BB0_14;
+	@%p9 bra 	$L__BB0_13;
 
 	ld.volatile.shared.f32 	%f46, [%r14];
 	ld.volatile.shared.f32 	%f47, [%r14+128];
@@ -672,24 +270,24 @@ $L__BB0_12:
 	min.f32 	%f63, %f62, %f61;
 	st.volatile.shared.f32 	[%r14], %f63;
 
-$L__BB0_14:
+$L__BB0_13:
 	setp.ne.s32 	%p10, %r2, 0;
-	@%p10 bra 	$L__BB0_16;
+	@%p10 bra 	$L__BB0_15;
 
 	ld.shared.f32 	%f64, [_ZZ17reduceminvecnorm2E5sdata];
 	abs.f32 	%f65, %f64;
 	mov.b32 	%r32, %f65;
 	cvta.to.global.u64 	%rd33, %rd15;
-	atom.global.min.s32 	%r33, [%rd33], %r32;
+	red.global.min.s32 	[%rd33], %r32;
 
-$L__BB0_16:
+$L__BB0_15:
 	ret;
 
 }
 
 `
 	reduceminvecnorm2_ptx_52 = `
-.version 7.7
+.version 8.2
 .target sm_52
 .address_size 64
 
@@ -824,12 +422,12 @@ $L__BB0_7:
 	st.shared.f32 	[%r14], %f70;
 	bar.sync 	0;
 	setp.lt.u32 	%p6, %r38, 66;
-	@%p6 bra 	$L__BB0_12;
+	@%p6 bra 	$L__BB0_11;
 
-$L__BB0_9:
+$L__BB0_8:
 	shr.u32 	%r16, %r38, 1;
 	setp.ge.u32 	%p7, %r2, %r16;
-	@%p7 bra 	$L__BB0_11;
+	@%p7 bra 	$L__BB0_10;
 
 	ld.shared.f32 	%f43, [%r14];
 	shl.b32 	%r30, %r16, 2;
@@ -838,15 +436,15 @@ $L__BB0_9:
 	min.f32 	%f45, %f43, %f44;
 	st.shared.f32 	[%r14], %f45;
 
-$L__BB0_11:
+$L__BB0_10:
 	bar.sync 	0;
 	setp.gt.u32 	%p8, %r38, 131;
 	mov.u32 	%r38, %r16;
-	@%p8 bra 	$L__BB0_9;
+	@%p8 bra 	$L__BB0_8;
 
-$L__BB0_12:
+$L__BB0_11:
 	setp.gt.s32 	%p9, %r2, 31;
-	@%p9 bra 	$L__BB0_14;
+	@%p9 bra 	$L__BB0_13;
 
 	ld.volatile.shared.f32 	%f46, [%r14];
 	ld.volatile.shared.f32 	%f47, [%r14+128];
@@ -873,24 +471,24 @@ $L__BB0_12:
 	min.f32 	%f63, %f62, %f61;
 	st.volatile.shared.f32 	[%r14], %f63;
 
-$L__BB0_14:
+$L__BB0_13:
 	setp.ne.s32 	%p10, %r2, 0;
-	@%p10 bra 	$L__BB0_16;
+	@%p10 bra 	$L__BB0_15;
 
 	ld.shared.f32 	%f64, [_ZZ17reduceminvecnorm2E5sdata];
 	abs.f32 	%f65, %f64;
 	mov.b32 	%r32, %f65;
 	cvta.to.global.u64 	%rd33, %rd15;
-	atom.global.min.s32 	%r33, [%rd33], %r32;
+	red.global.min.s32 	[%rd33], %r32;
 
-$L__BB0_16:
+$L__BB0_15:
 	ret;
 
 }
 
 `
 	reduceminvecnorm2_ptx_53 = `
-.version 7.7
+.version 8.2
 .target sm_53
 .address_size 64
 
@@ -1025,12 +623,12 @@ $L__BB0_7:
 	st.shared.f32 	[%r14], %f70;
 	bar.sync 	0;
 	setp.lt.u32 	%p6, %r38, 66;
-	@%p6 bra 	$L__BB0_12;
+	@%p6 bra 	$L__BB0_11;
 
-$L__BB0_9:
+$L__BB0_8:
 	shr.u32 	%r16, %r38, 1;
 	setp.ge.u32 	%p7, %r2, %r16;
-	@%p7 bra 	$L__BB0_11;
+	@%p7 bra 	$L__BB0_10;
 
 	ld.shared.f32 	%f43, [%r14];
 	shl.b32 	%r30, %r16, 2;
@@ -1039,15 +637,15 @@ $L__BB0_9:
 	min.f32 	%f45, %f43, %f44;
 	st.shared.f32 	[%r14], %f45;
 
-$L__BB0_11:
+$L__BB0_10:
 	bar.sync 	0;
 	setp.gt.u32 	%p8, %r38, 131;
 	mov.u32 	%r38, %r16;
-	@%p8 bra 	$L__BB0_9;
+	@%p8 bra 	$L__BB0_8;
 
-$L__BB0_12:
+$L__BB0_11:
 	setp.gt.s32 	%p9, %r2, 31;
-	@%p9 bra 	$L__BB0_14;
+	@%p9 bra 	$L__BB0_13;
 
 	ld.volatile.shared.f32 	%f46, [%r14];
 	ld.volatile.shared.f32 	%f47, [%r14+128];
@@ -1074,24 +672,24 @@ $L__BB0_12:
 	min.f32 	%f63, %f62, %f61;
 	st.volatile.shared.f32 	[%r14], %f63;
 
-$L__BB0_14:
+$L__BB0_13:
 	setp.ne.s32 	%p10, %r2, 0;
-	@%p10 bra 	$L__BB0_16;
+	@%p10 bra 	$L__BB0_15;
 
 	ld.shared.f32 	%f64, [_ZZ17reduceminvecnorm2E5sdata];
 	abs.f32 	%f65, %f64;
 	mov.b32 	%r32, %f65;
 	cvta.to.global.u64 	%rd33, %rd15;
-	atom.global.min.s32 	%r33, [%rd33], %r32;
+	red.global.min.s32 	[%rd33], %r32;
 
-$L__BB0_16:
+$L__BB0_15:
 	ret;
 
 }
 
 `
 	reduceminvecnorm2_ptx_60 = `
-.version 7.7
+.version 8.2
 .target sm_60
 .address_size 64
 
@@ -1226,12 +824,12 @@ $L__BB0_7:
 	st.shared.f32 	[%r14], %f70;
 	bar.sync 	0;
 	setp.lt.u32 	%p6, %r38, 66;
-	@%p6 bra 	$L__BB0_12;
+	@%p6 bra 	$L__BB0_11;
 
-$L__BB0_9:
+$L__BB0_8:
 	shr.u32 	%r16, %r38, 1;
 	setp.ge.u32 	%p7, %r2, %r16;
-	@%p7 bra 	$L__BB0_11;
+	@%p7 bra 	$L__BB0_10;
 
 	ld.shared.f32 	%f43, [%r14];
 	shl.b32 	%r30, %r16, 2;
@@ -1240,15 +838,15 @@ $L__BB0_9:
 	min.f32 	%f45, %f43, %f44;
 	st.shared.f32 	[%r14], %f45;
 
-$L__BB0_11:
+$L__BB0_10:
 	bar.sync 	0;
 	setp.gt.u32 	%p8, %r38, 131;
 	mov.u32 	%r38, %r16;
-	@%p8 bra 	$L__BB0_9;
+	@%p8 bra 	$L__BB0_8;
 
-$L__BB0_12:
+$L__BB0_11:
 	setp.gt.s32 	%p9, %r2, 31;
-	@%p9 bra 	$L__BB0_14;
+	@%p9 bra 	$L__BB0_13;
 
 	ld.volatile.shared.f32 	%f46, [%r14];
 	ld.volatile.shared.f32 	%f47, [%r14+128];
@@ -1275,24 +873,24 @@ $L__BB0_12:
 	min.f32 	%f63, %f62, %f61;
 	st.volatile.shared.f32 	[%r14], %f63;
 
-$L__BB0_14:
+$L__BB0_13:
 	setp.ne.s32 	%p10, %r2, 0;
-	@%p10 bra 	$L__BB0_16;
+	@%p10 bra 	$L__BB0_15;
 
 	ld.shared.f32 	%f64, [_ZZ17reduceminvecnorm2E5sdata];
 	abs.f32 	%f65, %f64;
 	mov.b32 	%r32, %f65;
 	cvta.to.global.u64 	%rd33, %rd15;
-	atom.global.min.s32 	%r33, [%rd33], %r32;
+	red.global.min.s32 	[%rd33], %r32;
 
-$L__BB0_16:
+$L__BB0_15:
 	ret;
 
 }
 
 `
 	reduceminvecnorm2_ptx_61 = `
-.version 7.7
+.version 8.2
 .target sm_61
 .address_size 64
 
@@ -1427,12 +1025,12 @@ $L__BB0_7:
 	st.shared.f32 	[%r14], %f70;
 	bar.sync 	0;
 	setp.lt.u32 	%p6, %r38, 66;
-	@%p6 bra 	$L__BB0_12;
+	@%p6 bra 	$L__BB0_11;
 
-$L__BB0_9:
+$L__BB0_8:
 	shr.u32 	%r16, %r38, 1;
 	setp.ge.u32 	%p7, %r2, %r16;
-	@%p7 bra 	$L__BB0_11;
+	@%p7 bra 	$L__BB0_10;
 
 	ld.shared.f32 	%f43, [%r14];
 	shl.b32 	%r30, %r16, 2;
@@ -1441,15 +1039,15 @@ $L__BB0_9:
 	min.f32 	%f45, %f43, %f44;
 	st.shared.f32 	[%r14], %f45;
 
-$L__BB0_11:
+$L__BB0_10:
 	bar.sync 	0;
 	setp.gt.u32 	%p8, %r38, 131;
 	mov.u32 	%r38, %r16;
-	@%p8 bra 	$L__BB0_9;
+	@%p8 bra 	$L__BB0_8;
 
-$L__BB0_12:
+$L__BB0_11:
 	setp.gt.s32 	%p9, %r2, 31;
-	@%p9 bra 	$L__BB0_14;
+	@%p9 bra 	$L__BB0_13;
 
 	ld.volatile.shared.f32 	%f46, [%r14];
 	ld.volatile.shared.f32 	%f47, [%r14+128];
@@ -1476,24 +1074,24 @@ $L__BB0_12:
 	min.f32 	%f63, %f62, %f61;
 	st.volatile.shared.f32 	[%r14], %f63;
 
-$L__BB0_14:
+$L__BB0_13:
 	setp.ne.s32 	%p10, %r2, 0;
-	@%p10 bra 	$L__BB0_16;
+	@%p10 bra 	$L__BB0_15;
 
 	ld.shared.f32 	%f64, [_ZZ17reduceminvecnorm2E5sdata];
 	abs.f32 	%f65, %f64;
 	mov.b32 	%r32, %f65;
 	cvta.to.global.u64 	%rd33, %rd15;
-	atom.global.min.s32 	%r33, [%rd33], %r32;
+	red.global.min.s32 	[%rd33], %r32;
 
-$L__BB0_16:
+$L__BB0_15:
 	ret;
 
 }
 
 `
 	reduceminvecnorm2_ptx_62 = `
-.version 7.7
+.version 8.2
 .target sm_62
 .address_size 64
 
@@ -1628,12 +1226,12 @@ $L__BB0_7:
 	st.shared.f32 	[%r14], %f70;
 	bar.sync 	0;
 	setp.lt.u32 	%p6, %r38, 66;
-	@%p6 bra 	$L__BB0_12;
+	@%p6 bra 	$L__BB0_11;
 
-$L__BB0_9:
+$L__BB0_8:
 	shr.u32 	%r16, %r38, 1;
 	setp.ge.u32 	%p7, %r2, %r16;
-	@%p7 bra 	$L__BB0_11;
+	@%p7 bra 	$L__BB0_10;
 
 	ld.shared.f32 	%f43, [%r14];
 	shl.b32 	%r30, %r16, 2;
@@ -1642,15 +1240,15 @@ $L__BB0_9:
 	min.f32 	%f45, %f43, %f44;
 	st.shared.f32 	[%r14], %f45;
 
-$L__BB0_11:
+$L__BB0_10:
 	bar.sync 	0;
 	setp.gt.u32 	%p8, %r38, 131;
 	mov.u32 	%r38, %r16;
-	@%p8 bra 	$L__BB0_9;
+	@%p8 bra 	$L__BB0_8;
 
-$L__BB0_12:
+$L__BB0_11:
 	setp.gt.s32 	%p9, %r2, 31;
-	@%p9 bra 	$L__BB0_14;
+	@%p9 bra 	$L__BB0_13;
 
 	ld.volatile.shared.f32 	%f46, [%r14];
 	ld.volatile.shared.f32 	%f47, [%r14+128];
@@ -1677,24 +1275,24 @@ $L__BB0_12:
 	min.f32 	%f63, %f62, %f61;
 	st.volatile.shared.f32 	[%r14], %f63;
 
-$L__BB0_14:
+$L__BB0_13:
 	setp.ne.s32 	%p10, %r2, 0;
-	@%p10 bra 	$L__BB0_16;
+	@%p10 bra 	$L__BB0_15;
 
 	ld.shared.f32 	%f64, [_ZZ17reduceminvecnorm2E5sdata];
 	abs.f32 	%f65, %f64;
 	mov.b32 	%r32, %f65;
 	cvta.to.global.u64 	%rd33, %rd15;
-	atom.global.min.s32 	%r33, [%rd33], %r32;
+	red.global.min.s32 	[%rd33], %r32;
 
-$L__BB0_16:
+$L__BB0_15:
 	ret;
 
 }
 
 `
 	reduceminvecnorm2_ptx_70 = `
-.version 7.7
+.version 8.2
 .target sm_70
 .address_size 64
 
@@ -1829,12 +1427,12 @@ $L__BB0_7:
 	st.shared.f32 	[%r14], %f70;
 	bar.sync 	0;
 	setp.lt.u32 	%p6, %r38, 66;
-	@%p6 bra 	$L__BB0_12;
+	@%p6 bra 	$L__BB0_11;
 
-$L__BB0_9:
+$L__BB0_8:
 	shr.u32 	%r16, %r38, 1;
 	setp.ge.u32 	%p7, %r2, %r16;
-	@%p7 bra 	$L__BB0_11;
+	@%p7 bra 	$L__BB0_10;
 
 	ld.shared.f32 	%f43, [%r14];
 	shl.b32 	%r30, %r16, 2;
@@ -1843,15 +1441,15 @@ $L__BB0_9:
 	min.f32 	%f45, %f43, %f44;
 	st.shared.f32 	[%r14], %f45;
 
-$L__BB0_11:
+$L__BB0_10:
 	bar.sync 	0;
 	setp.gt.u32 	%p8, %r38, 131;
 	mov.u32 	%r38, %r16;
-	@%p8 bra 	$L__BB0_9;
+	@%p8 bra 	$L__BB0_8;
 
-$L__BB0_12:
+$L__BB0_11:
 	setp.gt.s32 	%p9, %r2, 31;
-	@%p9 bra 	$L__BB0_14;
+	@%p9 bra 	$L__BB0_13;
 
 	ld.volatile.shared.f32 	%f46, [%r14];
 	ld.volatile.shared.f32 	%f47, [%r14+128];
@@ -1878,24 +1476,426 @@ $L__BB0_12:
 	min.f32 	%f63, %f62, %f61;
 	st.volatile.shared.f32 	[%r14], %f63;
 
-$L__BB0_14:
+$L__BB0_13:
 	setp.ne.s32 	%p10, %r2, 0;
-	@%p10 bra 	$L__BB0_16;
+	@%p10 bra 	$L__BB0_15;
 
 	ld.shared.f32 	%f64, [_ZZ17reduceminvecnorm2E5sdata];
 	abs.f32 	%f65, %f64;
 	mov.b32 	%r32, %f65;
 	cvta.to.global.u64 	%rd33, %rd15;
-	atom.global.min.s32 	%r33, [%rd33], %r32;
+	red.global.min.s32 	[%rd33], %r32;
 
-$L__BB0_16:
+$L__BB0_15:
+	ret;
+
+}
+
+`
+	reduceminvecnorm2_ptx_72 = `
+.version 8.2
+.target sm_72
+.address_size 64
+
+	// .globl	reduceminvecnorm2
+
+.visible .entry reduceminvecnorm2(
+	.param .u64 reduceminvecnorm2_param_0,
+	.param .u64 reduceminvecnorm2_param_1,
+	.param .u64 reduceminvecnorm2_param_2,
+	.param .u64 reduceminvecnorm2_param_3,
+	.param .f32 reduceminvecnorm2_param_4,
+	.param .u32 reduceminvecnorm2_param_5
+)
+{
+	.reg .pred 	%p<11>;
+	.reg .f32 	%f<71>;
+	.reg .b32 	%r<39>;
+	.reg .b64 	%rd<37>;
+	// demoted variable
+	.shared .align 4 .b8 _ZZ17reduceminvecnorm2E5sdata[2048];
+
+	ld.param.u64 	%rd16, [reduceminvecnorm2_param_0];
+	ld.param.u64 	%rd17, [reduceminvecnorm2_param_1];
+	ld.param.u64 	%rd18, [reduceminvecnorm2_param_2];
+	ld.param.u64 	%rd15, [reduceminvecnorm2_param_3];
+	ld.param.f32 	%f70, [reduceminvecnorm2_param_4];
+	ld.param.u32 	%r17, [reduceminvecnorm2_param_5];
+	cvta.to.global.u64 	%rd1, %rd18;
+	cvta.to.global.u64 	%rd2, %rd17;
+	cvta.to.global.u64 	%rd3, %rd16;
+	mov.u32 	%r38, %ntid.x;
+	mov.u32 	%r18, %ctaid.x;
+	mov.u32 	%r2, %tid.x;
+	mad.lo.s32 	%r36, %r18, %r38, %r2;
+	mov.u32 	%r19, %nctaid.x;
+	mul.lo.s32 	%r4, %r19, %r38;
+	setp.ge.s32 	%p1, %r36, %r17;
+	@%p1 bra 	$L__BB0_7;
+
+	add.s32 	%r20, %r4, %r17;
+	add.s32 	%r21, %r36, %r4;
+	not.b32 	%r22, %r21;
+	add.s32 	%r23, %r20, %r22;
+	div.u32 	%r5, %r23, %r4;
+	add.s32 	%r24, %r5, 1;
+	and.b32  	%r35, %r24, 3;
+	setp.eq.s32 	%p2, %r35, 0;
+	@%p2 bra 	$L__BB0_4;
+
+	mul.wide.s32 	%rd19, %r36, 4;
+	add.s64 	%rd36, %rd1, %rd19;
+	mul.wide.s32 	%rd5, %r4, 4;
+	add.s64 	%rd35, %rd2, %rd19;
+	add.s64 	%rd34, %rd3, %rd19;
+
+$L__BB0_3:
+	.pragma "nounroll";
+	ld.global.nc.f32 	%f10, [%rd34];
+	ld.global.nc.f32 	%f11, [%rd35];
+	mul.f32 	%f12, %f11, %f11;
+	fma.rn.f32 	%f13, %f10, %f10, %f12;
+	ld.global.nc.f32 	%f14, [%rd36];
+	fma.rn.f32 	%f15, %f14, %f14, %f13;
+	min.f32 	%f70, %f70, %f15;
+	add.s32 	%r36, %r36, %r4;
+	add.s64 	%rd36, %rd36, %rd5;
+	add.s64 	%rd35, %rd35, %rd5;
+	add.s64 	%rd34, %rd34, %rd5;
+	add.s32 	%r35, %r35, -1;
+	setp.ne.s32 	%p3, %r35, 0;
+	@%p3 bra 	$L__BB0_3;
+
+$L__BB0_4:
+	setp.lt.u32 	%p4, %r5, 3;
+	@%p4 bra 	$L__BB0_7;
+
+	mul.wide.s32 	%rd14, %r4, 4;
+
+$L__BB0_6:
+	mul.wide.s32 	%rd20, %r36, 4;
+	add.s64 	%rd21, %rd3, %rd20;
+	ld.global.nc.f32 	%f16, [%rd21];
+	add.s64 	%rd22, %rd2, %rd20;
+	ld.global.nc.f32 	%f17, [%rd22];
+	mul.f32 	%f18, %f17, %f17;
+	fma.rn.f32 	%f19, %f16, %f16, %f18;
+	add.s64 	%rd23, %rd1, %rd20;
+	ld.global.nc.f32 	%f20, [%rd23];
+	fma.rn.f32 	%f21, %f20, %f20, %f19;
+	min.f32 	%f22, %f70, %f21;
+	add.s64 	%rd24, %rd21, %rd14;
+	ld.global.nc.f32 	%f23, [%rd24];
+	add.s64 	%rd25, %rd22, %rd14;
+	ld.global.nc.f32 	%f24, [%rd25];
+	mul.f32 	%f25, %f24, %f24;
+	fma.rn.f32 	%f26, %f23, %f23, %f25;
+	add.s64 	%rd26, %rd23, %rd14;
+	ld.global.nc.f32 	%f27, [%rd26];
+	fma.rn.f32 	%f28, %f27, %f27, %f26;
+	min.f32 	%f29, %f22, %f28;
+	add.s32 	%r25, %r36, %r4;
+	add.s32 	%r26, %r25, %r4;
+	add.s64 	%rd27, %rd24, %rd14;
+	ld.global.nc.f32 	%f30, [%rd27];
+	add.s64 	%rd28, %rd25, %rd14;
+	ld.global.nc.f32 	%f31, [%rd28];
+	mul.f32 	%f32, %f31, %f31;
+	fma.rn.f32 	%f33, %f30, %f30, %f32;
+	add.s64 	%rd29, %rd26, %rd14;
+	ld.global.nc.f32 	%f34, [%rd29];
+	fma.rn.f32 	%f35, %f34, %f34, %f33;
+	min.f32 	%f36, %f29, %f35;
+	add.s32 	%r27, %r26, %r4;
+	add.s64 	%rd30, %rd27, %rd14;
+	ld.global.nc.f32 	%f37, [%rd30];
+	add.s64 	%rd31, %rd28, %rd14;
+	ld.global.nc.f32 	%f38, [%rd31];
+	mul.f32 	%f39, %f38, %f38;
+	fma.rn.f32 	%f40, %f37, %f37, %f39;
+	add.s64 	%rd32, %rd29, %rd14;
+	ld.global.nc.f32 	%f41, [%rd32];
+	fma.rn.f32 	%f42, %f41, %f41, %f40;
+	min.f32 	%f70, %f36, %f42;
+	add.s32 	%r36, %r27, %r4;
+	setp.lt.s32 	%p5, %r36, %r17;
+	@%p5 bra 	$L__BB0_6;
+
+$L__BB0_7:
+	shl.b32 	%r28, %r2, 2;
+	mov.u32 	%r29, _ZZ17reduceminvecnorm2E5sdata;
+	add.s32 	%r14, %r29, %r28;
+	st.shared.f32 	[%r14], %f70;
+	bar.sync 	0;
+	setp.lt.u32 	%p6, %r38, 66;
+	@%p6 bra 	$L__BB0_11;
+
+$L__BB0_8:
+	shr.u32 	%r16, %r38, 1;
+	setp.ge.u32 	%p7, %r2, %r16;
+	@%p7 bra 	$L__BB0_10;
+
+	ld.shared.f32 	%f43, [%r14];
+	shl.b32 	%r30, %r16, 2;
+	add.s32 	%r31, %r14, %r30;
+	ld.shared.f32 	%f44, [%r31];
+	min.f32 	%f45, %f43, %f44;
+	st.shared.f32 	[%r14], %f45;
+
+$L__BB0_10:
+	bar.sync 	0;
+	setp.gt.u32 	%p8, %r38, 131;
+	mov.u32 	%r38, %r16;
+	@%p8 bra 	$L__BB0_8;
+
+$L__BB0_11:
+	setp.gt.s32 	%p9, %r2, 31;
+	@%p9 bra 	$L__BB0_13;
+
+	ld.volatile.shared.f32 	%f46, [%r14];
+	ld.volatile.shared.f32 	%f47, [%r14+128];
+	min.f32 	%f48, %f46, %f47;
+	st.volatile.shared.f32 	[%r14], %f48;
+	ld.volatile.shared.f32 	%f49, [%r14+64];
+	ld.volatile.shared.f32 	%f50, [%r14];
+	min.f32 	%f51, %f50, %f49;
+	st.volatile.shared.f32 	[%r14], %f51;
+	ld.volatile.shared.f32 	%f52, [%r14+32];
+	ld.volatile.shared.f32 	%f53, [%r14];
+	min.f32 	%f54, %f53, %f52;
+	st.volatile.shared.f32 	[%r14], %f54;
+	ld.volatile.shared.f32 	%f55, [%r14+16];
+	ld.volatile.shared.f32 	%f56, [%r14];
+	min.f32 	%f57, %f56, %f55;
+	st.volatile.shared.f32 	[%r14], %f57;
+	ld.volatile.shared.f32 	%f58, [%r14+8];
+	ld.volatile.shared.f32 	%f59, [%r14];
+	min.f32 	%f60, %f59, %f58;
+	st.volatile.shared.f32 	[%r14], %f60;
+	ld.volatile.shared.f32 	%f61, [%r14+4];
+	ld.volatile.shared.f32 	%f62, [%r14];
+	min.f32 	%f63, %f62, %f61;
+	st.volatile.shared.f32 	[%r14], %f63;
+
+$L__BB0_13:
+	setp.ne.s32 	%p10, %r2, 0;
+	@%p10 bra 	$L__BB0_15;
+
+	ld.shared.f32 	%f64, [_ZZ17reduceminvecnorm2E5sdata];
+	abs.f32 	%f65, %f64;
+	mov.b32 	%r32, %f65;
+	cvta.to.global.u64 	%rd33, %rd15;
+	red.global.min.s32 	[%rd33], %r32;
+
+$L__BB0_15:
+	ret;
+
+}
+
+`
+	reduceminvecnorm2_ptx_75 = `
+.version 8.2
+.target sm_75
+.address_size 64
+
+	// .globl	reduceminvecnorm2
+
+.visible .entry reduceminvecnorm2(
+	.param .u64 reduceminvecnorm2_param_0,
+	.param .u64 reduceminvecnorm2_param_1,
+	.param .u64 reduceminvecnorm2_param_2,
+	.param .u64 reduceminvecnorm2_param_3,
+	.param .f32 reduceminvecnorm2_param_4,
+	.param .u32 reduceminvecnorm2_param_5
+)
+{
+	.reg .pred 	%p<11>;
+	.reg .f32 	%f<71>;
+	.reg .b32 	%r<39>;
+	.reg .b64 	%rd<37>;
+	// demoted variable
+	.shared .align 4 .b8 _ZZ17reduceminvecnorm2E5sdata[2048];
+
+	ld.param.u64 	%rd16, [reduceminvecnorm2_param_0];
+	ld.param.u64 	%rd17, [reduceminvecnorm2_param_1];
+	ld.param.u64 	%rd18, [reduceminvecnorm2_param_2];
+	ld.param.u64 	%rd15, [reduceminvecnorm2_param_3];
+	ld.param.f32 	%f70, [reduceminvecnorm2_param_4];
+	ld.param.u32 	%r17, [reduceminvecnorm2_param_5];
+	cvta.to.global.u64 	%rd1, %rd18;
+	cvta.to.global.u64 	%rd2, %rd17;
+	cvta.to.global.u64 	%rd3, %rd16;
+	mov.u32 	%r38, %ntid.x;
+	mov.u32 	%r18, %ctaid.x;
+	mov.u32 	%r2, %tid.x;
+	mad.lo.s32 	%r36, %r18, %r38, %r2;
+	mov.u32 	%r19, %nctaid.x;
+	mul.lo.s32 	%r4, %r19, %r38;
+	setp.ge.s32 	%p1, %r36, %r17;
+	@%p1 bra 	$L__BB0_7;
+
+	add.s32 	%r20, %r4, %r17;
+	add.s32 	%r21, %r36, %r4;
+	not.b32 	%r22, %r21;
+	add.s32 	%r23, %r20, %r22;
+	div.u32 	%r5, %r23, %r4;
+	add.s32 	%r24, %r5, 1;
+	and.b32  	%r35, %r24, 3;
+	setp.eq.s32 	%p2, %r35, 0;
+	@%p2 bra 	$L__BB0_4;
+
+	mul.wide.s32 	%rd19, %r36, 4;
+	add.s64 	%rd36, %rd1, %rd19;
+	mul.wide.s32 	%rd5, %r4, 4;
+	add.s64 	%rd35, %rd2, %rd19;
+	add.s64 	%rd34, %rd3, %rd19;
+
+$L__BB0_3:
+	.pragma "nounroll";
+	ld.global.nc.f32 	%f10, [%rd34];
+	ld.global.nc.f32 	%f11, [%rd35];
+	mul.f32 	%f12, %f11, %f11;
+	fma.rn.f32 	%f13, %f10, %f10, %f12;
+	ld.global.nc.f32 	%f14, [%rd36];
+	fma.rn.f32 	%f15, %f14, %f14, %f13;
+	min.f32 	%f70, %f70, %f15;
+	add.s32 	%r36, %r36, %r4;
+	add.s64 	%rd36, %rd36, %rd5;
+	add.s64 	%rd35, %rd35, %rd5;
+	add.s64 	%rd34, %rd34, %rd5;
+	add.s32 	%r35, %r35, -1;
+	setp.ne.s32 	%p3, %r35, 0;
+	@%p3 bra 	$L__BB0_3;
+
+$L__BB0_4:
+	setp.lt.u32 	%p4, %r5, 3;
+	@%p4 bra 	$L__BB0_7;
+
+	mul.wide.s32 	%rd14, %r4, 4;
+
+$L__BB0_6:
+	mul.wide.s32 	%rd20, %r36, 4;
+	add.s64 	%rd21, %rd3, %rd20;
+	ld.global.nc.f32 	%f16, [%rd21];
+	add.s64 	%rd22, %rd2, %rd20;
+	ld.global.nc.f32 	%f17, [%rd22];
+	mul.f32 	%f18, %f17, %f17;
+	fma.rn.f32 	%f19, %f16, %f16, %f18;
+	add.s64 	%rd23, %rd1, %rd20;
+	ld.global.nc.f32 	%f20, [%rd23];
+	fma.rn.f32 	%f21, %f20, %f20, %f19;
+	min.f32 	%f22, %f70, %f21;
+	add.s64 	%rd24, %rd21, %rd14;
+	ld.global.nc.f32 	%f23, [%rd24];
+	add.s64 	%rd25, %rd22, %rd14;
+	ld.global.nc.f32 	%f24, [%rd25];
+	mul.f32 	%f25, %f24, %f24;
+	fma.rn.f32 	%f26, %f23, %f23, %f25;
+	add.s64 	%rd26, %rd23, %rd14;
+	ld.global.nc.f32 	%f27, [%rd26];
+	fma.rn.f32 	%f28, %f27, %f27, %f26;
+	min.f32 	%f29, %f22, %f28;
+	add.s32 	%r25, %r36, %r4;
+	add.s32 	%r26, %r25, %r4;
+	add.s64 	%rd27, %rd24, %rd14;
+	ld.global.nc.f32 	%f30, [%rd27];
+	add.s64 	%rd28, %rd25, %rd14;
+	ld.global.nc.f32 	%f31, [%rd28];
+	mul.f32 	%f32, %f31, %f31;
+	fma.rn.f32 	%f33, %f30, %f30, %f32;
+	add.s64 	%rd29, %rd26, %rd14;
+	ld.global.nc.f32 	%f34, [%rd29];
+	fma.rn.f32 	%f35, %f34, %f34, %f33;
+	min.f32 	%f36, %f29, %f35;
+	add.s32 	%r27, %r26, %r4;
+	add.s64 	%rd30, %rd27, %rd14;
+	ld.global.nc.f32 	%f37, [%rd30];
+	add.s64 	%rd31, %rd28, %rd14;
+	ld.global.nc.f32 	%f38, [%rd31];
+	mul.f32 	%f39, %f38, %f38;
+	fma.rn.f32 	%f40, %f37, %f37, %f39;
+	add.s64 	%rd32, %rd29, %rd14;
+	ld.global.nc.f32 	%f41, [%rd32];
+	fma.rn.f32 	%f42, %f41, %f41, %f40;
+	min.f32 	%f70, %f36, %f42;
+	add.s32 	%r36, %r27, %r4;
+	setp.lt.s32 	%p5, %r36, %r17;
+	@%p5 bra 	$L__BB0_6;
+
+$L__BB0_7:
+	shl.b32 	%r28, %r2, 2;
+	mov.u32 	%r29, _ZZ17reduceminvecnorm2E5sdata;
+	add.s32 	%r14, %r29, %r28;
+	st.shared.f32 	[%r14], %f70;
+	bar.sync 	0;
+	setp.lt.u32 	%p6, %r38, 66;
+	@%p6 bra 	$L__BB0_11;
+
+$L__BB0_8:
+	shr.u32 	%r16, %r38, 1;
+	setp.ge.u32 	%p7, %r2, %r16;
+	@%p7 bra 	$L__BB0_10;
+
+	ld.shared.f32 	%f43, [%r14];
+	shl.b32 	%r30, %r16, 2;
+	add.s32 	%r31, %r14, %r30;
+	ld.shared.f32 	%f44, [%r31];
+	min.f32 	%f45, %f43, %f44;
+	st.shared.f32 	[%r14], %f45;
+
+$L__BB0_10:
+	bar.sync 	0;
+	setp.gt.u32 	%p8, %r38, 131;
+	mov.u32 	%r38, %r16;
+	@%p8 bra 	$L__BB0_8;
+
+$L__BB0_11:
+	setp.gt.s32 	%p9, %r2, 31;
+	@%p9 bra 	$L__BB0_13;
+
+	ld.volatile.shared.f32 	%f46, [%r14];
+	ld.volatile.shared.f32 	%f47, [%r14+128];
+	min.f32 	%f48, %f46, %f47;
+	st.volatile.shared.f32 	[%r14], %f48;
+	ld.volatile.shared.f32 	%f49, [%r14+64];
+	ld.volatile.shared.f32 	%f50, [%r14];
+	min.f32 	%f51, %f50, %f49;
+	st.volatile.shared.f32 	[%r14], %f51;
+	ld.volatile.shared.f32 	%f52, [%r14+32];
+	ld.volatile.shared.f32 	%f53, [%r14];
+	min.f32 	%f54, %f53, %f52;
+	st.volatile.shared.f32 	[%r14], %f54;
+	ld.volatile.shared.f32 	%f55, [%r14+16];
+	ld.volatile.shared.f32 	%f56, [%r14];
+	min.f32 	%f57, %f56, %f55;
+	st.volatile.shared.f32 	[%r14], %f57;
+	ld.volatile.shared.f32 	%f58, [%r14+8];
+	ld.volatile.shared.f32 	%f59, [%r14];
+	min.f32 	%f60, %f59, %f58;
+	st.volatile.shared.f32 	[%r14], %f60;
+	ld.volatile.shared.f32 	%f61, [%r14+4];
+	ld.volatile.shared.f32 	%f62, [%r14];
+	min.f32 	%f63, %f62, %f61;
+	st.volatile.shared.f32 	[%r14], %f63;
+
+$L__BB0_13:
+	setp.ne.s32 	%p10, %r2, 0;
+	@%p10 bra 	$L__BB0_15;
+
+	ld.shared.f32 	%f64, [_ZZ17reduceminvecnorm2E5sdata];
+	abs.f32 	%f65, %f64;
+	mov.b32 	%r32, %f65;
+	cvta.to.global.u64 	%rd33, %rd15;
+	red.global.min.s32 	[%rd33], %r32;
+
+$L__BB0_15:
 	ret;
 
 }
 
 `
 	reduceminvecnorm2_ptx_80 = `
-.version 7.7
+.version 8.2
 .target sm_80
 .address_size 64
 
@@ -2030,12 +2030,12 @@ $L__BB0_7:
 	st.shared.f32 	[%r14], %f70;
 	bar.sync 	0;
 	setp.lt.u32 	%p6, %r38, 66;
-	@%p6 bra 	$L__BB0_12;
+	@%p6 bra 	$L__BB0_11;
 
-$L__BB0_9:
+$L__BB0_8:
 	shr.u32 	%r16, %r38, 1;
 	setp.ge.u32 	%p7, %r2, %r16;
-	@%p7 bra 	$L__BB0_11;
+	@%p7 bra 	$L__BB0_10;
 
 	ld.shared.f32 	%f43, [%r14];
 	shl.b32 	%r30, %r16, 2;
@@ -2044,15 +2044,15 @@ $L__BB0_9:
 	min.f32 	%f45, %f43, %f44;
 	st.shared.f32 	[%r14], %f45;
 
-$L__BB0_11:
+$L__BB0_10:
 	bar.sync 	0;
 	setp.gt.u32 	%p8, %r38, 131;
 	mov.u32 	%r38, %r16;
-	@%p8 bra 	$L__BB0_9;
+	@%p8 bra 	$L__BB0_8;
 
-$L__BB0_12:
+$L__BB0_11:
 	setp.gt.s32 	%p9, %r2, 31;
-	@%p9 bra 	$L__BB0_14;
+	@%p9 bra 	$L__BB0_13;
 
 	ld.volatile.shared.f32 	%f46, [%r14];
 	ld.volatile.shared.f32 	%f47, [%r14+128];
@@ -2079,17 +2079,17 @@ $L__BB0_12:
 	min.f32 	%f63, %f62, %f61;
 	st.volatile.shared.f32 	[%r14], %f63;
 
-$L__BB0_14:
+$L__BB0_13:
 	setp.ne.s32 	%p10, %r2, 0;
-	@%p10 bra 	$L__BB0_16;
+	@%p10 bra 	$L__BB0_15;
 
 	ld.shared.f32 	%f64, [_ZZ17reduceminvecnorm2E5sdata];
 	abs.f32 	%f65, %f64;
 	mov.b32 	%r32, %f65;
 	cvta.to.global.u64 	%rd33, %rd15;
-	atom.global.min.s32 	%r33, [%rd33], %r32;
+	red.global.min.s32 	[%rd33], %r32;
 
-$L__BB0_16:
+$L__BB0_15:
 	ret;
 
 }

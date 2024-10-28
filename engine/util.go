@@ -7,6 +7,7 @@ import (
 	"path"
 	"sort"
 	"strings"
+	"errors"
 
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/data"
@@ -32,6 +33,7 @@ func init() {
 	DeclConst("Mu0", mag.Mu0, "Permittivity of vaccum (Tm/A)")
 	DeclFunc("Print", myprint, "Print to standard output")
 	DeclFunc("LoadFile", LoadFileDSlice, "Load a data file (ovf or dump)")
+	DeclFunc("LoadFileMyDir", LoadFileDSliceMyDir, "Load a data file from the ouput directory")
 	DeclFunc("LoadFileWithoutMem", LoadFileWithoutMem, "")
 	DeclFunc("SetQuantityWithoutMemToConfig", SetQuantityWithoutMemToConfig, "")
 	DeclFunc("LoadFileVector", LoadFileAsConfig, "")
@@ -40,6 +42,22 @@ func init() {
 		"and a specified size nx,ny,nz (remaining arguments)")
 	DeclFunc("NewVectorMask", NewVectorMask, "Makes a 3D array of vectors")
 	DeclFunc("NewScalarMask", NewScalarMask, "Makes a 3D array of scalars")
+	DeclFunc("IsFile", CheckIfFileExists, "Checks if a file at given path exists and returns bool")
+	DeclFunc("IsFileMyDir", CheckIfFileExistsOD, "Checks if a file at given path exists and returns bool")
+}
+
+func CheckIfFileExists(path string) bool {
+	if _, err := os.Stat(path); err == nil {
+		return true
+	} else if errors.Is(err, os.ErrNotExist) {
+		return false
+	} else {
+		panic("State of file " + path + " not known")
+	}
+}
+
+func CheckIfFileExistsOD(filename string) bool {
+	return CheckIfFileExists(OD() + filename)
 }
 
 // Returns a new new slice (3D array) with given number of components and size.
@@ -87,6 +105,10 @@ func Fprintln(filename string, msg ...interface{}) {
 	httpfs.Touch(filename)
 	err := httpfs.Append(filename, []byte(fmt.Sprintln(myFmt(msg)...)))
 	util.FatalErr(err)
+}
+
+func LoadFileDSliceMyDir(fname string) *data.Slice {
+	return LoadFileDSlice(OD() + fname)
 }
 
 // Read a magnetization state from .dump file.

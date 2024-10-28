@@ -84,8 +84,6 @@ func k_scalarProd_async(res unsafe.Pointer, ax unsafe.Pointer, ay unsafe.Pointer
 
 // maps compute capability on PTX code for scalarProd kernel.
 var scalarProd_map = map[int]string{0: "",
-	35: scalarProd_ptx_35,
-	37: scalarProd_ptx_37,
 	50: scalarProd_ptx_50,
 	52: scalarProd_ptx_52,
 	53: scalarProd_ptx_53,
@@ -93,190 +91,14 @@ var scalarProd_map = map[int]string{0: "",
 	61: scalarProd_ptx_61,
 	62: scalarProd_ptx_62,
 	70: scalarProd_ptx_70,
+	72: scalarProd_ptx_72,
+	75: scalarProd_ptx_75,
 	80: scalarProd_ptx_80}
 
 // scalarProd PTX code for various compute capabilities.
 const (
-	scalarProd_ptx_35 = `
-.version 7.7
-.target sm_35
-.address_size 64
-
-	// .globl	scalarProd
-
-.visible .entry scalarProd(
-	.param .u64 scalarProd_param_0,
-	.param .u64 scalarProd_param_1,
-	.param .u64 scalarProd_param_2,
-	.param .u64 scalarProd_param_3,
-	.param .u64 scalarProd_param_4,
-	.param .u64 scalarProd_param_5,
-	.param .u64 scalarProd_param_6,
-	.param .u32 scalarProd_param_7,
-	.param .u32 scalarProd_param_8,
-	.param .u32 scalarProd_param_9
-)
-{
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<10>;
-	.reg .b32 	%r<18>;
-	.reg .b64 	%rd<23>;
-
-
-	ld.param.u64 	%rd1, [scalarProd_param_0];
-	ld.param.u64 	%rd2, [scalarProd_param_1];
-	ld.param.u64 	%rd3, [scalarProd_param_2];
-	ld.param.u64 	%rd4, [scalarProd_param_3];
-	ld.param.u64 	%rd5, [scalarProd_param_4];
-	ld.param.u64 	%rd6, [scalarProd_param_5];
-	ld.param.u64 	%rd7, [scalarProd_param_6];
-	ld.param.u32 	%r4, [scalarProd_param_7];
-	ld.param.u32 	%r5, [scalarProd_param_8];
-	ld.param.u32 	%r6, [scalarProd_param_9];
-	mov.u32 	%r7, %ctaid.x;
-	mov.u32 	%r8, %ntid.x;
-	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r7, %r8, %r9;
-	mov.u32 	%r10, %ntid.y;
-	mov.u32 	%r11, %ctaid.y;
-	mov.u32 	%r12, %tid.y;
-	mad.lo.s32 	%r2, %r11, %r10, %r12;
-	mov.u32 	%r13, %ntid.z;
-	mov.u32 	%r14, %ctaid.z;
-	mov.u32 	%r15, %tid.z;
-	mad.lo.s32 	%r3, %r14, %r13, %r15;
-	setp.ge.s32 	%p1, %r1, %r4;
-	setp.ge.s32 	%p2, %r2, %r5;
-	or.pred  	%p3, %p1, %p2;
-	setp.ge.s32 	%p4, %r3, %r6;
-	or.pred  	%p5, %p3, %p4;
-	@%p5 bra 	$L__BB0_2;
-
-	cvta.to.global.u64 	%rd8, %rd2;
-	mad.lo.s32 	%r16, %r3, %r5, %r2;
-	mad.lo.s32 	%r17, %r16, %r4, %r1;
-	mul.wide.s32 	%rd9, %r17, 4;
-	add.s64 	%rd10, %rd8, %rd9;
-	cvta.to.global.u64 	%rd11, %rd5;
-	add.s64 	%rd12, %rd11, %rd9;
-	ld.global.nc.f32 	%f1, [%rd12];
-	ld.global.nc.f32 	%f2, [%rd10];
-	cvta.to.global.u64 	%rd13, %rd3;
-	add.s64 	%rd14, %rd13, %rd9;
-	cvta.to.global.u64 	%rd15, %rd6;
-	add.s64 	%rd16, %rd15, %rd9;
-	ld.global.nc.f32 	%f3, [%rd16];
-	ld.global.nc.f32 	%f4, [%rd14];
-	mul.f32 	%f5, %f4, %f3;
-	fma.rn.f32 	%f6, %f2, %f1, %f5;
-	cvta.to.global.u64 	%rd17, %rd4;
-	add.s64 	%rd18, %rd17, %rd9;
-	cvta.to.global.u64 	%rd19, %rd7;
-	add.s64 	%rd20, %rd19, %rd9;
-	ld.global.nc.f32 	%f7, [%rd20];
-	ld.global.nc.f32 	%f8, [%rd18];
-	fma.rn.f32 	%f9, %f8, %f7, %f6;
-	cvta.to.global.u64 	%rd21, %rd1;
-	add.s64 	%rd22, %rd21, %rd9;
-	st.global.f32 	[%rd22], %f9;
-
-$L__BB0_2:
-	ret;
-
-}
-
-`
-	scalarProd_ptx_37 = `
-.version 7.7
-.target sm_37
-.address_size 64
-
-	// .globl	scalarProd
-
-.visible .entry scalarProd(
-	.param .u64 scalarProd_param_0,
-	.param .u64 scalarProd_param_1,
-	.param .u64 scalarProd_param_2,
-	.param .u64 scalarProd_param_3,
-	.param .u64 scalarProd_param_4,
-	.param .u64 scalarProd_param_5,
-	.param .u64 scalarProd_param_6,
-	.param .u32 scalarProd_param_7,
-	.param .u32 scalarProd_param_8,
-	.param .u32 scalarProd_param_9
-)
-{
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<10>;
-	.reg .b32 	%r<18>;
-	.reg .b64 	%rd<23>;
-
-
-	ld.param.u64 	%rd1, [scalarProd_param_0];
-	ld.param.u64 	%rd2, [scalarProd_param_1];
-	ld.param.u64 	%rd3, [scalarProd_param_2];
-	ld.param.u64 	%rd4, [scalarProd_param_3];
-	ld.param.u64 	%rd5, [scalarProd_param_4];
-	ld.param.u64 	%rd6, [scalarProd_param_5];
-	ld.param.u64 	%rd7, [scalarProd_param_6];
-	ld.param.u32 	%r4, [scalarProd_param_7];
-	ld.param.u32 	%r5, [scalarProd_param_8];
-	ld.param.u32 	%r6, [scalarProd_param_9];
-	mov.u32 	%r7, %ctaid.x;
-	mov.u32 	%r8, %ntid.x;
-	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r7, %r8, %r9;
-	mov.u32 	%r10, %ntid.y;
-	mov.u32 	%r11, %ctaid.y;
-	mov.u32 	%r12, %tid.y;
-	mad.lo.s32 	%r2, %r11, %r10, %r12;
-	mov.u32 	%r13, %ntid.z;
-	mov.u32 	%r14, %ctaid.z;
-	mov.u32 	%r15, %tid.z;
-	mad.lo.s32 	%r3, %r14, %r13, %r15;
-	setp.ge.s32 	%p1, %r1, %r4;
-	setp.ge.s32 	%p2, %r2, %r5;
-	or.pred  	%p3, %p1, %p2;
-	setp.ge.s32 	%p4, %r3, %r6;
-	or.pred  	%p5, %p3, %p4;
-	@%p5 bra 	$L__BB0_2;
-
-	cvta.to.global.u64 	%rd8, %rd2;
-	mad.lo.s32 	%r16, %r3, %r5, %r2;
-	mad.lo.s32 	%r17, %r16, %r4, %r1;
-	mul.wide.s32 	%rd9, %r17, 4;
-	add.s64 	%rd10, %rd8, %rd9;
-	cvta.to.global.u64 	%rd11, %rd5;
-	add.s64 	%rd12, %rd11, %rd9;
-	ld.global.nc.f32 	%f1, [%rd12];
-	ld.global.nc.f32 	%f2, [%rd10];
-	cvta.to.global.u64 	%rd13, %rd3;
-	add.s64 	%rd14, %rd13, %rd9;
-	cvta.to.global.u64 	%rd15, %rd6;
-	add.s64 	%rd16, %rd15, %rd9;
-	ld.global.nc.f32 	%f3, [%rd16];
-	ld.global.nc.f32 	%f4, [%rd14];
-	mul.f32 	%f5, %f4, %f3;
-	fma.rn.f32 	%f6, %f2, %f1, %f5;
-	cvta.to.global.u64 	%rd17, %rd4;
-	add.s64 	%rd18, %rd17, %rd9;
-	cvta.to.global.u64 	%rd19, %rd7;
-	add.s64 	%rd20, %rd19, %rd9;
-	ld.global.nc.f32 	%f7, [%rd20];
-	ld.global.nc.f32 	%f8, [%rd18];
-	fma.rn.f32 	%f9, %f8, %f7, %f6;
-	cvta.to.global.u64 	%rd21, %rd1;
-	add.s64 	%rd22, %rd21, %rd9;
-	st.global.f32 	[%rd22], %f9;
-
-$L__BB0_2:
-	ret;
-
-}
-
-`
 	scalarProd_ptx_50 = `
-.version 7.7
+.version 8.2
 .target sm_50
 .address_size 64
 
@@ -365,7 +187,7 @@ $L__BB0_2:
 
 `
 	scalarProd_ptx_52 = `
-.version 7.7
+.version 8.2
 .target sm_52
 .address_size 64
 
@@ -454,7 +276,7 @@ $L__BB0_2:
 
 `
 	scalarProd_ptx_53 = `
-.version 7.7
+.version 8.2
 .target sm_53
 .address_size 64
 
@@ -543,7 +365,7 @@ $L__BB0_2:
 
 `
 	scalarProd_ptx_60 = `
-.version 7.7
+.version 8.2
 .target sm_60
 .address_size 64
 
@@ -632,7 +454,7 @@ $L__BB0_2:
 
 `
 	scalarProd_ptx_61 = `
-.version 7.7
+.version 8.2
 .target sm_61
 .address_size 64
 
@@ -721,7 +543,7 @@ $L__BB0_2:
 
 `
 	scalarProd_ptx_62 = `
-.version 7.7
+.version 8.2
 .target sm_62
 .address_size 64
 
@@ -810,7 +632,7 @@ $L__BB0_2:
 
 `
 	scalarProd_ptx_70 = `
-.version 7.7
+.version 8.2
 .target sm_70
 .address_size 64
 
@@ -898,8 +720,186 @@ $L__BB0_2:
 }
 
 `
+	scalarProd_ptx_72 = `
+.version 8.2
+.target sm_72
+.address_size 64
+
+	// .globl	scalarProd
+
+.visible .entry scalarProd(
+	.param .u64 scalarProd_param_0,
+	.param .u64 scalarProd_param_1,
+	.param .u64 scalarProd_param_2,
+	.param .u64 scalarProd_param_3,
+	.param .u64 scalarProd_param_4,
+	.param .u64 scalarProd_param_5,
+	.param .u64 scalarProd_param_6,
+	.param .u32 scalarProd_param_7,
+	.param .u32 scalarProd_param_8,
+	.param .u32 scalarProd_param_9
+)
+{
+	.reg .pred 	%p<6>;
+	.reg .f32 	%f<10>;
+	.reg .b32 	%r<18>;
+	.reg .b64 	%rd<23>;
+
+
+	ld.param.u64 	%rd1, [scalarProd_param_0];
+	ld.param.u64 	%rd2, [scalarProd_param_1];
+	ld.param.u64 	%rd3, [scalarProd_param_2];
+	ld.param.u64 	%rd4, [scalarProd_param_3];
+	ld.param.u64 	%rd5, [scalarProd_param_4];
+	ld.param.u64 	%rd6, [scalarProd_param_5];
+	ld.param.u64 	%rd7, [scalarProd_param_6];
+	ld.param.u32 	%r4, [scalarProd_param_7];
+	ld.param.u32 	%r5, [scalarProd_param_8];
+	ld.param.u32 	%r6, [scalarProd_param_9];
+	mov.u32 	%r7, %ctaid.x;
+	mov.u32 	%r8, %ntid.x;
+	mov.u32 	%r9, %tid.x;
+	mad.lo.s32 	%r1, %r7, %r8, %r9;
+	mov.u32 	%r10, %ntid.y;
+	mov.u32 	%r11, %ctaid.y;
+	mov.u32 	%r12, %tid.y;
+	mad.lo.s32 	%r2, %r11, %r10, %r12;
+	mov.u32 	%r13, %ntid.z;
+	mov.u32 	%r14, %ctaid.z;
+	mov.u32 	%r15, %tid.z;
+	mad.lo.s32 	%r3, %r14, %r13, %r15;
+	setp.ge.s32 	%p1, %r1, %r4;
+	setp.ge.s32 	%p2, %r2, %r5;
+	or.pred  	%p3, %p1, %p2;
+	setp.ge.s32 	%p4, %r3, %r6;
+	or.pred  	%p5, %p3, %p4;
+	@%p5 bra 	$L__BB0_2;
+
+	cvta.to.global.u64 	%rd8, %rd2;
+	mad.lo.s32 	%r16, %r3, %r5, %r2;
+	mad.lo.s32 	%r17, %r16, %r4, %r1;
+	mul.wide.s32 	%rd9, %r17, 4;
+	add.s64 	%rd10, %rd8, %rd9;
+	cvta.to.global.u64 	%rd11, %rd5;
+	add.s64 	%rd12, %rd11, %rd9;
+	ld.global.nc.f32 	%f1, [%rd12];
+	ld.global.nc.f32 	%f2, [%rd10];
+	cvta.to.global.u64 	%rd13, %rd3;
+	add.s64 	%rd14, %rd13, %rd9;
+	cvta.to.global.u64 	%rd15, %rd6;
+	add.s64 	%rd16, %rd15, %rd9;
+	ld.global.nc.f32 	%f3, [%rd16];
+	ld.global.nc.f32 	%f4, [%rd14];
+	mul.f32 	%f5, %f4, %f3;
+	fma.rn.f32 	%f6, %f2, %f1, %f5;
+	cvta.to.global.u64 	%rd17, %rd4;
+	add.s64 	%rd18, %rd17, %rd9;
+	cvta.to.global.u64 	%rd19, %rd7;
+	add.s64 	%rd20, %rd19, %rd9;
+	ld.global.nc.f32 	%f7, [%rd20];
+	ld.global.nc.f32 	%f8, [%rd18];
+	fma.rn.f32 	%f9, %f8, %f7, %f6;
+	cvta.to.global.u64 	%rd21, %rd1;
+	add.s64 	%rd22, %rd21, %rd9;
+	st.global.f32 	[%rd22], %f9;
+
+$L__BB0_2:
+	ret;
+
+}
+
+`
+	scalarProd_ptx_75 = `
+.version 8.2
+.target sm_75
+.address_size 64
+
+	// .globl	scalarProd
+
+.visible .entry scalarProd(
+	.param .u64 scalarProd_param_0,
+	.param .u64 scalarProd_param_1,
+	.param .u64 scalarProd_param_2,
+	.param .u64 scalarProd_param_3,
+	.param .u64 scalarProd_param_4,
+	.param .u64 scalarProd_param_5,
+	.param .u64 scalarProd_param_6,
+	.param .u32 scalarProd_param_7,
+	.param .u32 scalarProd_param_8,
+	.param .u32 scalarProd_param_9
+)
+{
+	.reg .pred 	%p<6>;
+	.reg .f32 	%f<10>;
+	.reg .b32 	%r<18>;
+	.reg .b64 	%rd<23>;
+
+
+	ld.param.u64 	%rd1, [scalarProd_param_0];
+	ld.param.u64 	%rd2, [scalarProd_param_1];
+	ld.param.u64 	%rd3, [scalarProd_param_2];
+	ld.param.u64 	%rd4, [scalarProd_param_3];
+	ld.param.u64 	%rd5, [scalarProd_param_4];
+	ld.param.u64 	%rd6, [scalarProd_param_5];
+	ld.param.u64 	%rd7, [scalarProd_param_6];
+	ld.param.u32 	%r4, [scalarProd_param_7];
+	ld.param.u32 	%r5, [scalarProd_param_8];
+	ld.param.u32 	%r6, [scalarProd_param_9];
+	mov.u32 	%r7, %ctaid.x;
+	mov.u32 	%r8, %ntid.x;
+	mov.u32 	%r9, %tid.x;
+	mad.lo.s32 	%r1, %r7, %r8, %r9;
+	mov.u32 	%r10, %ntid.y;
+	mov.u32 	%r11, %ctaid.y;
+	mov.u32 	%r12, %tid.y;
+	mad.lo.s32 	%r2, %r11, %r10, %r12;
+	mov.u32 	%r13, %ntid.z;
+	mov.u32 	%r14, %ctaid.z;
+	mov.u32 	%r15, %tid.z;
+	mad.lo.s32 	%r3, %r14, %r13, %r15;
+	setp.ge.s32 	%p1, %r1, %r4;
+	setp.ge.s32 	%p2, %r2, %r5;
+	or.pred  	%p3, %p1, %p2;
+	setp.ge.s32 	%p4, %r3, %r6;
+	or.pred  	%p5, %p3, %p4;
+	@%p5 bra 	$L__BB0_2;
+
+	cvta.to.global.u64 	%rd8, %rd2;
+	mad.lo.s32 	%r16, %r3, %r5, %r2;
+	mad.lo.s32 	%r17, %r16, %r4, %r1;
+	mul.wide.s32 	%rd9, %r17, 4;
+	add.s64 	%rd10, %rd8, %rd9;
+	cvta.to.global.u64 	%rd11, %rd5;
+	add.s64 	%rd12, %rd11, %rd9;
+	ld.global.nc.f32 	%f1, [%rd12];
+	ld.global.nc.f32 	%f2, [%rd10];
+	cvta.to.global.u64 	%rd13, %rd3;
+	add.s64 	%rd14, %rd13, %rd9;
+	cvta.to.global.u64 	%rd15, %rd6;
+	add.s64 	%rd16, %rd15, %rd9;
+	ld.global.nc.f32 	%f3, [%rd16];
+	ld.global.nc.f32 	%f4, [%rd14];
+	mul.f32 	%f5, %f4, %f3;
+	fma.rn.f32 	%f6, %f2, %f1, %f5;
+	cvta.to.global.u64 	%rd17, %rd4;
+	add.s64 	%rd18, %rd17, %rd9;
+	cvta.to.global.u64 	%rd19, %rd7;
+	add.s64 	%rd20, %rd19, %rd9;
+	ld.global.nc.f32 	%f7, [%rd20];
+	ld.global.nc.f32 	%f8, [%rd18];
+	fma.rn.f32 	%f9, %f8, %f7, %f6;
+	cvta.to.global.u64 	%rd21, %rd1;
+	add.s64 	%rd22, %rd21, %rd9;
+	st.global.f32 	[%rd22], %f9;
+
+$L__BB0_2:
+	ret;
+
+}
+
+`
 	scalarProd_ptx_80 = `
-.version 7.7
+.version 8.2
 .target sm_80
 .address_size 64
 

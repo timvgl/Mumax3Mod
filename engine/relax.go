@@ -24,17 +24,21 @@ var (
 	RelaxDDUThreshold			float64 = -1.
 	RelaxDUThreshold			float64 = -1.
 	precessRelax				bool = false
+	relaxTime					float64 = 0.
+	varyTime					bool = false
+	
 )
 
 func init() {
 	DeclFunc("Relax", Relax, "Try to minimize the total energy")
 	DeclVar("outputRelax", &outputRelax, "")
 	DeclVar("useHighEta", &useHighEta, "")
+	DeclVar("__varyTime__", &varyTime, "")
 	DeclVar("__prefix_relax__", &prefix, "")
 	DeclVar("__precessRelax__", &precessRelax, "")
 	DeclVar("__relaxing__", &relaxing, "")
 	DeclVar("__printSlope__", &printSlope, "")
-	DeclVar("RelaxDDUThreshold", &RelaxDUThreshold, "")
+	DeclVar("RelaxDDUThreshold", &RelaxDDUThreshold, "")
 	DeclVar("RelaxDUThreshold", &RelaxDUThreshold, "")
 	DeclVar("RelaxFullCoupled", &RelaxFullCoupled, "")
 	DeclVar("IterativeHalfing", &IterativeHalfing, "Half FixDtCoupledRelaxEnergyE n times an calculate minima for energy and force")
@@ -89,6 +93,9 @@ func RelaxMagOutput() {
 		Table.autosave.start = startOutputTable
 		Time = t_1
 	}()
+	if (relaxTime != 0.0) {
+		Time = relaxTime
+	}
 	SetSolver(BOGAKISHAMPINE)
 
 	FixDt = 0
@@ -135,7 +142,7 @@ func RelaxMagOutput() {
 	} else {
 		// previous (<jan2018) behaviour: run as long as torque goes down. Then increase the accuracy and step more.
 		// if MaxErr < 1e-9, this code won't run.
-		var T0, T1 float32 = 0, avgTorque()
+		var T0, T1 float32 = 0, GetAverageTorque()
 		// Step as long as torque goes down. Then increase the accuracy and step more.
 		for MaxErr > 1e-9 && !pause {
 			MaxErr /= math.Sqrt2
@@ -147,6 +154,7 @@ func RelaxMagOutput() {
 			}
 		}
 	}
+	relaxTime = Time
 	pause = true
 }
 
@@ -200,10 +208,19 @@ func RelaxCoupledOutput() {
 	if (useHighEta == true) {
 		Eta.Set(1e6)
 	}
-	
-	SetSolver(MAGELAS_RUNGEKUTTA)
 
-	util.AssertMsg(FixDt != 0, "FixDt has to be defined before Relax() if RelaxFullCoupled = true.")
+	if (relaxTime != 0.0) {
+		Time = relaxTime
+	}
+	
+	if varyTime == false {
+		SetSolver(MAGELAS_RUNGEKUTTA)
+	} else {
+		SetSolver(MAGELAS_RUNGEKUTTA_VARY_TIME)
+	}
+	
+
+	util.AssertMsg(FixDt != 0 && varyTime == false || FixDtM != 0 && FixDtU != 0 && varyTime == true, "FixDt has to be defined before Relax() if RelaxFullCoupled = true.")
 	Precess = precessRelax
 	relaxing = true
 
@@ -212,10 +229,16 @@ func RelaxCoupledOutput() {
 	// then half timesteps and slope, also check if we are in a minimum
 	const N = 3 // evaluate energy (expensive) every N steps
 	FixDtOrg := FixDt
+	FixDtOrgM := FixDtM
+	FixDtOrgU := FixDtU
 	FixDt *= 2
+	FixDtM *= 2
+	FixDtOrgU *= 2
 	valuePrinted := 0
 	for IterativeHalfingIt := 0; IterativeHalfingIt < IterativeHalfing +1; IterativeHalfingIt++ {
 		FixDt /= 2
+		FixDtM /= 2
+		FixDtU  /= 2
 		relaxStepsOutput(N, prefix)
 		E0 := GetTotalEnergySystem()
 		relaxStepsOutput(N, prefix)
@@ -228,14 +251,20 @@ func RelaxCoupledOutput() {
 		slopesLoaded := false
 		//check if energy is extreme point and if it is a minimum
 		//check if average of slope is also lower than treshold -> noise leads to problems otherwise
-		for (math.Abs(2*E1-E2-E0) / (2*N*FixDt) > 2* SlopeTresholdEnergyRelax / float64(((IterativeHalfingIt +1)*2)) || (math.Abs(slope0) + math.Abs(slope1) + math.Abs(slope2)) / 3 > 2*SlopeTresholdEnergyRelax / float64(((IterativeHalfingIt +1)*2)) || (2*slope1-slope2-slope0) / (2*N*FixDt) < 0 || math.IsNaN(slope1) || math.IsNaN(slope2)) && !pause {
+		DtSlope := FixDt
+		if varyTime == true && FixDtM > FixDtU {
+			DtSlope = FixDtM
+		} else if varyTime == true && (FixDtM < FixDtU || FixDtM > FixDtU) {
+			DtSlope = FixDtU
+		}
+		for (math.Abs(2*E1-E2-E0) / (2*N*DtSlope) > 2* SlopeTresholdEnergyRelax / float64(((IterativeHalfingIt +1)*2)) || (math.Abs(slope0) + math.Abs(slope1) + math.Abs(slope2)) / 3 > 2*SlopeTresholdEnergyRelax / float64(((IterativeHalfingIt +1)*2)) || (2*slope1-slope2-slope0) / (2*N*DtSlope) < 0 || math.IsNaN(slope1) || math.IsNaN(slope2)) && !pause {
 			relaxStepsOutput(N, prefix)
 			E0, E1, E2 = E1, E2, GetTotalEnergySystem()
 			//fmt.Println("slope", math.Abs(2*E1-E2-E0) / (2*N*FixDt))
 			if (math.IsNaN(slope1) && !slopesLoaded) {
-				slope1 = (2*E1-E2-E0) / (2*N*FixDt)
+				slope1 = (2*E1-E2-E0) / (2*N*DtSlope)
 			} else if (math.IsNaN(slope2) && !slopesLoaded) {
-				slope2 = (2*E1-E2-E0) / (2*N*FixDt)
+				slope2 = (2*E1-E2-E0) / (2*N*DtSlope)
 				slopesLoaded = true
 			} else if (math.IsNaN(slope1) && slopesLoaded) {
 				slope2 = math.NaN()
@@ -244,7 +273,7 @@ func RelaxCoupledOutput() {
 				slope1 = math.NaN()
 				slopesLoaded = false
 			} else {
-				slope0, slope1, slope2 = slope1, slope2, (2*E1-E2-E0) / (2*N*FixDt)
+				slope0, slope1, slope2 = slope1, slope2, (2*E1-E2-E0) / (2*N*DtSlope)
 			}
 			if printSlope == true {
 				fmt.Printf("\rEnergyslope: %e", slope2)
@@ -252,13 +281,15 @@ func RelaxCoupledOutput() {
 			}
 		}
 	}
-	if printSlope == true && valuePrinted > 1 {
+	if printSlope == true && valuePrinted > 0 {
 		fmt.Printf("\n")
 	}
 	valuePrinted = 0
 
 	// reset FixDt so that we can half it again later
 	FixDt = FixDtOrg
+	FixDtM = FixDtOrgM
+	FixDtU = FixDtOrgU
 	
 	defer stepper.Free() 
 
@@ -267,9 +298,13 @@ func RelaxCoupledOutput() {
 		// redo that with halfing FixDt again
 		var RelaxTorqueThresholdOrg = RelaxTorqueThreshold
 		FixDt *= 2
+		FixDtM *= 2
+		FixDtU *= 2
 		RelaxTorqueThreshold *= 2
 		for IterativeHalfingIt := 0; IterativeHalfingIt < IterativeHalfing +1; IterativeHalfingIt++ {
 			FixDt /= 2
+			FixDtM /= 2
+			FixDtU /= 2
 			RelaxTorqueThreshold /= 2
 			for !pause {
 				T0 := GetMaxTorque()
@@ -288,6 +323,8 @@ func RelaxCoupledOutput() {
 			}
 		}
 		FixDt = FixDtOrg
+		FixDtM = FixDtOrgM
+		FixDtU = FixDtOrgU
 		RelaxTorqueThreshold = RelaxTorqueThresholdOrg
 	} else {
 		// previous (<jan2018) behaviour: run as long as torque goes down. Then increase the accuracy and step more.
@@ -296,8 +333,12 @@ func RelaxCoupledOutput() {
 		var T0, T1 float32 = 0, GetAverageTorque()
 		// Step as long as torque goes down. Then increase the accuracy and step more.
 		FixDt *= 2
+		FixDtM *= 2
+		FixDtU *= 2
 		for IterativeHalfingIt := 0; IterativeHalfingIt < IterativeHalfing +1; IterativeHalfingIt++ {
 			FixDt /= 2
+			FixDtM /= 2
+			FixDtU /= 2
 			for MaxErr > 1e-9 && !pause {
 				MaxErr /= math.Sqrt2
 				relaxStepsOutput(N, prefix) // TODO: Play with other values
@@ -313,27 +354,61 @@ func RelaxCoupledOutput() {
 			}
 		}
 		FixDt = FixDtOrg
+		FixDtM = FixDtOrgM
+		FixDtU = FixDtOrgU
 	}
 
-	if printSlope == true && valuePrinted > 1 {
+	if printSlope == true && valuePrinted > 0 {
 		fmt.Printf("\n")
 	}
 	// Now we do the same we did for the torque for the elastic variables: here the second derivative in time of u
 	valuePrinted = 0
 	if RelaxDDUThreshold > 0 {
 		var RelaxDDUThresholdOrg = RelaxDDUThreshold
+		var DDU0 float64 = GetMaxDisplacementAcceleration()
+		relaxStepsOutput(N, prefix)
+		var DDU1 float64 = GetMaxDisplacementAcceleration()
+		relaxStepsOutput(N, prefix)
+		var DDU2 = GetMaxDisplacementAcceleration()
+		slope0DDU := (2*DDU1-DDU2-DDU0) / (2*N*FixDt)
+		slope1DDU := math.NaN()
+		slope2DDU := math.NaN()
+		slopesLoadedDDU := false
 		FixDt *= 2
+		FixDtM *= 2
+		FixDtU *= 2
 		RelaxDDUThreshold *= 2
-		for IterativeHalfingIt := 0; IterativeHalfingIt < IterativeHalfing +1; IterativeHalfingIt++ {
+		for IterativeHalfingIt := 0; IterativeHalfingIt < 1; IterativeHalfingIt++ {
 			FixDt /= 2
+			FixDtM /= 2
+			FixDtU /= 2
 			RelaxDDUThreshold /= 2
+			DtSlope := FixDt
+			if varyTime == true && FixDtM > FixDtU {
+				DtSlope = FixDtM
+			} else if varyTime == true && (FixDtM < FixDtU || FixDtM > FixDtU) {
+				DtSlope = FixDtU
+			}
 			for !pause {
-				var DDU0 = GetMaxDisplacementAcceleration()
-				for DDU0 > RelaxDDUThreshold && !pause {
+				for (math.Abs(2*DDU1-DDU2-DDU0) / (2*N*DtSlope) > 2* RelaxDDUThreshold / float64(((IterativeHalfingIt +1)*2)) || (math.Abs(slope0DDU) + math.Abs(slope1DDU) + math.Abs(slope2DDU)) / 3 > 2*RelaxDDUThreshold / float64(((IterativeHalfingIt +1)*2)) || (2*slope1DDU-slope2DDU-slope0DDU) / (2*N*DtSlope) < 0 || math.IsNaN(slope1DDU) || math.IsNaN(slope2DDU)) && !pause {
 					relaxStepsOutput(N, prefix)
 					if printSlope == true {
-						fmt.Printf("\rMaximal acceleration displacement: %e", DDU0)
+						fmt.Printf("\rMaximal acceleration displacement slope: %e", slope0DDU)
 						valuePrinted += 1
+					}
+					if (math.IsNaN(slope1DDU) && !slopesLoadedDDU) {
+						slope1DDU = (2*DDU1-DDU2-DDU0) / (2*N*DtSlope)
+					} else if (math.IsNaN(slope2DDU) && !slopesLoadedDDU) {
+						slope2DDU = (2*DDU1-DDU2-DDU0) / (2*N*DtSlope)
+						slopesLoadedDDU = true
+					} else if (math.IsNaN(slope1DDU) && slopesLoadedDDU) {
+						slope2DDU = math.NaN()
+						slopesLoadedDDU = false
+					} else if (math.IsNaN(slope2DDU) && slopesLoadedDDU) {
+						slope1DDU = math.NaN()
+						slopesLoadedDDU = false
+					} else {
+						slope0DDU, slope1DDU, slope2DDU = slope1DDU, slope2DDU, (2*DDU1-DDU2-DDU0) / (2*N*DtSlope)
 					}
 					DDU0 = GetMaxDisplacementAcceleration()
 				}
@@ -345,11 +420,17 @@ func RelaxCoupledOutput() {
 		}
 		RelaxDDUThreshold = RelaxDDUThresholdOrg
 		FixDt = FixDtOrg
+		FixDtM = FixDtOrgM
+		FixDtU = FixDtOrgU
 	} else {
 		var DDU0, DDU1 float64 = 0, GetAverageDisplacementAcceleration()
 		FixDt *= 2
-		for IterativeHalfingIt := 0; IterativeHalfingIt < IterativeHalfing +1; IterativeHalfingIt++ {
+		FixDtM *= 2
+		FixDtU *= 2
+		for IterativeHalfingIt := 0; IterativeHalfingIt < 1; IterativeHalfingIt++ {
 			FixDt /= 2
+			FixDtM /= 2
+			FixDtU /= 2
 			for MaxErr > 1e-9 && !pause {
 				MaxErr /= math.Sqrt2
 				relaxStepsOutput(N, prefix) // TODO: Play with other values
@@ -365,9 +446,11 @@ func RelaxCoupledOutput() {
 			}
 		}
 		FixDt = FixDtOrg
+		FixDtM = FixDtOrgM
+		FixDtU = FixDtOrgU
 	}
 
-	if printSlope == true && valuePrinted > 1 {
+	if printSlope == true && valuePrinted > 0 {
 		fmt.Printf("\n")
 	}
 
@@ -376,9 +459,13 @@ func RelaxCoupledOutput() {
 	if RelaxDUThreshold > 0 {
 		var RelaxDUThresholdOrg = RelaxDUThreshold
 		FixDt *= 2
+		FixDtM *= 2
+		FixDtU *= 2
 		RelaxDUThreshold *= 2
-		for IterativeHalfingIt := 0; IterativeHalfingIt < IterativeHalfing +1; IterativeHalfingIt++ {
+		for IterativeHalfingIt := 0; IterativeHalfingIt < 1; IterativeHalfingIt++ {
 			FixDt /= 2
+			FixDtM /= 2
+			FixDtU /= 2
 			RelaxDUThreshold /= 2
 			for !pause {
 				var DU0 = GetMaxDU()
@@ -398,12 +485,18 @@ func RelaxCoupledOutput() {
 			}
 		}
 		FixDt = FixDtOrg
+		FixDtM = FixDtOrgM
+		FixDtU = FixDtOrgU
 		RelaxDUThreshold = RelaxDUThresholdOrg
 	} else {
 		var DU0, DU1 float64 = 0, GetAverageDU()
 		FixDt *= 2
-		for IterativeHalfingIt := 0; IterativeHalfingIt < IterativeHalfing +1; IterativeHalfingIt++ {
+		FixDtM *= 2
+		FixDtU *= 2
+		for IterativeHalfingIt := 0; IterativeHalfingIt < 1; IterativeHalfingIt++ {
 			FixDt /= 2
+			FixDtM /= 2
+			FixDtU /= 2
 			for MaxErr > 1e-9 && !pause {
 				MaxErr /= math.Sqrt2
 				relaxStepsOutput(N, prefix) // TODO: Play with other values
@@ -419,14 +512,16 @@ func RelaxCoupledOutput() {
 			}
 		}
 		FixDt = FixDtOrg
+		FixDtM = FixDtOrgM
+		FixDtU = FixDtOrgU
 	}
 
-	if printSlope == true && valuePrinted > 1 {
+	if printSlope == true && valuePrinted > 0 {
 		fmt.Printf("\n")
 	}
 
 	valuePrinted = 0
-
+	relaxTime = Time
 	pause = true
 }
 
@@ -474,7 +569,11 @@ func RelaxCoupled() {
 		Eta.Set(1e6)
 	}
 	
-	SetSolver(MAGELAS_RUNGEKUTTA)
+	if varyTime == false {
+		SetSolver(MAGELAS_RUNGEKUTTA)
+	} else {
+		SetSolver(MAGELAS_RUNGEKUTTA_VARY_TIME)
+	}
 
 	//FixDt = 0
 	util.AssertMsg(FixDt != 0, "FixDt has to be defined before Relax() if RelaxFullCoupled = true.")
@@ -592,24 +691,45 @@ func RelaxCoupled() {
 	}
 
 	valuePrinted = 0
-	// Now we do the same we did for the torque for the elastic variables: here the second derivative in time of u
 	if RelaxDDUThreshold > 0 {
 		var RelaxDDUThresholdOrg = RelaxDDUThreshold
-		// run as long as the max torque is above threshold. Then increase the accuracy and step more.
+		var DDU0 float64 = GetMaxDisplacementAcceleration()
+		relaxSteps(N)
+		var DDU1 float64 = GetMaxDisplacementAcceleration()
+		relaxSteps(N)
+		var DDU2 = GetMaxDisplacementAcceleration()
+		slope0DDU := (2*DDU1-DDU2-DDU0) / (2*N*FixDt)
+		slope1DDU := math.NaN()
+		slope2DDU := math.NaN()
+		slopesLoadedDDU := false
 		FixDt *= 2
 		RelaxDDUThreshold *= 2
-		for IterativeHalfingIt := 0; IterativeHalfingIt < IterativeHalfing +1; IterativeHalfingIt++ {
+		for IterativeHalfingIt := 0; IterativeHalfingIt < 1; IterativeHalfingIt++ {
 			FixDt /= 2
 			RelaxDDUThreshold /= 2
 			for !pause {
-				var DDU0 = GetMaxDisplacementAcceleration()
-				for DDU0 > RelaxDDUThreshold && !pause {
+				for (math.Abs(2*DDU1-DDU2-DDU0) / (2*N*FixDt) > 2* RelaxDDUThreshold / float64(((IterativeHalfingIt +1)*2)) || (math.Abs(slope0DDU) + math.Abs(slope1DDU) + math.Abs(slope2DDU)) / 3 > 2*RelaxDDUThreshold / float64(((IterativeHalfingIt +1)*2)) || (2*slope1DDU-slope2DDU-slope0DDU) / (2*N*FixDt) < 0 || math.IsNaN(slope1DDU) || math.IsNaN(slope2DDU)) && !pause {
 					relaxSteps(N)
+					DDU0, DDU1, DDU2 = DDU1, DDU2, GetMaxDisplacementAcceleration()
+
 					if printSlope == true {
-						fmt.Printf("\rMaximal acceleration displacement: %e", DDU0)
+						fmt.Printf("\rMaximal acceleration displacement slope: %e", slope2DDU)
 						valuePrinted += 1
 					}
-					DDU0 = GetMaxDisplacementAcceleration()
+					if (math.IsNaN(slope1DDU) && !slopesLoadedDDU) {
+						slope1DDU = (2*DDU1-DDU2-DDU0) / (2*N*FixDt)
+					} else if (math.IsNaN(slope2DDU) && !slopesLoadedDDU) {
+						slope2DDU = (2*DDU1-DDU2-DDU0) / (2*N*FixDt)
+						slopesLoadedDDU = true
+					} else if (math.IsNaN(slope1DDU) && slopesLoadedDDU) {
+						slope2DDU = math.NaN()
+						slopesLoadedDDU = false
+					} else if (math.IsNaN(slope2DDU) && slopesLoadedDDU) {
+						slope1DDU = math.NaN()
+						slopesLoadedDDU = false
+					} else {
+						slope0DDU, slope1DDU, slope2DDU = slope1DDU, slope2DDU, (2*DDU1-DDU2-DDU0) / (2*N*FixDt)
+					}
 				}
 				MaxErr /= math.Sqrt2
 				if MaxErr < 1e-9 {
@@ -622,7 +742,7 @@ func RelaxCoupled() {
 	} else {
 		var DDU0, DDU1 float64 = 0, GetAverageDisplacementAcceleration()
 		FixDt *= 2
-		for IterativeHalfingIt := 0; IterativeHalfingIt < IterativeHalfing +1; IterativeHalfingIt++ {
+		for IterativeHalfingIt := 0; IterativeHalfingIt < 1; IterativeHalfingIt++ {
 			FixDt /= 2
 			for MaxErr > 1e-9 && !pause {
 				MaxErr /= math.Sqrt2
