@@ -101,7 +101,7 @@ func corePosCPU()[]float64 {
 	m := ValueOf(M_full)
 	defer cuda.Recycle(m)
 
-	m_z := m.Comp(Z).HostCopy().Scalars()
+	m_z := m.Comp(Z).HostCopy("ext_corepos").Scalars()
 	s := m.Size()
 	Nx, Ny, Nz := s[X], s[Y], s[Z]
 
@@ -138,7 +138,7 @@ func corePosCPU()[]float64 {
 	if rM {
 		defer cuda.Recycle(msat)
 	}
-	pos[Z] = float64(m_z[maxZ][maxY][maxX]) / float64(msat.HostCopy().Scalars()[maxZ][maxY][maxX]) // 3rd coordinate is core polarization
+	pos[Z] = float64(m_z[maxZ][maxY][maxX]) / float64(msat.HostCopy("ext_corepos").Scalars()[maxZ][maxY][maxX]) // 3rd coordinate is core polarization
 	pos[X] += GetShiftPos() // add simulation window shift
 	CorePosRT = pos
 	return pos
@@ -204,7 +204,7 @@ func corePosElasticCPU()[]float64 {
 	defer cuda.Recycle(displacementNormGPU)
 	cuda.Zero(displacementNormGPU)
 	cuda.Norm(displacementNormGPU, U.Buffer(), U.Mesh())
-	displacementNormCPU := displacementNormGPU.HostCopy().Scalars()
+	displacementNormCPU := displacementNormGPU.HostCopy("ext_corepos").Scalars()
 
 	s := U.Mesh().Size()
 	Nx, Ny, Nz := s[X], s[Y], s[Z]

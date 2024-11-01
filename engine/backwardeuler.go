@@ -21,7 +21,7 @@ func (s *BackwardEuler) Step() {
 
 	y0 := cuda.Buffer(VECTOR, y.Size())
 	defer cuda.Recycle(y0)
-	data.Copy(y0, y)
+	data.Copy(y0, y, "bwE")
 
 	dy0 := cuda.Buffer(VECTOR, y.Size())
 	defer cuda.Recycle(dy0)

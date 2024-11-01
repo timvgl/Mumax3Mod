@@ -2,11 +2,6 @@ package engine
 
 import (
 	"fmt"
-	"github.com/mumax/3/cuda"
-	"github.com/mumax/3/cuda/cu"
-	"github.com/mumax/3/gui"
-	"github.com/mumax/3/httpfs"
-	"github.com/mumax/3/util"
 	"math/rand"
 	"net"
 	"net/http"
@@ -15,6 +10,12 @@ import (
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/mumax/3/cuda"
+	"github.com/mumax/3/cuda/cu"
+	"github.com/mumax/3/gui"
+	"github.com/mumax/3/httpfs"
+	"github.com/mumax/3/util"
 )
 
 // global GUI state stores what is currently shown in the web page.
@@ -78,9 +79,9 @@ type Param interface {
 	IsUniform() bool
 }
 
-func GUIAdd(name string, value interface{}) {
-	gui_.Add(name, value)
-}
+//func GUIAdd(name string, value interface{}) {
+//	gui_.Add(name, value)
+//}
 
 // Internal:add a quantity to the GUI, will be visible in web interface.
 // Automatically called by Decl*(), still before PrepareServer()
@@ -309,7 +310,7 @@ var (
 )
 
 func Break() {
-	Inject <- func() { pause = true }
+	Inject <- func() { Pause = true }
 }
 
 // see prepareServer
@@ -453,8 +454,8 @@ func (g *guistate) prepareOnUpdate() {
 			g.Set("mindt", MinDt)
 			g.Set("maxdt", MaxDt)
 			g.Set("fixdt", FixDt)
-			g.Set("solvertype", fmt.Sprint(solvernames[solvertype]))
-			if pause {
+			g.Set("solvertype", fmt.Sprint(solvernames[Solvertype]))
+			if Pause {
 				g.Set("busy", "Paused")
 			} else {
 				g.Set("busy", "Running")
@@ -501,7 +502,8 @@ func (g *guistate) prepareOnUpdate() {
 }
 
 // Returns documentation string for quantity name. E.g.:
-// 	"m" -> "Reduced magnetization"
+//
+//	"m" -> "Reduced magnetization"
 func (g *guistate) Doc(quant string) string {
 	doc, ok := World.Doc[quant]
 	if !ok {
@@ -511,7 +513,8 @@ func (g *guistate) Doc(quant string) string {
 }
 
 // Returns unit for quantity name. E.g.:
-// 	"Msat" -> "A/m"
+//
+//	"Msat" -> "A/m"
 func (g *guistate) UnitOf(quant string) string {
 	p := g.Params[quant]
 	if p != nil {

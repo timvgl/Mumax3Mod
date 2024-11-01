@@ -19,7 +19,7 @@ type DemagConvolution struct {
 	bwPlan           fft3DC2RPlan      // Backward FFT (1 component)
 }
 
-// Initializes a convolution to evaluate the demag field for the given mesh geometry.
+// Initializes a convolution to evaluate the demag field for the given mesh Geometry.
 // Sanity-checked if test == true (slow-ish for large meshes).
 func NewDemag(inputSize, PBC [3]int, kernel [3][3]*data.Slice, test bool) *DemagConvolution {
 	c := new(DemagConvolution)
@@ -155,9 +155,9 @@ func (c *DemagConvolution) init(realKern [3][3]*data.Slice) {
 		for j := i; j < 3; j++ { // upper triangular part
 			if realKern[i][j] != nil { // ignore 0's
 				// FW FFT
-				data.Copy(input, realKern[i][j])
+				data.Copy(input, realKern[i][j], "demag1")
 				c.fwPlan.ExecAsync(input, output)
-				data.Copy(kfull, output)
+				data.Copy(kfull, output, "demag2")
 
 				// extract non-redundant part (Y,Z symmetry)
 				for iz := 0; iz < kCSize[Z]; iz++ {
@@ -170,7 +170,7 @@ func (c *DemagConvolution) init(realKern [3][3]*data.Slice) {
 
 				// extract real parts (X symmetry)
 				scaleRealParts(fftKern, kCmplx, 1/float32(c.fwPlan.InputLen()))
-				c.kern[i][j] = GPUCopy(fftKern)
+				c.kern[i][j] = GPUCopy(fftKern, "demag3")
 			}
 		}
 	}

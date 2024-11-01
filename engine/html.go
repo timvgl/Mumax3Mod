@@ -179,7 +179,7 @@ const templText = `
 
 
 
-{{.Data.Div "geometry"}}
+{{.Data.Div "Geometry"}}
 
 SetGeom( {{.Data.Shapes | .SelectArray "geomselect" "Universe"}} {{.TextBox "geomargs" "()" }} ) {{.Button "setgeom" "Set"}} </br>
 {{.Span "geomdoc" "" "style=\"color:gray\""}}

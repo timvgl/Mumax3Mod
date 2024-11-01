@@ -28,12 +28,12 @@ func (_ *elasYOSH) Step() {
 	//SetFreezeDisp()
 	u0 := cuda.Buffer(3, size)
 	defer cuda.Recycle(u0)
-	data.Copy(u0, u)
+	data.Copy(u0, u, "elastic_yoshida_1")
 
 	v := DU.Buffer()
 	v0 := cuda.Buffer(3, size)
 	defer cuda.Recycle(v0)
-	data.Copy(v0, v)
+	data.Copy(v0, v, "elastic_yoshida_1")
 
 	a1, a2, a3 := cuda.Buffer(3, size), cuda.Buffer(3, size), cuda.Buffer(3, size)
 

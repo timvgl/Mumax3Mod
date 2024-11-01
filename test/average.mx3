@@ -1,8 +1,8 @@
 /*
-	Test for averages with a non-universe geometry.
-	Magnetization should be averaged over the geometry,
+	Test for averages with a non-universe Geometry.
+	Magnetization should be averaged over the Geometry,
 	while others should average over the box (parameters, external excitations).
-	Finally, test averages over a region (ignores geometry).
+	Finally, test averages over a region (ignores Geometry).
 */
 
 N := 512
@@ -20,13 +20,13 @@ defregion(2, xrange( 0, inf))
 
 m = uniform(0, 1, 0)
 
-// Magnetization should average over the geometry
+// Magnetization should average over the Geometry
 expectv("m", m.average(), vector(0, 1, 0), tol)
 expect("mx", m.comp(0).average(), 0, tol)
 expect("my", m.comp(1).average(), 1, tol)
 expect("mz", m.comp(2).average(), 0, tol)
 
-// Average over region ignores geometry, 
+// Average over region ignores Geometry, 
 // so here average m feels the surface of the disk
 expectv("m1", m.region(1).average(), vector(0, pi/4, 0), tol)
 expect("m1x", m.region(1).average()[0],      0,    tol)

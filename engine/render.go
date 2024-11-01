@@ -94,7 +94,7 @@ func (ren *render) download() {
 		}
 		for c := 0; c < quant.NComp(); c++ {
 			cuda.Resize(ren.rescaleBuf, buf.Comp(c), renderLayer)
-			data.Copy(ren.imgBuf.Comp(c), ren.rescaleBuf)
+			data.Copy(ren.imgBuf.Comp(c), ren.rescaleBuf, "render_download")
 		}
 	})
 }

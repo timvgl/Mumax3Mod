@@ -93,7 +93,7 @@ func SaveAs(q Quantity, fname string) {
 	buffer := ValueOf(q) // TODO: check and optimize for Buffer()
 	defer cuda.Recycle(buffer)
 	info := data.Meta{Time: Time, Name: NameOf(q), Unit: UnitOf(q), CellSize: MeshOf(q).CellSize()}
-	data := buffer.HostCopy() // must be copy (async io)
+	data := buffer.HostCopy("SaveAs") // must be copy (async io)
 	queOutput(func() { saveAs_sync(fname, data, info, outputFormat) })
 }
 
@@ -103,7 +103,7 @@ func Snapshot(q Quantity) {
 	fname := fmt.Sprintf(OD()+FilenameFormat+"."+SnapshotFormat, qname, autonumSnapshots[qname])
 	s := ValueOf(q)
 	defer cuda.Recycle(s)
-	data := s.HostCopy() // must be copy (asyncio)
+	data := s.HostCopy("Snapshot") // must be copy (asyncio)
 	queOutput(func() { snapshot_sync(fname, data) })
 	autonumSnapshots[qname]++
 } 
@@ -113,7 +113,7 @@ func SnapshotPrefix(q Quantity, prefix string) {
 	fname := fmt.Sprintf(OD()+FilenameFormat+"."+SnapshotFormat, prefix  + "_" + qname, autonumSnapshotsPrefix[qname])
 	s := ValueOf(q)
 	defer cuda.Recycle(s)
-	data := s.HostCopy() // must be copy (asyncio)
+	data := s.HostCopy("SnapshotPrefix") // must be copy (asyncio)
 	queOutput(func() { snapshot_sync(fname, data) })
 	autonumSnapshotsPrefix[qname]++
 }
@@ -123,7 +123,7 @@ func SnapshotAsOverwrite(q Quantity, name string) {
 	fname := fmt.Sprintf(OD()+FilenameFormat+"."+SnapshotFormat, name, autonumSnapshotsAs[qname])
 	s := ValueOf(q)
 	defer cuda.Recycle(s)
-	data := s.HostCopy() // must be copy (asyncio)
+	data := s.HostCopy("SnapshotAsOverwrite") // must be copy (asyncio)
 	queOutput(func() { snapshot_sync(fname, data) })
 	autonumSnapshotsAs[qname]++
 }
@@ -133,7 +133,7 @@ func SnapshotAsOverwritePrefix(q Quantity, prefix, name string) {
 	fname := fmt.Sprintf(OD()+FilenameFormat+"."+SnapshotFormat, prefix + "_" + name, autonumSnapshotsPrefixAs[qname])
 	s := ValueOf(q)
 	defer cuda.Recycle(s)
-	data := s.HostCopy() // must be copy (asyncio)
+	data := s.HostCopy("SnapshotAsOverwritePrefix") // must be copy (asyncio)
 	queOutput(func() { snapshot_sync(fname, data) })
 	autonumSnapshotsPrefixAs[qname]++
 }
@@ -148,7 +148,7 @@ func SnapshotAs(q Quantity, fname string) {
 	}
 	s := ValueOf(q)
 	defer cuda.Recycle(s)
-	data := s.HostCopy() // must be copy (asyncio)
+	data := s.HostCopy("SnapshotAs") // must be copy (asyncio)
 	queOutput(func() { snapshot_sync(fname, data) })
 }
 

@@ -36,7 +36,7 @@ func (u *displacement) Eval() interface{}       { return u }
 func (u *displacement) average() []float64      { return sAverageMagnet(u.Buffer()) }
 func (u *displacement) Average() data.Vector    { return unslice(u.average()) }
 
-//func (u *displacement) normalize()              { cuda.Normalize(u.Buffer(), geometry.Gpu()) }
+//func (u *displacement) normalize()              { cuda.Normalize(u.Buffer(), Geometry.Gpu()) }
 //func (u *displacement) Strain()              { return Strain(u) }
 
 // allocate storage (not done by init, as mesh size may not yet be known then)
@@ -49,7 +49,7 @@ func (b *displacement) SetArray(src *data.Slice) {
 	if src.Size() != b.Mesh().Size() {
 		src = data.Resample(src, b.Mesh().Size())
 	}
-	data.Copy(b.Buffer(), src)
+	data.Copy(b.Buffer(), src, "DisplacementSetArray")
 	//b.normalize()
 }
 
@@ -85,12 +85,12 @@ func (u *displacement) Slice() (s *data.Slice, recycle bool) {
 }
 
 func (u *displacement) EvalTo(dst *data.Slice) {
-	data.Copy(dst, u.buffer_)
+	data.Copy(dst, u.buffer_, "DisplacementEvalTo")
 }
 
 func (u *displacement) Region(r int) *vOneReg { return vOneRegion(u, r) }
 
-func (u *displacement) String() string { return util.Sprint(u.Buffer().HostCopy()) }
+func (u *displacement) String() string { return util.Sprint(u.Buffer().HostCopy("DisplacementString")) }
 
 // Set the value of one cell.
 func (u *displacement) SetCell(ix, iy, iz int, v data.Vector) {
@@ -116,7 +116,7 @@ func (u *displacement) SetInShape(region Shape, conf Config) {
 	if region == nil {
 		region = universe
 	}
-	host := u.Buffer().HostCopy()
+	host := u.Buffer().HostCopy("DisplacementSetInShape")
 	h := host.Vectors()
 	n := u.Mesh().Size()
 
@@ -139,7 +139,7 @@ func (u *displacement) SetInShape(region Shape, conf Config) {
 
 // set u to config in region
 func (u *displacement) SetRegion(region int, conf Config) {
-	host := u.Buffer().HostCopy()
+	host := u.Buffer().HostCopy("DisplacementSetRegion")
 	h := host.Vectors()
 	n := u.Mesh().Size()
 	r := byte(region)
@@ -164,10 +164,10 @@ func (u *displacement) SetRegion(region int, conf Config) {
 }
 
 func (u *displacement) resize() {
-	backup := u.Buffer().HostCopy()
+	backup := u.Buffer().HostCopy("DisplacenentResize")
 	s2 := Mesh().Size()
 	resized := data.Resample(backup, s2)
 	u.buffer_.Free()
 	u.buffer_ = cuda.NewSlice(VECTOR, s2)
-	data.Copy(u.buffer_, resized)
+	data.Copy(u.buffer_, resized, "DisplacenentResize")
 }

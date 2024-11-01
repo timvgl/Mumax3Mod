@@ -22,7 +22,7 @@ func (s *RK4) Step() {
 	// backup copy of Y
 	Y0 := cuda.Buffer(nComp, size)
 	defer cuda.Recycle(Y0)
-	data.Copy(Y0, Y)
+	data.Copy(Y0, Y, "rk4")
 
 	k1 := cuda.Buffer(nComp, size)
 	k2 := cuda.Buffer(nComp, size)

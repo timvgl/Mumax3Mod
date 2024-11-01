@@ -117,6 +117,14 @@ func GetThermalEnergy() float64 {
 	}
 }
 
+func GetThermalEnergyElastic() float64 {
+	if Temp.isZero() || relaxing {
+		return 0
+	} else {
+		return -cellVolume() * dot(&M_full, &B_therm)
+	}
+}
+
 // Seeds the thermal noise generator
 func ThermSeed(seed int) {
 	B_therm.seed = int64(seed)
@@ -130,7 +138,7 @@ func (b *thermField) NComp() int             { return 3 }
 func (b *thermField) Name() string           { return "Thermal field" }
 func (b *thermField) Unit() string           { return "T" }
 func (b *thermField) average() []float64     { return qAverageUniverse(b) }
-func (b *thermField) EvalTo(dst *data.Slice) { EvalTo(b, dst) }
+func (b *thermField) EvalTo(dst *data.Slice) { EvalTo(b, dst, "temper") }
 func (b *thermField) Slice() (*data.Slice, bool) {
 	b.update()
 	return b.noise, false

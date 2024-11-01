@@ -132,6 +132,7 @@ getelasticforce(float* __restrict__  fx, float* __restrict__  fy, float* __restr
 		z_shear_m1_in_bndry = true;
 	}
 
+
 	float3 z_shear_p1 = make_float3(0.0f, 0.0f, 0.0f);     // +1
 	bool z_shear_p1_in_bndry = false;
 	i_ = idx(ix, iy, lclampx(iz+1));                // load neighbor shear strain if inside grid, keep 0 otherwise

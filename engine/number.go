@@ -2,6 +2,7 @@ package engine
 
 import (
 	"reflect"
+	"fmt"
 )
 
 // TODO: wrap around outputValue
@@ -28,4 +29,9 @@ func (p *inputValue) Eval() interface{}       { return p.v }
 func (p *inputValue) SetValue(v interface{}) {
 	p.v = v.(float64)
 	p.onSet()
+}
+
+func (p *inputValue) GetRegionToString(int) string {
+	v := p.v
+	return fmt.Sprintf("%g", v)
 }

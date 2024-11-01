@@ -1,6 +1,6 @@
 /*
 	Test DMI + exchange for 3D simulation.
-	Reference solution from the same geometry with 2D discretization.
+	Reference solution from the same Geometry with 2D discretization.
 */
 
 SetGridSize(64, 64, 2)

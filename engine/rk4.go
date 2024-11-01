@@ -23,7 +23,7 @@ func (rk *RK4) Step() {
 	// backup magnetization
 	m0 := cuda.Buffer(3, size)
 	defer cuda.Recycle(m0)
-	data.Copy(m0, m)
+	data.Copy(m0, m, "rk4_1")
 
 	k1, k2, k3, k4 := cuda.Buffer(3, size), cuda.Buffer(3, size), cuda.Buffer(3, size), cuda.Buffer(3, size)
 
@@ -70,7 +70,7 @@ func (rk *RK4) Step() {
 		// undo bad step
 		util.Assert(FixDt == 0)
 		Time = t0
-		data.Copy(m, m0)
+		data.Copy(m, m0, "rk4_2")
 		NUndone++
 		adaptDt(math.Pow(MaxErr/err, 1./5.))
 	}

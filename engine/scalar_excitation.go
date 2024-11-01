@@ -6,6 +6,7 @@ import (
 	"github.com/mumax/3/script"
 	"github.com/mumax/3/util"
 	"reflect"
+	"fmt"
 )
 
 // An excitation, typically field or current,
@@ -123,4 +124,8 @@ func (e *ScalarExcitation) Comp(c int) ScalarField  { return Comp(e, c) }
 func (e *ScalarExcitation) Eval() interface{}       { return e }
 func (e *ScalarExcitation) Type() reflect.Type      { return reflect.TypeOf(new(ScalarExcitation)) }
 func (e *ScalarExcitation) InputType() reflect.Type { return script.ScalarFunction_t }
-func (e *ScalarExcitation) EvalTo(dst *data.Slice)  { EvalTo(e, dst) }
+func (e *ScalarExcitation) EvalTo(dst *data.Slice)  { EvalTo(e, dst, "scalar_exc") }
+
+func (e *ScalarExcitation) GetRegionToString(region int) string {
+	return fmt.Sprintf("%g", e.perRegion.GetRegion(region))
+}

@@ -2,8 +2,11 @@
 
 *IMPORTANT NOTE: this repository is not the official mumax3-ME repository. The official mumax3-ME repository can be found [here](https://github.com/Fredericvdv/Magnetoelasticity_MuMax3).*
 
+*IMPORTANT NOTE: this repository is not the official amumax repository. The official amumax repository can be found [here](https://github.com/MathieuMoalic/amumax).*
+
 
 This repository contains an extended Mumax3-ME version.<br />
+The webinterface is used from [here](https://github.com/MathieuMoalic/amumax).
 The functions have mainly been tested for reasearching vortices in magnetic systems.<br />
 The following changes are implemented:<br />
 

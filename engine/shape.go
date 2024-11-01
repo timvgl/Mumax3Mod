@@ -33,8 +33,9 @@ func init() {
 		"height (third argument). The last argument is a seed for the random number generator.")
 }
 
-// geometrical shape for setting sample geometry
+// geometrical shape for setting sample Geometry
 type Shape func(x, y, z float64) bool
+
 
 // Ellipsoid with given diameters
 func Ellipsoid(diamx, diamy, diamz float64) Shape {

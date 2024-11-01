@@ -7,6 +7,7 @@ import (
 	"github.com/mumax/3/data"
 	"github.com/mumax/3/util"
 	"math"
+	//"fmt"
 )
 
 var (
@@ -101,9 +102,9 @@ func GetElasticForceDensity(dst *data.Slice) {
 
 	stress_shear := ValueOf(shear_stress.Quantity)
 	defer cuda.Recycle(stress_shear)
-
 	cuda.GetElasticForceDensity(dst,
-		stress_norm, stress_shear, M.Mesh())
+		stress_norm, stress_shear, U.Mesh())
+
 }
 
 func GetDisplacementSpeedForceDensity(dst *data.Slice) {
@@ -133,6 +134,8 @@ func GetDisplacementForceDensity(dst *data.Slice) {
 	}
 
 	F_elRef := ValueOf(F_el.Quantity)
+	//F_elRef := cuda.Buffer(3, Mesh().Size())
+	//GetElasticForceDensity(F_elRef)
 	defer cuda.Recycle(F_elRef)
 
 	F_melRef := ValueOf(F_mel.Quantity)
@@ -143,7 +146,6 @@ func GetDisplacementForceDensity(dst *data.Slice) {
 
 	bf, _ := Bf.Slice()
 	defer cuda.Recycle(bf)
-
 	cuda.Madd4(dst, F_elRef, F_melRef, bf, etadudtRef, 1, 1, 1, -1)
 }
 
@@ -175,7 +177,16 @@ func GetAverageDisplacementAcceleration() float64 {
 	defer cuda.Recycle(buf)
 	cuda.Zero(buf)
 	GetDisplacementAcceleration(buf)
-	avergeDDU := sAverageMagnet(buf)
+	avergeDDU := sAverageUniverse(buf)
+	return float64(math.Sqrt(math.Pow(avergeDDU[0], 2) + math.Pow(avergeDDU[1], 2) + math.Pow(avergeDDU[2], 2)))
+}
+
+func GetAverageDisplacementAccelerationIgnoreNaN() float64 {
+	buf := cuda.Buffer(3, Mesh().Size())
+	defer cuda.Recycle(buf)
+	cuda.Zero(buf)
+	GetDisplacementAcceleration(buf)
+	avergeDDU := sAverageUniverseIgnoreNaN(buf)
 	return float64(math.Sqrt(math.Pow(avergeDDU[0], 2) + math.Pow(avergeDDU[1], 2) + math.Pow(avergeDDU[2], 2)))
 }
 

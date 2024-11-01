@@ -69,7 +69,7 @@ func (mini *Minimizer) Step() {
 	// save original magnetization
 	m0 := cuda.Buffer(3, size)
 	defer cuda.Recycle(m0)
-	data.Copy(m0, m)
+	data.Copy(m0, m, "minimizer_1")
 
 	// make descent
 	cuda.Minimize(m, m0, k, h)
@@ -77,7 +77,7 @@ func (mini *Minimizer) Step() {
 	// calculate new torque for next step
 	k0 := cuda.Buffer(3, size)
 	defer cuda.Recycle(k0)
-	data.Copy(k0, k)
+	data.Copy(k0, k, "minimizer_1")
 	torqueFn(k)
 	setMaxTorque(k) // report to user
 
@@ -123,7 +123,7 @@ func Minimize() {
 	Refer("exl2014")
 	SanityCheck()
 	// Save the settings we are changing...
-	prevType := solvertype
+	prevType := Solvertype
 	prevFixDt := FixDt
 	prevPrecess := Precess
 	t0 := Time
@@ -158,5 +158,5 @@ func Minimize() {
 	}
 
 	RunWhile(cond)
-	pause = true
+	Pause = true
 }

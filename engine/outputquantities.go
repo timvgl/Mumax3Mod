@@ -108,7 +108,7 @@ type fieldFunc struct {
 
 func (c *fieldFunc) Mesh() *data.Mesh       { return Mesh() }
 func (c *fieldFunc) average() []float64     { return qAverageUniverse(c) }
-func (c *fieldFunc) EvalTo(dst *data.Slice) { EvalTo(c, dst) }
+func (c *fieldFunc) EvalTo(dst *data.Slice) { EvalTo(c, dst, "outputqtty") }
 
 // Calculates and returns the quantity.
 // recycle is true: slice needs to be recycled.
@@ -165,5 +165,5 @@ func (v VectorField) Unit() string             { return UnitOf(v.Quantity) }
 func (v VectorField) HostCopy() *data.Slice {
 	s := ValueOf(v.Quantity)
 	defer cuda.Recycle(s)
-	return s.HostCopy()
+	return s.HostCopy("vectorfield_HostCopy")
 }

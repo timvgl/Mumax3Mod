@@ -16,7 +16,7 @@ type Solver struct {
 	Time   *float64
 	dt     float64
 	inject chan func()
-	pause  bool
+	Pause  bool
 	nsteps int
 
 	Y          *data.Slice
@@ -71,15 +71,15 @@ func (s *Solver) Func(dst *data.Slice) {
 
 func (s *Solver) RunWhile(condition func() bool) {
 	// TODO: sanity check
-	s.pause = false // may be set by <-Inject
+	s.Pause = false // may be set by <-Inject
 	const output = true
 	s.runWhile(condition, output)
-	s.pause = true
+	s.Pause = true
 }
 
 func (s *Solver) runWhile(condition func() bool, output bool) {
 	//DoOutput() // allow t=0 output   // TODO
-	for condition() && !s.pause {
+	for condition() && !s.Pause {
 		select {
 		default:
 			s.step(output)

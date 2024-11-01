@@ -4,31 +4,35 @@ package engine
 
 import (
 	"flag"
-	"github.com/mumax/3/cuda"
-	"github.com/mumax/3/util"
 	"os"
 	"path"
+
+	"github.com/mumax/3/cuda"
+	"github.com/mumax/3/util"
 )
 
 var (
 	// These flags are shared between cmd/mumax3 and Go input files.
+	Flag_debug       = flag.Bool("debug", false, "debug code")
 	Flag_cachedir    = flag.String("cache", os.TempDir(), "Kernel cache directory (empty disables caching)")
 	Flag_gpu         = flag.Int("gpu", 0, "Specify GPU")
 	Flag_interactive = flag.Bool("i", false, "Open interactive browser session")
 	Flag_od          = flag.String("o", "", "Override output directory")
-	Flag_port        = flag.String("http", ":35367", "Port to serve web gui")
+	Flag_port        = flag.String("webUIPort", "35367", "Port to serve web gui") //change to without :
 	Flag_selftest    = flag.Bool("paranoid", false, "Enable convolution self-test for cuFFT sanity.")
 	Flag_silent      = flag.Bool("s", false, "Silent") // provided for backwards compatibility
 	Flag_sync        = flag.Bool("sync", false, "Synchronize all CUDA calls (debug)")
 	Flag_forceclean  = flag.Bool("f", false, "Force start, clean existing output directory")
+	Flag_tunnel      = flag.String("tunnel", "", "tunnel through proxy")
+	Flag_webUIHost   = flag.String("webUIHost", "localhost", "give different ip")
 )
 
 // Usage: in every Go input file, write:
 //
-// 	func main(){
-// 		defer InitAndClose()()
-// 		// ...
-// 	}
+//	func main(){
+//		defer InitAndClose()()
+//		// ...
+//	}
 //
 // This initialises the GPU, output directory, etc,
 // and makes sure pending output will get flushed.

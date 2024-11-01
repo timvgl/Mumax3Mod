@@ -1,5 +1,5 @@
 /*
-	2D Geometry test: average m should use volume of geometry, not box
+	2D Geometry test: average m should use volume of Geometry, not box
 */
 
 N := 128

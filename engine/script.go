@@ -3,10 +3,14 @@ package engine
 // declare functionality for interpreted input scripts
 
 import (
-	"github.com/mumax/3/httpfs"
-	"github.com/mumax/3/script"
 	"reflect"
+
+	"github.com/mumax/3/httpfs"
+	"github.com/mumax/3/log"
+	"github.com/mumax/3/script"
 )
+
+var QuantityChanged = make(map[string]bool)
 
 func CompileFile(fname string) (*script.BlockStmt, error) {
 	bytes, err := httpfs.Read(fname)
@@ -57,7 +61,7 @@ func DeclConst(name string, value float64, doc string) {
 // It can be changed, but not by the user.
 func DeclROnly(name string, value interface{}, doc string) {
 	World.ROnly(name, value, doc)
-	GUIAdd(name, value)
+	addQuantity(name, value, doc)
 }
 
 func Export(q interface {
@@ -70,21 +74,22 @@ func Export(q interface {
 // Add a (pointer to) variable to the script world
 func DeclVar(name string, value interface{}, doc string) {
 	World.Var(name, value, doc)
-	GUIAdd(name, value)
+	addQuantity(name, value, doc)
 }
 
 // Hack for fixing the closure caveat:
 // Defines "t", the time variable, handled specially by Fix()
 func DeclTVar(name string, value interface{}, doc string) {
 	World.TVar(name, value, doc)
-	GUIAdd(name, value)
+	addQuantity(name, value, doc)
 }
 
 // Add an LValue to the script world.
 // Assign to LValue invokes SetValue()
 func DeclLValue(name string, value LValue, doc string) {
-	World.LValue(name, newLValueWrapper(value), doc)
-	GUIAdd(name, value)
+	addParameter(name, value, doc)
+	World.LValue(name, newLValueWrapper(name, value), doc)
+	addQuantity(name, value, doc)
 }
 
 // LValue is settable
@@ -106,10 +111,11 @@ func EvalFile(code *script.BlockStmt) {
 // wraps LValue and provides empty Child()
 type lValueWrapper struct {
 	LValue
+	name string
 }
 
-func newLValueWrapper(lv LValue) script.LValue {
-	return &lValueWrapper{lv}
+func newLValueWrapper(name string, lv LValue) script.LValue {
+	return &lValueWrapper{name: name, LValue: lv}
 }
 
 func (w *lValueWrapper) Child() []script.Expr { return nil }
@@ -123,4 +129,22 @@ func (w *lValueWrapper) InputType() reflect.Type {
 	} else {
 		return w.Type()
 	}
+}
+
+func (w *lValueWrapper) SetValue(val interface{}) {
+	w.LValue.SetValue(val)
+	QuantityChanged[w.name] = true
+}
+
+func EvalTryRecover(code string) {
+	defer func() {
+		if err := recover(); err != nil {
+			if userErr, ok := err.(UserErr); ok {
+				log.Log.Err("%v", userErr)
+			} else {
+				panic(err)
+			}
+		}
+	}()
+	Eval(code)
 }

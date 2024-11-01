@@ -38,7 +38,7 @@ func (_ *magelasRK4) Step() {
 	SetFreezeDisp()
 	u0 := cuda.Buffer(3, size)
 	defer cuda.Recycle(u0)
-	data.Copy(u0, u)
+	data.Copy(u0, u, "MEC_RK4_1")
 
 	/*if InsertTimeDepDisplacement == 1 {
 		var funcResults []float64
@@ -53,13 +53,13 @@ func (_ *magelasRK4) Step() {
 	m := M.Buffer()
 	m0 := cuda.Buffer(3, size)
 	defer cuda.Recycle(m0)
-	data.Copy(m0, m)
+	data.Copy(m0, m, "MEC_RK4_2")
 
 	v := DU.Buffer()
 
 	v0 := cuda.Buffer(3, size)
 	defer cuda.Recycle(v0)
-	data.Copy(v0, v)
+	data.Copy(v0, v, "MEC_RK4_4")
 
 	ku1, ku2, ku3, ku4 := cuda.Buffer(3, size), cuda.Buffer(3, size), cuda.Buffer(3, size), cuda.Buffer(3, size)
 	kv1, kv2, kv3, kv4 := cuda.Buffer(3, size), cuda.Buffer(3, size), cuda.Buffer(3, size), cuda.Buffer(3, size)
@@ -207,7 +207,7 @@ func (_ *magelasRK4) Step() {
 			//Post handlings
 			M.normalize()
 		} else {
-			data.Copy(m, m0)
+			data.Copy(m, m0, "MEC_RK4_5")
 			M.normalize()
 		}
 		for i := 0; i < 3; i++ {
@@ -229,9 +229,9 @@ func (_ *magelasRK4) Step() {
 		// undo bad step
 		util.Assert(FixDt == 0)
 		Time = t0
-		data.Copy(u, u0)
-		data.Copy(v, v0)
-		data.Copy(m, m0)
+		data.Copy(u, u0, "MEC_RK4_6")
+		data.Copy(v, v0, "MEC_RK4_7")
+		data.Copy(m, m0, "MEC_RK4_8")
 		NUndone++
 		if err > err2 {
 			adaptDt(math.Pow(MaxErr/err, 1./3.))

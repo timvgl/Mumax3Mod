@@ -12,28 +12,27 @@ import (
 
 // Solver globals
 var (
-	Time                    float64                      // time in seconds
-	alarm                   float64                      // alarm clock marks end time of run, dt adaptation must not cross it!
-	pause                   = true                       // set pause at any time to stop running after the current step
-	postStep                []func()                     // called on after every full time step
-	Inject                           = make(chan func()) // injects code in between time steps. Used by web interface.
-	Dt_si                   float64  = 1e-15             // time step = dt_si (seconds) *dt_mul, which should be nice float32
-	MinDt, MaxDt            float64                      // minimum and maximum time step
-	MaxErr                  float64  = 1e-5              // maximum error/step
-	Headroom                float64  = 0.8               // solver headroom, (Gustafsson, 1992, Control of Error and Convergence in ODE Solvers)
-	LastErr, PeakErr        float64                      // error of last step, highest error ever
-	LastTorque              float64                      // maxTorque of last time step
-	NSteps, NUndone, NEvals int                          // number of good steps, undone steps
-	FixDt                   float64                      // fixed time step?
-	stepper                 Stepper                      // generic step, can be EulerStep, HeunStep, etc
-	FixDtM                  float64                      // fixed time step?
-	FixDtU                  float64                      // fixed time step?
+	Time                    			float64                      // time in seconds
+	alarm                   			float64                      // alarm clock marks end time of run, dt adaptation must not cross it!
+	Pause                   			= true                       // set Pause at any time to stop running after the current step
+	postStep                			[]func()                     // called on after every full time step
+	Inject                           		 	 = make(chan func()) // injects code in between time steps. Used by web interface.
+	Dt_si                   			float64  = 1e-15             // time step = dt_si (seconds) *dt_mul, which should be nice float32
+	MinDt, MaxDt            			float64                      // minimum and maximum time step
+	MaxErr                  			float64  = 1e-5              // maximum error/step
+	Headroom                			float64  = 0.8               // solver headroom, (Gustafsson, 1992, Control of Error and Convergence in ODE Solvers)
+	LastErr, PeakErr        			float64                      // error of last step, highest error ever
+	LastTorque              			float64                      // maxTorque of last time step
+	NSteps, NUndone, NEvals 			int                          // number of good steps, undone steps
+	FixDt                   			float64                      // fixed time step?
+	stepper                 			Stepper                      // generic step, can be EulerStep, HeunStep, etc
+	FixDtM                   			float64                      // fixed time step?
+	FixDtU                   			float64                      // fixed time step?
 
-	solvertype int
+	Solvertype              			int
 
-	BoolAllowInhomogeniousMECoupling bool = false
-	useBoundaries                    bool = false
-	Timetravel                       bool = false
+	BoolAllowInhomogeniousMECoupling	bool 	= false
+	useBoundaries						bool 	= false
 	//InsertTimeDepDisplacement 			int		= 0					 //1 for True, 0 for False
 	//InsertTimeDepDisplacementFunc 		func(arg1, arg2, arg3, arg4, arg5 float64) Config //func for calc displacement that is supposed to be added
 	//InsertTimeDepDisplacementFuncArgs	[]func(t float64) float64	 //slices of funcs that are going to be used as args for InsertTimeDepDisplacementFunc
@@ -56,7 +55,6 @@ func init() {
 	DeclVar("FixDt", &FixDt, "Set a fixed time step, 0 disables fixed step (which is the default)")
 	DeclVar("FixDtU", &FixDtU, "Set a fixed time step, 0 disables fixed step (which is the default)")
 	DeclVar("FixDtM", &FixDtM, "Set a fixed time step, 0 disables fixed step (which is the default)")
-	DeclVar("timetravel", &Timetravel, "")
 
 	DeclFunc("Exit", Exit, "Exit from the program")
 	//DeclVar("BoolAllowInhomogeniousMECoupling", BoolAllowInhomogeniousMECoupling, "Bypasses an error that is going to be raised if B1 or B2 is inhomogenious, bool")
@@ -76,18 +74,18 @@ type Stepper interface {
 
 // Arguments for SetSolver
 const (
-	BACKWARD_EULER               = -1
-	EULER                        = 1
-	HEUN                         = 2
-	BOGAKISHAMPINE               = 3
-	RUNGEKUTTA                   = 4
-	DORMANDPRINCE                = 5
-	FEHLBERG                     = 6
-	SECONDDERIV                  = 7
-	ELAS_RUNGEKUTTA              = 8
-	MAGELAS_RUNGEKUTTA           = 9
-	ELAS_LEAPFROG                = 10
-	ELAS_YOSH                    = 11
+	BACKWARD_EULER     = -1
+	EULER              = 1
+	HEUN               = 2
+	BOGAKISHAMPINE     = 3
+	RUNGEKUTTA         = 4
+	DORMANDPRINCE      = 5
+	FEHLBERG           = 6
+	SECONDDERIV        = 7
+	ELAS_RUNGEKUTTA    = 8
+	MAGELAS_RUNGEKUTTA = 9
+	ELAS_LEAPFROG      = 10
+	ELAS_YOSH          = 11
 	MAGELAS_RUNGEKUTTA_VARY_TIME = 12
 )
 
@@ -126,7 +124,7 @@ func SetSolver(typ int) {
 	case MAGELAS_RUNGEKUTTA_VARY_TIME:
 		stepper = new(magelasRK4_vary_time)
 	}
-	solvertype = typ
+	Solvertype = typ
 }
 
 // write torque to dst and increment NEvals
@@ -208,16 +206,16 @@ func Steps(n int) {
 // Runs as long as condition returns true, saves output.
 func RunWhile(condition func() bool) {
 	SanityCheck()
-	pause = false // may be set by <-Inject
+	Pause = false // may be set by <-Inject
 	const output = true
 	stepper.Free() // start from a clean state
 	runWhile(condition, output)
-	pause = true
+	Pause = true
 }
 
 func runWhile(condition func() bool, output bool) {
 	DoOutput() // allow t=0 output
-	for condition() && !pause {
+	for condition() && !Pause {
 		select {
 		default:
 			step(output)
@@ -231,7 +229,7 @@ func runWhile(condition func() bool, output bool) {
 func RunWhileRelax(condition func() bool, prefix string) {
 	const output = true
 	DoOutputPrefix(prefix) // allow t=0 output
-	for condition() && !pause {
+	for condition() && !Pause {
 		select {
 		default:
 			stepPrefix(output, prefix)

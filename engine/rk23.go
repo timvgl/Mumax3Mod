@@ -49,7 +49,7 @@ func (rk *RK23) Step() {
 	// backup magnetization
 	m0 := cuda.Buffer(3, size)
 	defer cuda.Recycle(m0)
-	data.Copy(m0, m)
+	data.Copy(m0, m, "rk23_1")
 
 	k2, k3, k4 := cuda.Buffer(3, size), cuda.Buffer(3, size), cuda.Buffer(3, size)
 	defer cuda.Recycle(k2)
@@ -94,13 +94,13 @@ func (rk *RK23) Step() {
 		NSteps++
 		Time = t0 + Dt_si
 		adaptDt(math.Pow(MaxErr/err, 1./3.))
-		data.Copy(rk.k1, k4) // FSAL
+		data.Copy(rk.k1, k4, "rk23_2") // FSAL
 	} else {
 		// undo bad step
 		//util.Println("Bad step at t=", t0, ", err=", err)
 		util.Assert(FixDt == 0)
 		Time = t0
-		data.Copy(m, m0)
+		data.Copy(m, m0, "rk23_3")
 		NUndone++
 		adaptDt(math.Pow(MaxErr/err, 1./4.))
 	}

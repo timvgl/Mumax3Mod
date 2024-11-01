@@ -427,7 +427,7 @@ func (q *masked) createMask() {
 	// Update mask
 	q.mask.Free()
 	q.mask = cuda.NewSlice(SCALAR, size)
-	data.Copy(q.mask, maskhost)
+	data.Copy(q.mask, maskhost, "customField")
 	q.mesh = *Mesh()
 	// Remove mask from host
 }

@@ -77,6 +77,6 @@ func SetArray(dst, src *data.Slice,) {
 	if src.Size() != dst.Size() {
 		src = data.Resample(src, dst.Size())
 	}
-	data.Copy(dst, src)
+	data.Copy(dst, src, "elastic_strain_SetArray")
 	//b.normalize()
 }
