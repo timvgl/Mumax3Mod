@@ -23,7 +23,7 @@ func (rk *RK56) Step() {
 	// backup magnetization
 	m0 := cuda.Buffer(3, size)
 	defer cuda.Recycle(m0)
-	data.Copy(m0, m)
+	data.Copy(m0, m, "rk56_1")
 
 	k1, k2, k3, k4, k5, k6, k7, k8 := cuda.Buffer(3, size), cuda.Buffer(3, size), cuda.Buffer(3, size), cuda.Buffer(3, size), cuda.Buffer(3, size), cuda.Buffer(3, size), cuda.Buffer(3, size), cuda.Buffer(3, size)
 	defer cuda.Recycle(k1)
@@ -111,7 +111,7 @@ func (rk *RK56) Step() {
 		//util.Println("Bad step at t=", t0, ", err=", err)
 		util.Assert(FixDt == 0)
 		Time = t0
-		data.Copy(m, m0)
+		data.Copy(m, m0, "rk56_2")
 		NUndone++
 		adaptDt(math.Pow(MaxErr/err, 1./7.))
 	}

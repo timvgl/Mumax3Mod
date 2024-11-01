@@ -38,6 +38,30 @@ func (m *Mesh) Size() [3]int {
 	}
 }
 
+func (m *Mesh) Nx() int {
+	if m == nil {
+		return 0
+	} else {
+		return m.gridSize[0]
+	}
+}
+
+func (m *Mesh) Ny() int {
+	if m == nil {
+		return 0
+	} else {
+		return m.gridSize[1]
+	}
+}
+
+func (m *Mesh) Nz() int {
+	if m == nil {
+		return 0
+	} else {
+		return m.gridSize[2]
+	}
+}
+
 // Returns cellx, celly, cellz, as passed to constructor.
 func (m *Mesh) CellSize() [3]float64 {
 	return m.cellSize

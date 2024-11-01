@@ -1,18 +1,20 @@
 package engine
 
 import (
+	"sort"
+
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/data"
 	"github.com/mumax/3/util"
 )
 
-var regions = Regions{info: info{1, "regions", ""}} // global regions map
+var regions = Regions{info: info{1, "Regions", ""}} // global Regions map
 
-const NREGION = 256 // maximum number of regions, limited by size of byte.
+const NREGION = 256 // maximum number of Regions, limited by size of byte.
 
 func init() {
 	DeclFunc("DefRegion", DefRegion, "Define a material region with given index (0-255) and shape")
-	DeclROnly("regions", &regions, "Outputs the region index for each cell")
+	DeclROnly("Regions", &regions, "Outputs the region index for each cell")
 	DeclFunc("DefRegionCell", DefRegionCell, "Set a material region (first argument) in one cell "+
 		"by the index of the cell (last three arguments)")
 }
@@ -21,7 +23,13 @@ func init() {
 type Regions struct {
 	gpuCache *cuda.Bytes                 // TODO: rename: buffer
 	hist     []func(x, y, z float64) int // history of region set operations
+	indices  []int
 	info
+}
+
+type Pair struct {
+	Value  int
+	Object func(x, y, z float64) int // Replace interface{} with the actual type of your objects
 }
 
 func (r *Regions) alloc() {
@@ -39,6 +47,21 @@ func (r *Regions) resize() {
 	}
 }
 
+func GetExistingIndices() []int {
+	pairs := make([]Pair, len(regions.indices))
+	for i := range regions.indices {
+		pairs[i] = Pair{Value: regions.indices[i], Object: regions.hist[i]}
+	}
+	sort.Slice(pairs, func(i, j int) bool {
+		return pairs[i].Value < pairs[j].Value
+	})
+	for i := range pairs {
+		regions.indices[i] = pairs[i].Value
+		regions.hist[i] = pairs[i].Object
+	}
+	return regions.indices
+}
+
 // Define a region with id (0-255) to be inside the Shape.
 func DefRegion(id int, s Shape) {
 	defRegionId(id)
@@ -51,6 +74,7 @@ func DefRegion(id int, s Shape) {
 	}
 	regions.render(f)
 	regions.hist = append(regions.hist, f)
+	regions.indices = append(regions.indices, id)
 }
 
 // renders (rasterizes) shape, filling it with region number #id, between x1 and x2
@@ -71,7 +95,7 @@ func (r *Regions) render(f func(x, y, z float64) int) {
 			}
 		}
 	}
-	//log.Print("regions.upload")
+	//log.Print("Regions.upload")
 	r.gpuCache.Upload(l)
 }
 
@@ -93,9 +117,9 @@ func (r *Regions) HostArray() [][][]byte {
 }
 
 func (r *Regions) HostList() []byte {
-	regionsList := make([]byte, r.Mesh().NCell())
-	regions.gpuCache.Download(regionsList)
-	return regionsList
+	RegionsList := make([]byte, r.Mesh().NCell())
+	regions.gpuCache.Download(RegionsList)
+	return RegionsList
 }
 
 func DefRegionCell(id int, x, y, z int) {
@@ -104,7 +128,7 @@ func DefRegionCell(id int, x, y, z int) {
 	regions.gpuCache.Set(index, byte(id))
 }
 
-// Load regions from ovf file, use first component.
+// Load Regions from ovf file, use first component.
 // Regions should be between 0 and 256
 func (r *Regions) LoadFile(fname string) {
 	inSlice := LoadFileDSliceMyDir(fname)
@@ -119,7 +143,7 @@ func (r *Regions) LoadFile(fname string) {
 			for ix := 0; ix < n[X]; ix++ {
 				val := inArr[iz][iy][ix]
 				if val < 0 || val > 256 {
-					util.Fatal("regions.LoadFile(", fname, "): all values should be between 0 & 256, have: ", val)
+					util.Fatal("Regions.LoadFile(", fname, "): all values should be between 0 & 256, have: ", val)
 				}
 				arr[iz][iy][ix] = byte(val)
 			}
@@ -178,7 +202,7 @@ func (r *Regions) Gpu() *cuda.Bytes {
 	return r.gpuCache
 }
 
-var unitMap regionwise // unit map used to output regions quantity
+var unitMap regionwise // unit map used to output Regions quantity
 
 func init() {
 	unitMap.init(1, "unit", "", nil)
@@ -187,14 +211,14 @@ func init() {
 	}
 }
 
-// Get returns the regions as a slice of floats, so it can be output.
+// Get returns the Regions as a slice of floats, so it can be output.
 func (r *Regions) Slice() (*data.Slice, bool) {
 	buf := cuda.Buffer(1, r.Mesh().Size())
 	cuda.RegionDecode(buf, unitMap.gpuLUT1(), regions.Gpu())
 	return buf, true
 }
 
-func (r *Regions) EvalTo(dst *data.Slice) { EvalTo(r, dst) }
+func (r *Regions) EvalTo(dst *data.Slice) { EvalTo(r, dst, "") }
 
 var _ Quantity = &regions
 
@@ -215,7 +239,7 @@ func reshapeBytes(array []byte, size [3]int) [][][]byte {
 }
 
 func (b *Regions) shift(dx int) {
-	// TODO: return if no regions defined
+	// TODO: return if no Regions defined
 	r1 := b.Gpu()
 	r2 := cuda.NewBytes(b.Mesh().NCell()) // TODO: somehow recycle
 	defer r2.Free()
@@ -240,7 +264,7 @@ func (b *Regions) shift(dx int) {
 }
 
 func (b *Regions) shiftY(dy int) {
-	// TODO: return if no regions defined
+	// TODO: return if no Regions defined
 	r1 := b.Gpu()
 	r2 := cuda.NewBytes(b.Mesh().NCell()) // TODO: somehow recycle
 	defer r2.Free()

@@ -1,23 +1,29 @@
 package engine
 
 import (
+	"bytes"
+	"encoding/binary"
 	"fmt"
+	"io"
+	"slices"
+	"sync"
+	"time"
+
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/data"
 	"github.com/mumax/3/httpfs"
 	"github.com/mumax/3/script"
 	"github.com/mumax/3/timer"
 	"github.com/mumax/3/util"
-	"io"
-	"sync"
-	"time"
 )
 
-const TableAutoflushRate = 5   // auto-flush table every X seconds
+const TableAutoflushRate = 5 // auto-flush table every X seconds
 var (
-	createNewTable bool = true
- 	rewriteHeaderTable bool = false
- 	Table *DataTable
+	createNewTable      bool = true
+	rewriteHeaderTable  bool = false
+	Table               *DataTable
+	TableAutoSavePeriod float64 = 0.0
+	negativeTime        bool    = false
 )
 
 func init() {
@@ -34,6 +40,15 @@ func init() {
 	Table.Add(&M)
 }
 
+func float64ToByte(f float64) []byte {
+	var buf bytes.Buffer
+	err := binary.Write(&buf, binary.BigEndian, f)
+	if err != nil {
+		fmt.Println("binary.Write failed:", err)
+	}
+	return buf.Bytes()
+}
+
 type DataTable struct {
 	output interface {
 		io.Writer
@@ -41,8 +56,17 @@ type DataTable struct {
 	}
 	info
 	outputs []Quantity
+	Columns []column
 	autosave
-	flushlock sync.Mutex
+	Data      map[string][]float64 `json:"data"`
+	Flushlock sync.Mutex
+}
+
+type column struct {
+	Name   string
+	Unit   string
+	buffer []byte
+	io     httpfs.WriteCloseFlusher
 }
 
 func (t *DataTable) Write(p []byte) (int, error) {
@@ -70,6 +94,8 @@ func (t *DataTable) Flush() error {
 func newTable(name string) *DataTable {
 	t := new(DataTable)
 	t.name = name
+	t.Data = map[string][]float64{"t": make([]float64, 0)}
+	t.Columns = []column{column{Name: "t", Unit: "s", buffer: []byte{}}}
 	return t
 }
 
@@ -106,22 +132,31 @@ func TableSave() {
 }
 
 func TableAutoSave(period float64) {
+	TableAutoSavePeriod = period
 	Table.autosave = autosave{period, Time, -1, nil, nil, nil, nil, ""} // count -1 allows output on t=0
 }
 
 func (t *DataTable) SavePrefix(prefix string) {
-	t.flushlock.Lock() // flush during write gives errShortWrite
-	defer t.flushlock.Unlock()
+	negativeTime = true
+	t.Flushlock.Lock() // flush during write gives errShortWrite
+	defer t.Flushlock.Unlock()
 
 	if cuda.Synchronous {
 		timer.Start("io")
 	}
 	t.init()
-	fprint(t, prefix + "_", Time)
+	fprint(t, prefix+"_", Time)
+	//Table.Columns[0].buffer = append(Table.Columns[0].buffer, float64ToByte(Time)...)
+	t.Data["t"] = append(t.Data["t"], Time)
+	absCol := 1
 	for _, o := range t.outputs {
 		vec := AverageOf(o)
 		for _, v := range vec {
 			fprint(t, "\t", float32(v))
+			//t.Columns[j+i+1].buffer = append(t.Columns[j+i+1].buffer, float64ToByte(v)...)
+			t.Data[t.Columns[absCol].Name] = append(t.Data[t.Columns[absCol].Name], v)
+			absCol += 1
+
 		}
 	}
 	fprintln(t)
@@ -138,21 +173,39 @@ func (t *DataTable) Add(output Quantity) {
 		util.Fatal("data table add ", NameOf(output), ": need to add quantity before table is output the first time")
 	}
 	t.outputs = append(t.outputs, output)
+	if output.NComp() == 1 {
+		t.Columns = append(t.Columns, column{Name: NameOf(output), Unit: UnitOf(output)})
+	} else if output.NComp() == 3 {
+		suffixes := []string{"x", "y", "z"}
+		for comp := 0; comp < output.NComp(); comp++ {
+			t.Columns = append(t.Columns, column{Name: NameOf(output) + suffixes[comp], Unit: UnitOf(output), buffer: []byte{}})
+		}
+	}
 }
 
 func (t *DataTable) Save() {
-	t.flushlock.Lock() // flush during write gives errShortWrite
-	defer t.flushlock.Unlock()
+	if negativeTime == true {
+		slices.Reverse(t.Data["t"])
+		negativeTime = false
+	}
+	t.Flushlock.Lock() // flush during write gives errShortWrite
+	defer t.Flushlock.Unlock()
 
 	if cuda.Synchronous {
 		timer.Start("io")
 	}
 	t.init()
 	fprint(t, Time)
+	//Table.Columns[0].buffer = append(Table.Columns[0].buffer, float64ToByte(Time)...)
+	t.Data["t"] = append(t.Data["t"], Time)
+	absCol := 1
 	for _, o := range t.outputs {
 		vec := AverageOf(o)
 		for _, v := range vec {
 			fprint(t, "\t", float32(v))
+			//t.Columns[j+i+1].buffer = append(t.Columns[j+i+1].buffer, float64ToByte(v)...)
+			t.Data[t.Columns[absCol].Name] = append(t.Data[t.Columns[absCol].Name], v)
+			absCol += 1
 		}
 	}
 	fprintln(t)
@@ -188,7 +241,7 @@ func (t *DataTable) init() {
 		util.FatalErr(err)
 		t.output = f
 	}
-	if rewriteHeaderTable == true || createNewTable == true {	
+	if rewriteHeaderTable == true || createNewTable == true {
 		// write header
 		fprint(t, "# t (s)")
 		for _, o := range t.outputs {
@@ -220,8 +273,8 @@ func (t *DataTable) inited() bool {
 }
 
 func (t *DataTable) flush() {
-	t.flushlock.Lock()
-	defer t.flushlock.Unlock()
+	t.Flushlock.Lock()
+	defer t.Flushlock.Unlock()
 	t.Flush()
 }
 

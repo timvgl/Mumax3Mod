@@ -26,12 +26,12 @@ func (_ *elasLF) Step() {
 	//SetFreezeDisp()
 	u0 := cuda.Buffer(3, size)
 	defer cuda.Recycle(u0)
-	data.Copy(u0, u)
+	data.Copy(u0, u, "elastic_leapfrog_1")
 
 	v := DU.Buffer()
 	v0 := cuda.Buffer(3, size)
 	defer cuda.Recycle(v0)
-	data.Copy(v0, v)
+	data.Copy(v0, v, "elastic_leapfrog_2")
 
 	//ai = nabla sigma
 	ai := cuda.Buffer(3, size)

@@ -1,10 +1,13 @@
 package engine
 
 import (
+	"reflect"
+
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/data"
-	"reflect"
 )
+
+var Quantities = make(map[string]Quantity)
 
 // Arbitrary physical quantity.
 type Quantity interface {
@@ -14,6 +17,13 @@ type Quantity interface {
 
 func MeshSize() [3]int {
 	return Mesh().Size()
+}
+
+func addQuantity(name string, value interface{}, doc string) {
+	_ = doc
+	if v, ok := value.(Quantity); ok {
+		Quantities[name] = v
+	}
 }
 
 func SizeOf(q Quantity) [3]int {
@@ -80,10 +90,10 @@ func ValueOf(q Quantity) *data.Slice {
 // Temporary shim to fit Slice into EvalTo
 func EvalTo(q interface {
 	Slice() (*data.Slice, bool)
-}, dst *data.Slice) {
+}, dst *data.Slice, qStr string) {
 	v, r := q.Slice()
 	if r {
 		defer cuda.Recycle(v)
 	}
-	data.Copy(dst, v)
+	data.Copy(dst, v, qStr)
 }

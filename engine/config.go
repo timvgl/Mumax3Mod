@@ -6,10 +6,12 @@ import (
 	"math"
 	"math/rand"
 	"github.com/mumax/3/data"
+	"github.com/mumax/3/util"
 )
 
 func init() {
 	DeclFunc("Uniform", Uniform, "Uniform magnetization in given direction")
+	DeclFunc("SinShape", SinShape, "Sin in space")
 	DeclFunc("Vortex", Vortex, "Vortex magnetization with given circulation and core polarization")
 	DeclFunc("VortexAsym", VortexAsym, "Vortex magnetization with given circulation and core polarization")
 	DeclFunc("DisplacedVortex", DisplacedVortex, "")
@@ -62,6 +64,42 @@ func randomDir(rng *rand.Rand) data.Vector {
 func Uniform(mx, my, mz float64) Config {
 	return func(x, y, z float64) data.Vector {
 		return data.Vector{mx, my, mz}
+	}
+}
+
+func SinShape(ax, ay, az, kx, ky, kz, phx, phy, phz float64, typex, typey, typez string) Config {
+	return func(x, y, z float64) data.Vector {
+		var mx func(fx float64) float64
+		var my func(fy float64) float64
+		var mz func(fz float64) float64
+		if typex == "sin" {
+			mx = math.Sin
+		} else if typex == "cos" {
+			mx = math.Cos
+		} else if typex == "" {
+			mx = func(fx float64) float64 {return 1}
+		} else {
+			util.AssertMsg(false, "String has to be sin, cos or empty")
+		}
+		if typey == "sin" {
+			my = math.Sin
+		} else if typey == "cos" {
+			my = math.Cos
+		} else if typey == "" {
+			my = func(fy float64) float64 {return 1}
+		} else {
+			util.AssertMsg(false, "String has to be sin, cos or empty")
+		}
+		if typez == "sin" {
+			mz = math.Sin
+		} else if typez == "cos" {
+			mz = math.Cos
+		} else if typez == "" {
+			mz = func(fz float64) float64 {return 1}
+		} else {
+			util.AssertMsg(false, "String has to be sin, cos or empty")
+		}
+		return data.Vector{ax*mx(x*kx + phx), ay*my(y*ky + phy), az*mz(z*kz + phz)}
 	}
 }
 

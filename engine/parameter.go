@@ -17,6 +17,55 @@ import (
 	"github.com/mumax/3/util"
 )
 
+var Params map[string]field
+
+type field struct {
+	Name        string           `json:"name"`
+	Value       func(int) string `json:"value"`
+	Description string           `json:"description"`
+}
+
+func init() {
+	addParameter("B_ext", B_ext, "External magnetic field (T)")
+}
+
+func addParameter(name string, value interface{}, doc string) {
+	if Params == nil {
+		Params = make(map[string]field)
+	}
+	if v, ok := value.(*RegionwiseScalar); ok {
+		Params[name] = field{
+			name,
+			v.GetRegionToString,
+			doc,
+		}
+	} else if v, ok := value.(*RegionwiseVector); ok {
+		Params[name] = field{
+			name,
+			v.GetRegionToString,
+			doc,
+		}
+	} else if v, ok := value.(*inputValue); ok {
+		Params[name] = field{
+			name,
+			v.GetRegionToString,
+			doc,
+		}
+	} else if v, ok := value.(*Excitation); ok {
+		Params[name] = field{
+			name,
+			v.GetRegionToString,
+			doc,
+		}
+	} else if v, ok := value.(*ScalarExcitation); ok {
+		Params[name] = field{
+			name,
+			v.GetRegionToString,
+			doc,
+		}
+	}
+}
+
 // input parameter, settable by user
 type regionwise struct {
 	lut
@@ -47,6 +96,11 @@ func (p *regionwise) MSlice() cuda.MSlice {
 func (p *regionwise) Name() string     { return p.name }
 func (p *regionwise) Unit() string     { return p.unit }
 func (p *regionwise) Mesh() *data.Mesh { return Mesh() }
+
+func (p *regionwise) GetRegionToString(region int) string {
+	v := float64(p.getRegion(region)[0])
+	return fmt.Sprintf("%g", v)
+}
 
 func (p *regionwise) addChild(c ...derived) {
 	for _, c := range c {

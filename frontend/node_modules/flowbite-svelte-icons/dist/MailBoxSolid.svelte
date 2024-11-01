@@ -1,0 +1,92 @@
+<script>import { getContext } from "svelte";
+import { twMerge } from "tailwind-merge";
+const ctx = getContext("iconCtx") ?? {};
+const sizes = {
+    xs: "w-3 h-3",
+    sm: "w-4 h-4",
+    md: "w-5 h-5",
+    lg: "w-6 h-6",
+    xl: "w-8 h-8"
+};
+export let size = ctx.size || "md";
+export let role = ctx.role || "img";
+export let color = ctx.color || "currentColor";
+export let withEvents = ctx.withEvents || false;
+export let title = {};
+export let desc = {};
+let ariaDescribedby = `${title.id || ""} ${desc.id || ""}`;
+let hasDescription = false;
+$: if (title.id || desc.id) {
+    hasDescription = true;
+}
+else {
+    hasDescription = false;
+}
+export let ariaLabel = "mail box solid";
+</script>
+
+{#if withEvents}
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill={color}
+    {...$$restProps}
+    class={twMerge('shrink-0', sizes[size ?? 'md'], $$props.class)}
+    {role}
+    aria-label={ariaLabel}
+    aria-describedby={hasDescription ? ariaDescribedby : undefined}
+    viewBox="0 0 24 24"
+    on:click
+    on:keydown
+    on:keyup
+    on:focus
+    on:blur
+    on:mouseenter
+    on:mouseleave
+    on:mouseover
+    on:mouseout
+  >
+    {#if title.id && title.title}
+      <title id={title.id}>{title.title}</title>
+    {/if}
+    {#if desc.id && desc.desc}
+      <desc id={desc.id}>{desc.desc}</desc>
+    {/if}
+    <path
+      d="M17 6h-2V5h1a1 1 0 1 0 0-2h-2a1 1 0 0 0-1 1v2h-.541A5.965 5.965 0 0 1 14 10v4a1 1 0 1 1-2 0v-4c0-2.206-1.794-4-4-4-.075 0-.148.012-.22.028C7.686 6.022 7.596 6 7.5 6A4.505 4.505 0 0 0 3 10.5V16a1 1 0 0 0 1 1h7v3a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-3h5a1 1 0 0 0 1-1v-6c0-2.206-1.794-4-4-4Zm-9 8.5H7a1 1 0 1 1 0-2h1a1 1 0 1 1 0 2Z"
+    />
+  </svg>
+{:else}
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill={color}
+    {...$$restProps}
+    class={twMerge('shrink-0', sizes[size ?? 'md'], $$props.class)}
+    {role}
+    aria-label={ariaLabel}
+    aria-describedby={hasDescription ? ariaDescribedby : undefined}
+    viewBox="0 0 24 24"
+  >
+    {#if title.id && title.title}
+      <title id={title.id}>{title.title}</title>
+    {/if}
+    {#if desc.id && desc.desc}
+      <desc id={desc.id}>{desc.desc}</desc>
+    {/if}
+    <path
+      d="M17 6h-2V5h1a1 1 0 1 0 0-2h-2a1 1 0 0 0-1 1v2h-.541A5.965 5.965 0 0 1 14 10v4a1 1 0 1 1-2 0v-4c0-2.206-1.794-4-4-4-.075 0-.148.012-.22.028C7.686 6.022 7.596 6 7.5 6A4.505 4.505 0 0 0 3 10.5V16a1 1 0 0 0 1 1h7v3a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-3h5a1 1 0 0 0 1-1v-6c0-2.206-1.794-4-4-4Zm-9 8.5H7a1 1 0 1 1 0-2h1a1 1 0 1 1 0 2Z"
+    />
+  </svg>
+{/if}
+
+<!--
+@component
+[Go to docs](https://flowbite-svelte-icons.codewithshin.com/)
+## Props
+@prop export let size: Props['size'] = ctx.size || 'md';
+@prop export let role: Props['role'] = ctx.role || 'img';
+@prop export let color: Props['color'] = ctx.color || 'currentColor';
+@prop export let withEvents: Props['withEvents'] = ctx.withEvents || false;
+@prop export let title: TitleType = {};
+@prop export let desc: DescType = {};
+@prop export let ariaLabel = 'mail box solid';
+-->

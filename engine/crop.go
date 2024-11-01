@@ -124,7 +124,7 @@ func rangeStr(a, b int) string {
 func (q *cropped) NComp() int             { return q.parent.NComp() }
 func (q *cropped) Name() string           { return q.name }
 func (q *cropped) Unit() string           { return UnitOf(q.parent) }
-func (q *cropped) EvalTo(dst *data.Slice) { EvalTo(q, dst) }
+func (q *cropped) EvalTo(dst *data.Slice) { EvalTo(q, dst, "crop") }
 
 func (q *cropped) Mesh() *data.Mesh {
 	c := MeshOf(q.parent).CellSize()

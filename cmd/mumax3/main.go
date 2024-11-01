@@ -8,8 +8,10 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"strconv"
 	"time"
 
+	"github.com/mumax/3/api"
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/engine"
 	"github.com/mumax/3/script"
@@ -81,7 +83,12 @@ func runInteractive() {
 		alpha = 1
 		m = RandomMag()`)
 	addr := goServeGUI()
-	openbrowser("http://127.0.0.1" + addr)
+	castedPort, ok := strconv.Atoi(*engine.Flag_port)
+	if ok != nil {
+		panic("Provide port as integer.")
+	}
+	go api.Start(*engine.Flag_webUIHost, castedPort, *engine.Flag_tunnel, *engine.Flag_debug)
+	openbrowser("http://127.0.0.1:" + addr)
 	engine.RunInteractive()
 }
 
@@ -111,10 +118,14 @@ func runScript(fname string) {
 	}
 
 	// now the parser is not used anymore so it can handle web requests
-	goServeGUI()
+	castedPort, ok := strconv.Atoi(*engine.Flag_port)
+	if ok != nil {
+		panic("Provide port as integer.")
+	}
+	go api.Start(*engine.Flag_webUIHost, castedPort, *engine.Flag_tunnel, *engine.Flag_debug)
 
 	if *engine.Flag_interactive {
-		openbrowser("http://127.0.0.1" + *engine.Flag_port)
+		openbrowser("http://127.0.0.1:" + *engine.Flag_port)
 	}
 
 	// start executing the tree, possibly injecting commands from web gui

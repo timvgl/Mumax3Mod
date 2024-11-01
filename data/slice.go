@@ -215,13 +215,13 @@ func (s *Slice) Host() [][]float32 {
 }
 
 // Returns a copy of the Slice, allocated on CPU.
-func (s *Slice) HostCopy() *Slice {
+func (s *Slice) HostCopy(q string) *Slice {
 	cpy := NewSlice(s.NComp(), s.Size())
-	Copy(cpy, s)
+	Copy(cpy, s, q)
 	return cpy
 }
 
-func Copy(dst, src *Slice) {
+func Copy(dst, src *Slice, q string) {
 	if dst.NComp() != src.NComp() || dst.Len() != src.Len() {
 		panic(fmt.Sprintf("slice copy: illegal sizes: dst: %vx%v, src: %vx%v", dst.NComp(), dst.Len(), src.NComp(), src.Len()))
 	}

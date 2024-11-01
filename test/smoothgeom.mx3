@@ -1,5 +1,5 @@
 /*
-	Test smooth geometry by evaluating the surface of a circle.
+	Test smooth Geometry by evaluating the surface of a circle.
 */
 
 N := 10

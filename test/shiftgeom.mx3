@@ -1,5 +1,5 @@
 /*
-	Test that shifting introduces the correct geometry from the sides.
+	Test that shifting introduces the correct Geometry from the sides.
 */
 
 setgridsize(512, 64, 1)

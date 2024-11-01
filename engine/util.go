@@ -195,7 +195,7 @@ func SetInShape(dst *data.Slice, region Shape, conf Config) {
 	if region == nil {
 		region = universe
 	}
-	host := dst.HostCopy()
+	host := dst.HostCopy("util")
 	h := host.Vectors()
 	n := dst.Size()
 
@@ -238,7 +238,7 @@ func Download(q Quantity) *data.Slice {
 	if buf.CPUAccess() {
 		return buf
 	} else {
-		return buf.HostCopy()
+		return buf.HostCopy("util")
 	}
 }
 
@@ -316,7 +316,7 @@ func assureGPU(s *data.Slice) *data.Slice {
 	if s.GPUAccess() {
 		return s
 	} else {
-		return cuda.GPUCopy(s)
+		return cuda.GPUCopy(s, "util")
 	}
 }
 

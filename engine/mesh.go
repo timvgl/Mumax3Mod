@@ -5,6 +5,25 @@ import (
 	"github.com/mumax/3/data"
 )
 
+var (
+	Nx              int
+	Ny              int
+	Nz              int
+	Dx              float64
+	Dy              float64
+	Dz              float64
+	Tx              float64
+	Ty              float64
+	Tz              float64
+	PBCx            int
+	PBCy            int
+	PBCz            int
+	AutoMeshx       bool
+	AutoMeshy       bool
+	AutoMeshz       bool
+	gotMeshDefValue bool = false
+)
+
 var globalmesh_ data.Mesh // mesh for m and everything that has the same size
 
 func init() {
@@ -66,9 +85,9 @@ func SetMesh(Nx, Ny, Nz int, cellSizeX, cellSizeY, cellSizeZ float64, pbcx, pbcy
 		DU.resize()
 		regions.resize()
 		//UOVERLAY.resize()
-		geometry.buffer.Free()
-		geometry.buffer = data.NilSlice(1, Mesh().Size())
-		geometry.setGeom(geometry.shape)
+		Geometry.Buffer.Free()
+		Geometry.Buffer = data.NilSlice(1, Mesh().Size())
+		Geometry.setGeom(Geometry.shape)
 
 		// remove excitation extra terms if they don't fit anymore
 		// up to the user to add them again
@@ -98,7 +117,17 @@ var (
 	lazy_pbc      = []int{0, 0, 0}
 )
 
-func SetGridSize(Nx, Ny, Nz int) {
+func SetGridSize(NxTmp, NyTmp, NzTmp int) {
+	Nx = NxTmp
+	Ny = NyTmp
+	Nz = NzTmp
+	if gotMeshDefValue == true {
+		Tx = Dx * float64(Nx)
+		Ty = Dy * float64(Ny)
+		Tz = Dz * float64(Nz)
+	} else {
+		gotMeshDefValue = true
+	}
 	lazy_gridsize = []int{Nx, Ny, Nz}
 	if lazy_cellsize != nil {
 		SetMesh(Nx, Ny, Nz, lazy_cellsize[X], lazy_cellsize[Y], lazy_cellsize[Z], lazy_pbc[X], lazy_pbc[Y], lazy_pbc[Z])
@@ -106,6 +135,16 @@ func SetGridSize(Nx, Ny, Nz int) {
 }
 
 func SetCellSize(cx, cy, cz float64) {
+	Dx = cx
+	Dy = cy
+	Dz = cz
+	if gotMeshDefValue == true {
+		Tx = Dx * float64(Nx)
+		Ty = Dy * float64(Ny)
+		Tz = Dz * float64(Nz)
+	} else {
+		gotMeshDefValue = true
+	}
 	lazy_cellsize = []float64{cx, cy, cz}
 	if lazy_gridsize != nil {
 		SetMesh(lazy_gridsize[X], lazy_gridsize[Y], lazy_gridsize[Z], cx, cy, cz, lazy_pbc[X], lazy_pbc[Y], lazy_pbc[Z])

@@ -17,7 +17,7 @@ type component struct {
 // Comp returns vector component c of the parent Quantity
 func Comp(parent Quantity, c int) ScalarField {
 	util.Argument(c >= 0 && c < parent.NComp())
-	return AsScalarField(&component{parent, c})
+	return AsScalarField(parent)
 }
 
 func (q *component) NComp() int       { return 1 }
@@ -33,10 +33,10 @@ func (q *component) Slice() (*data.Slice, bool) {
 	return c, true
 }
 
-func (q *component) EvalTo(dst *data.Slice) {
+func (q *component) EvalTo(dst *data.Slice, qStr string) {
 	src := ValueOf(q.parent)
 	defer cuda.Recycle(src)
-	data.Copy(dst, src.Comp(q.comp))
+	data.Copy(dst, src.Comp(q.comp), qStr)
 }
 
 var compname = map[int]string{0: "x", 1: "y", 2: "z"}

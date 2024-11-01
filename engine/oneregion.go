@@ -47,7 +47,7 @@ func (q *oneReg) NComp() int             { return q.parent.NComp() }
 func (q *oneReg) Name() string           { return fmt.Sprint(NameOf(q.parent), ".region", q.region) }
 func (q *oneReg) Unit() string           { return UnitOf(q.parent) }
 func (q *oneReg) Mesh() *data.Mesh       { return MeshOf(q.parent) }
-func (q *oneReg) EvalTo(dst *data.Slice) { EvalTo(q, dst) }
+func (q *oneReg) EvalTo(dst *data.Slice) { EvalTo(q, dst, "oneregion") }
 
 // returns a new slice equal to q in the given region, 0 outside.
 func (q *oneReg) Slice() (*data.Slice, bool) {

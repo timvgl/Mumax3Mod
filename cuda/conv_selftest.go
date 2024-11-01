@@ -22,7 +22,7 @@ func testConvolution(c *DemagConvolution, PBC [3]int, realKern [3][3]*data.Slice
 	initConvTestInput(inhost.Vectors())
 	gpu := NewSlice(3, c.inputSize)
 	defer gpu.Free()
-	data.Copy(gpu, inhost)
+	data.Copy(gpu, inhost, "ConvTest")
 
 	Msat := NewSlice(1, [3]int{1, 1, 256})
 	defer Msat.Free()
@@ -31,7 +31,7 @@ func testConvolution(c *DemagConvolution, PBC [3]int, realKern [3][3]*data.Slice
 	vol := data.NilSlice(1, c.inputSize)
 	c.Exec(gpu, gpu, vol, ToMSlice(Msat))
 
-	output := gpu.HostCopy()
+	output := gpu.HostCopy("ConvTest")
 
 	brute := data.NewSlice(3, c.inputSize)
 	bruteConv(inhost.Vectors(), brute.Vectors(), realKern)
