@@ -1,14 +1,15 @@
 package engine
 
 import (
-	"github.com/mumax/3/cuda"
-	"github.com/mumax/3/data"
-	"github.com/mumax/3/draw"
 	"image"
 	"image/jpeg"
 	"math"
 	"net/http"
 	"sync"
+
+	"github.com/mumax/3/cuda"
+	"github.com/mumax/3/data"
+	"github.com/mumax/3/draw"
 )
 
 type render struct {
@@ -94,7 +95,7 @@ func (ren *render) download() {
 		}
 		for c := 0; c < quant.NComp(); c++ {
 			cuda.Resize(ren.rescaleBuf, buf.Comp(c), renderLayer)
-			data.Copy(ren.imgBuf.Comp(c), ren.rescaleBuf, "render_download")
+			data.Copy(ren.imgBuf.Comp(c), ren.rescaleBuf)
 		}
 	})
 }

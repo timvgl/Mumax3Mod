@@ -1,10 +1,11 @@
 package engine
 
 import (
+	"math/rand"
+
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/data"
 	"github.com/mumax/3/util"
-	"math/rand"
 )
 
 func init() {
@@ -56,7 +57,7 @@ func (g *geom) Slice() (*data.Slice, bool) {
 	}
 }
 
-func (q *geom) EvalTo(dst *data.Slice) { EvalTo(q, dst, "geom") }
+func (q *geom) EvalTo(dst *data.Slice) { EvalTo(q, dst) }
 
 var _ Quantity = &Geometry
 
@@ -150,12 +151,12 @@ func (Geometry *geom) setGeom(s Shape) {
 		util.Fatal("SetGeom: Geometry completely empty")
 	}
 
-	data.Copy(Geometry.Buffer, V, "geom_1")
+	data.Copy(Geometry.Buffer, V)
 
 	// M inside geom but previously outside needs to be re-inited
 	needupload := false
 	geomlist := host.Host()[0]
-	mhost := M.Buffer().HostCopy("geom_2")
+	mhost := M.Buffer().HostCopy()
 	m := mhost.Host()
 	rng := rand.New(rand.NewSource(0))
 	for i := range m[0] {
@@ -169,7 +170,7 @@ func (Geometry *geom) setGeom(s Shape) {
 		}
 	}
 	if needupload {
-		data.Copy(M.Buffer(), mhost, "geom_3")
+		data.Copy(M.Buffer(), mhost)
 	}
 
 	M.normalize() // removes m outside vol
@@ -177,7 +178,7 @@ func (Geometry *geom) setGeom(s Shape) {
 	// U inside geom but previously outside needs to be re-inited
 	needupload2 := false
 	geomlist2 := host.Host()[0]
-	uhost := U.Buffer().HostCopy("geom_4")
+	uhost := U.Buffer().HostCopy()
 	u := uhost.Host()
 	rng2 := rand.New(rand.NewSource(0))
 	for i := range u[0] {
@@ -191,7 +192,7 @@ func (Geometry *geom) setGeom(s Shape) {
 		}
 	}
 	if needupload2 {
-		data.Copy(U.Buffer(), uhost, "geom_4")
+		data.Copy(U.Buffer(), uhost)
 	}
 
 	//U.normalize() // removes m outside vol
@@ -199,7 +200,7 @@ func (Geometry *geom) setGeom(s Shape) {
 	// du inside geom but previously outside needs to be re-inited
 	needupload3 := false
 	geomlist3 := host.Host()[0]
-	duhost := DU.Buffer().HostCopy("geom_5")
+	duhost := DU.Buffer().HostCopy()
 	du := duhost.Host()
 	rng3 := rand.New(rand.NewSource(0))
 	for i := range du[0] {
@@ -213,7 +214,7 @@ func (Geometry *geom) setGeom(s Shape) {
 		}
 	}
 	if needupload3 {
-		data.Copy(DU.Buffer(), duhost, "geom_6")
+		data.Copy(DU.Buffer(), duhost)
 	}
 
 	//U.normalize() // removes m outside vol
@@ -260,7 +261,7 @@ func (g *geom) shift(dx int) {
 	defer cuda.Recycle(s2)
 	newv := float32(1) // initially fill edges with 1's
 	cuda.ShiftX(s2, s, dx, newv, newv)
-	data.Copy(s, s2, "geom_7")
+	data.Copy(s, s2)
 
 	n := Mesh().Size()
 	x1, x2 := shiftDirtyRange(dx)
@@ -290,7 +291,7 @@ func (g *geom) shiftY(dy int) {
 	defer cuda.Recycle(s2)
 	newv := float32(1) // initially fill edges with 1's
 	cuda.ShiftY(s2, s, dy, newv, newv)
-	data.Copy(s, s2, "geom_8")
+	data.Copy(s, s2)
 
 	n := Mesh().Size()
 	y1, y2 := shiftDirtyRange(dy)

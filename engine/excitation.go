@@ -1,13 +1,14 @@
 package engine
 
 import (
+	"fmt"
+	"math"
+	"reflect"
+
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/data"
 	"github.com/mumax/3/script"
 	"github.com/mumax/3/util"
-	"math"
-	"reflect"
-	"fmt"
 )
 
 // An excitation, typically field or current,
@@ -129,7 +130,7 @@ func (e *Excitation) Comp(c int) ScalarField  { return Comp(e, c) }
 func (e *Excitation) Eval() interface{}       { return e }
 func (e *Excitation) Type() reflect.Type      { return reflect.TypeOf(new(Excitation)) }
 func (e *Excitation) InputType() reflect.Type { return script.VectorFunction_t }
-func (e *Excitation) EvalTo(dst *data.Slice)  { EvalTo(e, dst, "excitation") }
+func (e *Excitation) EvalTo(dst *data.Slice)  { EvalTo(e, dst) }
 
 func checkNaN(s *data.Slice, name string) {
 	h := s.Host()

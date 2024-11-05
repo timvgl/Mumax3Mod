@@ -33,10 +33,11 @@ func NewDemag(inputSize, PBC [3]int, kernel [3][3]*data.Slice, test bool) *Demag
 }
 
 // Calculate the demag field of m * vol * Bsat, store result in B.
-// 	m:    magnetization normalized to unit length
-// 	vol:  unitless mask used to scale m's length, may be nil
-// 	Bsat: saturation magnetization in Tesla
-// 	B:    resulting demag field, in Tesla
+//
+//	m:    magnetization normalized to unit length
+//	vol:  unitless mask used to scale m's length, may be nil
+//	Bsat: saturation magnetization in Tesla
+//	B:    resulting demag field, in Tesla
 func (c *DemagConvolution) Exec(B, m, vol *data.Slice, Msat MSlice) {
 	util.Argument(B.Size() == c.inputSize && m.Size() == c.inputSize)
 	if c.is2D() {
@@ -155,9 +156,9 @@ func (c *DemagConvolution) init(realKern [3][3]*data.Slice) {
 		for j := i; j < 3; j++ { // upper triangular part
 			if realKern[i][j] != nil { // ignore 0's
 				// FW FFT
-				data.Copy(input, realKern[i][j], "demag1")
+				data.Copy(input, realKern[i][j])
 				c.fwPlan.ExecAsync(input, output)
-				data.Copy(kfull, output, "demag2")
+				data.Copy(kfull, output)
 
 				// extract non-redundant part (Y,Z symmetry)
 				for iz := 0; iz < kCSize[Z]; iz++ {
@@ -170,7 +171,7 @@ func (c *DemagConvolution) init(realKern [3][3]*data.Slice) {
 
 				// extract real parts (X symmetry)
 				scaleRealParts(fftKern, kCmplx, 1/float32(c.fwPlan.InputLen()))
-				c.kern[i][j] = GPUCopy(fftKern, "demag3")
+				c.kern[i][j] = GPUCopy(fftKern)
 			}
 		}
 	}

@@ -1,4 +1,4 @@
-package log
+package logUI
 
 // Logging and error reporting utility functions
 
@@ -8,11 +8,13 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/mumax/3/httpfs"
 	"github.com/fatih/color"
+	"github.com/mumax/3/httpfs"
 )
 
 var Log Logs
+
+var logOnlyForUI = true
 
 type Logs struct {
 	Hist    string                   // console history for GUI
@@ -29,7 +31,7 @@ func (l *Logs) AutoFlushToFile() {
 }
 
 func (l *Logs) FlushToFile() {
-	if l.logfile != nil {
+	if l.logfile != nil && !logOnlyForUI {
 		l.logfile.Flush()
 
 	}
@@ -40,31 +42,37 @@ func (l *Logs) SetDebug(debug bool) {
 }
 
 func (l *Logs) Init(zarrPath string) {
-	l.path = zarrPath + "/log.txt"
-	l.createLogFile()
-	l.writeToFile(l.Hist)
+	if !logOnlyForUI {
+		l.path = zarrPath + "/log.txt"
+		l.createLogFile()
+		l.writeToFile(l.Hist)
+	}
 }
 
 func (l *Logs) createLogFile() {
-	var err error
-	l.logfile, err = httpfs.Create(l.path)
-	if err != nil {
-		color.Red(fmt.Sprintf("Error creating the log file: %v", err))
+	if !logOnlyForUI {
+		var err error
+		l.logfile, err = httpfs.Create(l.path)
+		if err != nil {
+			color.Red(fmt.Sprintf("Error creating the log file: %v", err))
+		}
 	}
 }
 
 func (l *Logs) writeToFile(msg string) {
-	if l.logfile == nil {
-		return
-	}
-	_, err := l.logfile.Write([]byte(msg))
-	if err != nil {
-		if err.Error() == "short write" {
-			color.Yellow("Error writing to log file, trying to recreate it...")
-			l.createLogFile()
-			_, _ = l.logfile.Write([]byte(msg))
-		} else {
-			color.Red(fmt.Sprintf("Error writing to log file: %v", err))
+	if !logOnlyForUI {
+		if l.logfile == nil {
+			return
+		}
+		_, err := l.logfile.Write([]byte(msg))
+		if err != nil {
+			if err.Error() == "short write" {
+				color.Yellow("Error writing to log file, trying to recreate it...")
+				l.createLogFile()
+				_, _ = l.logfile.Write([]byte(msg))
+			} else {
+				color.Red(fmt.Sprintf("Error writing to log file: %v", err))
+			}
 		}
 	}
 }

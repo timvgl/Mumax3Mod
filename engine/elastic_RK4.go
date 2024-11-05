@@ -9,7 +9,7 @@ import (
 )
 
 // Classical 4th order RK solver.
-type elasRK4 struct{
+type elasRK4 struct {
 	ku1 *data.Slice
 	ku2 *data.Slice
 	ku3 *data.Slice
@@ -38,13 +38,13 @@ func (_ *elasRK4) Step() {
 	SetFreezeDisp()
 	u0 := cuda.Buffer(3, size)
 	defer cuda.Recycle(u0)
-	data.Copy(u0, u, "elastic_RK4_1")
+	data.Copy(u0, u)
 
 	v := DU.Buffer()
 
 	v0 := cuda.Buffer(3, size)
 	defer cuda.Recycle(v0)
-	data.Copy(v0, v, "elastic_RK4_2")
+	data.Copy(v0, v)
 
 	ku1, ku2, ku3, ku4 := cuda.Buffer(3, size), cuda.Buffer(3, size), cuda.Buffer(3, size), cuda.Buffer(3, size)
 	kv1, kv2, kv3, kv4 := cuda.Buffer(3, size), cuda.Buffer(3, size), cuda.Buffer(3, size), cuda.Buffer(3, size)
@@ -157,8 +157,8 @@ func (_ *elasRK4) Step() {
 		// undo bad step
 		util.Assert(FixDt == 0)
 		Time = t0
-		data.Copy(u, u0, "elastic_RK4_3")
-		data.Copy(v, v0, "elastic_RK4_4")
+		data.Copy(u, u0)
+		data.Copy(v, v0)
 		NUndone++
 		if err > err2 {
 			adaptDt(math.Pow(MaxErr/err, 1./3.))

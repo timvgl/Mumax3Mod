@@ -1,10 +1,11 @@
 package engine
 
 import (
+	"math"
+
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/data"
 	"github.com/mumax/3/util"
-	"math"
 )
 
 // Classical 4th order RK solver.
@@ -28,12 +29,12 @@ func (_ *elasYOSH) Step() {
 	//SetFreezeDisp()
 	u0 := cuda.Buffer(3, size)
 	defer cuda.Recycle(u0)
-	data.Copy(u0, u, "elastic_yoshida_1")
+	data.Copy(u0, u)
 
 	v := DU.Buffer()
 	v0 := cuda.Buffer(3, size)
 	defer cuda.Recycle(v0)
-	data.Copy(v0, v, "elastic_yoshida_1")
+	data.Copy(v0, v)
 
 	a1, a2, a3 := cuda.Buffer(3, size), cuda.Buffer(3, size), cuda.Buffer(3, size)
 

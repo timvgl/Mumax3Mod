@@ -23,8 +23,8 @@ func MemAlloc(bytes int64) unsafe.Pointer {
 }
 
 // Returns a copy of in, allocated on GPU.
-func GPUCopy(in *data.Slice, q string) *data.Slice {
+func GPUCopy(in *data.Slice) *data.Slice {
 	s := NewSlice(in.NComp(), in.Size())
-	data.Copy(s, in, q)
+	data.Copy(s, in)
 	return s
 }

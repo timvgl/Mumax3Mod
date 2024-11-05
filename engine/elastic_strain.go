@@ -6,24 +6,24 @@ import (
 )
 
 var (
-	loadNormStrain bool = false
-	loadNormStrainPath string
-	loadShearStrain bool = false
-	loadShearStrainPath string
-	loadNormStrainConfig bool = false
-	normStrainConfig Config
+	loadNormStrain        bool = false
+	loadNormStrainPath    string
+	loadShearStrain       bool = false
+	loadShearStrainPath   string
+	loadNormStrainConfig  bool = false
+	normStrainConfig      Config
 	loadShearStrainConfig bool = false
-	shearStrainConfig Config
-	norm_strain  = NewVectorField("normStrain", "", "Normal strain components", setNormStrain)
-	shear_strain = NewVectorField("shearStrain", "", "Shear strain components", setShearStrain)
+	shearStrainConfig     Config
+	norm_strain           = NewVectorField("normStrain", "", "Normal strain components", setNormStrain)
+	shear_strain          = NewVectorField("shearStrain", "", "Shear strain components", setShearStrain)
 )
 
-//###################
-//Strain
+// ###################
+// Strain
 func setNormStrain(dst *data.Slice) {
 	if loadNormStrain == false && loadNormStrainConfig == false {
 		NormStrain(dst, U, C11)
-	} else if loadNormStrain == true && loadNormStrainConfig == false{
+	} else if loadNormStrain == true && loadNormStrainConfig == false {
 		var d *data.Slice
 		d = LoadFileDSlice(loadNormStrainPath)
 		SetArray(dst, d)
@@ -40,7 +40,7 @@ func setNormStrain(dst *data.Slice) {
 func setShearStrain(dst *data.Slice) {
 	if loadShearStrain == false && loadShearStrainConfig == false {
 		ShearStrain(dst, U, C11)
-	} else if loadShearStrain == true && loadShearStrainConfig == false{
+	} else if loadShearStrain == true && loadShearStrainConfig == false {
 		var d *data.Slice
 		d = LoadFileDSlice(loadShearStrainPath)
 		SetArray(dst, d)
@@ -73,10 +73,10 @@ func SetTime(fname string) {
 	Time = meta.Time
 }
 
-func SetArray(dst, src *data.Slice,) {
+func SetArray(dst, src *data.Slice) {
 	if src.Size() != dst.Size() {
 		src = data.Resample(src, dst.Size())
 	}
-	data.Copy(dst, src, "elastic_strain_SetArray")
+	data.Copy(dst, src)
 	//b.normalize()
 }

@@ -4,6 +4,7 @@ package engine
 
 import (
 	"fmt"
+
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/data"
 	"github.com/mumax/3/util"
@@ -17,7 +18,7 @@ type component struct {
 // Comp returns vector component c of the parent Quantity
 func Comp(parent Quantity, c int) ScalarField {
 	util.Argument(c >= 0 && c < parent.NComp())
-	return AsScalarField(parent)
+	return AsScalarField(&component{parent, c})
 }
 
 func (q *component) NComp() int       { return 1 }
@@ -33,10 +34,10 @@ func (q *component) Slice() (*data.Slice, bool) {
 	return c, true
 }
 
-func (q *component) EvalTo(dst *data.Slice, qStr string) {
+func (q *component) EvalTo(dst *data.Slice) {
 	src := ValueOf(q.parent)
 	defer cuda.Recycle(src)
-	data.Copy(dst, src.Comp(q.comp), qStr)
+	data.Copy(dst, src.Comp(q.comp))
 }
 
 var compname = map[int]string{0: "x", 1: "y", 2: "z"}

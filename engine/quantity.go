@@ -90,10 +90,10 @@ func ValueOf(q Quantity) *data.Slice {
 // Temporary shim to fit Slice into EvalTo
 func EvalTo(q interface {
 	Slice() (*data.Slice, bool)
-}, dst *data.Slice, qStr string) {
+}, dst *data.Slice) {
 	v, r := q.Slice()
 	if r {
 		defer cuda.Recycle(v)
 	}
-	data.Copy(dst, v, qStr)
+	data.Copy(dst, v)
 }

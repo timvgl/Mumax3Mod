@@ -1,13 +1,14 @@
 package engine
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"os"
 	"path"
+	"path/filepath"
 	"sort"
 	"strings"
-	"errors"
 
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/data"
@@ -19,9 +20,11 @@ import (
 )
 
 var (
-	GradMx	  = NewVectorField("GradMx", "J", "", GetGradMx)
-	GradMy	  = NewVectorField("GradMy", "J", "", GetGradMy)
-	GradMz	  = NewVectorField("GradMz", "J", "", GetGradMz)
+	GradMx = NewVectorField("GradMx", "J", "", GetGradMx)
+	GradMy = NewVectorField("GradMy", "J", "", GetGradMy)
+	GradMz = NewVectorField("GradMz", "J", "", GetGradMz)
+	GSDir  string
+	Suffix string
 )
 
 func init() {
@@ -44,6 +47,33 @@ func init() {
 	DeclFunc("NewScalarMask", NewScalarMask, "Makes a 3D array of scalars")
 	DeclFunc("IsFile", CheckIfFileExists, "Checks if a file at given path exists and returns bool")
 	DeclFunc("IsFileMyDir", CheckIfFileExistsOD, "Checks if a file at given path exists and returns bool")
+	DeclFunc("ConcStr", ConcStr, "")
+	DeclVar("GSDir", &GSDir, "")
+	DeclFunc("EraseOD", EraseOD, "")
+	DeclVar("Suffix", &Suffix, "")
+}
+
+func EraseOD() {
+	dir := OD()
+	d, err := os.Open(dir)
+	if err != nil {
+		util.PanicErr(err)
+	}
+	defer d.Close()
+	names, err := d.Readdirnames(-1)
+	if err != nil {
+		util.PanicErr(err)
+	}
+	for _, name := range names {
+		err = os.RemoveAll(filepath.Join(dir, name))
+		if err != nil {
+			util.PanicErr(err)
+		}
+	}
+}
+
+func ConcStr(str1, str2 string) string {
+	return str1 + str2
 }
 
 func CheckIfFileExists(path string) bool {
@@ -146,7 +176,7 @@ func LoadFileAsConfig(fname string) Config {
 	var size = M.Mesh().Size()
 	var xSize, ySize, zSize = float64(size[0]), float64(size[1]), float64(size[2])
 	return func(x, y, z float64) data.Vector {
-		var xIndex, yIndex, zIndex = int((x + xSize * xCellSize / 2) / xCellSize), int((y + ySize * yCellSize / 2)/yCellSize), int((z + zSize * zCellSize / 2)/zCellSize)
+		var xIndex, yIndex, zIndex = int((x + xSize*xCellSize/2) / xCellSize), int((y + ySize*yCellSize/2) / yCellSize), int((z + zSize*zCellSize/2) / zCellSize)
 		return data.New_dataVector(float64(vec[0][zIndex][yIndex][xIndex]), float64(vec[1][zIndex][yIndex][xIndex]), float64(vec[2][zIndex][yIndex][xIndex]))
 	}
 }
@@ -165,9 +195,9 @@ func LoadFileWithoutMem(q Quantity, fname string) {
 		loadShearStress = true
 		loadShearStressPath = fname
 	} else {
-		util.AssertMsg(true, "Loading file for " + NameOf(q) + " not yet supported.")
+		util.AssertMsg(true, "Loading file for "+NameOf(q)+" not yet supported.")
 	}
-	
+
 }
 
 func SetQuantityWithoutMemToConfig(q Quantity, cfg Config) {
@@ -184,9 +214,9 @@ func SetQuantityWithoutMemToConfig(q Quantity, cfg Config) {
 		loadShearStressConfig = true
 		shearStressConfig = cfg
 	} else {
-		util.AssertMsg(true, "Loading config for " + NameOf(q) + " not yet supported.")
+		util.AssertMsg(true, "Loading config for "+NameOf(q)+" not yet supported.")
 	}
-	
+
 }
 
 func SetInShape(dst *data.Slice, region Shape, conf Config) {
@@ -195,7 +225,7 @@ func SetInShape(dst *data.Slice, region Shape, conf Config) {
 	if region == nil {
 		region = universe
 	}
-	host := dst.HostCopy("util")
+	host := dst.HostCopy()
 	h := host.Vectors()
 	n := dst.Size()
 
@@ -228,7 +258,6 @@ func GetGradMz(dst *data.Slice) {
 	cuda.Grad3(dst, M.Buffer(), M.Mesh())
 }
 
-
 // Download a quantity to host,
 // or just return its data when already on host.
 func Download(q Quantity) *data.Slice {
@@ -238,7 +267,7 @@ func Download(q Quantity) *data.Slice {
 	if buf.CPUAccess() {
 		return buf
 	} else {
-		return buf.HostCopy("util")
+		return buf.HostCopy()
 	}
 }
 
@@ -316,7 +345,7 @@ func assureGPU(s *data.Slice) *data.Slice {
 	if s.GPUAccess() {
 		return s
 	} else {
-		return cuda.GPUCopy(s, "util")
+		return cuda.GPUCopy(s)
 	}
 }
 

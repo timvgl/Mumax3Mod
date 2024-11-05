@@ -9,7 +9,7 @@ import (
 )
 
 // Classical 4th order RK solver.
-type magelasRK4 struct{
+type magelasRK4 struct {
 	kv1 *data.Slice
 	kv2 *data.Slice
 	kv3 *data.Slice
@@ -28,9 +28,9 @@ func (_ *magelasRK4) Step() {
 	//#################################
 	//Initialisation:
 	/*
-	if InsertTimeDepDisplacement == 1 {
-		U.Set(Uniform(0, 0, 0))
-	}*/
+		if InsertTimeDepDisplacement == 1 {
+			U.Set(Uniform(0, 0, 0))
+		}*/
 	u := U.Buffer()
 	size := u.Size()
 
@@ -38,7 +38,7 @@ func (_ *magelasRK4) Step() {
 	SetFreezeDisp()
 	u0 := cuda.Buffer(3, size)
 	defer cuda.Recycle(u0)
-	data.Copy(u0, u, "MEC_RK4_1")
+	data.Copy(u0, u)
 
 	/*if InsertTimeDepDisplacement == 1 {
 		var funcResults []float64
@@ -53,13 +53,13 @@ func (_ *magelasRK4) Step() {
 	m := M.Buffer()
 	m0 := cuda.Buffer(3, size)
 	defer cuda.Recycle(m0)
-	data.Copy(m0, m, "MEC_RK4_2")
+	data.Copy(m0, m)
 
 	v := DU.Buffer()
 
 	v0 := cuda.Buffer(3, size)
 	defer cuda.Recycle(v0)
-	data.Copy(v0, v, "MEC_RK4_4")
+	data.Copy(v0, v)
 
 	ku1, ku2, ku3, ku4 := cuda.Buffer(3, size), cuda.Buffer(3, size), cuda.Buffer(3, size), cuda.Buffer(3, size)
 	kv1, kv2, kv3, kv4 := cuda.Buffer(3, size), cuda.Buffer(3, size), cuda.Buffer(3, size), cuda.Buffer(3, size)
@@ -102,7 +102,7 @@ func (_ *magelasRK4) Step() {
 	//Stage 1:
 	calcRhs(kv1, f, v)
 	ku1 = v0
-	if (fixM == false) {
+	if fixM == false {
 		torqueFn(km1)
 	}
 
@@ -115,15 +115,14 @@ func (_ *magelasRK4) Step() {
 		calcBndry()
 	}
 	cuda.Madd2(v, v0, kv1, 1, (1./2.)*dt)
-	if (fixM == false) {
+	if fixM == false {
 		cuda.Madd2(m, m, km1, 1, (1./2.)*dt*float32(GammaLL))
 		M.normalize()
 	}
-	
 
 	calcRhs(kv2, f, v)
 	cuda.Madd2(ku2, v0, kv1, 1, (1./2.)*dt)
-	if (fixM == false) {
+	if fixM == false {
 		torqueFn(km2)
 	}
 
@@ -134,14 +133,14 @@ func (_ *magelasRK4) Step() {
 		calcBndry()
 	}
 	cuda.Madd2(v, v0, kv2, 1, (1./2.)*dt)
-	if (fixM == false) {
+	if fixM == false {
 		cuda.Madd2(m, m0, km2, 1, (1./2.)*dt*float32(GammaLL))
 		M.normalize()
 	}
 
 	calcRhs(kv3, f, v)
 	cuda.Madd2(ku3, v0, kv2, 1, (1./2.)*dt)
-	if (fixM == false) {
+	if fixM == false {
 		torqueFn(km3)
 	}
 
@@ -153,14 +152,14 @@ func (_ *magelasRK4) Step() {
 		calcBndry()
 	}
 	cuda.Madd2(v, v0, kv3, 1, 1.*dt)
-	if (fixM == false) {
+	if fixM == false {
 		cuda.Madd2(m, m0, km3, 1, 1.*dt*float32(GammaLL))
 		M.normalize()
 	}
 
 	calcRhs(kv4, f, v)
 	cuda.Madd2(ku4, v0, kv3, 1, 1.*dt)
-	if (fixM == false) {
+	if fixM == false {
 		torqueFn(km4)
 	}
 
@@ -202,12 +201,12 @@ func (_ *magelasRK4) Step() {
 			calcBndry()
 		}
 		cuda.Madd5(v, v0, kv1, kv2, kv3, kv4, 1, (1./6.)*dt, (1./3.)*dt, (1./3.)*dt, (1./6.)*dt)
-		if (fixM == false) {
+		if fixM == false {
 			cuda.Madd5(m, m0, km1, km2, km3, km4, 1, (1./6.)*dt*float32(GammaLL), (1./3.)*dt*float32(GammaLL), (1./3.)*dt*float32(GammaLL), (1./6.)*dt*float32(GammaLL))
 			//Post handlings
 			M.normalize()
 		} else {
-			data.Copy(m, m0, "MEC_RK4_5")
+			data.Copy(m, m0)
 			M.normalize()
 		}
 		for i := 0; i < 3; i++ {
@@ -229,9 +228,9 @@ func (_ *magelasRK4) Step() {
 		// undo bad step
 		util.Assert(FixDt == 0)
 		Time = t0
-		data.Copy(u, u0, "MEC_RK4_6")
-		data.Copy(v, v0, "MEC_RK4_7")
-		data.Copy(m, m0, "MEC_RK4_8")
+		data.Copy(u, u0)
+		data.Copy(v, v0)
+		data.Copy(m, m0)
 		NUndone++
 		if err > err2 {
 			adaptDt(math.Pow(MaxErr/err, 1./3.))

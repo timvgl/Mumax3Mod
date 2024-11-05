@@ -218,7 +218,7 @@ func (r *Regions) Slice() (*data.Slice, bool) {
 	return buf, true
 }
 
-func (r *Regions) EvalTo(dst *data.Slice) { EvalTo(r, dst, "") }
+func (r *Regions) EvalTo(dst *data.Slice) { EvalTo(r, dst) }
 
 var _ Quantity = &regions
 

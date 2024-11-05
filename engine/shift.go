@@ -48,7 +48,7 @@ func shiftMag(m *data.Slice, dx int) {
 	for c := 0; c < m.NComp(); c++ {
 		comp := m.Comp(c)
 		cuda.ShiftX(m2, comp, dx, float32(ShiftMagL[c]), float32(ShiftMagR[c]))
-		data.Copy(comp, m2, "shiftMag") // str0 ?
+		data.Copy(comp, m2) // str0 ?
 	}
 }
 
@@ -73,6 +73,6 @@ func shiftMagY(m *data.Slice, dy int) {
 	for c := 0; c < m.NComp(); c++ {
 		comp := m.Comp(c)
 		cuda.ShiftY(m2, comp, dy, float32(ShiftMagU[c]), float32(ShiftMagD[c]))
-		data.Copy(comp, m2, "shiftMagY") // str0 ?
+		data.Copy(comp, m2) // str0 ?
 	}
 }

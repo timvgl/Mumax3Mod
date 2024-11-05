@@ -4,6 +4,7 @@ package engine
 
 import (
 	"fmt"
+
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/data"
 	"github.com/mumax/3/util"
@@ -107,7 +108,6 @@ func Crop(parent Quantity, x1, x2, y1, y2, z1, z2 int) *cropped {
 			name += "zrange" + rangeStr(z1, z2)
 		}
 	}
-	
 
 	return &cropped{parent, name, x1, x2, y1, y2, z1, z2}
 }
@@ -124,7 +124,7 @@ func rangeStr(a, b int) string {
 func (q *cropped) NComp() int             { return q.parent.NComp() }
 func (q *cropped) Name() string           { return q.name }
 func (q *cropped) Unit() string           { return UnitOf(q.parent) }
-func (q *cropped) EvalTo(dst *data.Slice) { EvalTo(q, dst, "crop") }
+func (q *cropped) EvalTo(dst *data.Slice) { EvalTo(q, dst) }
 
 func (q *cropped) Mesh() *data.Mesh {
 	c := MeshOf(q.parent).CellSize()

@@ -1,10 +1,11 @@
 package engine
 
 import (
+	"reflect"
+
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/data"
 	"github.com/mumax/3/util"
-	"reflect"
 )
 
 // Special buffered quantity to store variable vector fields such as the magnetization
@@ -30,7 +31,6 @@ func (m *varVectorField) average() []float64      { return sAverageMagnet(M.Buff
 func (m *varVectorField) Average() data.Vector    { return unslice(m.average()) }
 func (m *varVectorField) normalize()              { cuda.Normalize(m.Buffer(), Geometry.Gpu()) }
 
-
 // allocate storage (not done by init, as mesh size may not yet be known then)
 func (m *varVectorField) alloc() {
 	m.buffer_ = cuda.NewSlice(3, m.Mesh().Size())
@@ -41,7 +41,7 @@ func (b *varVectorField) SetArray(src *data.Slice) {
 	if src.Size() != b.Mesh().Size() {
 		src = data.Resample(src, b.Mesh().Size())
 	}
-	data.Copy(b.Buffer(), src, "varfield_SetArray")
+	data.Copy(b.Buffer(), src)
 	if b.normalized {
 		b.normalize()
 	}
@@ -79,12 +79,12 @@ func (m *varVectorField) Slice() (s *data.Slice, recycle bool) {
 }
 
 func (m *varVectorField) EvalTo(dst *data.Slice) {
-	data.Copy(dst, m.buffer_, "varfield_EvalTo")
+	data.Copy(dst, m.buffer_)
 }
 
 func (m *varVectorField) Region(r int) *vOneReg { return vOneRegion(m, r) }
 
-func (m *varVectorField) String() string { return util.Sprint(m.Buffer().HostCopy("varfield_String")) }
+func (m *varVectorField) String() string { return util.Sprint(m.Buffer().HostCopy()) }
 
 // Set the value of one cell.
 func (m *varVectorField) SetCell(ix, iy, iz int, v data.Vector) {
@@ -115,7 +115,7 @@ func (m *varVectorField) SetInShape(region Shape, conf Config) {
 	if region == nil {
 		region = universe
 	}
-	host := m.Buffer().HostCopy("varfield_SetInShape")
+	host := m.Buffer().HostCopy()
 	h := host.Vectors()
 	n := m.Mesh().Size()
 
@@ -138,7 +138,7 @@ func (m *varVectorField) SetInShape(region Shape, conf Config) {
 
 // set m to config in region
 func (m *varVectorField) SetRegion(region int, conf Config) {
-	host := m.Buffer().HostCopy("varfield_SetRegion")
+	host := m.Buffer().HostCopy()
 	h := host.Vectors()
 	n := m.Mesh().Size()
 	r := byte(region)
@@ -163,10 +163,10 @@ func (m *varVectorField) SetRegion(region int, conf Config) {
 }
 
 func (m *varVectorField) resize() {
-	backup := m.Buffer().HostCopy("varfield_resize_1")
+	backup := m.Buffer().HostCopy()
 	s2 := Mesh().Size()
 	resized := data.Resample(backup, s2)
 	m.buffer_.Free()
 	m.buffer_ = cuda.NewSlice(VECTOR, s2)
-	data.Copy(m.buffer_, resized, "varfield_resize_2")
+	data.Copy(m.buffer_, resized)
 }

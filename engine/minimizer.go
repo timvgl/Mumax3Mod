@@ -69,7 +69,7 @@ func (mini *Minimizer) Step() {
 	// save original magnetization
 	m0 := cuda.Buffer(3, size)
 	defer cuda.Recycle(m0)
-	data.Copy(m0, m, "minimizer_1")
+	data.Copy(m0, m)
 
 	// make descent
 	cuda.Minimize(m, m0, k, h)
@@ -77,7 +77,7 @@ func (mini *Minimizer) Step() {
 	// calculate new torque for next step
 	k0 := cuda.Buffer(3, size)
 	defer cuda.Recycle(k0)
-	data.Copy(k0, k, "minimizer_1")
+	data.Copy(k0, k)
 	torqueFn(k)
 	setMaxTorque(k) // report to user
 

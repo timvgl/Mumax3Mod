@@ -55,7 +55,7 @@ func (s *SolverState) Update() {
 }
 
 func getSolverType(typeStr string) int {
-	solvertypes := map[string]int{"bw_euler": -1, "euler": 1, "heun": 2, "rk23": 3, "rk4": 4, "rk45": 5, "rkf56": 6}
+	solvertypes := map[string]int{"bw_euler": -1, "euler": 1, "heun": 2, "rk23": 3, "rk4": 4, "rk45": 5, "rkf56": 6, "secondHeun": 7, "elasRK4": 8, "magelasRK4": 9, "elasLF": 10, "elasYOSH": 11, "magelasRK4_vary_time": 12}
 	if solver, ok := solvertypes[typeStr]; ok {
 		return solver
 	}
@@ -63,7 +63,7 @@ func getSolverType(typeStr string) int {
 }
 
 func getSolverName(solver int) string {
-	solvernames := map[int]string{-1: "bw_euler", 1: "euler", 2: "heun", 3: "rk23", 4: "rk4", 5: "rk45", 6: "rkf56"}
+	solvernames := map[int]string{-1: "bw_euler", 1: "euler", 2: "heun", 3: "rk23", 4: "rk4", 5: "rk45", 6: "rkf56", 7: "secondHeun", 8: "elasRK4", 9: "magelasRK4", 10: "elasLF", 11: "elasYOSH", 12: "magelasRK4_vary_time"}
 	if name, ok := solvernames[solver]; ok {
 		return name
 	}

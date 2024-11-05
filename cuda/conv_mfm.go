@@ -65,7 +65,7 @@ func (c *MFMConvolution) initFFTKern3D() {
 
 	for i := 0; i < 3; i++ {
 		zero1_async(c.fftRBuf)
-		data.Copy(c.fftRBuf, c.kern[i], "FFT")
+		data.Copy(c.fftRBuf, c.kern[i])
 		c.fwPlan.ExecAsync(c.fftRBuf, c.fftCBuf)
 		scale := 2 / float32(c.fwPlan.InputLen()) // ??
 		zero1_async(c.gpuFFTKern[i])

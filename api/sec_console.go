@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/mumax/3/engine"
-	"github.com/mumax/3/log"
+	"github.com/mumax/3/logUI"
 	"github.com/labstack/echo/v4"
 )
 
@@ -19,7 +19,7 @@ func (s ConsoleState) Update() {}
 func initConsoleAPI(e *echo.Echo, ws *WebSocketManager) *ConsoleState {
 	state := &ConsoleState{
 		ws:   ws,
-		Hist: &log.Log.Hist,
+		Hist: &logUI.Log.Hist,
 	}
 	e.POST("/api/console/command", state.postConsoleCommand)
 	return state
