@@ -8,7 +8,7 @@ import (
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/data"
 	"github.com/mumax/3/engine"
-	"github.com/mumax/3/log"
+	"github.com/mumax/3/logUI"
 )
 
 type PreviewState struct {
@@ -73,7 +73,7 @@ func initPreviewAPI(e *echo.Echo, ws *WebSocketManager) *PreviewState {
 func (s *PreviewState) getQuantity() engine.Quantity {
 	quantity, exists := engine.Quantities[s.Quantity]
 	if !exists {
-		log.Log.Err("Quantity not found: %v", s.Quantity)
+		logUI.Log.Err("Quantity not found: %v", s.Quantity)
 	}
 	return quantity
 }
@@ -104,17 +104,17 @@ func (s *PreviewState) UpdateQuantityBuffer() {
 	if s.Type == "3D" {
 		for c := 0; c < componentCount; c++ {
 			cuda.Resize(GPU_out, GPU_in.Comp(c), s.Layer)
-			data.Copy(CPU_out.Comp(c), GPU_out, "sec_preview")
+			data.Copy(CPU_out.Comp(c), GPU_out)
 		}
 		s.normalizeVectors(CPU_out)
 		s.UpdateVectorField(CPU_out.Vectors())
 	} else {
 		if s.getQuantity().NComp() > 1 {
 			cuda.Resize(GPU_out, GPU_in.Comp(s.getComponent()), s.Layer)
-			data.Copy(CPU_out.Comp(0), GPU_out, "sec_preview")
+			data.Copy(CPU_out.Comp(0), GPU_out)
 		} else {
 			cuda.Resize(GPU_out, GPU_in.Comp(0), s.Layer)
-			data.Copy(CPU_out.Comp(0), GPU_out, "sec_preview")
+			data.Copy(CPU_out.Comp(0), GPU_out)
 		}
 		s.UpdateScalarField(CPU_out.Scalars())
 	}
@@ -212,7 +212,7 @@ func (s *PreviewState) UpdateScalarField(scalarField [][][]float32) {
 		}
 	}
 	if len(valArray) == 0 {
-		log.Log.Warn("No data in scalar field")
+		logUI.Log.Warn("No data in scalar field")
 	}
 
 	s.Min = min
@@ -238,7 +238,7 @@ func (s *PreviewState) updateMask() {
 	// copy resized geom from GPU to CPU
 	CPU_out := data.NewSlice(1, [3]int{s.XChosenSize, s.YChosenSize, 1})
 	defer CPU_out.Free()
-	data.Copy(CPU_out.Comp(0), GPU_resized, "sec_preview")
+	data.Copy(CPU_out.Comp(0), GPU_resized)
 
 	// extract mask from CPU slice
 	s.layerMask = CPU_out.Scalars()[0]
@@ -266,7 +266,7 @@ func compStringToIndex(comp string) int {
 	case "None":
 		return 0
 	}
-	log.Log.ErrAndExit("Invalid component string")
+	logUI.Log.ErrAndExit("Invalid component string")
 	return -2
 }
 
@@ -309,7 +309,7 @@ func (s *PreviewState) validateComponent() {
 			s.Component = "3D"
 		}
 	default:
-		log.Log.Err("Invalid number of components")
+		logUI.Log.Err("Invalid number of components")
 		// reset to default
 		s.Quantity = "m"
 		s.Component = "3D"
@@ -322,7 +322,7 @@ func (s *PreviewState) postPreviewComponent(c echo.Context) error {
 	}
 	req := new(Request)
 	if err := c.Bind(req); err != nil {
-		log.Log.Err("%v", err)
+		logUI.Log.Err("%v", err)
 		return c.JSON(http.StatusBadRequest, echo.Map{"error": "Invalid request payload"})
 	}
 	s.Component = req.Component
@@ -339,7 +339,7 @@ func (s *PreviewState) postPreviewQuantity(c echo.Context) error {
 	}
 	req := new(Request)
 	if err := c.Bind(req); err != nil {
-		log.Log.Err("%v", err)
+		logUI.Log.Err("%v", err)
 		return c.JSON(http.StatusBadRequest, echo.Map{"error": "Invalid request payload"})
 	}
 	_, exists := engine.Quantities[req.Quantity]
@@ -360,7 +360,7 @@ func (s *PreviewState) postPreviewLayer(c echo.Context) error {
 	}
 	req := new(Request)
 	if err := c.Bind(req); err != nil {
-		log.Log.Err("%v", err)
+		logUI.Log.Err("%v", err)
 		return c.JSON(http.StatusBadRequest, echo.Map{"error": "Invalid request payload"})
 	}
 
@@ -377,7 +377,7 @@ func (s *PreviewState) postPreviewMaxPoints(c echo.Context) error {
 	}
 	req := new(Request)
 	if err := c.Bind(req); err != nil {
-		log.Log.Err("%v", err)
+		logUI.Log.Err("%v", err)
 		return c.JSON(http.StatusBadRequest, echo.Map{"error": "Invalid request payload"})
 	}
 	if req.MaxPoints < 8 {
@@ -410,7 +410,7 @@ func (s *PreviewState) postXChosenSize(c echo.Context) error {
 	}
 	req := new(Request)
 	if err := c.Bind(req); err != nil {
-		log.Log.Err("%v", err)
+		logUI.Log.Err("%v", err)
 		return c.JSON(http.StatusBadRequest, echo.Map{"error": "Invalid request payload"})
 	}
 	if !containsInt(s.XPossibleSizes, req.XChosenSize) {
@@ -429,7 +429,7 @@ func (s *PreviewState) postYChosenSize(c echo.Context) error {
 	}
 	req := new(Request)
 	if err := c.Bind(req); err != nil {
-		log.Log.Err("%v", err)
+		logUI.Log.Err("%v", err)
 		return c.JSON(http.StatusBadRequest, echo.Map{"error": "Invalid request payload"})
 	}
 	if !containsInt(s.YPossibleSizes, req.YChosenSize) {

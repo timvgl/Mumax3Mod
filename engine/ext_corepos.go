@@ -1,53 +1,53 @@
 package engine
 
 import (
+	"fmt"
+	"math"
+
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/cuda/cu"
 	"github.com/mumax/3/data"
 	"github.com/mumax/3/util"
-	"math"
-	"fmt"
 )
 
 var (
-	evaluteCorePosGPU 					bool = false
-	devMode								bool = false
-	memoryAllocated 					bool = false
-	vals 								*data.Slice
-	idx 								*data.Slice
-	blk_vals 							*data.Slice
-	blk_idxs 							*data.Slice
-	CorePosRT					 			 = make([]float64, 3) //core Position of Vortex
-	CorePosE								 = make([]float64, 3)
-	CorePosRTR							float64
-	CorePosR							float64
-	CorePosRE							float64
-	postStepModeVortexCore				bool = false
-	ActivateCorePosScriptAccessState 	bool = false
-	gotCorePosForE						bool = false
-	radiusElasticVortexCore 			float64 = -1
-
+	evaluteCorePosGPU                bool = false
+	devMode                          bool = false
+	memoryAllocated                  bool = false
+	vals                             *data.Slice
+	idx                              *data.Slice
+	blk_vals                         *data.Slice
+	blk_idxs                         *data.Slice
+	CorePosRT                        = make([]float64, 3) //core Position of Vortex
+	CorePosE                         = make([]float64, 3)
+	CorePosRTR                       float64
+	CorePosR                         float64
+	CorePosRE                        float64
+	postStepModeVortexCore           bool    = false
+	ActivateCorePosScriptAccessState bool    = false
+	gotCorePosForE                   bool    = false
+	radiusElasticVortexCore          float64 = -1
 )
+
 func init() {
 	NewVectorValue("ext_corepos", "m", "Vortex core position (x,y) + polarization (z)", corePosTable)
 	NewVectorValue("ext_corepos_elastic", "m", "Vortex core position (x,y) + polarization (z)", elasticCorePos)
 	DeclVar("radiusElasticVortexCore", &radiusElasticVortexCore, "")
 	DeclVar("evaluteCorePosGPU", &evaluteCorePosGPU, "")
 	DeclVar("__devMode__", &devMode, "")
-	NewScalarValue("CorePosR", "m", "Radius of CorePosRT", func() float64 { 	
-																				return CorePosR
-																			})
-	NewScalarValue("CorePosRE", "m", "Radius of CorePosRT", func() float64 { 	
-																				return CorePosRE
-																			})
-	NewScalarValue("CorePosRER", "m", "Radius of CorePosRT", func() float64 { 	
-																				return CorePosRE - CorePosR
-																			})
+	NewScalarValue("CorePosR", "m", "Radius of CorePosRT", func() float64 {
+		return CorePosR
+	})
+	NewScalarValue("CorePosRE", "m", "Radius of CorePosRT", func() float64 {
+		return CorePosRE
+	})
+	NewScalarValue("CorePosRER", "m", "Radius of CorePosRT", func() float64 {
+		return CorePosRE - CorePosR
+	})
 	DeclFunc("Activate_corePosScriptAccess", Activate_corePosScriptAccess, "Activates the availability of the vortex core position as live data")
 	DeclFunc("Activate_corePosScriptAccessR", Activate_corePosScriptAccessR, "")
 	DeclVar("CorePosRT", &CorePosRT, "Vortex core position in real time")
 	DeclVar("CorePosRTR", &CorePosRTR, "Radius of CorePosRT")
-
 
 }
 
@@ -55,17 +55,17 @@ func allocateMemoryForMax() {
 	if memoryAllocated == false {
 		vals = cuda.NewSlice(1, [3]int{int(cu.MAX_BLOCK_DIM_X), 1, 1})
 		cuda.Zero(vals)
-		idx = cuda.NewSliceInt(1, [3]int{int(cu.MAX_BLOCK_DIM_X)*3 +2, 1, 1})
+		idx = cuda.NewSliceInt(1, [3]int{int(cu.MAX_BLOCK_DIM_X)*3 + 2, 1, 1})
 		cuda.Zero(idx)
 		blk_vals = cuda.NewSlice(1, [3]int{int(cu.MAX_GRID_DIM_X), 1, 1})
 		cuda.Zero(blk_vals)
-		blk_idxs = cuda.NewSliceInt(1, [3]int{int(cu.MAX_GRID_DIM_X)*3 +2, 1, 1})
+		blk_idxs = cuda.NewSliceInt(1, [3]int{int(cu.MAX_GRID_DIM_X)*3 + 2, 1, 1})
 		cuda.Zero(blk_idxs)
 		memoryAllocated = true
 	}
 }
 
-func corePosGPU()[]float64 {
+func corePosGPU() []float64 {
 	util.AssertMsg(!devMode, "This code is not working. Please don't calculate the core position on the GPU.")
 	fmt.Println("Getting pos on GPU")
 	allocateMemoryForMax()
@@ -97,11 +97,11 @@ func corePosGPU()[]float64 {
 	return pos
 }
 
-func corePosCPU()[]float64 { 
+func corePosCPU() []float64 {
 	m := ValueOf(M_full)
 	defer cuda.Recycle(m)
 
-	m_z := m.Comp(Z).HostCopy("ext_corepos").Scalars()
+	m_z := m.Comp(Z).HostCopy().Scalars()
 	s := m.Size()
 	Nx, Ny, Nz := s[X], s[Y], s[Z]
 
@@ -138,13 +138,13 @@ func corePosCPU()[]float64 {
 	if rM {
 		defer cuda.Recycle(msat)
 	}
-	pos[Z] = float64(m_z[maxZ][maxY][maxX]) / float64(msat.HostCopy("ext_corepos").Scalars()[maxZ][maxY][maxX]) // 3rd coordinate is core polarization
-	pos[X] += GetShiftPos() // add simulation window shift
+	pos[Z] = float64(m_z[maxZ][maxY][maxX]) / float64(msat.HostCopy().Scalars()[maxZ][maxY][maxX]) // 3rd coordinate is core polarization
+	pos[X] += GetShiftPos()                                                                        // add simulation window shift
 	CorePosRT = pos
 	return pos
 }
 
-func corePosTable()[]float64 {
+func corePosTable() []float64 {
 	gotCorePosForE = true
 	if evaluteCorePosGPU == true && postStepModeVortexCore == false {
 		Activate_corePosScriptAccess()
@@ -157,12 +157,12 @@ func corePosTable()[]float64 {
 	return CorePosRT
 }
 
-func corePos()[]float64 {
+func corePos() []float64 {
 	if evaluteCorePosGPU == true {
 		CorePosRT = corePosGPU()
 	} else {
 		CorePosRT = corePosCPU()
-	} 
+	}
 	return CorePosRT
 }
 
@@ -192,10 +192,10 @@ func Activate_corePosScriptAccessR() {
 func Activate_corePosScriptAccess() {
 	postStepModeVortexCore = true
 	ActivateCorePosScriptAccessState = true
-	PostStep(func() {CorePosRT = corePos()})
+	PostStep(func() { CorePosRT = corePos() })
 }
 
-func corePosElasticCPU()[]float64 {
+func corePosElasticCPU() []float64 {
 	if radiusElasticVortexCore == -1 {
 		radiusElasticVortexCore = U.Mesh().CellSize()[X] * float64(U.Mesh().Size()[X]) / 32
 	}
@@ -204,17 +204,17 @@ func corePosElasticCPU()[]float64 {
 	defer cuda.Recycle(displacementNormGPU)
 	cuda.Zero(displacementNormGPU)
 	cuda.Norm(displacementNormGPU, U.Buffer(), U.Mesh())
-	displacementNormCPU := displacementNormGPU.HostCopy("ext_corepos").Scalars()
+	displacementNormCPU := displacementNormGPU.HostCopy().Scalars()
 
 	s := U.Mesh().Size()
 	Nx, Ny, Nz := s[X], s[Y], s[Z]
 
 	min := float32(math.Inf(1))
 	var minX, minY, minZ int = 1, 1, 0
-	corPosXTrans := CorePosRT[0] + float64(M.Mesh().CellSize()[X]) * float64(M.Mesh().Size()[X]) / 2
-	corPosYTrans := CorePosRT[1] + float64(M.Mesh().CellSize()[Y]) * float64(M.Mesh().Size()[Y]) / 2
-	xLimMinCell, xLimMaxCell := int((corPosXTrans - radiusElasticVortexCore) / float64(M.Mesh().CellSize()[X])), int((corPosXTrans + radiusElasticVortexCore) / float64(M.Mesh().CellSize()[X]))
-	yLimMinCell, yLimMaxCell := int((corPosYTrans - radiusElasticVortexCore) / float64(M.Mesh().CellSize()[Y])), int((corPosYTrans + radiusElasticVortexCore) / float64(M.Mesh().CellSize()[Y]))
+	corPosXTrans := CorePosRT[0] + float64(M.Mesh().CellSize()[X])*float64(M.Mesh().Size()[X])/2
+	corPosYTrans := CorePosRT[1] + float64(M.Mesh().CellSize()[Y])*float64(M.Mesh().Size()[Y])/2
+	xLimMinCell, xLimMaxCell := int((corPosXTrans-radiusElasticVortexCore)/float64(M.Mesh().CellSize()[X])), int((corPosXTrans+radiusElasticVortexCore)/float64(M.Mesh().CellSize()[X]))
+	yLimMinCell, yLimMaxCell := int((corPosYTrans-radiusElasticVortexCore)/float64(M.Mesh().CellSize()[Y])), int((corPosYTrans+radiusElasticVortexCore)/float64(M.Mesh().CellSize()[Y]))
 	if xLimMinCell < 1 {
 		xLimMinCell = 1
 	}
@@ -222,10 +222,10 @@ func corePosElasticCPU()[]float64 {
 		yLimMinCell = 1
 	}
 	if xLimMaxCell > Nx-1 {
-		xLimMaxCell = Nx-1
+		xLimMaxCell = Nx - 1
 	}
 	if yLimMaxCell > Ny-1 {
-		yLimMaxCell = Ny-1
+		yLimMaxCell = Ny - 1
 	}
 	nonZeroDisplacementFound := false
 	for z := 0; z < Nz; z++ {
@@ -250,7 +250,6 @@ func corePosElasticCPU()[]float64 {
 	}
 	pos := make([]float64, 3)
 	uz := displacementNormCPU[minZ]
-
 
 	// sub-cell interpolation in X and Y, but not Z
 	pos[X] = float64(minX) + interpolate_maxpos(
@@ -278,7 +277,7 @@ func corePosElasticCPU()[]float64 {
 	return pos
 }
 
-func elasticCorePos()[]float64 {
+func elasticCorePos() []float64 {
 	if gotCorePosForE == false {
 		CorePosRT = corePosTable()
 	}

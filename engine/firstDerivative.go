@@ -1,11 +1,12 @@
 package engine
 
 import (
+	"math"
+	"reflect"
+
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/data"
 	"github.com/mumax/3/util"
-	"reflect"
-	"math"
 )
 
 var DU firstDerivative // firstDerivative (unit [m/s])
@@ -43,7 +44,7 @@ func (b *firstDerivative) SetArray(src *data.Slice) {
 	if src.Size() != b.Mesh().Size() {
 		src = data.Resample(src, b.Mesh().Size())
 	}
-	data.Copy(b.Buffer(), src, "du")
+	data.Copy(b.Buffer(), src)
 	//b.normalize()
 }
 
@@ -65,12 +66,12 @@ func (du *firstDerivative) Slice() (s *data.Slice, recycle bool) {
 }
 
 func (du *firstDerivative) EvalTo(dst *data.Slice) {
-	data.Copy(dst, du.buffer_, "du_EvalTo")
+	data.Copy(dst, du.buffer_)
 }
 
 func (du *firstDerivative) Region(r int) *vOneReg { return vOneRegion(du, r) }
 
-func (du *firstDerivative) String() string { return util.Sprint(du.Buffer().HostCopy("du_String")) }
+func (du *firstDerivative) String() string { return util.Sprint(du.Buffer().HostCopy()) }
 
 // Set the value of one cell.
 func (du *firstDerivative) SetCell(ix, iy, iz int, v data.Vector) {
@@ -78,7 +79,6 @@ func (du *firstDerivative) SetCell(ix, iy, iz int, v data.Vector) {
 		cuda.SetCell(du.Buffer(), c, ix, iy, iz, float32(v[c]))
 	}
 }
-
 
 // Get the value of one cell.
 func (du *firstDerivative) GetCell(ix, iy, iz int) data.Vector {
@@ -97,7 +97,7 @@ func (du *firstDerivative) SetInShape(region Shape, conf Config) {
 	if region == nil {
 		region = universe
 	}
-	host := du.Buffer().HostCopy("du_SetInShape")
+	host := du.Buffer().HostCopy()
 	h := host.Vectors()
 	n := du.Mesh().Size()
 
@@ -120,7 +120,7 @@ func (du *firstDerivative) SetInShape(region Shape, conf Config) {
 
 // set du to config in region
 func (du *firstDerivative) SetRegion(region int, conf Config) {
-	host := du.Buffer().HostCopy("du_SetRegion")
+	host := du.Buffer().HostCopy()
 	h := host.Vectors()
 	n := du.Mesh().Size()
 	r := byte(region)
@@ -145,12 +145,12 @@ func (du *firstDerivative) SetRegion(region int, conf Config) {
 }
 
 func (du *firstDerivative) resize() {
-	backup := du.Buffer().HostCopy("du_resize")
+	backup := du.Buffer().HostCopy()
 	s2 := Mesh().Size()
 	resized := data.Resample(backup, s2)
 	du.buffer_.Free()
 	du.buffer_ = cuda.NewSlice(VECTOR, s2)
-	data.Copy(du.buffer_, resized, "du_resize")
+	data.Copy(du.buffer_, resized)
 }
 
 func GetMaxDU() float64 {

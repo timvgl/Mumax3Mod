@@ -16,7 +16,7 @@
 	import { Button, Dropdown, DropdownItem, ButtonGroup, InputAddon } from 'flowbite-svelte';
 	import { ChevronDownOutline } from 'flowbite-svelte-icons';
 
-	let solvertypes = ['bw_euler', 'euler', 'heun', 'rk4', 'rk23', 'rk45', 'rkf56'];
+	let solvertypes = ['bw_euler', 'euler', 'heun', 'rk4', 'rk23', 'rk45', 'rkf56', 'elasRK4', 'magelasRK4', 'elasLF', 'elasYOSH', 'magelasRK4_vary_time'];
 	let runSeconds = '1e-9';
 	let runSteps = '100';
 	let dropdownOpen = false;

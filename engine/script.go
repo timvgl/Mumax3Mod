@@ -6,7 +6,7 @@ import (
 	"reflect"
 
 	"github.com/mumax/3/httpfs"
-	"github.com/mumax/3/log"
+	"github.com/mumax/3/logUI"
 	"github.com/mumax/3/script"
 )
 
@@ -25,6 +25,8 @@ func Eval(code string) {
 	if err != nil {
 		LogIn(code)
 		LogErr(err.Error())
+		logUI.Log.Command(code)
+		logUI.Log.Err("%v", err.Error())
 		return
 	}
 	LogIn(rmln(tree.Format()))
@@ -104,6 +106,7 @@ func EvalFile(code *script.BlockStmt) {
 	for i := range code.Children {
 		formatted := rmln(script.Format(code.Node[i]))
 		LogIn(formatted)
+		logUI.Log.Command(formatted)
 		code.Children[i].Eval()
 	}
 }
@@ -140,7 +143,7 @@ func EvalTryRecover(code string) {
 	defer func() {
 		if err := recover(); err != nil {
 			if userErr, ok := err.(UserErr); ok {
-				log.Log.Err("%v", userErr)
+				logUI.Log.Err("%v", userErr)
 			} else {
 				panic(err)
 			}

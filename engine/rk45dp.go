@@ -1,10 +1,11 @@
 package engine
 
 import (
+	"math"
+
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/data"
 	"github.com/mumax/3/util"
-	"math"
 )
 
 type RK45DP struct {
@@ -39,7 +40,7 @@ func (rk *RK45DP) Step() {
 	// backup magnetization
 	m0 := cuda.Buffer(3, size)
 	defer cuda.Recycle(m0)
-	data.Copy(m0, m, "rk45dp_1")
+	data.Copy(m0, m)
 
 	k2, k3, k4, k5, k6 := cuda.Buffer(3, size), cuda.Buffer(3, size), cuda.Buffer(3, size), cuda.Buffer(3, size), cuda.Buffer(3, size)
 	defer cuda.Recycle(k2)
@@ -107,13 +108,13 @@ func (rk *RK45DP) Step() {
 		NSteps++
 		Time = t0 + Dt_si
 		adaptDt(math.Pow(MaxErr/err, 1./5.))
-		data.Copy(rk.k1, k7, "rk45dp_2") // FSAL
+		data.Copy(rk.k1, k7) // FSAL
 	} else {
 		// undo bad step
 		//util.Println("Bad step at t=", t0, ", err=", err)
 		util.Assert(FixDt == 0)
 		Time = t0
-		data.Copy(m, m0, "rk45dp_3")
+		data.Copy(m, m0)
 		NUndone++
 		adaptDt(math.Pow(MaxErr/err, 1./6.))
 	}

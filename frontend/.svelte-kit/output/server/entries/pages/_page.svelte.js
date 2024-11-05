@@ -1819,7 +1819,16 @@ const quantities = {
     "Edens_mel",
     "Edens_therm",
     "Edens_total",
-    "Edens_Zeeman"
+    "Edens_Zeeman",
+    "Edens_el",
+    "Edens_kin"
+  ],
+  "Force": [
+    "F_melM",
+    "F_el",
+    "F_elsys",
+    "rhod2udt2",
+    "etadudt"
   ],
   Anisotropy: ["anisC1", "anisC2", "anisU", "Kc1", "Kc2", "Kc3", "Ku1", "Ku2"],
   DMI: ["Dbulk", "Dind", "DindCoupling"],
@@ -1841,7 +1850,8 @@ const quantities = {
   Strain: ["exx", "exy", "exz", "eyy", "eyz", "ezz"],
   Current: ["J", "Pol"],
   Slonczewski: ["EpsilonPrime", "FixedLayer", "FreeLayerThickness", "Lambda"],
-  "Magneto-elastic": ["B1", "B2", "F_mel", "B_mel"],
+  "Magneto-elastic-constants": ["B1", "B2", "C11", "C12", "C44", "eta", "rho"],
+  "Magneto-elastic-dynamics": ["F_mel", "B_mel", "u", "du", "normStrain", "normStress", "shearStrain", "shearStress", "force_density", "poynting"],
   Miscellaneous: [
     "frozenspins",
     "NoDemagSpins",
@@ -2395,7 +2405,12 @@ function Solver($$payload, $$props) {
     "rk4",
     "rk23",
     "rk45",
-    "rkf56"
+    "rkf56",
+    "elasRK4",
+    "magelasRK4",
+    "elasLF",
+    "elasYOSH",
+    "magelasRK4_vary_time"
   ];
   let runSeconds = "1e-9";
   let runSteps = "100";

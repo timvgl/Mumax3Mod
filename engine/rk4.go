@@ -1,10 +1,11 @@
 package engine
 
 import (
+	"math"
+
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/data"
 	"github.com/mumax/3/util"
-	"math"
 )
 
 // Classical 4th order RK solver.
@@ -23,7 +24,7 @@ func (rk *RK4) Step() {
 	// backup magnetization
 	m0 := cuda.Buffer(3, size)
 	defer cuda.Recycle(m0)
-	data.Copy(m0, m, "rk4_1")
+	data.Copy(m0, m)
 
 	k1, k2, k3, k4 := cuda.Buffer(3, size), cuda.Buffer(3, size), cuda.Buffer(3, size), cuda.Buffer(3, size)
 
@@ -70,7 +71,7 @@ func (rk *RK4) Step() {
 		// undo bad step
 		util.Assert(FixDt == 0)
 		Time = t0
-		data.Copy(m, m0, "rk4_2")
+		data.Copy(m, m0)
 		NUndone++
 		adaptDt(math.Pow(MaxErr/err, 1./5.))
 	}

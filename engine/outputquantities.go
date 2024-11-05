@@ -10,6 +10,7 @@ in objects that provide:
 
 import (
 	"fmt"
+
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/data"
 )
@@ -108,7 +109,7 @@ type fieldFunc struct {
 
 func (c *fieldFunc) Mesh() *data.Mesh       { return Mesh() }
 func (c *fieldFunc) average() []float64     { return qAverageUniverse(c) }
-func (c *fieldFunc) EvalTo(dst *data.Slice) { EvalTo(c, dst, "outputqtty") }
+func (c *fieldFunc) EvalTo(dst *data.Slice) { EvalTo(c, dst) }
 
 // Calculates and returns the quantity.
 // recycle is true: slice needs to be recycled.
@@ -165,5 +166,5 @@ func (v VectorField) Unit() string             { return UnitOf(v.Quantity) }
 func (v VectorField) HostCopy() *data.Slice {
 	s := ValueOf(v.Quantity)
 	defer cuda.Recycle(s)
-	return s.HostCopy("vectorfield_HostCopy")
+	return s.HostCopy()
 }

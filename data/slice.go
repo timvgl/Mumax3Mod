@@ -5,10 +5,11 @@ package data
 import (
 	"bytes"
 	"fmt"
-	"github.com/mumax/3/util"
 	"log"
 	"reflect"
 	"unsafe"
+
+	"github.com/mumax/3/util"
 )
 
 // Slice is like a [][]float32, but may be stored in GPU or host memory.
@@ -215,13 +216,13 @@ func (s *Slice) Host() [][]float32 {
 }
 
 // Returns a copy of the Slice, allocated on CPU.
-func (s *Slice) HostCopy(q string) *Slice {
+func (s *Slice) HostCopy() *Slice {
 	cpy := NewSlice(s.NComp(), s.Size())
-	Copy(cpy, s, q)
+	Copy(cpy, s)
 	return cpy
 }
 
-func Copy(dst, src *Slice, q string) {
+func Copy(dst, src *Slice) {
 	if dst.NComp() != src.NComp() || dst.Len() != src.Len() {
 		panic(fmt.Sprintf("slice copy: illegal sizes: dst: %vx%v, src: %vx%v", dst.NComp(), dst.Len(), src.NComp(), src.Len()))
 	}

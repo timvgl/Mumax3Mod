@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/mumax/3/engine"
-	"github.com/mumax/3/log"
+	"github.com/mumax/3/logUI"
 	"github.com/labstack/echo/v4"
 )
 
@@ -60,7 +60,7 @@ func (s *ParametersState) postSelectParameterRegion(c echo.Context) error {
 	}
 	req := new(Request)
 	if err := c.Bind(req); err != nil {
-		log.Log.Err("%v", err)
+		logUI.Log.Err("%v", err)
 		return c.JSON(http.StatusBadRequest, echo.Map{"error": "Invalid request payload"})
 	}
 

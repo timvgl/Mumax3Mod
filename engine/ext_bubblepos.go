@@ -19,7 +19,7 @@ func bubblePos() []float64 {
 	m := M.Buffer()
 	n := Mesh().Size()
 	c := Mesh().CellSize()
-	mz := m.Comp(Z).HostCopy("bubblePos").Scalars()[0]
+	mz := m.Comp(Z).HostCopy().Scalars()[0]
 
 	posx, posy := 0., 0.
 

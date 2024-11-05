@@ -38,7 +38,7 @@ func init() {
 	DeclFunc("RemoveCustomFields", RemoveCustomFields, "Removes all custom fields again")
 }
 
-//Removes all customfields
+// Removes all customfields
 func RemoveCustomFields() {
 	customTerms = nil
 }
@@ -180,7 +180,8 @@ func (q *mulmv) NComp() int {
 
 // DotProduct creates a new quantity that is the dot product of
 // quantities a and b. E.g.:
-// 	DotProct(&M, &B_ext)
+//
+//	DotProct(&M, &B_ext)
 func Dot(a, b Quantity) Quantity {
 	return &dotProduct{fieldOp{a, b, 1}}
 }
@@ -196,7 +197,8 @@ func (d *dotProduct) EvalTo(dst *data.Slice) {
 
 // CrossProduct creates a new quantity that is the cross product of
 // quantities a and b. E.g.:
-// 	CrossProct(&M, &B_ext)
+//
+//	CrossProct(&M, &B_ext)
 func Cross(a, b Quantity) Quantity {
 	return &crossProduct{fieldOp{a, b, 3}}
 }
@@ -427,7 +429,7 @@ func (q *masked) createMask() {
 	// Update mask
 	q.mask.Free()
 	q.mask = cuda.NewSlice(SCALAR, size)
-	data.Copy(q.mask, maskhost, "customField")
+	data.Copy(q.mask, maskhost)
 	q.mesh = *Mesh()
 	// Remove mask from host
 }

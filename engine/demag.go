@@ -61,7 +61,7 @@ func setMaskedDemagField(dst *data.Slice, msat cuda.MSlice) {
 	if r {
 		defer cuda.Recycle(geom)
 	}
-	data.Copy(buf, geom, "maskedDemag")
+	data.Copy(buf, geom)
 
 	// mask-out
 	cuda.ZeroMask(buf, NoDemagSpins.gpuLUT1(), regions.Gpu())

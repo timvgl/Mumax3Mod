@@ -5,7 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/mumax/3/engine"
-	"github.com/mumax/3/log"
+	"github.com/mumax/3/logUI"
 )
 
 type TablePlotState struct {
@@ -191,7 +191,7 @@ func (t *TablePlotState) postTablePlotMaxPoints(c echo.Context) error {
 	}
 	req := new(Request)
 	if err := c.Bind(req); err != nil {
-		log.Log.Err("%v", err)
+		logUI.Log.Err("%v", err)
 		return c.JSON(http.StatusBadRequest, echo.Map{"error": "Invalid request payload"})
 	}
 	t.MaxPoints = req.MaxPoints
@@ -206,7 +206,7 @@ func (t *TablePlotState) postTablePlotStep(c echo.Context) error {
 	}
 	req := new(Request)
 	if err := c.Bind(req); err != nil {
-		log.Log.Err("%v", err)
+		logUI.Log.Err("%v", err)
 		return c.JSON(http.StatusBadRequest, echo.Map{"error": "Invalid request payload"})
 	}
 	if req.Step < 1 {

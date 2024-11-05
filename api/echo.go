@@ -9,7 +9,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/mumax/3/log"
+	"github.com/mumax/3/logUI"
 	"github.com/mumax/3/script"
 )
 
@@ -51,9 +51,9 @@ func startGuiServer(e *echo.Echo, host string, port int, tunnel string) {
 		//addr, port, err := findAvailablePort(host, port)
 		addr, _, err := findAvailablePort(host, port)
 		if err != nil {
-			log.Log.ErrAndExit("Failed to find available port: %v", err)
+			logUI.Log.ErrAndExit("Failed to find available port: %v", err)
 		}
-		log.Log.Info("Serving the web UI at http://%s", addr)
+		logUI.Log.Info("Serving the web UI at http://%s", addr)
 
 		if tunnel != "" {
 			go startTunnel(tunnel)
@@ -71,17 +71,17 @@ func startGuiServer(e *echo.Echo, host string, port int, tunnel string) {
 				continue
 			}
 			// If the error is not related to the port being busy, exit
-			log.Log.Err("Failed to start server:  %v", err)
+			logUI.Log.Err("Failed to start server:  %v", err)
 			break
 		}
 
 		// If the server started successfully, break out of the loop
-		log.Log.Info("Successfully started server at http://%s", addr)
+		logUI.Log.Info("Successfully started server at http://%s", addr)
 		return
 	}
 
 	// If the loop completes without successfully starting the server
-	log.Log.Err("Failed to start server after multiple attempts")
+	logUI.Log.Err("Failed to start server after multiple attempts")
 }
 
 func findAvailablePort(host string, startPort int) (string, string, error) {

@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/mumax/3/engine"
-	"github.com/mumax/3/log"
+	"github.com/mumax/3/logUI"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 	"github.com/vmihailenco/msgpack/v5"
@@ -43,14 +43,14 @@ func newWebSocketManager() *WebSocketManager {
 }
 
 func (cm *connectionManager) add(ws *websocket.Conn) {
-	log.Log.Debug("Websocket connection added")
+	logUI.Log.Debug("Websocket connection added")
 	cm.mu.Lock()
 	defer cm.mu.Unlock()
 	cm.conns[ws] = struct{}{}
 }
 
 func (cm *connectionManager) remove(ws *websocket.Conn) {
-	log.Log.Debug("Websocket connection removed")
+	logUI.Log.Debug("Websocket connection removed")
 	cm.mu.Lock()
 	defer cm.mu.Unlock()
 	delete(cm.conns, ws)
@@ -62,7 +62,7 @@ func (cm *connectionManager) broadcast(msg []byte) {
 	for ws := range cm.conns {
 		err := ws.WriteMessage(websocket.BinaryMessage, msg)
 		if err != nil {
-			log.Log.Err("Error sending message via WebSocket: %v", err)
+			logUI.Log.Err("Error sending message via WebSocket: %v", err)
 			ws.Close()
 			delete(cm.conns, ws)
 		}
@@ -70,11 +70,11 @@ func (cm *connectionManager) broadcast(msg []byte) {
 }
 
 func (wsManager *WebSocketManager) websocketEntrypoint(c echo.Context) error {
-	log.Log.Debug("New WebSocket connection, upgrading...")
+	logUI.Log.Debug("New WebSocket connection, upgrading...")
 	ws, err := wsManager.upgrader.Upgrade(c.Response(), c.Request(), nil)
-	log.Log.Debug("New WebSocket connection upgraded")
+	logUI.Log.Debug("New WebSocket connection upgraded")
 	if err != nil {
-		log.Log.Err("Error upgrading connection to WebSocket: %v", err)
+		logUI.Log.Err("Error upgrading connection to WebSocket: %v", err)
 		return err
 	}
 	defer ws.Close()
@@ -99,7 +99,7 @@ func (wsManager *WebSocketManager) websocketEntrypoint(c echo.Context) error {
 
 	select {
 	case <-done:
-		log.Log.Debug("Connection closed by client")
+		logUI.Log.Debug("Connection closed by client")
 		return nil
 	case <-wsManager.broadcastStop:
 		return nil
@@ -110,7 +110,7 @@ func (wsManager *WebSocketManager) broadcastEngineState() {
 	wsManager.engineState.Update()
 	msg, err := msgpack.Marshal(wsManager.engineState)
 	if err != nil {
-		log.Log.Err("Error marshaling combined message: %v", err)
+		logUI.Log.Err("Error marshaling combined message: %v", err)
 		return
 	}
 	wsManager.connections.broadcast(msg)
