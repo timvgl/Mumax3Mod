@@ -17,6 +17,7 @@ func init() {
 	DeclROnly("Regions", &regions, "Outputs the region index for each cell")
 	DeclFunc("DefRegionCell", DefRegionCell, "Set a material region (first argument) in one cell "+
 		"by the index of the cell (last three arguments)")
+	DeclFunc("ReDefRegion", ReDefRegion, "")
 }
 
 // stores the region index for each cell
@@ -75,6 +76,81 @@ func DefRegion(id int, s Shape) {
 	regions.render(f)
 	regions.hist = append(regions.hist, f)
 	regions.indices = append(regions.indices, id)
+}
+
+func ReDefRegion(startId, endId int) {
+	// Checks validity of input region IDs
+	defRegionId(startId)
+	defRegionId(endId)
+
+	hist_len := len(regions.hist) // Only consider hist before this Redef to avoid recursion
+	f := func(x, y, z float64) int {
+		value := -1
+		for i := hist_len - 1; i >= 0; i-- {
+			f_other := regions.hist[i]
+			region := f_other(x, y, z)
+			if region >= 0 {
+				value = region
+				break
+			}
+		}
+		if value == startId {
+			return endId
+		} else {
+			return value
+		}
+	}
+	regions.redefine(startId, endId)
+	deleteIndex := -1
+	for i, v := range regions.indices {
+		if v == startId {
+			deleteIndex = i
+			break
+		}
+	}
+	if deleteIndex != -1 {
+		regions.indices = append(regions.indices[:deleteIndex], regions.indices[deleteIndex+1:]...)
+		regions.hist = append(regions.hist[:deleteIndex], regions.hist[deleteIndex+1:]...)
+	} else {
+		panic("Could not find region index of first index.")
+	}
+	deleteIndex = -1
+	for i, v := range regions.indices {
+		if v == endId {
+			deleteIndex = i
+			break
+		}
+	}
+	if deleteIndex != -1 {
+		regions.hist[deleteIndex] = f
+	} else {
+		panic("Could not find region index of second index.")
+	}
+	//Regions.hist = append(Regions.hist, f)
+}
+
+func (r *Regions) redefine(startId, endId int) {
+	// Loop through all cells, if their region ID matches startId, change it to endId
+	n := Mesh().Size()
+	l := r.RegionListCPU() // need to start from previous state
+	arr := reshapeBytes(l, r.Mesh().Size())
+
+	for iz := 0; iz < n[Z]; iz++ {
+		for iy := 0; iy < n[Y]; iy++ {
+			for ix := 0; ix < n[X]; ix++ {
+				if arr[iz][iy][ix] == byte(startId) {
+					arr[iz][iy][ix] = byte(endId)
+				}
+			}
+		}
+	}
+	r.gpuCache.Upload(l)
+}
+
+func (r *Regions) RegionListCPU() []byte {
+	regionsList := make([]byte, r.Mesh().NCell())
+	r.gpuCache.Download(regionsList)
+	return regionsList
 }
 
 // renders (rasterizes) shape, filling it with region number #id, between x1 and x2
