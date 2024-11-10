@@ -15,6 +15,7 @@ var (
 	limitRenderY            = RegionRange1D{from: 0, to: -1}
 	limitRenderZ            = RegionRange1D{from: 0, to: -1}
 	homogeniousRegionZ bool = false
+	eraseAllRegions    bool = false
 )
 
 const NREGION = 256 // maximum number of Regions, limited by size of byte.
@@ -29,6 +30,7 @@ func init() {
 	DeclFunc("LimitRenderRegionY", LimitRenderRegionY, "")
 	DeclFunc("LimitRenderRegionZ", LimitRenderRegionZ, "")
 	DeclVar("homogeniousRegionZ", &homogeniousRegionZ, "")
+	DeclFunc("EraseAllRegions", DeleteAllRegions, "")
 
 }
 
@@ -167,6 +169,14 @@ func ReDefRegion(startId, endId int) {
 	//Regions.hist = append(Regions.hist, f)
 }
 
+func DeleteAllRegions() {
+	regions.hist = make([]func(x, y, z float64) int, 0)
+	regions.indices = make([]int, 0)
+	eraseAllRegions = true
+	regions.redefine(0, 0)
+	eraseAllRegions = false
+}
+
 func (r *Regions) redefine(startId, endId int) {
 	// Loop through all cells, if their region ID matches startId, change it to endId
 	n := Mesh().Size()
@@ -201,7 +211,7 @@ func (r *Regions) redefine(startId, endId int) {
 				wg.Add(1)
 				go func(iz, iy int) {
 					for ix := xStart; ix < xEnd; ix++ {
-						if arr[iz][iy][ix] == byte(startId) {
+						if arr[iz][iy][ix] == byte(startId) || eraseAllRegions && arr[iz][iy][ix] != byte(startId) {
 							arr[iz][iy][ix] = byte(endId)
 						}
 					}
@@ -215,7 +225,7 @@ func (r *Regions) redefine(startId, endId int) {
 					wg.Add(1)
 					go func(iz, iy int) {
 						for ix := xStart; ix < xEnd; ix++ {
-							if arr[iz][iy][ix] == byte(startId) {
+							if arr[iz][iy][ix] == byte(startId) || eraseAllRegions && arr[iz][iy][ix] != byte(startId) {
 								arr[iz][iy][ix] = byte(endId)
 							}
 						}
