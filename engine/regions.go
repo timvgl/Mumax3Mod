@@ -2,13 +2,20 @@ package engine
 
 import (
 	"sort"
+	"sync"
 
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/data"
 	"github.com/mumax/3/util"
 )
 
-var regions = Regions{info: info{1, "Regions", ""}} // global Regions map
+var (
+	regions                 = Regions{info: info{1, "Regions", ""}} // global Regions map
+	limitRenderX            = RegionRange1D{from: 0, to: -1}
+	limitRenderY            = RegionRange1D{from: 0, to: -1}
+	limitRenderZ            = RegionRange1D{from: 0, to: -1}
+	homogeniousRegionZ bool = false
+)
 
 const NREGION = 256 // maximum number of Regions, limited by size of byte.
 
@@ -18,6 +25,11 @@ func init() {
 	DeclFunc("DefRegionCell", DefRegionCell, "Set a material region (first argument) in one cell "+
 		"by the index of the cell (last three arguments)")
 	DeclFunc("ReDefRegion", ReDefRegion, "")
+	DeclFunc("LimitRenderRegionX", LimitRenderRegionX, "")
+	DeclFunc("LimitRenderRegionY", LimitRenderRegionY, "")
+	DeclFunc("LimitRenderRegionZ", LimitRenderRegionZ, "")
+	DeclVar("homogeniousRegionZ", &homogeniousRegionZ, "")
+
 }
 
 // stores the region index for each cell
@@ -26,6 +38,11 @@ type Regions struct {
 	hist     []func(x, y, z float64) int // history of region set operations
 	indices  []int
 	info
+}
+
+type RegionRange1D struct {
+	from int
+	to   int
 }
 
 type Pair struct {
@@ -46,6 +63,26 @@ func (r *Regions) resize() {
 	for _, f := range r.hist {
 		r.render(f)
 	}
+}
+func LimitRenderRegionX(start, end int) {
+	if start < 0 || end < -1 {
+		panic("Start or end out of sample. Please provide valid cell index.")
+	}
+	limitRenderX = RegionRange1D{from: start, to: end}
+}
+
+func LimitRenderRegionY(start, end int) {
+	if start < 0 || end < -1 {
+		panic("Start or end out of sample. Please provide valid cell index.")
+	}
+	limitRenderY = RegionRange1D{from: start, to: end}
+}
+
+func LimitRenderRegionZ(start, end int) {
+	if start < 0 || end < -1 {
+		panic("Start or end out of sample. Please provide valid cell index.")
+	}
+	limitRenderZ = RegionRange1D{from: start, to: end}
 }
 
 func GetExistingIndices() []int {
@@ -101,6 +138,7 @@ func ReDefRegion(startId, endId int) {
 		}
 	}
 	regions.redefine(startId, endId)
+
 	deleteIndex := -1
 	for i, v := range regions.indices {
 		if v == startId {
@@ -135,15 +173,61 @@ func (r *Regions) redefine(startId, endId int) {
 	l := r.RegionListCPU() // need to start from previous state
 	arr := reshapeBytes(l, r.Mesh().Size())
 
-	for iz := 0; iz < n[Z]; iz++ {
-		for iy := 0; iy < n[Y]; iy++ {
-			for ix := 0; ix < n[X]; ix++ {
-				if arr[iz][iy][ix] == byte(startId) {
-					arr[iz][iy][ix] = byte(endId)
-				}
+	var (
+		xStart = limitRenderX.from
+		yStart = limitRenderY.from
+		zStart = limitRenderZ.from
+	)
+	if limitRenderX.to == -1 || limitRenderX.to > n[X] {
+		limitRenderX.to = n[X]
+	}
+	if limitRenderY.to == -1 || limitRenderY.to > n[Y] {
+		limitRenderY.to = n[Y]
+	}
+	if limitRenderZ.to == -1 || limitRenderZ.to > n[Z] {
+		limitRenderZ.to = n[Z]
+	}
+
+	var (
+		xEnd = limitRenderX.to
+		yEnd = limitRenderY.to
+		zEnd = limitRenderZ.to
+	)
+
+	wg := sync.WaitGroup{}
+	for iz := zStart; iz < zEnd; iz++ {
+		if zEnd-zStart == 1 {
+			for iy := yStart; iy < yEnd; iy++ {
+				wg.Add(1)
+				go func(iz, iy int) {
+					for ix := xStart; ix < xEnd; ix++ {
+						if arr[iz][iy][ix] == byte(startId) {
+							arr[iz][iy][ix] = byte(endId)
+						}
+					}
+					wg.Done()
+				}(iz, iy)
 			}
+		} else {
+			wg.Add(1)
+			go func(iz int) {
+				for iy := yStart; iy < yEnd; iy++ {
+					wg.Add(1)
+					go func(iz, iy int) {
+						for ix := xStart; ix < xEnd; ix++ {
+							if arr[iz][iy][ix] == byte(startId) {
+								arr[iz][iy][ix] = byte(endId)
+							}
+						}
+						wg.Done()
+					}(iz, iy)
+				}
+				wg.Done()
+			}(iz)
 		}
 	}
+	wg.Wait()
+
 	r.gpuCache.Upload(l)
 }
 
@@ -160,17 +244,77 @@ func (r *Regions) render(f func(x, y, z float64) int) {
 	l := r.HostList() // need to start from previous state
 	arr := reshapeBytes(l, r.Mesh().Size())
 
-	for iz := 0; iz < n[Z]; iz++ {
-		for iy := 0; iy < n[Y]; iy++ {
-			for ix := 0; ix < n[X]; ix++ {
-				r := Index2Coord(ix, iy, iz)
-				region := f(r[X], r[Y], r[Z])
-				if region >= 0 {
-					arr[iz][iy][ix] = byte(region)
-				}
+	var (
+		xStart = limitRenderX.from
+		yStart = limitRenderY.from
+		zStart = limitRenderZ.from
+	)
+	if limitRenderX.to == -1 || limitRenderX.to > n[X] {
+		limitRenderX.to = n[X]
+	}
+	if limitRenderY.to == -1 || limitRenderY.to > n[Y] {
+		limitRenderY.to = n[Y]
+	}
+	if limitRenderZ.to == -1 || limitRenderZ.to > n[Z] {
+		limitRenderZ.to = n[Z]
+	}
+
+	var (
+		xEnd = limitRenderX.to
+		yEnd = limitRenderY.to
+		zEnd = limitRenderZ.to
+	)
+
+	wg := sync.WaitGroup{}
+	for iz := zStart; iz < zEnd; iz++ {
+		if zEnd-zStart == 1 || homogeniousRegionZ {
+			for iy := yStart; iy < yEnd; iy++ {
+				wg.Add(1)
+				go func(iz, iy int) {
+					for ix := xStart; ix < xEnd; ix++ {
+						r := Index2Coord(ix, iy, iz)
+						region := f(r[X], r[Y], r[Z])
+						if region >= 0 {
+							arr[iz][iy][ix] = byte(region)
+						}
+					}
+					wg.Done()
+				}(iz, iy)
 			}
+			break
+		} else {
+			wg.Add(1)
+			go func(iz int) {
+				for iy := yStart; iy < yEnd; iy++ {
+					wg.Add(1)
+					go func(iz, iy int) {
+						for ix := xStart; ix < xEnd; ix++ {
+							r := Index2Coord(ix, iy, iz)
+							region := f(r[X], r[Y], r[Z])
+							if region >= 0 {
+								arr[iz][iy][ix] = byte(region)
+							}
+						}
+						wg.Done()
+					}(iz, iy)
+				}
+				wg.Done()
+			}(iz)
 		}
 	}
+	wg.Wait()
+	if homogeniousRegionZ {
+		for iz := zStart; iz < zEnd; iz++ {
+			wg.Add(1)
+			go func(iz int) {
+				for iy := yStart; iy < yEnd; iy++ {
+					copy(arr[iz][iy], arr[0][iy])
+				}
+				wg.Done()
+			}(iz)
+		}
+	}
+
 	//log.Print("Regions.upload")
 	r.gpuCache.Upload(l)
 }
