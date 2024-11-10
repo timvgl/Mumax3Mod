@@ -113,4 +113,4 @@ Comment: Loading strains is highly experimental - if you want to use the strain 
     + __LimitRenderRegionY__ - limit the area in which the rendering process in supposed to done in the y direction. Reduces computational time for generating a region. Args: from, to __int__ (cells)
     + __LimitRenderRegionZ__ - limit the area in which the rendering process in supposed to done in the z direction. Reduces computational time for generating a region. Args: from, to __int__ (cells)
     + __ReDefRegion__ - if a region has been set it cannot be removed - assign the cells of one region to a different one (0 for removing it). Args: oldRegion, newRegion __int__
-    + __int__ - casts castable values to integer. Args: value __int__
+    + __int__ - casts castable values to integer. Args: value __float__
