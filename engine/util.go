@@ -51,6 +51,12 @@ func init() {
 	DeclVar("GSDir", &GSDir, "")
 	DeclFunc("EraseOD", EraseOD, "")
 	DeclVar("Suffix", &Suffix, "")
+	DeclFunc("int", castInt, "")
+
+}
+
+func castInt(val float64) int {
+	return int(val)
 }
 
 func EraseOD() {
