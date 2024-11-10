@@ -48,7 +48,19 @@ func arg(msg string, test bool) {
 // Set the simulation mesh to Nx x Ny x Nz cells of given size.
 // Can be set only once at the beginning of the simulation.
 // TODO: dedup arguments from globals
-func SetMesh(Nx, Ny, Nz int, cellSizeX, cellSizeY, cellSizeZ float64, pbcx, pbcy, pbcz int) {
+func SetMesh(NxTmp, NyTmp, NzTmp int, cellSizeX, cellSizeY, cellSizeZ float64, pbcx, pbcy, pbcz int) {
+	Nx = NxTmp
+	Ny = NyTmp
+	Nz = NzTmp
+	Dx = cellSizeX
+	Dy = cellSizeY
+	Dz = cellSizeZ
+	Tx = float64(Nx) * Dx
+	Ty = float64(Ny) * Dy
+	Tz = float64(Nz) * Dz
+	PBCx = pbcx
+	PBCy = pbcy
+	PBCz = pbcz
 	SetBusy(true)
 	defer SetBusy(false)
 
@@ -152,6 +164,9 @@ func SetCellSize(cx, cy, cz float64) {
 }
 
 func SetPBC(nx, ny, nz int) {
+	PBCx = nx
+	PBCy = ny
+	PBCz = nz
 	lazy_pbc = []int{nx, ny, nz}
 	if lazy_gridsize != nil && lazy_cellsize != nil {
 		SetMesh(lazy_gridsize[X], lazy_gridsize[Y], lazy_gridsize[Z],
