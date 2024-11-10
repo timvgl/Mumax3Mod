@@ -62,7 +62,7 @@ Comment: Loading strains is highly experimental - if you want to use the strain 
     + __IsFile__ - checks if file at give path exists. Args: path_to_file __string__
     + __IsFileMyDir__ - checks if file exists in the current used mumax directory. Args: filename __string__
     + __EraseOD__ - delete all files in current mumax directory
-    + __GSDIR__ - mumax3 doesnot allow strings in the script by default. If groundstates of various systems are stored in a single folder as a library this var can be assigned with the path. In combination with __Suffix__ and __ConcatStr__ complex groundstate ovf files can be stored using schematic names. See example below
+    + __GSDIR__ - mumax3 does not allow strings in the script by default. If groundstates of various systems are stored in a single folder as a library this var can be assigned with the path. In combination with __Suffix__ and __ConcatStr__ complex groundstate ovf files can be stored using schematic names. See example below
     + __Suffix__ - see __GSDir__
     + __ConcStr__ - concatenate two strings. Args: string1, string2 __string__
     + Example for GS:
@@ -109,8 +109,8 @@ Comment: Loading strains is highly experimental - if you want to use the strain 
 
 * Regions:
     + __homogeniousRegionZ__ - set to true renders region only for one z-layer and copies to the other layers. if the region is homogenious in the z direction but the sample has n layers into the z-direction, the region is going to be rendered for one z-layer and being copied to the others
-    + __LimitRenderRegionX__ - limit the area in which the rendering process in supposed to done in the x direction. Reduces computational time for generating a region. Args: from, to __int__ (cells)
-    + __LimitRenderRegionY__ - limit the area in which the rendering process in supposed to done in the y direction. Reduces computational time for generating a region. Args: from, to __int__ (cells)
-    + __LimitRenderRegionZ__ - limit the area in which the rendering process in supposed to done in the z direction. Reduces computational time for generating a region. Args: from, to __int__ (cells)
-    + __ReDefRegion__ - if a region has been set it cannot be removed - assign the cells of one region to a different one (0 for removing it). Args: oldRegion, newRegion __int__
+    + __LimitRenderRegionX__ - limit the area in which the rendering process in supposed to be done in the x direction. Reduces computational time for generating a region. Args: from, to __int__ (cells)
+    + __LimitRenderRegionY__ - limit the area in which the rendering process in supposed to be done in the y direction. Reduces computational time for generating a region. Args: from, to __int__ (cells)
+    + __LimitRenderRegionZ__ - limit the area in which the rendering process in supposed to be done in the z direction. Reduces computational time for generating a region. Args: from, to __int__ (cells)
+    + __ReDefRegion__ - if a region has been set it cannot be removed by default - assign the cells of one region to a different one (0 for removing it). Args: oldRegion, newRegion __int__
     + __int__ - casts castable values to integer. Args: value __float__
