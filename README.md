@@ -41,8 +41,9 @@ New extraction variables:<br />
 Comment: Loading strains is highly experimental - if you want to use the strain as an inital state, activate the loading only for one step, otherwise the new calculated displacement is never concidered properly
 
 * Further commands for saving data:
-    + __AutoSaveAs__ - autosave quantity but relabel it for the files. Args: __Quantity__, __float__ and __string__
-    + __AutoSnapshotAs__ - autosnapshot quantity but relabel it for the files. Args: __Quantity__, __float__ and __string__
+    + __SaveAsAt__ - save a quantity as an ovf file with a certain name at a provided path. Args: __Quantity__, filename, path __string__
+    + __AutoSaveAs__ - autosave quantity but relabel it for the files. Args: __Quantity__, dt __float__ and name __string__
+    + __AutoSnapshotAs__ - autosnapshot quantity but relabel it for the files. Args: __Quantity__, dt __float__ and name __string__
     + __ignoreCropName__ - set to true in order to prohibit range labeling of ovf files, if quantity is cropped and saved to file.
     + For setting the numeration of the ovf files (for example if a simulation is supposed to be continued) to a specific value:
         - SetAutoNumTo - defines numeration of usual ovf files
@@ -56,17 +57,43 @@ Comment: Loading strains is highly experimental - if you want to use the strain 
     
         All need an integer as arg
     + __createNewTable__ set to false the old table.txt file will be continued and not overwritten
-    + __rewriteHeaderTable__ set to true this appends the header of the table into the table.txt if table is continued 
+    + __rewriteHeaderTable__ set to true this appends the header of the table into the table.txt if table is continued
+* Further commands for checking/retrieving files:
+    + __IsFile__ - checks if file at give path exists. Args: path_to_file __string__
+    + __IsFileMyDir__ - checks if file exists in the current used mumax directory. Args: filename __string__
+    + __EraseOD__ - delete all files in current mumax directory
+    + __GSDIR__ - mumax3 doesnot allow strings in the script by default. If groundstates of various systems are stored in a single folder as a library this var can be assigned with the path. In combination with __Suffix__ and __ConcatStr__ complex groundstate ovf files can be stored using schematic names. See example below
+    + __Suffix__ - see __GSDir__
+    + __ConcStr__ - concatenate two strings. Args: string1, string2 __string__
+    + Example for GS:
+      ```
+      GSDir = "/home/test/GS/"
+      Suffix = "_GS_3mTX_Vortex_512_512_256_256_eta_300_CoFeB.ovf"
+      if IsFile(ConcStr(GSDir, ConcStr("m", Suffix))) && IsFile(ConcStr(GSDir, ConcStr("u", Suffix))) && IsFile(ConcStr(GSDir, ConcStr("du", Suffix))) {
+            m.LoadFile(ConcStr(GSDir, ConcStr("m", Suffix)))
+            u.LoadFile(ConcStr(GSDir, ConcStr("u", Suffix)))
+            du = Uniform(0, 0, 0)
+      } else {
+            B_ext = Vector(0, 0.003, 0)
+            RelaxFullCoupled = true
+            Relax()
+            SaveAsAt(m, ConcStr("m", Suffix), GSDir)
+            SaveAsAt(u, ConcStr("u", Suffix), GSDir)
+            SaveAsAt(du, ConcStr("du", Suffix), GSDir)
+            B_ext = Vector(0, 0, 0)
+            du = Uniform(0, 0, 0)
+      }
+      ```
 
 * Further commands for fully elastic coupled systems:
     + __useBoundaries__ - activate boundaries for elastic system
     + __AllowInhomogeniousMECoupling__ - deactivate blocking of inhomogenious B1 and B2 values
 
 * Further useful commands:
-    + __RotVector__ - needs to be applied onto a vector. Rotates this vector around another vector b with the angle c. Args: b, c
+    + __RotVector__ - needs to be applied onto a vector. Rotates this vector around another vector b with the angle c. Args: b, c __vector__
  
 * Further shapes:
-    + __IDT__ - generate one sided IDT. Args: IDTWidthFinger, IDTDistanceFinger, IDTFingerLength float64, AmountFingers int
+    + __IDT__ - generate one sided IDT. Args: IDTWidthFinger, IDTDistanceFinger, IDTFingerLength float64, AmountFingers __int__
   
 
 
@@ -80,5 +107,9 @@ Comment: Loading strains is highly experimental - if you want to use the strain 
     + __RelaxDUThreshold__ - same as __RelaxTorqueThreshold__ but for first derivative in time of u (needs __RelaxFullCoupled__ = true)
     + __IterativeHalfing__ - run the minizing process N times and half __FixDt__ each time and __SlopeTresholdEnergyRelax__/__RelaxDDUThreshold__/__RelaxDUThreshold__ each time (needs __RelaxFullCoupled__ = true)
 
-
-
+* Regions:
+    + __homogeniousRegionZ__ - set to true renders region only for one z-layer and copies to the other layers. if the region is homogenious in the z direction but the sample has n layers into the z-direction, the region is going to be rendered for one z-layer and being copied to the others
+    + __LimitRenderRegionX__ - limit the area in which the rendering process in supposed to done in the x direction. Reduces computational time for generating a region. Args: from, to __int__ (cells)
+    + __LimitRenderRegionY__ - limit the area in which the rendering process in supposed to done in the y direction. Reduces computational time for generating a region. Args: from, to __int__ (cells)
+    + __LimitRenderRegionZ__ - limit the area in which the rendering process in supposed to done in the z direction. Reduces computational time for generating a region. Args: from, to __int__ (cells)
+    + __ReDefRegion__ - if a region has been set it cannot be removed - assign the cells of one region to a different one (0 for removing it). Args: oldRegion, newRegion __int__
