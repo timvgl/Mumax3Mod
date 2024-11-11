@@ -109,9 +109,9 @@ Comment: Loading strains is highly experimental - if you want to use the strain 
 
 * Regions:
     + __homogeniousRegionZ__ - set to true renders region only for one z-layer and copies to the other layers. if the region is homogenious in the z direction but the sample has n layers into the z-direction, the region is going to be rendered for one z-layer and being copied to the others
-    + __LimitRenderRegionX__ - limit the area in which the rendering process in supposed to be done in the x direction. Reduces computational time for generating a region. Args: from, to __int__ (cells)
-    + __LimitRenderRegionY__ - limit the area in which the rendering process in supposed to be done in the y direction. Reduces computational time for generating a region. Args: from, to __int__ (cells)
-    + __LimitRenderRegionZ__ - limit the area in which the rendering process in supposed to be done in the z direction. Reduces computational time for generating a region. Args: from, to __int__ (cells)
+    + __LimitRenderRegionX__ - limit the area in which the rendering process is supposed to be done in the x direction. Reduces computational time for generating a region. Args: from, to __int__ (cells)
+    + __LimitRenderRegionY__ - limit the area in which the rendering process is supposed to be done in the y direction. Reduces computational time for generating a region. Args: from, to __int__ (cells)
+    + __LimitRenderRegionZ__ - limit the area in which the rendering process is supposed to be done in the z direction. Reduces computational time for generating a region. Args: from, to __int__ (cells)
     + __ReDefRegion__ - if a region has been set it cannot be removed by default - assign the cells of one region to a different one (0 for removing it). Args: oldRegion, newRegion __int__
     + __EraseAllRegions__ - erase all regions - sets all regions back to region 0 - more efficent than redefining all regions seperate 
     + __int__ - casts castable values to integer. Args: value __float__
