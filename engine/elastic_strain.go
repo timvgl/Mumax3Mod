@@ -21,7 +21,17 @@ var (
 // ###################
 // Strain
 func setNormStrain(dst *data.Slice) {
-	if loadNormStrain == false && loadNormStrainConfig == false {
+	if Solvertype < 7 {
+		Exx := exx.MSlice()
+		defer Exx.Recycle()
+	
+		Eyy := eyy.MSlice()
+		defer Eyy.Recycle()
+	
+		Ezz := ezz.MSlice()
+		defer Ezz.Recycle()
+		cuda.ScalarToVec(dst, Exx, Eyy, Ezz, Mesh())
+	} else if loadNormStrain == false && loadNormStrainConfig == false {
 		NormStrain(dst, U, C11)
 	} else if loadNormStrain == true && loadNormStrainConfig == false {
 		var d *data.Slice
@@ -38,7 +48,18 @@ func setNormStrain(dst *data.Slice) {
 }
 
 func setShearStrain(dst *data.Slice) {
-	if loadShearStrain == false && loadShearStrainConfig == false {
+	if Solvertype < 7 {
+		Exy := exy.MSlice()
+		defer Exy.Recycle()
+	
+		Exz := exz.MSlice()
+		defer Exz.Recycle()
+	
+		Eyz := eyz.MSlice()
+		defer Eyz.Recycle()
+
+		cuda.ScalarToVec(dst, Exy, Eyz, Exz, Mesh())
+	} else if loadShearStrain == false && loadShearStrainConfig == false {
 		ShearStrain(dst, U, C11)
 	} else if loadShearStrain == true && loadShearStrainConfig == false {
 		var d *data.Slice

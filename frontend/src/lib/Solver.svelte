@@ -210,6 +210,15 @@
 					<InputAddon class="w-24 !bg-transparent"></InputAddon>
 				</ButtonGroup>
 			</div>
+
+			<!-- NUndone -->
+			<div class="flex items-center space-x-2">
+				<ButtonGroup class="h-11 w-full">
+					<InputAddon class="w-44 !bg-transparent">NUndone</InputAddon>
+					<Input class="w-full" type="text" value={$solverState.nundone} readonly />
+					<InputAddon class="w-24 !bg-transparent"></InputAddon>
+				</ButtonGroup>
+			</div>
 		</div>
 	</div>
 </section>

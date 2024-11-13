@@ -11,6 +11,7 @@ export interface Solver {
     mindt: number;
     maxdt: number;
     maxerr: number;
+    nundone: number;
 }
 
 export const solverState = writable<Solver>({
@@ -23,6 +24,7 @@ export const solverState = writable<Solver>({
     fixdt: 0,
     mindt: 0,
     maxdt: 0,
-    maxerr: 0
+    maxerr: 0,
+    nundone: 0
 });
 

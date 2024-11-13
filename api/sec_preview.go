@@ -9,6 +9,7 @@ import (
 	"github.com/mumax/3/data"
 	"github.com/mumax/3/engine"
 	"github.com/mumax/3/logUI"
+	"fmt"
 )
 
 type PreviewState struct {
@@ -344,6 +345,7 @@ func (s *PreviewState) postPreviewQuantity(c echo.Context) error {
 	}
 	_, exists := engine.Quantities[req.Quantity]
 	if !exists {
+		fmt.Sprintf("Did not found %v", req.Quantity)
 		return c.JSON(http.StatusBadRequest, echo.Map{"error": "Quantity not found"})
 	}
 	s.Quantity = req.Quantity

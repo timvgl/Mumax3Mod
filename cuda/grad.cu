@@ -26,13 +26,13 @@ pointwise_grad(float* __restrict__  dstx, float* __restrict__  dsty, float* __re
     float ac = a[I];               				  //center
 
 	// get neighbour cells into x direction
-	float ax_m1 = 0.0f;     // -1
+	float ax_m1 = NAN;     // -1
 	i_ = idx(lclampx(ix-1), iy, iz);                 // load neighbor if inside grid, keep 0 otherwise
 	if (ix-1 >= 0 || PBCx)
 	{
 		ax_m1 = a[i_];
 	}
-    float ax_p1 = 0.0f;     // +1
+    float ax_p1 = NAN;     // +1
 	i_ = idx(lclampx(ix+1), iy, iz);                 // load neighbor if inside grid, keep 0 otherwise
 	if (ix+1 >= 0 || PBCx)
 	{
@@ -40,13 +40,13 @@ pointwise_grad(float* __restrict__  dstx, float* __restrict__  dsty, float* __re
 	}
 
     // get neighbour cells into y direction
-	float ay_m1 = 0.0f;     // -1
+	float ay_m1 = NAN;     // -1
 	i_ = idx(ix, lclampy(iy-1), iz);                 // load neighbor if inside grid, keep 0 otherwise
 	if (iy-1 >= 0 || PBCy)
 	{
 		ay_m1 = a[i_];
 	}
-    float ay_p1 = 0.0f;     // +1
+    float ay_p1 = NAN;     // +1
 	i_ = idx(ix, lclampy(iy+1), iz);                 // load neighbor if inside grid, keep 0 otherwise
 	if (iy+1 >= 0 || PBCy)
 	{
@@ -54,13 +54,13 @@ pointwise_grad(float* __restrict__  dstx, float* __restrict__  dsty, float* __re
 	}
 
     // get neighbour cells into z direction
-	float az_m1 = 0.0f;     // -1
+	float az_m1 = NAN;     // -1
 	i_ = idx(ix, iy, lclampz(iz-1));                 // load neighbor if inside grid, keep 0 otherwise
 	if (iz-1 >= 0 || PBCz)
 	{
 		az_m1 = a[i_];
 	}
-    float az_p1 = 0.0f;     // +1
+    float az_p1 = NAN;     // +1
 	i_ = idx(ix, iy, lclampz(iz+1));                 // load neighbor if inside grid, keep 0 otherwise
 	if (iz+1 >= 0 || PBCz)
 	{
@@ -69,26 +69,32 @@ pointwise_grad(float* __restrict__  dstx, float* __restrict__  dsty, float* __re
 
 	float half = 1.0f/2.0f;
 
-	if (ax_m1 != 0.0f && ax_p1 != 0.0f) {
+	if (!isnan(ax_m1) && !isnan(ax_p1)) {
 		dstx[I] = half * rcsx * (2.0f * ac - ax_m1 - ax_p1);
-	} else if ((ax_m1 != 0.0f || ax_p1 != 0.0f) && Nx > 1) {
-		dstx[I] = rcsx * (ac - ax_m1 - ax_p1);
+	} else if (!isnan(ax_m1)) {
+		dstx[I] = rcsx * (ac - ax_m1);
+	} else if (!isnan(ax_p1)) {
+		dstx[I] = rcsx * (ac - ax_p1);
 	} else {
 		dstx[I] = 0.0f;
 	}
 
-	if (ay_m1 != 0.0f && ay_p1 != 0.0f) {
+	if (!isnan(ay_m1) && !isnan(ay_p1)) {
 		dsty[I] = half * rcsy * (2.0f * ac - ay_m1 - ay_p1);
-	} else if ((ay_m1 != 0.0f || ay_p1 != 0.0f) && Ny > 1) {
-		dsty[I] = rcsy * (ac - ay_m1 - ay_p1);
+	} else if (!isnan(ay_m1)) {
+		dsty[I] = rcsy * (ac - ay_m1);
+	} else if (!isnan(ay_p1)) {
+		dsty[I] = rcsy * (ac - ay_p1);
 	} else {
 		dsty[I] = 0.0f;
 	}
 
-	if (az_m1 != 0.0f && az_p1 != 0.0f) {
+	if (!isnan(az_m1) && !isnan(az_p1)) {
 		dstz[I] = half * rcsz * (2.0f * ac - az_m1 - az_p1);
-	} else if ((az_m1 != 0.0f || az_p1 != 0.0f) && Nz > 1) {
-		dstz[I] = rcsz * (ac - az_m1 - az_p1);
+	} else if (!isnan(az_m1)) {
+		dstz[I] = rcsz * (ac - az_m1);
+	} else if (!isnan(az_p1)) {
+		dstz[I] = rcsz * (ac - az_p1);
 	} else {
 		dstz[I] = 0.0f;
 	}

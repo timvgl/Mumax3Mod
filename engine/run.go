@@ -28,6 +28,8 @@ var (
 	stepper                 Stepper                      // generic step, can be EulerStep, HeunStep, etc
 	FixDtM                  float64                      // fixed time step?
 	FixDtU                  float64                      // fixed time step?
+	MoreStepsM				bool = true
+	FactorTimeMvsU			float64 = 10.
 
 	Solvertype int
 
@@ -61,6 +63,8 @@ func init() {
 	DeclVar("FixDtM", &FixDtM, "Set a fixed time step, 0 disables fixed step (which is the default)")
 	DeclVar("timetravel", &Timetravel, "")
 	DeclVar("overwriteUndoBackup", &overwriteUndoBackup, "")
+	DeclVar("MoreStepsM", &MoreStepsM, "")
+	DeclVar("FactorTimeMvsU", &FactorTimeMvsU, "")
 
 	DeclFunc("Exit", Exit, "Exit from the program")
 	//DeclVar("BoolAllowInhomogeniousMECoupling", BoolAllowInhomogeniousMECoupling, "Bypasses an error that is going to be raised if B1 or B2 is inhomogenious, bool")

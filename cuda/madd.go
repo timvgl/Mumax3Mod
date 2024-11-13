@@ -3,6 +3,7 @@ package cuda
 import (
 	"github.com/mumax/3/data"
 	"github.com/mumax/3/util"
+	"fmt"
 )
 
 // multiply: dst[i] = a[i] * b[i]
@@ -54,11 +55,23 @@ func Madd2(dst, src1, src2 *data.Slice, factor1, factor2 float32) {
 	N := dst.Len()
 	nComp := dst.NComp()
 	util.Assert(src1.Len() == N && src2.Len() == N)
-	util.Assert(src1.NComp() == nComp && src2.NComp() == nComp)
+	util.AssertMsg(src1.NComp() == nComp && src2.NComp() == nComp || src1.NComp() == nComp && src2.NComp() == 1 || src2.NComp() == nComp && src1.NComp() == 1, fmt.Sprintf("Comp: %v vs %v vs %v", nComp, src1.NComp(), src2.NComp()))
 	cfg := make1DConf(N)
-	for c := 0; c < nComp; c++ {
-		k_madd2_async(dst.DevPtr(c), src1.DevPtr(c), factor1,
-			src2.DevPtr(c), factor2, N, cfg)
+	if src1.NComp() == nComp && src2.NComp() == nComp {
+		for c := 0; c < nComp; c++ {
+			k_madd2_async(dst.DevPtr(c), src1.DevPtr(c), factor1,
+				src2.DevPtr(c), factor2, N, cfg)
+		}
+	} else if src1.NComp() == nComp && src2.NComp() == 1 {
+		for c := 0; c < nComp; c++ {
+			k_madd2_async(dst.DevPtr(c), src1.DevPtr(c), factor1,
+				src2.DevPtr(0), factor2, N, cfg)
+		}
+	} else if src2.NComp() == nComp && src1.NComp() == 1 {
+		for c := 0; c < nComp; c++ {
+			k_madd2_async(dst.DevPtr(c), src1.DevPtr(0), factor1,
+				src2.DevPtr(c), factor2, N, cfg)
+		}
 	}
 }
 

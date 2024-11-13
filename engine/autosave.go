@@ -122,8 +122,8 @@ func AutoSave(q Quantity, period float64) {
 	autoSave(q, period, Save, SavePrefix)
 }
 func AutoSaveAs(q Quantity, period float64, name string) {
-	autonumAs[NameOf(q)] = 0
-	autonumPrefixAs[NameOf(q)] = 0
+	autonumAs[name] = 0
+	autonumPrefixAs[name] = 0
 	autoSaveAs(q, period, Save, SavePrefix, SaveAsOverwrite, SaveAsOverwritePrefix, name)
 }
 // Register quant to be auto-saved as image, every period.
@@ -134,8 +134,8 @@ func AutoSnapshot(q Quantity, period float64) {
 }
 
 func AutoSnapshotAs(q Quantity, period float64, name string) {
-	autonumSnapshotsAs[NameOf(q)] = 0
-	autonumSnapshotsPrefixAs[NameOf(q)] = 0
+	autonumSnapshotsAs[name] = 0
+	autonumSnapshotsPrefixAs[name] = 0
 	autoSaveAs(q, period, Snapshot, SnapshotPrefix, SnapshotAsOverwrite, SnapshotAsOverwritePrefix, name)
 }
 

@@ -1714,7 +1714,8 @@ const solverState = writable({
   fixdt: 0,
   mindt: 0,
   maxdt: 0,
-  maxerr: 0
+  maxerr: 0,
+  nundone: 0
 });
 const consoleState = writable({ hist: "" });
 const meshState = writable({
@@ -1851,7 +1852,7 @@ const quantities = {
   Current: ["J", "Pol"],
   Slonczewski: ["EpsilonPrime", "FixedLayer", "FreeLayerThickness", "Lambda"],
   "Magneto-elastic-constants": ["B1", "B2", "C11", "C12", "C44", "eta", "rho"],
-  "Magneto-elastic-dynamics": ["F_mel", "B_mel", "u", "du", "normStrain", "normStress", "shearStrain", "shearStress", "force_density", "poynting"],
+  "Magneto-elastic-dynamics": ["F_mel", "u", "du", "normStrain", "normStress", "shearStrain", "shearStress", "force_density", "poynting"],
   Miscellaneous: [
     "frozenspins",
     "NoDemagSpins",
@@ -2807,6 +2808,30 @@ function Solver($$payload, $$props) {
             store_mutate($$store_subs ??= {}, "$solverState", solverState, store_get($$store_subs ??= {}, "$solverState", solverState).maxerr = $$value);
             $$settled = false;
           }
+        });
+        $$payload3.out += `<!----> `;
+        InputAddon($$payload3, { class: "w-24 !bg-transparent" });
+        $$payload3.out += `<!---->`;
+      },
+      $$slots: { default: true }
+    });
+    $$payload2.out += `<!----></div> <div class="flex items-center space-x-2">`;
+    ButtonGroup($$payload2, {
+      class: "h-11 w-full",
+      children: ($$payload3) => {
+        InputAddon($$payload3, {
+          class: "w-44 !bg-transparent",
+          children: ($$payload4) => {
+            $$payload4.out += `<!---->NUndone`;
+          },
+          $$slots: { default: true }
+        });
+        $$payload3.out += `<!----> `;
+        Input($$payload3, {
+          class: "w-full",
+          type: "text",
+          value: store_get($$store_subs ??= {}, "$solverState", solverState).nundone,
+          readonly: true
         });
         $$payload3.out += `<!----> `;
         InputAddon($$payload3, { class: "w-24 !bg-transparent" });

@@ -60,7 +60,7 @@ WRAPPERS := $(CUDAFILES:.cu=_wrapper.go)
 
 all: wrappers
 	@echo "Built with CUDA version ${CUDA_VERSION}"
-	go install -v
+	go23 install -v
 
 
 wrappers: $(WRAPPERS)
@@ -77,7 +77,7 @@ wrappers: $(WRAPPERS)
 
 
 cuda2go: cuda2go.go
-	go build $<
+	go23 build $<
 
 
 clean:

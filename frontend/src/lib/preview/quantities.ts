@@ -62,7 +62,7 @@ export const quantities: { [category: string]: string[] } = {
 
 	'Magneto-elastic-constants': ['B1', 'B2', 'C11', 'C12', 'C44', 'eta', 'rho'],
 
-	'Magneto-elastic-dynamics': ['F_mel', 'B_mel', 'u', 'du', 'normStrain', 'normStress', 'shearStrain', 'shearStress', 'force_density', 'poynting'],
+	'Magneto-elastic-dynamics': ['F_mel', 'u', 'du', 'normStrain', 'normStress', 'shearStrain', 'shearStress', 'force_density', 'poynting'],
 
 
 	Miscellaneous: [

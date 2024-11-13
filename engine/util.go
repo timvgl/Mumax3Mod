@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"sort"
 	"strings"
-
+	"strconv"
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/data"
 	"github.com/mumax/3/dump"
@@ -25,6 +26,7 @@ var (
 	GradMz = NewVectorField("GradMz", "J", "", GetGradMz)
 	GSDir  string
 	Suffix string
+	absPath string = ""
 )
 
 func init() {
@@ -52,11 +54,60 @@ func init() {
 	DeclFunc("EraseOD", EraseOD, "")
 	DeclVar("Suffix", &Suffix, "")
 	DeclFunc("int", castInt, "")
+	DeclFunc("string", castString, "")
+	DeclFunc("NUndoneToLog", NUndoneToLog, "")
+	DeclFunc("exec", runExec, "")
+	DeclFunc("execDir", runExecDir, "")
+	DeclVar("absPath", &absPath, "")
+	DeclFunc("WriteNUndoneToLog", WriteNUndoneToLog, "")
 
 }
 
-func castInt(val float64) int {
-	return int(val)
+func WriteNUndoneToLog() {
+	LogOut(fmt.Sprintf("NUndone: %v", NUndone))
+}
+
+func runExec(cmdStr string) {
+	path, err := exec.LookPath(strings.Split(cmdStr, " ")[0])
+	if err != nil {
+		panic(err)
+	}
+	cmd := exec.Command(path, strings.Split(cmdStr, " ")[1:]...)
+	if err := cmd.Run(); err != nil {
+		panic(err)
+	}
+}
+
+func runExecDir(cmdStr string) {
+	runExec(cmdStr + " " + absPath+OD())
+}
+
+func NUndoneToLog() {
+	LogOut(fmt.Sprintf("NUndone: %v", NUndone))
+}
+
+func castString(val interface{}) string {
+	return fmt.Sprintf("%v", val)
+}
+
+func castInt(val interface{}) int {
+	switch v := val.(type) {
+		case string:
+			valStr, ok := strconv.Atoi(v)
+			if ok == nil {
+				return(valStr)
+			} else {
+				panic("Got non-castable string.")
+			}
+		case int32:
+			return int(v)
+		case float32:
+			return int(v)
+		case float64:
+			return int(v)
+		default:
+			panic(fmt.Sprintf("Type not recognized for %v", v))
+		}
 }
 
 func EraseOD() {
@@ -71,15 +122,22 @@ func EraseOD() {
 		util.PanicErr(err)
 	}
 	for _, name := range names {
-		err = os.RemoveAll(filepath.Join(dir, name))
-		if err != nil {
-			util.PanicErr(err)
+		if name != "log.txt" && name != "gui" {
+			err = os.RemoveAll(filepath.Join(dir, name))
+			if err != nil {
+				util.PanicErr(err)
+			}
 		}
 	}
 }
 
-func ConcStr(str1, str2 string) string {
-	return str1 + str2
+func ConcStr(strs ...string) string {
+	var resultStr string
+	for _, str := range strs {
+        resultStr += str
+    }
+
+	return resultStr
 }
 
 func CheckIfFileExists(path string) bool {
