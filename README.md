@@ -58,13 +58,14 @@ Comment: Loading strains is highly experimental - if you want to use the strain 
         All need an integer as arg
     + __createNewTable__ set to false the old table.txt file will be continued and not overwritten
     + __rewriteHeaderTable__ set to true this appends the header of the table into the table.txt if table is continued
+
 * Further commands for checking/retrieving files:
     + __IsFile__ - checks if file at give path exists. Args: path_to_file __string__
     + __IsFileMyDir__ - checks if file exists in the current used mumax directory. Args: filename __string__
     + __EraseOD__ - delete all files in current mumax directory
     + __GSDIR__ - mumax3 does not allow strings in the script by default. If groundstates of various systems are stored in a single folder as a library this var can be assigned with the path. In combination with __Suffix__ and __ConcatStr__ complex groundstate ovf files can be stored using schematic names. See example below
     + __Suffix__ - see __GSDir__
-    + __ConcStr__ - concatenate two strings. Args: string1, string2 __string__
+    + __ConcStr__ - concatenate as many strings as wished. Args: strings... __string__
     + Example for GS:
       ```
       GSDir = "/home/test/GS/"
@@ -94,7 +95,14 @@ Comment: Loading strains is highly experimental - if you want to use the strain 
  
 * Further shapes:
     + __IDT__ - generate one sided IDT. Args: IDTWidthFinger, IDTDistanceFinger, IDTFingerLength float64, AmountFingers __int__
-  
+
+* Helpful commands:
+    + __WriteNUndoneToLog__ - writes amount of reversed steps to log
+    + __absPath__ - define the absolute path to the simulation folder without the folder itself -> being used in __ExecDir__
+    + __Exec__ - run bash command. Args: cmd __string__
+    + __ExecDir__ - run bash command but append absolute path to output directory as arg for executed command. Args: cmd __string__
+    + __string__ - cast float or int to string. Args: interface
+    + __int__ - cast castable values to integer. Args: value __float__
 
 
 * Relaxing:
@@ -114,4 +122,4 @@ Comment: Loading strains is highly experimental - if you want to use the strain 
     + __LimitRenderRegionZ__ - limit the area in which the rendering process is supposed to be done in the z direction. Reduces computational time for generating a region. Args: from, to __int__ (cells)
     + __ReDefRegion__ - if a region has been set it cannot be removed by default - assign the cells of one region to a different one (0 for removing it). Args: oldRegion, newRegion __int__
     + __EraseAllRegions__ - erase all regions - sets all regions back to region 0 - more efficent than redefining all regions seperate 
-    + __int__ - casts castable values to integer. Args: value __float__
+
