@@ -1,14 +1,15 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"sync"
 	"time"
 
-	"github.com/mumax/3/engine"
-	"github.com/mumax/3/logUI"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
+	"github.com/mumax/3/engine"
+	"github.com/mumax/3/logUI"
 	"github.com/vmihailenco/msgpack/v5"
 )
 
@@ -110,7 +111,7 @@ func (wsManager *WebSocketManager) broadcastEngineState() {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered from panic:", r)
-			}
+		}
 	}()
 	wsManager.engineState.Update()
 	msg, err := msgpack.Marshal(wsManager.engineState)
