@@ -5,8 +5,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/mumax/3/cuda/cu"
-	"github.com/mumax/3/engine"
 	"io"
 	"log"
 	"net/http"
@@ -14,6 +12,9 @@ import (
 	"os/exec"
 	"sync"
 	"sync/atomic"
+
+	"github.com/mumax/3/cuda/cu"
+	"github.com/mumax/3/engine"
 )
 
 var (
@@ -84,7 +85,7 @@ func (s *stateTab) Run() {
 	idle := initGPUs(nGPU)
 	for {
 		gpu := <-idle
-		addr := fmt.Sprint(":", 35368+gpu)
+		addr := fmt.Sprintf("%v:%v", *engine.Flag_webUIHost, 35368+gpu)
 		j, ok := s.StartNext(addr)
 		if !ok {
 			break
@@ -110,12 +111,12 @@ func (a *atom) inc()      { atomic.AddInt32((*int32)(a), 1) }
 func run(inFile string, gpu int, webAddr string) {
 	// overridden flags
 	gpuFlag := fmt.Sprint(`-gpu=`, gpu)
-	httpFlag := fmt.Sprint(`-http=`, webAddr)
+	httpFlag := fmt.Sprintf("-webUIHost %v", webAddr)
 
 	// pass through flags
 	flags := []string{gpuFlag, httpFlag}
 	flag.Visit(func(f *flag.Flag) {
-		if f.Name != "gpu" && f.Name != "http" && f.Name != "failfast" {
+		if f.Name != "gpu" && f.Name != "webUIHost" && f.Name != "failfast" {
 			flags = append(flags, fmt.Sprintf("-%v=%v", f.Name, f.Value))
 		}
 	})
