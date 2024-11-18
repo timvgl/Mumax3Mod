@@ -4,12 +4,13 @@ import (
 	"math"
 	"net/http"
 
+	"fmt"
+
 	"github.com/labstack/echo/v4"
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/data"
 	"github.com/mumax/3/engine"
 	"github.com/mumax/3/logUI"
-	"fmt"
 )
 
 type PreviewState struct {
@@ -91,33 +92,35 @@ func (s *PreviewState) UpdateQuantityBuffer() {
 	if s.layerMask == nil {
 		s.updateMask()
 	}
-	componentCount := 1
-	if s.Type == "3D" {
-		componentCount = 3
-	}
-	GPU_in := engine.ValueOf(s.getQuantity())
-	defer cuda.Recycle(GPU_in)
-
-	CPU_out := data.NewSlice(componentCount, [3]int{s.XChosenSize, s.YChosenSize, 1})
-	GPU_out := cuda.NewSlice(1, [3]int{s.XChosenSize, s.YChosenSize, 1})
-	defer GPU_out.Free()
-
-	if s.Type == "3D" {
-		for c := 0; c < componentCount; c++ {
-			cuda.Resize(GPU_out, GPU_in.Comp(c), s.Layer)
-			data.Copy(CPU_out.Comp(c), GPU_out)
+	if s.XChosenSize > 0 && s.YChosenSize > 0 {
+		componentCount := 1
+		if s.Type == "3D" {
+			componentCount = 3
 		}
-		s.normalizeVectors(CPU_out)
-		s.UpdateVectorField(CPU_out.Vectors())
-	} else {
-		if s.getQuantity().NComp() > 1 {
-			cuda.Resize(GPU_out, GPU_in.Comp(s.getComponent()), s.Layer)
-			data.Copy(CPU_out.Comp(0), GPU_out)
+		GPU_in := engine.ValueOf(s.getQuantity())
+		defer cuda.Recycle(GPU_in)
+
+		CPU_out := data.NewSlice(componentCount, [3]int{s.XChosenSize, s.YChosenSize, 1})
+		GPU_out := cuda.NewSlice(1, [3]int{s.XChosenSize, s.YChosenSize, 1})
+		defer GPU_out.Free()
+
+		if s.Type == "3D" {
+			for c := 0; c < componentCount; c++ {
+				cuda.Resize(GPU_out, GPU_in.Comp(c), s.Layer)
+				data.Copy(CPU_out.Comp(c), GPU_out)
+			}
+			s.normalizeVectors(CPU_out)
+			s.UpdateVectorField(CPU_out.Vectors())
 		} else {
-			cuda.Resize(GPU_out, GPU_in.Comp(0), s.Layer)
-			data.Copy(CPU_out.Comp(0), GPU_out)
+			if s.getQuantity().NComp() > 1 {
+				cuda.Resize(GPU_out, GPU_in.Comp(s.getComponent()), s.Layer)
+				data.Copy(CPU_out.Comp(0), GPU_out)
+			} else {
+				cuda.Resize(GPU_out, GPU_in.Comp(0), s.Layer)
+				data.Copy(CPU_out.Comp(0), GPU_out)
+			}
+			s.UpdateScalarField(CPU_out.Scalars())
 		}
-		s.UpdateScalarField(CPU_out.Scalars())
 	}
 }
 
