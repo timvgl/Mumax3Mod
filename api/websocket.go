@@ -107,6 +107,11 @@ func (wsManager *WebSocketManager) websocketEntrypoint(c echo.Context) error {
 }
 
 func (wsManager *WebSocketManager) broadcastEngineState() {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered from panic:", r)
+			}
+	}()
 	wsManager.engineState.Update()
 	msg, err := msgpack.Marshal(wsManager.engineState)
 	if err != nil {
