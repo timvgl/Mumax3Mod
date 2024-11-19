@@ -293,7 +293,7 @@ func findExpressions(mx3 string) (expressions []Expression, err error) {
 }
 
 // Generates the files with the processed expressions
-func generateFiles(parentDir, mx3 string, expressions []Expression, flat bool) ([]string, error) {
+func generateFiles(parentDir, mx3, orgScriptName string, expressions []Expression, flat bool) ([]string, error) {
 	// Generate combinations of all arrays using cartesian product
 	combinationCount := 1
 	for _, exp := range expressions {
@@ -338,8 +338,17 @@ func generateFiles(parentDir, mx3 string, expressions []Expression, flat bool) (
 		} else {
 			joinedPath = filepath.Join(pathParts...)
 		}
+		var fullPath string
+		if *flag_encapsle {
+			err := os.MkdirAll(filepath.Join(parentDir, orgScriptName[:len(orgScriptName)-4]+".out"), os.ModePerm)
+			if err != nil {
+				return make([]string, 0), fmt.Errorf("error creating directories: %v", err)
+			}
+			fullPath = filepath.Join(parentDir, orgScriptName[:len(orgScriptName)-4]+".out", joinedPath+".mx3")
 
-		fullPath := filepath.Join(parentDir, joinedPath+".mx3")
+		} else {
+			fullPath = filepath.Join(parentDir, joinedPath+".mx3")
+		}
 		if !flat {
 			err := os.MkdirAll(filepath.Dir(fullPath), os.ModePerm)
 			if err != nil {
@@ -387,7 +396,8 @@ func template(path string, flat bool) ([]string, error) {
 		return make([]string, 0), fmt.Errorf("error finding expressions: %v", err)
 	}
 	mx3ScriptsPaths := make([]string, 0)
-	mx3ScriptsPaths, err = generateFiles(parentDir, mx3, expressions, flat)
+	_, filename := filepath.Split(path)
+	mx3ScriptsPaths, err = generateFiles(parentDir, mx3, filename, expressions, flat)
 	if err != nil {
 		return make([]string, 0), fmt.Errorf("error generating files: %v", err)
 	}
