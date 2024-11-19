@@ -116,7 +116,7 @@ func run(inFile string, gpu int, port string) {
 	// pass through flags
 	flags := []string{gpuFlag, portFlag}
 	flag.Visit(func(f *flag.Flag) {
-		if f.Name != "gpu" && f.Name != "failfast" && f.Name != "webUIPort" && f.Name != "template" && f.Name != "flat" && f.Name != "pipelineLenth" {
+		if f.Name != "gpu" && f.Name != "failfast" && f.Name != "webUIPort" && f.Name != "template" && f.Name != "flat" && f.Name != "pipelineLenth" && f.Name != "encapsle" {
 			flags = append(flags, fmt.Sprintf("-%v=%v", f.Name, f.Value))
 		}
 	})
