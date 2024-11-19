@@ -41,9 +41,9 @@ type stateTab struct {
 
 // Job info.
 type job struct {
-	inFile  string // input file to run
-	webAddr string // http address for gui of running process
-	uid     int
+	inFile string // input file to run
+	uid    int
+	port   string
 }
 
 // NewStateTab constructs a queue for the given input files.
@@ -60,13 +60,13 @@ func NewStateTab(inFiles []string) *stateTab {
 // StartNext advances the next job and marks it running, setting its webAddr to indicate the GUI url.
 // A copy of the job info is returned, the original remains unmodified.
 // ok is false if there is no next job.
-func (s *stateTab) StartNext(webAddr string) (next job, ok bool) {
+func (s *stateTab) StartNext(port string) (next job, ok bool) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 	if s.next >= len(s.jobs) {
 		return job{}, false
 	}
-	s.jobs[s.next].webAddr = webAddr
+	s.jobs[s.next].port = port
 	jobCopy := s.jobs[s.next]
 	s.next++
 	return jobCopy, true
@@ -76,7 +76,7 @@ func (s *stateTab) StartNext(webAddr string) (next job, ok bool) {
 func (s *stateTab) Finish(j job) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
-	s.jobs[j.uid].webAddr = ""
+	s.jobs[j.uid].port = ""
 }
 
 // Runs all the jobs in stateTab.
@@ -85,13 +85,13 @@ func (s *stateTab) Run() {
 	idle := initGPUs(nGPU)
 	for {
 		gpu := <-idle
-		addr := fmt.Sprintf("%v:%v", *engine.Flag_webUIHost, 35368+gpu)
-		j, ok := s.StartNext(addr)
+		port := fmt.Sprintf("%v", gpu+35367)
+		j, ok := s.StartNext(port)
 		if !ok {
 			break
 		}
 		go func() {
-			run(j.inFile, gpu, j.webAddr)
+			run(j.inFile, gpu, j.port)
 			s.Finish(j)
 			idle <- gpu
 		}()
@@ -108,22 +108,21 @@ func (a *atom) set(v int) { atomic.StoreInt32((*int32)(a), int32(v)) }
 func (a *atom) get() int  { return int(atomic.LoadInt32((*int32)(a))) }
 func (a *atom) inc()      { atomic.AddInt32((*int32)(a), 1) }
 
-func run(inFile string, gpu int, webAddr string) {
+func run(inFile string, gpu int, port string) {
 	// overridden flags
 	gpuFlag := fmt.Sprint(`-gpu=`, gpu)
-	httpFlag := fmt.Sprintf("-webUIHost %v", webAddr)
+	portFlag := fmt.Sprint("-webUIPort=", port)
 
 	// pass through flags
-	flags := []string{gpuFlag, httpFlag}
+	flags := []string{gpuFlag, portFlag}
 	flag.Visit(func(f *flag.Flag) {
-		if f.Name != "gpu" && f.Name != "webUIHost" && f.Name != "failfast" {
+		if f.Name != "gpu" && f.Name != "failfast" && f.Name != "webUIPort" && f.Name != "template" && f.Name != "flat" && f.Name != "pipelineLenth" {
 			flags = append(flags, fmt.Sprintf("-%v=%v", f.Name, f.Value))
 		}
 	})
 	flags = append(flags, inFile)
 
 	cmd := exec.Command(os.Args[0], flags...)
-	log.Println(os.Args[0], flags)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Println(inFile, err)
@@ -154,7 +153,7 @@ func (s *stateTab) PrintTo(w io.Writer) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 	for i, j := range s.jobs {
-		fmt.Fprintf(w, "%3d %v %v\n", i, j.inFile, j.webAddr)
+		fmt.Fprintf(w, "%3d %v %v\n", i, j.inFile, j.port)
 	}
 }
 
@@ -175,8 +174,8 @@ func (s *stateTab) RenderHTML(w io.Writer) {
 	hostname := "localhost"
 	hostname, _ = os.Hostname()
 	for _, j := range s.jobs {
-		if j.webAddr != "" {
-			fmt.Fprint(w, `<b>`, j.uid, ` <a href="`, "http://", hostname+j.webAddr, `">`, j.inFile, " ", j.webAddr, "</a></b>\n")
+		if j.port != "" {
+			fmt.Fprint(w, `<b>`, j.uid, ` <a href="`, "http://", hostname+j.port, `">`, j.inFile, " ", j.port, "</a></b>\n")
 		} else {
 			fmt.Fprint(w, j.uid, " ", j.inFile, "\n")
 		}

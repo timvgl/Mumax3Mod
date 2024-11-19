@@ -23,6 +23,9 @@ var (
 	flag_test     = flag.Bool("test", false, "Cuda test (internal)")
 	flag_version  = flag.Bool("v", true, "Print version")
 	flag_vet      = flag.Bool("vet", false, "Check input files for errors, but don't run them")
+	flag_template = flag.Bool("template", false, "use template method from amumax")
+	flag_flat     = flag.Bool("flat", false, "flat structure for template")
+	flag_pipeline = flag.Int("pipelineLenth", 1, "")
 	// more flags in engine/gofiles.go
 )
 
@@ -52,15 +55,31 @@ func main() {
 		return
 	}
 
-	switch flag.NArg() {
-	case 0:
-		if *engine.Flag_interactive {
-			runInteractive()
+	if *flag_template {
+		args := flag.Args()
+		if len(args) > *flag_pipeline {
+			panic(fmt.Sprintf("Found unparsed args.\n %v", args))
 		}
-	case 1:
-		runFileAndServe(flag.Arg(0))
-	default:
-		RunQueue(flag.Args())
+		mmx3Scripts := make([]string, 0)
+		for i := range args {
+			mmx3ScriptsTmp, err := template(args[i], *flag_flat)
+			if err != nil {
+				panic(err)
+			}
+			mmx3Scripts = append(mmx3Scripts, mmx3ScriptsTmp...)
+		}
+		RunQueue(mmx3Scripts)
+	} else {
+		switch flag.NArg() {
+		case 0:
+			if *engine.Flag_interactive {
+				runInteractive()
+			}
+		case 1:
+			runFileAndServe(flag.Arg(0))
+		default:
+			RunQueue(flag.Args())
+		}
 	}
 }
 
