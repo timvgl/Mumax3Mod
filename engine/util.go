@@ -70,6 +70,7 @@ func WriteNUndoneToLog() {
 }
 
 func runExec(cmdStr string) {
+	fmt.Println(cmdStr)
 	path, err := exec.LookPath(strings.Split(cmdStr, " ")[0])
 	if err != nil {
 		panic(err)
@@ -90,7 +91,6 @@ func runExecDir(cmdStr string) {
 		for i := range len(argsSprintf) {
 			argsSprintf[i] = absPath + OD()
 		}
-		fmt.Println(fmt.Sprintf(cmdStr, argsSprintf...))
 		runExec(fmt.Sprintf(cmdStr, argsSprintf...))
 	} else {
 		runExec(cmdStr + " " + absPath + OD())
