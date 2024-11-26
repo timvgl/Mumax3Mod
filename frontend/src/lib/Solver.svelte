@@ -25,14 +25,14 @@
 <section>
 	<h2 class="mb-6 text-2xl font-semibold">Solver</h2>
 
-	<div class="grid gap-6 md:grid-cols-2">
+	<div class="grid grid-cols-2 gap-x-3 gap-y-6">
 		<!-- Left Column -->
 		<div class="space-y-4">
 			<!-- Solver Type -->
 			<div>
 				<Button outline color="primary" class="flex w-full items-center justify-between">
-					<span>Solver: {$solverState.type}</span>
-
+					<span>Solver: </span>
+					<span class="truncate font-bold text-white">{$solverState.type}</span>
 					<ChevronDownOutline class="h-5 w-5 text-gray-500" />
 				</Button>
 				<Dropdown
@@ -56,9 +56,9 @@
 			</div>
 
 			<!-- Run -->
-			<div class="flex items-center space-x-2">
+			<div class="field">
 				<Button outline on:click={() => postRun(runSeconds)}>Run</Button>
-				<ButtonGroup class="h-11 w-full">
+				<ButtonGroup class="h-11 w-full pl-3">
 					<Input
 						class="w-full"
 						id="run_seconds"
@@ -71,15 +71,22 @@
 			</div>
 
 			<!-- Run Steps -->
-			<div class="flex items-center space-x-2">
-				<Button class="w-1/3" outline on:click={() => postSteps(runSteps)}>Run Steps</Button>
-				<Input
-					class="w-2/3"
-					id="run_steps"
-					bind:value={runSteps}
-					placeholder="Number of steps"
-					on:change={() => postRun(runSteps)}
-				/>
+			<div class="field">
+				<Button
+					class="inline-flex h-11 items-center whitespace-nowrap px-4 py-2"
+					outline
+					on:click={() => postSteps(runSteps)}
+				>
+					Run Steps
+				</Button>
+				<div class="w-full pl-3">
+					<Input
+						id="run_steps"
+						bind:value={runSteps}
+						placeholder="Number of steps"
+						on:change={() => postRun(runSteps)}
+					/>
+				</div>
 			</div>
 
 			<!-- Relax -->
@@ -87,7 +94,7 @@
 				<Button outline class="w-full" on:click={postRelax}>Relax</Button>
 			</div>
 
-			<!-- Relax -->
+			<!-- Minimize -->
 			<div>
 				<Button outline class="w-full" on:click={postMinimize}>Minimize</Button>
 			</div>
@@ -101,8 +108,8 @@
 		<!-- Right Column -->
 		<div class="space-y-4">
 			<!-- Steps -->
-			<div class="flex items-center space-x-2">
-				<ButtonGroup class="h-11 w-full">
+			<div class="field">
+				<ButtonGroup class="btn-group">
 					<InputAddon class="w-44 !bg-transparent">Steps</InputAddon>
 					<Input class="w-full" value={$solverState.steps} readonly />
 					<InputAddon class="w-24 !bg-transparent"></InputAddon>
@@ -110,8 +117,8 @@
 			</div>
 
 			<!-- Time -->
-			<div class="flex items-center space-x-2">
-				<ButtonGroup class="h-11 w-full">
+			<div class="field">
+				<ButtonGroup class="btn-group">
 					<InputAddon class="w-44 !bg-transparent">Time</InputAddon>
 					<Input class="w-full" type="text" value={$solverState.time.toExponential(3)} readonly />
 					<InputAddon class="w-24 !bg-transparent">s</InputAddon>
@@ -119,8 +126,8 @@
 			</div>
 
 			<!-- dt -->
-			<div class="flex items-center space-x-2">
-				<ButtonGroup class="h-11 w-full">
+			<div class="field">
+				<ButtonGroup class="btn-group">
 					<InputAddon class="w-44 !bg-transparent">dt</InputAddon>
 					<Input class="w-full" type="text" value={$solverState.dt.toExponential(3)} readonly />
 					<InputAddon class="w-24 !bg-transparent">s</InputAddon>
@@ -128,8 +135,8 @@
 			</div>
 
 			<!-- err/step -->
-			<div class="flex items-center space-x-2">
-				<ButtonGroup class="h-11 w-full">
+			<div class="field">
+				<ButtonGroup class="btn-group">
 					<InputAddon class="w-44 !bg-transparent">Err/step</InputAddon>
 					<Input
 						class="w-full"
@@ -142,8 +149,8 @@
 			</div>
 
 			<!-- maxTorque -->
-			<div class="flex items-center space-x-2">
-				<ButtonGroup class="h-11 w-full">
+			<div class="field">
+				<ButtonGroup class="btn-group">
 					<InputAddon class="w-44 !bg-transparent">Max Torque</InputAddon>
 					<Input
 						class="w-full"
@@ -156,8 +163,8 @@
 			</div>
 
 			<!-- fixdt -->
-			<div class="flex items-center space-x-2">
-				<ButtonGroup class="h-11 w-full">
+			<div class="field">
+				<ButtonGroup class="btn-group">
 					<InputAddon class="w-44 !bg-transparent">Fixdt</InputAddon>
 					<Input
 						class="w-full"
@@ -170,8 +177,8 @@
 			</div>
 
 			<!-- mindt -->
-			<div class="flex items-center space-x-2">
-				<ButtonGroup class="h-11 w-full">
+			<div class="field">
+				<ButtonGroup class="btn-group">
 					<InputAddon class="w-44 !bg-transparent">Mindt</InputAddon>
 					<Input
 						class="w-full"
@@ -184,8 +191,8 @@
 			</div>
 
 			<!-- maxdt -->
-			<div class="flex items-center space-x-2">
-				<ButtonGroup class="h-11 w-full">
+			<div class="field">
+				<ButtonGroup class="btn-group">
 					<InputAddon class="w-44 !bg-transparent">Maxdt</InputAddon>
 					<Input
 						class="w-full"
@@ -198,26 +205,35 @@
 			</div>
 
 			<!-- maxerr -->
-			<div class="flex items-center space-x-2">
-				<ButtonGroup class="h-11 w-full">
-					<InputAddon class="w-44 !bg-transparent">MaxErr</InputAddon>
-					<Input
-						class="w-full"
-						type="number"
-						bind:value={$solverState.maxerr}
-						on:change={postMaxerr}
-					/>
-					<InputAddon class="w-24 !bg-transparent"></InputAddon>
-				</ButtonGroup>
+			<div class="field">
+				<div class="btn-group">
+					<ButtonGroup>
+						<InputAddon class="w-44 !bg-transparent">MaxErr</InputAddon>
+						<Input
+							class="w-full"
+							type="number"
+							bind:value={$solverState.maxerr}
+							on:change={postMaxerr}
+						/>
+						<InputAddon class="w-24 !bg-transparent"></InputAddon>
+					</ButtonGroup>
+				</div>
 			</div>
 
 			<!-- NUndone -->
-			<div class="flex items-center space-x-2">
-				<ButtonGroup class="h-11 w-full">
-					<InputAddon class="w-44 !bg-transparent">NUndone</InputAddon>
-					<Input class="w-full" type="text" value={$solverState.nundone} readonly />
-					<InputAddon class="w-24 !bg-transparent"></InputAddon>
-				</ButtonGroup>
+			<div class="field">
+				<div class="btn-group">
+					<ButtonGroup>
+						<InputAddon class="w-44 !bg-transparent">NUndone</InputAddon>
+						<Input 
+							class="w-full"
+							type="number"
+							bind:value={$solverState.nundone} 
+							readonly 
+						/>
+						<InputAddon class="w-24 !bg-transparent"></InputAddon>
+					</ButtonGroup>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -226,5 +242,11 @@
 <style>
 	section {
 		grid-area: solver;
+	}
+	.field {
+		@apply flex items-center;
+	}
+	.btn-group {
+		@apply h-11 w-full;
 	}
 </style>

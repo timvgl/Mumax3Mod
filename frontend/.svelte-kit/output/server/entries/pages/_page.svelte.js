@@ -1,5 +1,5 @@
-import { j as rest_props, s as setContext, k as fallback, x as element, o as bind_props, f as pop, q as sanitize_props, p as push, n as slot, l as spread_attributes, t as getContext, y as spread_props, m as attr, z as copy_payload, A as assign_payload, h as sanitize_slots, B as ensure_array_like, u as escape_html, C as stringify, D as noop, v as store_get, w as unsubscribe_stores, E as store_mutate } from "../../chunks/index2.js";
-import { w as writable } from "../../chunks/index.js";
+import { a4 as noop, V as rest_props, R as setContext, W as fallback, a5 as element, _ as bind_props, S as pop, $ as sanitize_props, Q as push, Z as slot, X as spread_attributes, a0 as getContext, a6 as spread_props, Y as attr, a7 as copy_payload, a8 as assign_payload, T as sanitize_slots, a9 as ensure_array_like, a1 as escape_html, aa as stringify, a2 as store_get, a3 as unsubscribe_stores, ab as store_mutate } from "../../chunks/index.js";
+import { w as writable } from "../../chunks/index2.js";
 import "msgpack-lite";
 import "echarts";
 import { twMerge, twJoin } from "tailwind-merge";
@@ -7,6 +7,30 @@ import * as dom from "@floating-ui/dom";
 import { C as CloseButton, s as setAlert } from "../../chunks/alert.js";
 import Prism from "prismjs";
 import "prismjs/components/prism-go.js";
+const now = () => Date.now();
+const raf = {
+  // don't access requestAnimationFrame eagerly outside method
+  // this allows basic testing of user code without JSDOM
+  // bunder will eval and remove ternary when the user's app is built
+  tick: (
+    /** @param {any} _ */
+    (_) => noop()
+  ),
+  now: () => now(),
+  tasks: /* @__PURE__ */ new Set()
+};
+function loop(callback) {
+  let task;
+  if (raf.tasks.size === 0) ;
+  return {
+    promise: new Promise((fulfill) => {
+      raf.tasks.add(task = { c: callback, f: fulfill });
+    }),
+    abort() {
+      raf.tasks.delete(task);
+    }
+  };
+}
 function html(value) {
   var html2 = String(value ?? "");
   var open = "<!---->";
@@ -268,30 +292,39 @@ function Button($$payload, $$props) {
     $$payload.out += `<!----></a>`;
   } else {
     $$payload.out += "<!--[!-->";
-    if (tag === "button") {
+    if (tag === "label") {
       $$payload.out += "<!--[-->";
-      $$payload.out += `<button${spread_attributes({
-        type,
-        ...$$restProps,
-        disabled,
-        class: buttonClass
-      })}><!---->`;
+      $$payload.out += `<label${spread_attributes({ ...$$restProps, class: buttonClass })}><!---->`;
       slot($$payload, $$props, "default", {}, null);
-      $$payload.out += `<!----></button>`;
+      $$payload.out += `<!----></label>`;
     } else {
       $$payload.out += "<!--[!-->";
-      element(
-        $$payload,
-        tag,
-        () => {
-          $$payload.out += `${spread_attributes({ ...$$restProps, class: buttonClass })}`;
-        },
-        () => {
-          $$payload.out += `<!---->`;
-          slot($$payload, $$props, "default", {}, null);
-          $$payload.out += `<!---->`;
-        }
-      );
+      if (tag === "button") {
+        $$payload.out += "<!--[-->";
+        $$payload.out += `<button${spread_attributes({
+          type,
+          ...$$restProps,
+          disabled,
+          class: buttonClass
+        })}><!---->`;
+        slot($$payload, $$props, "default", {}, null);
+        $$payload.out += `<!----></button>`;
+      } else {
+        $$payload.out += "<!--[!-->";
+        element(
+          $$payload,
+          tag,
+          () => {
+            $$payload.out += `${spread_attributes({ ...$$restProps, class: buttonClass })}`;
+          },
+          () => {
+            $$payload.out += `<!---->`;
+            slot($$payload, $$props, "default", {}, null);
+            $$payload.out += `<!---->`;
+          }
+        );
+      }
+      $$payload.out += `<!--]-->`;
     }
     $$payload.out += `<!--]-->`;
   }
@@ -844,9 +877,9 @@ function Radio($$payload, $$props) {
     children: ($$payload2) => {
       $$payload2.out += `<input${spread_attributes({
         type: "radio",
+        ...$$restProps,
         checked: group === value,
         value,
-        ...$$restProps,
         class: inputClass(custom, color, false, background, spacing, $$slots.default || $$sanitized_props.class)
       })}> <!---->`;
       slot($$payload2, $$props, "default", {}, null);
@@ -965,7 +998,9 @@ function Input($$payload, $$props) {
     "clearable",
     "defaultClass",
     "color",
-    "floatClass"
+    "floatClass",
+    "classLeft",
+    "classRight"
   ]);
   push();
   let _size;
@@ -976,6 +1011,8 @@ function Input($$payload, $$props) {
   let defaultClass = fallback($$props["defaultClass"], "block w-full disabled:cursor-not-allowed disabled:opacity-50 rtl:text-right");
   let color = fallback($$props["color"], "base");
   let floatClass = fallback($$props["floatClass"], "flex absolute inset-y-0 items-center text-gray-500 dark:text-gray-400");
+  let classLeft = fallback($$props["classLeft"], "");
+  let classRight = fallback($$props["classRight"], "");
   const borderClasses = {
     base: "border border-gray-300 dark:border-gray-600",
     tinted: "border border-gray-300 dark:border-gray-500",
@@ -1027,7 +1064,7 @@ function Input($$payload, $$props) {
     children: ($$payload2) => {
       if ($$slots.left) {
         $$payload2.out += "<!--[-->";
-        $$payload2.out += `<div${attr("class", `${stringify(twMerge(floatClass, $$sanitized_props.classLeft))} start-0 ps-2.5 pointer-events-none`)}><!---->`;
+        $$payload2.out += `<div${attr("class", `${stringify(twMerge(floatClass, classLeft))} start-0 ps-2.5 pointer-events-none`)}><!---->`;
         slot($$payload2, $$props, "left", {}, null);
         $$payload2.out += `<!----></div>`;
       } else {
@@ -1053,7 +1090,7 @@ function Input($$payload, $$props) {
       $$payload2.out += `<!----> `;
       if ($$slots.right) {
         $$payload2.out += "<!--[-->";
-        $$payload2.out += `<div${attr("class", `${stringify(twMerge(floatClass, $$sanitized_props.classRight))} end-0 pe-2.5`)}><!---->`;
+        $$payload2.out += `<div${attr("class", `${stringify(twMerge(floatClass, classRight))} end-0 pe-2.5`)}><!---->`;
         slot($$payload2, $$props, "right", {}, null);
         $$payload2.out += `<!----></div>`;
       } else {
@@ -1065,7 +1102,7 @@ function Input($$payload, $$props) {
         CloseButton($$payload2, {
           size,
           color: "none",
-          class: ` ${stringify(twMerge(floatClass, $$sanitized_props.classRight))} focus:ring-0 end-6 focus:ring-gray-400 dark:text-white`
+          class: ` ${stringify(twMerge(floatClass, classRight))} focus:ring-0 end-6 focus:ring-gray-400 dark:text-white`
         });
       } else {
         $$payload2.out += "<!--[!-->";
@@ -1081,7 +1118,9 @@ function Input($$payload, $$props) {
     clearable,
     defaultClass,
     color,
-    floatClass
+    floatClass,
+    classLeft,
+    classRight
   });
   pop();
 }
@@ -1119,28 +1158,6 @@ function InputAddon($$payload, $$props) {
   bind_props($$props, { size });
   pop();
 }
-function Range($$payload, $$props) {
-  const $$sanitized_props = sanitize_props($$props);
-  const $$restProps = rest_props($$sanitized_props, ["value", "size"]);
-  push();
-  let value = fallback($$props["value"], 0);
-  let size = fallback($$props["size"], "md");
-  const sizes = {
-    sm: "h-1 range-sm",
-    md: "h-2",
-    lg: "h-3 range-lg"
-  };
-  let inputClass2;
-  inputClass2 = twMerge("w-full bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700", sizes[size] ?? sizes.md, $$sanitized_props.class);
-  $$payload.out += `<input${spread_attributes({
-    type: "range",
-    value,
-    ...$$restProps,
-    class: inputClass2
-  })}>`;
-  bind_props($$props, { value, size });
-  pop();
-}
 function Toggle($$payload, $$props) {
   const $$slots = sanitize_slots($$props);
   const $$sanitized_props = sanitize_props($$props);
@@ -1149,7 +1166,9 @@ function Toggle($$payload, $$props) {
     "group",
     "value",
     "checked",
-    "customSize"
+    "customSize",
+    "classDiv",
+    "disabled"
   ]);
   push();
   let size = fallback($$props["size"], "default");
@@ -1157,6 +1176,8 @@ function Toggle($$payload, $$props) {
   let value = fallback($$props["value"], "");
   let checked = fallback($$props["checked"], () => void 0, true);
   let customSize = fallback($$props["customSize"], "");
+  let classDiv = fallback($$props["classDiv"], "");
+  let disabled = fallback($$props["disabled"], false);
   let background = getContext("background");
   const common = "me-3 shrink-0 bg-gray-200 rounded-full peer-focus:ring-4 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:bg-white after:border-gray-300 after:border after:rounded-full after:transition-all";
   const colors = {
@@ -1177,7 +1198,9 @@ function Toggle($$payload, $$props) {
     custom: customSize
   };
   let divClass;
-  divClass = twMerge(common, $$slots.offLabel ? "ms-3" : "", background ? "dark:bg-gray-600 dark:border-gray-500" : "dark:bg-gray-700 dark:border-gray-600", colors[$$restProps.color ?? "primary"], sizes[size], "relative", $$sanitized_props.classDiv);
+  let checkboxCls;
+  divClass = twMerge(common, $$slots.offLabel ? "ms-3" : "", background ? "dark:bg-gray-600 dark:border-gray-500" : "dark:bg-gray-700 dark:border-gray-600", colors[$$restProps.color ?? "primary"], sizes[size], "relative", classDiv);
+  checkboxCls = disabled ? "cursor-not-allowed grayscale contrast-50 text-gray-400" : "cursor-pointer text-gray-900";
   let $$settled = true;
   let $$inner_payload;
   function $$render_inner($$payload2) {
@@ -1185,7 +1208,8 @@ function Toggle($$payload, $$props) {
       { custom: true },
       $$restProps,
       {
-        class: $$sanitized_props.class,
+        disabled,
+        class: twMerge(checkboxCls, $$sanitized_props.class),
         value,
         get checked() {
           return checked;
@@ -1218,7 +1242,15 @@ function Toggle($$payload, $$props) {
     $$render_inner($$inner_payload);
   } while (!$$settled);
   assign_payload($$payload, $$inner_payload);
-  bind_props($$props, { size, group, value, checked, customSize });
+  bind_props($$props, {
+    size,
+    group,
+    value,
+    checked,
+    customSize,
+    classDiv,
+    disabled
+  });
   pop();
 }
 function linear(t) {
@@ -1227,28 +1259,6 @@ function linear(t) {
 function cubicOut(t) {
   const f = t - 1;
   return f * f * f + 1;
-}
-const request_animation_frame = noop;
-const now = () => Date.now();
-const raf = {
-  tick: (
-    /** @param {any} _ */
-    (_) => request_animation_frame()
-  ),
-  now: () => now(),
-  tasks: /* @__PURE__ */ new Set()
-};
-function loop(callback) {
-  let task;
-  if (raf.tasks.size === 0) ;
-  return {
-    promise: new Promise((fulfill) => {
-      raf.tasks.add(task = { c: callback, f: fulfill });
-    }),
-    abort() {
-      raf.tasks.delete(task);
-    }
-  };
 }
 function is_date(obj) {
   return Object.prototype.toString.call(obj) === "[object Date]";
@@ -1389,7 +1399,8 @@ function Progressbar($$payload, $$props) {
     "color",
     "labelInsideClass",
     "divClass",
-    "progressClass"
+    "progressClass",
+    "classLabelOutside"
   ]);
   push();
   var $$store_subs;
@@ -1405,6 +1416,7 @@ function Progressbar($$payload, $$props) {
   let labelInsideClass = fallback($$props["labelInsideClass"], "text-primary-100 text-xs font-medium text-center p-0.5 leading-none rounded-full");
   let divClass = fallback($$props["divClass"], "w-full bg-gray-200 rounded-full dark:bg-gray-700");
   let progressClass = fallback($$props["progressClass"], "");
+  let classLabelOutside = fallback($$props["classLabelOutside"], "");
   const _progress = tweened(0, { duration: animate ? tweenDuration : 0, easing });
   const barColors = {
     primary: "bg-primary-600",
@@ -1421,7 +1433,7 @@ function Progressbar($$payload, $$props) {
     $$payload.out += "<!--[-->";
     $$payload.out += `<div${spread_attributes({
       ...$$restProps,
-      class: twMerge("flex justify-between mb-1", $$sanitized_props.classLabelOutside)
+      class: twMerge("flex justify-between mb-1", classLabelOutside)
     })}><span class="text-base font-medium text-blue-700 dark:text-white">${escape_html(labelOutside)}</span> <span class="text-sm font-medium text-blue-700 dark:text-white">${escape_html(progress)}%</span></div>`;
   } else {
     $$payload.out += "<!--[!-->";
@@ -1448,22 +1460,12 @@ function Progressbar($$payload, $$props) {
     color,
     labelInsideClass,
     divClass,
-    progressClass
+    progressClass,
+    classLabelOutside
   });
   pop();
 }
 function ChevronDownOutline($$payload, $$props) {
-  const $$sanitized_props = sanitize_props($$props);
-  const $$restProps = rest_props($$sanitized_props, [
-    "size",
-    "role",
-    "color",
-    "withEvents",
-    "title",
-    "strokeWidth",
-    "desc",
-    "ariaLabel"
-  ]);
   push();
   const ctx = getContext("iconCtx") ?? {};
   const sizes = {
@@ -1473,111 +1475,52 @@ function ChevronDownOutline($$payload, $$props) {
     lg: "w-6 h-6",
     xl: "w-8 h-8"
   };
-  let size = fallback($$props["size"], () => ctx.size || "md", true);
-  let role = fallback($$props["role"], () => ctx.role || "img", true);
-  let color = fallback($$props["color"], () => ctx.color || "currentColor", true);
-  let withEvents = fallback($$props["withEvents"], () => ctx.withEvents || false, true);
-  let title = fallback($$props["title"], () => ({}), true);
-  let strokeWidth = fallback($$props["strokeWidth"], () => ctx.strokeWidth || "2", true);
-  let desc = fallback($$props["desc"], () => ({}), true);
-  let ariaDescribedby = `${title.id || ""} ${desc.id || ""}`;
-  let hasDescription = false;
-  let ariaLabel = fallback($$props["ariaLabel"], "chevron down outline");
-  if (title.id || desc.id) {
-    hasDescription = true;
-  } else {
-    hasDescription = false;
-  }
-  if (withEvents) {
+  let {
+    size = ctx.size || "md",
+    color = ctx.color || "currentColor",
+    title,
+    strokeWidth = ctx.strokeWidth || "2",
+    desc,
+    class: className,
+    ariaLabel = "chevron down outline",
+    $$slots,
+    $$events,
+    ...restProps
+  } = $$props;
+  let ariaDescribedby = `${title?.id || ""} ${desc?.id || ""}`;
+  const hasDescription = !!(title?.id || desc?.id);
+  $$payload.out += `<svg${spread_attributes(
+    {
+      xmlns: "http://www.w3.org/2000/svg",
+      fill: "none",
+      color,
+      ...restProps,
+      class: twMerge("shrink-0", sizes[size], className),
+      "aria-label": ariaLabel,
+      "aria-describedby": hasDescription ? ariaDescribedby : void 0,
+      viewBox: "0 0 24 24"
+    },
+    void 0,
+    void 0,
+    3
+  )}>`;
+  if (title?.id && title.title) {
     $$payload.out += "<!--[-->";
-    $$payload.out += `<svg${spread_attributes(
-      {
-        xmlns: "http://www.w3.org/2000/svg",
-        fill: "none",
-        color,
-        ...$$restProps,
-        class: twMerge("shrink-0", sizes[size ?? "md"], $$sanitized_props.class),
-        role,
-        "aria-label": ariaLabel,
-        "aria-describedby": hasDescription ? ariaDescribedby : void 0,
-        viewBox: "0 0 24 24"
-      },
-      void 0,
-      void 0,
-      3
-    )}>`;
-    if (title.id && title.title) {
-      $$payload.out += "<!--[-->";
-      $$payload.out += `<title${attr("id", title.id)}>${escape_html(title.title)}</title>`;
-    } else {
-      $$payload.out += "<!--[!-->";
-    }
-    $$payload.out += `<!--]-->`;
-    if (desc.id && desc.desc) {
-      $$payload.out += "<!--[-->";
-      $$payload.out += `<desc${attr("id", desc.id)}>${escape_html(desc.desc)}</desc>`;
-    } else {
-      $$payload.out += "<!--[!-->";
-    }
-    $$payload.out += `<!--]--><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"${attr("stroke-width", strokeWidth)} d="m8 10 4 4 4-4"></path></svg>`;
+    $$payload.out += `<title${attr("id", title.id)}>${escape_html(title.title)}</title>`;
   } else {
     $$payload.out += "<!--[!-->";
-    $$payload.out += `<svg${spread_attributes(
-      {
-        xmlns: "http://www.w3.org/2000/svg",
-        fill: "none",
-        color,
-        ...$$restProps,
-        class: twMerge("shrink-0", sizes[size ?? "md"], $$sanitized_props.class),
-        role,
-        "aria-label": ariaLabel,
-        "aria-describedby": hasDescription ? ariaDescribedby : void 0,
-        viewBox: "0 0 24 24"
-      },
-      void 0,
-      void 0,
-      3
-    )}>`;
-    if (title.id && title.title) {
-      $$payload.out += "<!--[-->";
-      $$payload.out += `<title${attr("id", title.id)}>${escape_html(title.title)}</title>`;
-    } else {
-      $$payload.out += "<!--[!-->";
-    }
-    $$payload.out += `<!--]-->`;
-    if (desc.id && desc.desc) {
-      $$payload.out += "<!--[-->";
-      $$payload.out += `<desc${attr("id", desc.id)}>${escape_html(desc.desc)}</desc>`;
-    } else {
-      $$payload.out += "<!--[!-->";
-    }
-    $$payload.out += `<!--]--><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"${attr("stroke-width", strokeWidth)} d="m8 10 4 4 4-4"></path></svg>`;
   }
   $$payload.out += `<!--]-->`;
-  bind_props($$props, {
-    size,
-    role,
-    color,
-    withEvents,
-    title,
-    strokeWidth,
-    desc,
-    ariaLabel
-  });
+  if (desc?.id && desc.desc) {
+    $$payload.out += "<!--[-->";
+    $$payload.out += `<desc${attr("id", desc.id)}>${escape_html(desc.desc)}</desc>`;
+  } else {
+    $$payload.out += "<!--[!-->";
+  }
+  $$payload.out += `<!--]--><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"${attr("stroke-width", strokeWidth)} d="m8 10 4 4 4-4"></path></svg>`;
   pop();
 }
 function ChevronRightOutline($$payload, $$props) {
-  const $$sanitized_props = sanitize_props($$props);
-  const $$restProps = rest_props($$sanitized_props, [
-    "size",
-    "role",
-    "color",
-    "withEvents",
-    "title",
-    "strokeWidth",
-    "desc",
-    "ariaLabel"
-  ]);
   push();
   const ctx = getContext("iconCtx") ?? {};
   const sizes = {
@@ -1587,97 +1530,214 @@ function ChevronRightOutline($$payload, $$props) {
     lg: "w-6 h-6",
     xl: "w-8 h-8"
   };
-  let size = fallback($$props["size"], () => ctx.size || "md", true);
-  let role = fallback($$props["role"], () => ctx.role || "img", true);
-  let color = fallback($$props["color"], () => ctx.color || "currentColor", true);
-  let withEvents = fallback($$props["withEvents"], () => ctx.withEvents || false, true);
-  let title = fallback($$props["title"], () => ({}), true);
-  let strokeWidth = fallback($$props["strokeWidth"], () => ctx.strokeWidth || "2", true);
-  let desc = fallback($$props["desc"], () => ({}), true);
-  let ariaDescribedby = `${title.id || ""} ${desc.id || ""}`;
-  let hasDescription = false;
-  let ariaLabel = fallback($$props["ariaLabel"], "chevron right outline");
-  if (title.id || desc.id) {
-    hasDescription = true;
-  } else {
-    hasDescription = false;
-  }
-  if (withEvents) {
+  let {
+    size = ctx.size || "md",
+    color = ctx.color || "currentColor",
+    title,
+    strokeWidth = ctx.strokeWidth || "2",
+    desc,
+    class: className,
+    ariaLabel = "chevron right outline",
+    $$slots,
+    $$events,
+    ...restProps
+  } = $$props;
+  let ariaDescribedby = `${title?.id || ""} ${desc?.id || ""}`;
+  const hasDescription = !!(title?.id || desc?.id);
+  $$payload.out += `<svg${spread_attributes(
+    {
+      xmlns: "http://www.w3.org/2000/svg",
+      fill: "none",
+      color,
+      ...restProps,
+      class: twMerge("shrink-0", sizes[size], className),
+      "aria-label": ariaLabel,
+      "aria-describedby": hasDescription ? ariaDescribedby : void 0,
+      viewBox: "0 0 24 24"
+    },
+    void 0,
+    void 0,
+    3
+  )}>`;
+  if (title?.id && title.title) {
     $$payload.out += "<!--[-->";
-    $$payload.out += `<svg${spread_attributes(
-      {
-        xmlns: "http://www.w3.org/2000/svg",
-        fill: "none",
-        color,
-        ...$$restProps,
-        class: twMerge("shrink-0", sizes[size ?? "md"], $$sanitized_props.class),
-        role,
-        "aria-label": ariaLabel,
-        "aria-describedby": hasDescription ? ariaDescribedby : void 0,
-        viewBox: "0 0 24 24"
-      },
-      void 0,
-      void 0,
-      3
-    )}>`;
-    if (title.id && title.title) {
-      $$payload.out += "<!--[-->";
-      $$payload.out += `<title${attr("id", title.id)}>${escape_html(title.title)}</title>`;
-    } else {
-      $$payload.out += "<!--[!-->";
-    }
-    $$payload.out += `<!--]-->`;
-    if (desc.id && desc.desc) {
-      $$payload.out += "<!--[-->";
-      $$payload.out += `<desc${attr("id", desc.id)}>${escape_html(desc.desc)}</desc>`;
-    } else {
-      $$payload.out += "<!--[!-->";
-    }
-    $$payload.out += `<!--]--><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"${attr("stroke-width", strokeWidth)} d="m10 16 4-4-4-4"></path></svg>`;
+    $$payload.out += `<title${attr("id", title.id)}>${escape_html(title.title)}</title>`;
   } else {
     $$payload.out += "<!--[!-->";
-    $$payload.out += `<svg${spread_attributes(
-      {
-        xmlns: "http://www.w3.org/2000/svg",
-        fill: "none",
-        color,
-        ...$$restProps,
-        class: twMerge("shrink-0", sizes[size ?? "md"], $$sanitized_props.class),
-        role,
-        "aria-label": ariaLabel,
-        "aria-describedby": hasDescription ? ariaDescribedby : void 0,
-        viewBox: "0 0 24 24"
-      },
-      void 0,
-      void 0,
-      3
-    )}>`;
-    if (title.id && title.title) {
-      $$payload.out += "<!--[-->";
-      $$payload.out += `<title${attr("id", title.id)}>${escape_html(title.title)}</title>`;
-    } else {
-      $$payload.out += "<!--[!-->";
-    }
-    $$payload.out += `<!--]-->`;
-    if (desc.id && desc.desc) {
-      $$payload.out += "<!--[-->";
-      $$payload.out += `<desc${attr("id", desc.id)}>${escape_html(desc.desc)}</desc>`;
-    } else {
-      $$payload.out += "<!--[!-->";
-    }
-    $$payload.out += `<!--]--><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"${attr("stroke-width", strokeWidth)} d="m10 16 4-4-4-4"></path></svg>`;
   }
   $$payload.out += `<!--]-->`;
-  bind_props($$props, {
-    size,
-    role,
-    color,
-    withEvents,
+  if (desc?.id && desc.desc) {
+    $$payload.out += "<!--[-->";
+    $$payload.out += `<desc${attr("id", desc.id)}>${escape_html(desc.desc)}</desc>`;
+  } else {
+    $$payload.out += "<!--[!-->";
+  }
+  $$payload.out += `<!--]--><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"${attr("stroke-width", strokeWidth)} d="m10 16 4-4-4-4"></path></svg>`;
+  pop();
+}
+function CloseCircleOutline($$payload, $$props) {
+  push();
+  const ctx = getContext("iconCtx") ?? {};
+  const sizes = {
+    xs: "w-3 h-3",
+    sm: "w-4 h-4",
+    md: "w-5 h-5",
+    lg: "w-6 h-6",
+    xl: "w-8 h-8"
+  };
+  let {
+    size = ctx.size || "md",
+    color = ctx.color || "currentColor",
     title,
-    strokeWidth,
+    strokeWidth = ctx.strokeWidth || "2",
     desc,
-    ariaLabel
-  });
+    class: className,
+    ariaLabel = "close circle outline",
+    $$slots,
+    $$events,
+    ...restProps
+  } = $$props;
+  let ariaDescribedby = `${title?.id || ""} ${desc?.id || ""}`;
+  const hasDescription = !!(title?.id || desc?.id);
+  $$payload.out += `<svg${spread_attributes(
+    {
+      xmlns: "http://www.w3.org/2000/svg",
+      fill: "none",
+      color,
+      ...restProps,
+      class: twMerge("shrink-0", sizes[size], className),
+      "aria-label": ariaLabel,
+      "aria-describedby": hasDescription ? ariaDescribedby : void 0,
+      viewBox: "0 0 24 24"
+    },
+    void 0,
+    void 0,
+    3
+  )}>`;
+  if (title?.id && title.title) {
+    $$payload.out += "<!--[-->";
+    $$payload.out += `<title${attr("id", title.id)}>${escape_html(title.title)}</title>`;
+  } else {
+    $$payload.out += "<!--[!-->";
+  }
+  $$payload.out += `<!--]-->`;
+  if (desc?.id && desc.desc) {
+    $$payload.out += "<!--[-->";
+    $$payload.out += `<desc${attr("id", desc.id)}>${escape_html(desc.desc)}</desc>`;
+  } else {
+    $$payload.out += "<!--[!-->";
+  }
+  $$payload.out += `<!--]--><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"${attr("stroke-width", strokeWidth)} d="m15 9-6 6m0-6 6 6m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"></path></svg>`;
+  pop();
+}
+function PauseOutline($$payload, $$props) {
+  push();
+  const ctx = getContext("iconCtx") ?? {};
+  const sizes = {
+    xs: "w-3 h-3",
+    sm: "w-4 h-4",
+    md: "w-5 h-5",
+    lg: "w-6 h-6",
+    xl: "w-8 h-8"
+  };
+  let {
+    size = ctx.size || "md",
+    color = ctx.color || "currentColor",
+    title,
+    strokeWidth = ctx.strokeWidth || "2",
+    desc,
+    class: className,
+    ariaLabel = "pause outline",
+    $$slots,
+    $$events,
+    ...restProps
+  } = $$props;
+  let ariaDescribedby = `${title?.id || ""} ${desc?.id || ""}`;
+  const hasDescription = !!(title?.id || desc?.id);
+  $$payload.out += `<svg${spread_attributes(
+    {
+      xmlns: "http://www.w3.org/2000/svg",
+      fill: "none",
+      color,
+      ...restProps,
+      class: twMerge("shrink-0", sizes[size], className),
+      "aria-label": ariaLabel,
+      "aria-describedby": hasDescription ? ariaDescribedby : void 0,
+      viewBox: "0 0 24 24"
+    },
+    void 0,
+    void 0,
+    3
+  )}>`;
+  if (title?.id && title.title) {
+    $$payload.out += "<!--[-->";
+    $$payload.out += `<title${attr("id", title.id)}>${escape_html(title.title)}</title>`;
+  } else {
+    $$payload.out += "<!--[!-->";
+  }
+  $$payload.out += `<!--]-->`;
+  if (desc?.id && desc.desc) {
+    $$payload.out += "<!--[-->";
+    $$payload.out += `<desc${attr("id", desc.id)}>${escape_html(desc.desc)}</desc>`;
+  } else {
+    $$payload.out += "<!--[!-->";
+  }
+  $$payload.out += `<!--]--><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"${attr("stroke-width", strokeWidth)} d="M9 6H8a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1Zm7 0h-1a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1Z"></path></svg>`;
+  pop();
+}
+function PlayOutline($$payload, $$props) {
+  push();
+  const ctx = getContext("iconCtx") ?? {};
+  const sizes = {
+    xs: "w-3 h-3",
+    sm: "w-4 h-4",
+    md: "w-5 h-5",
+    lg: "w-6 h-6",
+    xl: "w-8 h-8"
+  };
+  let {
+    size = ctx.size || "md",
+    color = ctx.color || "currentColor",
+    title,
+    strokeWidth = ctx.strokeWidth || "2",
+    desc,
+    class: className,
+    ariaLabel = "play outline",
+    $$slots,
+    $$events,
+    ...restProps
+  } = $$props;
+  let ariaDescribedby = `${title?.id || ""} ${desc?.id || ""}`;
+  const hasDescription = !!(title?.id || desc?.id);
+  $$payload.out += `<svg${spread_attributes(
+    {
+      xmlns: "http://www.w3.org/2000/svg",
+      fill: "none",
+      color,
+      ...restProps,
+      class: twMerge("shrink-0", sizes[size], className),
+      "aria-label": ariaLabel,
+      "aria-describedby": hasDescription ? ariaDescribedby : void 0,
+      viewBox: "0 0 24 24"
+    },
+    void 0,
+    void 0,
+    3
+  )}>`;
+  if (title?.id && title.title) {
+    $$payload.out += "<!--[-->";
+    $$payload.out += `<title${attr("id", title.id)}>${escape_html(title.title)}</title>`;
+  } else {
+    $$payload.out += "<!--[!-->";
+  }
+  $$payload.out += `<!--]-->`;
+  if (desc?.id && desc.desc) {
+    $$payload.out += "<!--[-->";
+    $$payload.out += `<desc${attr("id", desc.id)}>${escape_html(desc.desc)}</desc>`;
+  } else {
+    $$payload.out += "<!--[!-->";
+  }
+  $$payload.out += `<!--]--><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"${attr("stroke-width", strokeWidth)} d="M8 18V6l8 6-8 6Z"></path></svg>`;
   pop();
 }
 const previewState = writable({
@@ -1702,7 +1762,8 @@ const previewState = writable({
 });
 const headerState = writable({
   path: "",
-  status: ""
+  status: "",
+  version: ""
 });
 const solverState = writable({
   type: "",
@@ -1752,7 +1813,6 @@ const tablePlotState = writable({
   maxPoints: 0,
   step: 0
 });
-const threeDPreview = writable(null);
 const metricsState = writable({
   pid: 0,
   error: "",
@@ -1773,30 +1833,29 @@ let connected = writable(false);
 function Header($$payload, $$props) {
   push();
   var $$store_subs;
-  $$payload.out += `<section class="svelte-16ipdyn"><h1 class="svelte-16ipdyn">`;
-  if (store_get($$store_subs ??= {}, "$headerState", headerState).status === "running") {
+  $$payload.out += `<section class="sticky top-0 z-10 m-2.5 mb-0 p-2"><div class="flex w-screen items-center gap-2"><div class="text-3xl">`;
+  if (store_get($$store_subs ??= {}, "$connected", connected)) {
     $$payload.out += "<!--[-->";
-    $$payload.out += `<svg class="icon svelte-16ipdyn" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16.6582 9.28638C18.098 10.1862 18.8178 10.6361 19.0647 11.2122C19.2803 11.7152 19.2803 12.2847 19.0647 12.7878C18.8178 13.3638 18.098 13.8137 16.6582 14.7136L9.896 18.94C8.29805 19.9387 7.49907 20.4381 6.83973 20.385C6.26501 20.3388 5.73818 20.0469 5.3944 19.584C5 19.053 5 18.1108 5 16.2264V7.77357C5 5.88919 5 4.94701 5.3944 4.41598C5.73818 3.9531 6.26501 3.66111 6.83973 3.6149C7.49907 3.5619 8.29805 4.06126 9.896 5.05998L16.6582 9.28638Z" stroke="#2ec27e" stroke-width="2" stroke-linejoin="round" style="--darkreader-inline-stroke: #4ed597;" data-darkreader-inline-stroke=""></path></svg>`;
-  } else {
-    $$payload.out += "<!--[!-->";
-    if (store_get($$store_subs ??= {}, "$headerState", headerState).status === "paused") {
+    if (store_get($$store_subs ??= {}, "$headerState", headerState).status === "running") {
       $$payload.out += "<!--[-->";
-      $$payload.out += `<svg class="icon svelte-16ipdyn" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 9V15M10 9V15M12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21Z" stroke="#e66100" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="--darkreader-inline-stroke: #ff842b;" data-darkreader-inline-stroke=""></path></svg>`;
+      PlayOutline($$payload, { color: "green", size: "xl" });
     } else {
       $$payload.out += "<!--[!-->";
-      $$payload.out += `<svg class="icon svelte-16ipdyn" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 16H12.01M12 8V12M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z" stroke="#e01b24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="--darkreader-inline-stroke: #e7353d;" data-darkreader-inline-stroke=""></path></svg>`;
+      if (store_get($$store_subs ??= {}, "$headerState", headerState).status === "paused") {
+        $$payload.out += "<!--[-->";
+        PauseOutline($$payload, { color: "orange", size: "xl" });
+      } else {
+        $$payload.out += "<!--[!-->";
+        CloseCircleOutline($$payload, { color: "red", size: "xl" });
+      }
+      $$payload.out += `<!--]-->`;
     }
     $$payload.out += `<!--]-->`;
-  }
-  $$payload.out += `<!--]--> <div class="title svelte-16ipdyn">${escape_html(store_get($$store_subs ??= {}, "$headerState", headerState).path)}</div> <div class="connection svelte-16ipdyn">`;
-  if (!store_get($$store_subs ??= {}, "$connected", connected)) {
-    $$payload.out += "<!--[-->";
-    $$payload.out += `<div class="no svelte-16ipdyn">Connection lost</div>`;
   } else {
     $$payload.out += "<!--[!-->";
-    $$payload.out += `<div class="yes svelte-16ipdyn">Connected</div>`;
+    CloseCircleOutline($$payload, { color: "red", size: "xl" });
   }
-  $$payload.out += `<!--]--></div></h1></section>`;
+  $$payload.out += `<!--]--></div> <div class="min-w-0 flex-grow truncate text-3xl text-green-500">${escape_html(store_get($$store_subs ??= {}, "$headerState", headerState).path)}</div> <div class="w-40 whitespace-nowrap text-xl text-gray-500">v.${escape_html(store_get($$store_subs ??= {}, "$headerState", headerState).version)}</div></div></section>`;
   if ($$store_subs) unsubscribe_stores($$store_subs);
   pop();
 }
@@ -1865,7 +1924,7 @@ const quantities = {
   ]
 };
 async function post(endpoint, data) {
-  const response = await fetch(`/api/${endpoint}`, {
+  const response = await fetch(`./api/${endpoint}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -1880,6 +1939,9 @@ async function post(endpoint, data) {
       setAlert("An error occurred");
     }
   }
+}
+function postLayer(layer) {
+  post("preview/layer", { layer });
 }
 function postXChosenSize(xChosenSize) {
   post("preview/XChosenSize", { xChosenSize });
@@ -1896,9 +1958,9 @@ function QuantityDropdown($$payload, $$props) {
   function $$render_inner($$payload2) {
     Button($$payload2, {
       outline: true,
-      class: "flex items-center overflow-hidden text-ellipsis whitespace-nowrap",
+      class: "h-11 w-full justify-between",
       children: ($$payload3) => {
-        $$payload3.out += `<span class="truncate">${escape_html(store_get($$store_subs ??= {}, "$p", previewState).quantity)}</span> `;
+        $$payload3.out += `<span>Quantity:</span> <span class="truncate font-bold text-white">${escape_html(store_get($$store_subs ??= {}, "$p", previewState).quantity)}</span> `;
         ChevronDownOutline($$payload3, {
           class: "ms-2 h-6 w-6 text-white dark:text-white"
         });
@@ -1991,40 +2053,35 @@ function QuantityDropdown($$payload, $$props) {
 function Component($$payload, $$props) {
   push();
   var $$store_subs;
+  let isDisabled;
+  isDisabled = store_get($$store_subs ??= {}, "$p", previewState).nComp == 1;
   let $$settled = true;
   let $$inner_payload;
   function $$render_inner($$payload2) {
-    if (store_get($$store_subs ??= {}, "$p", previewState).nComp == 3) {
-      $$payload2.out += "<!--[-->";
-      const each_array = ensure_array_like(["3D", "x", "y", "z"]);
-      $$payload2.out += `<ul class="w-full items-center divide-x divide-gray-200 rounded-lg border border-gray-200 disabled:bg-slate-50 sm:flex rtl:divide-x-reverse dark:divide-gray-600 dark:border-gray-600 dark:bg-gray-800"><!--[-->`;
-      for (let $$index = 0, $$length = each_array.length; $$index < $$length; $$index++) {
-        let choice = each_array[$$index];
-        $$payload2.out += `<li class="w-full">`;
-        Radio($$payload2, {
-          name: "hor-list",
-          class: "p-3",
-          get group() {
-            return store_get($$store_subs ??= {}, "$p", previewState).component;
-          },
-          set group($$value) {
-            store_mutate($$store_subs ??= {}, "$p", previewState, store_get($$store_subs ??= {}, "$p", previewState).component = $$value);
-            $$settled = false;
-          },
-          value: choice,
-          children: ($$payload3) => {
-            $$payload3.out += `<!---->${escape_html(choice)}`;
-          },
-          $$slots: { default: true }
-        });
-        $$payload2.out += `<!----></li>`;
-      }
-      $$payload2.out += `<!--]--></ul>`;
-    } else {
-      $$payload2.out += "<!--[!-->";
-      $$payload2.out += `<div></div>`;
+    const each_array = ensure_array_like(["3D", "x", "y", "z"]);
+    $$payload2.out += `<ul class="divide-x divide-gray-600 rounded-lg border border-gray-600 bg-gray-800 sm:flex"><!--[-->`;
+    for (let $$index = 0, $$length = each_array.length; $$index < $$length; $$index++) {
+      let choice = each_array[$$index];
+      $$payload2.out += `<li class="w-full">`;
+      Radio($$payload2, {
+        class: `p-3 ${stringify(isDisabled ? "cursor-not-allowed opacity-50" : "")}`,
+        get group() {
+          return store_get($$store_subs ??= {}, "$p", previewState).component;
+        },
+        set group($$value) {
+          store_mutate($$store_subs ??= {}, "$p", previewState, store_get($$store_subs ??= {}, "$p", previewState).component = $$value);
+          $$settled = false;
+        },
+        value: choice,
+        disabled: isDisabled,
+        children: ($$payload3) => {
+          $$payload3.out += `<!---->${escape_html(choice)}`;
+        },
+        $$slots: { default: true }
+      });
+      $$payload2.out += `<!----></li>`;
     }
-    $$payload2.out += `<!--]-->`;
+    $$payload2.out += `<!--]--></ul>`;
   }
   do {
     $$settled = true;
@@ -2033,36 +2090,70 @@ function Component($$payload, $$props) {
   } while (!$$settled);
   assign_payload($$payload, $$inner_payload);
   if ($$store_subs) unsubscribe_stores($$store_subs);
+  pop();
+}
+function Slider($$payload, $$props) {
+  push();
+  let sliderMin, sliderMax;
+  let label = fallback($$props["label"], "Label");
+  let values = fallback($$props["values"], () => [], true);
+  let value = $$props["value"];
+  let onChangeFunction = $$props["onChangeFunction"];
+  let isDisabled = fallback($$props["isDisabled"], false);
+  let index = values.indexOf(value);
+  sliderMin = 0;
+  sliderMax = values.length - 1;
+  {
+    const idx = values.indexOf(value);
+    if (idx !== -1) {
+      index = idx;
+    } else {
+      index = 0;
+      value = values[0];
+    }
+  }
+  if (values[index] !== value) {
+    value = values[index];
+  }
+  $$payload.out += `<div${attr("class", `relative h-11 overflow-hidden rounded-md border border-gray-600 bg-gray-800 ${stringify(isDisabled ? "cursor-not-allowed opacity-50" : "")}`)}${attr("style", `--index:${stringify(index)}; --min:${stringify(sliderMin)}; --max:${stringify(sliderMax)};`)}><div class="filled-portion absolute left-0 top-0 h-full rounded-md bg-gray-700 svelte-gvofwu"></div> <input type="range"${attr("min", sliderMin)}${attr("max", sliderMax)} step="1"${attr("value", index)} class="absolute left-0 top-0 h-full w-full cursor-pointer opacity-0"${attr("disabled", isDisabled, true)}> <div class="pointer-events-none absolute inset-0 flex items-center justify-between px-4"><span class="text-gray-400">${escape_html(values[0])}</span> <span class="text-gray-400">${escape_html(values[values.length - 1])}</span></div> <div class="pointer-events-none absolute inset-0 flex items-center justify-center"><span class="text-gray-200">${escape_html(label)} = ${escape_html(value)}</span></div></div>`;
+  bind_props($$props, {
+    label,
+    values,
+    value,
+    onChangeFunction,
+    isDisabled
+  });
   pop();
 }
 function Layer($$payload, $$props) {
   push();
   var $$store_subs;
+  let values, layer;
+  let isDisabled;
+  isDisabled = store_get($$store_subs ??= {}, "$meshState", meshState).Nz < 2;
+  values = Array.from(
+    {
+      length: store_get($$store_subs ??= {}, "$meshState", meshState).Nz
+    },
+    (_, i) => i
+  );
+  layer = store_get($$store_subs ??= {}, "$p", previewState).layer;
   let $$settled = true;
   let $$inner_payload;
   function $$render_inner($$payload2) {
-    $$payload2.out += `<div class="m-3 grid grid-cols-5 gap-2"><div class="col-span-1 flex items-center justify-center">`;
-    Label($$payload2, {
-      children: ($$payload3) => {
-        $$payload3.out += `<!---->Layer: ${escape_html(store_get($$store_subs ??= {}, "$p", previewState).layer)}`;
-      },
-      $$slots: { default: true }
-    });
-    $$payload2.out += `<!----></div> <div class="col-span-4 flex items-center justify-center">`;
-    Range($$payload2, {
-      id: "range-steps",
-      min: "0",
-      max: store_get($$store_subs ??= {}, "$meshState", meshState).Nz - 1,
+    Slider($$payload2, {
+      label: "Z Layer",
       get value() {
-        return store_get($$store_subs ??= {}, "$p", previewState).layer;
+        return layer;
       },
       set value($$value) {
-        store_mutate($$store_subs ??= {}, "$p", previewState, store_get($$store_subs ??= {}, "$p", previewState).layer = $$value);
+        layer = $$value;
         $$settled = false;
       },
-      step: "1"
+      values,
+      onChangeFunction: postLayer,
+      isDisabled
     });
-    $$payload2.out += `<!----></div></div>`;
   }
   do {
     $$settled = true;
@@ -2073,26 +2164,24 @@ function Layer($$payload, $$props) {
   if ($$store_subs) unsubscribe_stores($$store_subs);
   pop();
 }
-function DataPointSlider($$payload, $$props) {
+function XDataPoints($$payload, $$props) {
   push();
-  let possibleSizes = fallback($$props["possibleSizes"], () => [], true);
-  let postChosenSize = $$props["postChosenSize"];
-  let sliderValue = possibleSizes.length - 1;
+  var $$store_subs;
   let $$settled = true;
   let $$inner_payload;
   function $$render_inner($$payload2) {
-    Range($$payload2, {
+    Slider($$payload2, {
+      label: "X Data Points",
       get value() {
-        return sliderValue;
+        return store_get($$store_subs ??= {}, "$p", previewState).xChosenSize;
       },
       set value($$value) {
-        sliderValue = $$value;
+        store_mutate($$store_subs ??= {}, "$p", previewState, store_get($$store_subs ??= {}, "$p", previewState).xChosenSize = $$value);
         $$settled = false;
       },
-      min: "0",
-      max: possibleSizes.length - 1
+      values: store_get($$store_subs ??= {}, "$p", previewState).xPossibleSizes,
+      onChangeFunction: postXChosenSize
     });
-    $$payload2.out += `<!----> ${escape_html(possibleSizes[sliderValue])}`;
   }
   do {
     $$settled = true;
@@ -2100,93 +2189,123 @@ function DataPointSlider($$payload, $$props) {
     $$render_inner($$inner_payload);
   } while (!$$settled);
   assign_payload($$payload, $$inner_payload);
-  bind_props($$props, { possibleSizes, postChosenSize });
+  if ($$store_subs) unsubscribe_stores($$store_subs);
+  pop();
+}
+function YDataPoints($$payload, $$props) {
+  push();
+  var $$store_subs;
+  let $$settled = true;
+  let $$inner_payload;
+  function $$render_inner($$payload2) {
+    Slider($$payload2, {
+      label: "Y Data Points",
+      get value() {
+        return store_get($$store_subs ??= {}, "$p", previewState).yChosenSize;
+      },
+      set value($$value) {
+        store_mutate($$store_subs ??= {}, "$p", previewState, store_get($$store_subs ??= {}, "$p", previewState).yChosenSize = $$value);
+        $$settled = false;
+      },
+      values: store_get($$store_subs ??= {}, "$p", previewState).yPossibleSizes,
+      onChangeFunction: postYChosenSize
+    });
+  }
+  do {
+    $$settled = true;
+    $$inner_payload = copy_payload($$payload);
+    $$render_inner($$inner_payload);
+  } while (!$$settled);
+  assign_payload($$payload, $$inner_payload);
+  if ($$store_subs) unsubscribe_stores($$store_subs);
+  pop();
+}
+function ResetCamera($$payload, $$props) {
+  push();
+  var $$store_subs;
+  let isDisabled;
+  isDisabled = store_get($$store_subs ??= {}, "$p", previewState).nComp != 3;
+  Button($$payload, {
+    outline: true,
+    class: `h-11 w-full ${stringify(isDisabled ? "cursor-not-allowed opacity-50" : "")}`,
+    disabled: isDisabled,
+    children: ($$payload2) => {
+      $$payload2.out += `<!---->Reset Camera`;
+    },
+    $$slots: { default: true }
+  });
+  if ($$store_subs) unsubscribe_stores($$store_subs);
   pop();
 }
 function Preview($$payload, $$props) {
   push();
   var $$store_subs;
-  $$payload.out += `<section class="svelte-h7t6v0"><h2 class="mb-4 text-2xl font-semibold">Preview</h2> <div class="m-3 grid grid-cols-10 gap-2"><div class="field col-span-2 svelte-h7t6v0">`;
+  $$payload.out += `<section class="svelte-14whbff"><h2 class="mb-4 text-2xl font-semibold">Preview</h2> <div class="m-1 flex flex-wrap svelte-14whbff" id="parent-fields"><div class="basis-1/2 svelte-14whbff">`;
   QuantityDropdown($$payload);
-  $$payload.out += `<!----></div> <div class="field col-span-4 svelte-h7t6v0">`;
+  $$payload.out += `<!----></div> <div class="basis-1/2 svelte-14whbff">`;
   Component($$payload);
-  $$payload.out += `<!----></div> <div class="field col-span-4 svelte-h7t6v0">`;
+  $$payload.out += `<!----></div> <div class="basis-1/2 svelte-14whbff">`;
   if (store_get($$store_subs ??= {}, "$p", previewState).xPossibleSizes.length > 0) {
     $$payload.out += "<!--[-->";
-    DataPointSlider($$payload, {
-      possibleSizes: store_get($$store_subs ??= {}, "$p", previewState).xPossibleSizes,
-      postChosenSize: postXChosenSize
-    });
+    XDataPoints($$payload);
   } else {
     $$payload.out += "<!--[!-->";
   }
-  $$payload.out += `<!--]--></div> <div class="field col-span-4 svelte-h7t6v0">`;
+  $$payload.out += `<!--]--></div> <div class="basis-1/2 svelte-14whbff">`;
   if (store_get($$store_subs ??= {}, "$p", previewState).yPossibleSizes.length > 0) {
     $$payload.out += "<!--[-->";
-    DataPointSlider($$payload, {
-      possibleSizes: store_get($$store_subs ??= {}, "$p", previewState).yPossibleSizes,
-      postChosenSize: postYChosenSize
-    });
+    YDataPoints($$payload);
   } else {
     $$payload.out += "<!--[!-->";
   }
-  $$payload.out += `<!--]--></div> `;
-  if (store_get($$store_subs ??= {}, "$threeDPreview", threeDPreview) !== null) {
-    $$payload.out += "<!--[-->";
-    $$payload.out += `<div class="field col-span-3 svelte-h7t6v0">`;
-    Button($$payload, {
-      outline: true,
-      children: ($$payload2) => {
-        $$payload2.out += `<!---->Reset Camera`;
-      },
-      $$slots: { default: true }
-    });
-    $$payload.out += `<!----></div>`;
-  } else {
-    $$payload.out += "<!--[!-->";
-    $$payload.out += `<div class="field col-span-3 svelte-h7t6v0"></div>`;
-  }
-  $$payload.out += `<!--]--> `;
-  if (store_get($$store_subs ??= {}, "$meshState", meshState).Nz > 1) {
-    $$payload.out += "<!--[-->";
-    $$payload.out += `<div class="field col-span-7 svelte-h7t6v0">`;
-    Layer($$payload);
-    $$payload.out += `<!----></div>`;
-  } else {
-    $$payload.out += "<!--[!-->";
-  }
-  $$payload.out += `<!--]--></div> <hr> `;
+  $$payload.out += `<!--]--></div> <div class="basis-1/2 svelte-14whbff">`;
+  ResetCamera($$payload);
+  $$payload.out += `<!----></div> <div class="basis-1/2 svelte-14whbff">`;
+  Layer($$payload);
+  $$payload.out += `<!----></div></div> <hr> <div class="relative h-[500px] w-full">`;
   if (store_get($$store_subs ??= {}, "$p", previewState).scalarField == null && store_get($$store_subs ??= {}, "$p", previewState).vectorFieldPositions == null) {
     $$payload.out += "<!--[-->";
-    $$payload.out += `<div class="field col-span-4 svelte-h7t6v0">No data to display for Quantity: ${escape_html(store_get($$store_subs ??= {}, "$p", previewState).quantity)}, Component: ${escape_html(store_get($$store_subs ??= {}, "$p", previewState).component)}, Layer: ${escape_html(store_get($$store_subs ??= {}, "$p", previewState).layer)}</div>`;
+    $$payload.out += `<div class="absolute inset-0 flex items-center justify-center text-6xl text-gray-600">NO DATA</div>`;
   } else {
     $$payload.out += "<!--[!-->";
   }
-  $$payload.out += `<!--]--> <div id="container" class="svelte-h7t6v0"></div> <hr></section>`;
+  $$payload.out += `<!--]--> <div id="container" class="svelte-14whbff"></div></div> <hr></section>`;
   if ($$store_subs) unsubscribe_stores($$store_subs);
   pop();
 }
-function TimeStep($$payload, $$props) {
+function MaxPoints($$payload, $$props) {
   push();
   var $$store_subs;
   let value = "";
   let $$settled = true;
   let $$inner_payload;
   function $$render_inner($$payload2) {
-    $$payload2.out += `<div class="m-3 flex flex-col gap-2"><div class="flex items-center justify-center">Time step (s)</div> `;
-    Input($$payload2, {
-      class: "w-24",
-      type: "number",
-      get value() {
-        return value;
+    ButtonGroup($$payload2, {
+      class: "flex h-11",
+      children: ($$payload3) => {
+        InputAddon($$payload3, {
+          class: "w-fit whitespace-nowrap !bg-transparent ",
+          children: ($$payload4) => {
+            $$payload4.out += `<!---->Max Points`;
+          },
+          $$slots: { default: true }
+        });
+        $$payload3.out += `<!----> `;
+        Input($$payload3, {
+          class: "w-full truncate",
+          get value() {
+            return value;
+          },
+          set value($$value) {
+            value = $$value;
+            $$settled = false;
+          },
+          placeholder: ` ${stringify(store_get($$store_subs ??= {}, "$tablePlotState", tablePlotState).maxPoints)}`
+        });
+        $$payload3.out += `<!---->`;
       },
-      set value($$value) {
-        value = $$value;
-        $$settled = false;
-      },
-      placeholder: ` ${stringify(store_get($$store_subs ??= {}, "$tablePlotState", tablePlotState).autoSaveInterval)}`
+      $$slots: { default: true }
     });
-    $$payload2.out += `<!----></div>`;
   }
   do {
     $$settled = true;
@@ -2197,27 +2316,47 @@ function TimeStep($$payload, $$props) {
   if ($$store_subs) unsubscribe_stores($$store_subs);
   pop();
 }
-function Step($$payload, $$props) {
+function AutoSaveInterval($$payload, $$props) {
   push();
   var $$store_subs;
   let value = "";
   let $$settled = true;
   let $$inner_payload;
   function $$render_inner($$payload2) {
-    $$payload2.out += `<div class="m-3 flex flex-col gap-2"><div class="flex items-center justify-center">Step</div> `;
-    Input($$payload2, {
-      class: "w-24",
-      type: "number",
-      get value() {
-        return value;
+    ButtonGroup($$payload2, {
+      class: "flex h-11",
+      children: ($$payload3) => {
+        InputAddon($$payload3, {
+          class: "w-fit whitespace-nowrap !bg-transparent",
+          children: ($$payload4) => {
+            $$payload4.out += `<!---->AutoSave Interval`;
+          },
+          $$slots: { default: true }
+        });
+        $$payload3.out += `<!----> `;
+        Input($$payload3, {
+          class: "w-full truncate",
+          get value() {
+            return value;
+          },
+          set value($$value) {
+            value = $$value;
+            $$settled = false;
+          },
+          placeholder: ` ${stringify(store_get($$store_subs ??= {}, "$tablePlotState", tablePlotState).autoSaveInterval)}`
+        });
+        $$payload3.out += `<!----> `;
+        InputAddon($$payload3, {
+          class: "w-16 !bg-transparent",
+          children: ($$payload4) => {
+            $$payload4.out += `<!---->s`;
+          },
+          $$slots: { default: true }
+        });
+        $$payload3.out += `<!---->`;
       },
-      set value($$value) {
-        value = $$value;
-        $$settled = false;
-      },
-      placeholder: ` ${stringify(store_get($$store_subs ??= {}, "$tablePlotState", tablePlotState).step)}`
+      $$slots: { default: true }
     });
-    $$payload2.out += `<!----></div>`;
   }
   do {
     $$settled = true;
@@ -2235,15 +2374,13 @@ function XColumn($$payload, $$props) {
   let $$settled = true;
   let $$inner_payload;
   function $$render_inner($$payload2) {
-    $$payload2.out += `<div class="m-3 flex flex-col gap-2"><div class="flex items-center justify-center">X axis</div> `;
     Button($$payload2, {
       outline: true,
-      class: "flex items-center overflow-hidden text-ellipsis whitespace-nowrap",
+      color: "primary",
+      class: "h-11 w-full justify-between",
       children: ($$payload3) => {
-        $$payload3.out += `<span class="truncate">${escape_html(store_get($$store_subs ??= {}, "$tablePlotState", tablePlotState).xColumn)}</span> `;
-        ChevronDownOutline($$payload3, {
-          class: "ms-2 h-6 w-6 text-white dark:text-white"
-        });
+        $$payload3.out += `<span>X Axis:</span> <span class="truncate font-bold text-white">${escape_html(store_get($$store_subs ??= {}, "$tablePlotState", tablePlotState).xColumn)}</span> `;
+        ChevronDownOutline($$payload3, { class: "h-5 w-5 text-gray-500" });
         $$payload3.out += `<!---->`;
       },
       $$slots: { default: true }
@@ -2257,6 +2394,7 @@ function XColumn($$payload, $$props) {
         dropdownOpen = $$value;
         $$settled = false;
       },
+      class: "w-3/4",
       children: ($$payload3) => {
         const each_array = ensure_array_like(store_get($$store_subs ??= {}, "$tablePlotState", tablePlotState).columns);
         $$payload3.out += `<!--[-->`;
@@ -2273,7 +2411,7 @@ function XColumn($$payload, $$props) {
       },
       $$slots: { default: true }
     });
-    $$payload2.out += `<!----></div>`;
+    $$payload2.out += `<!---->`;
   }
   do {
     $$settled = true;
@@ -2291,15 +2429,13 @@ function YColumn($$payload, $$props) {
   let $$settled = true;
   let $$inner_payload;
   function $$render_inner($$payload2) {
-    $$payload2.out += `<div class="m-3 flex flex-col gap-2"><div class="flex items-center justify-center">Y axis</div> `;
     Button($$payload2, {
       outline: true,
-      class: "flex items-center overflow-hidden text-ellipsis whitespace-nowrap",
+      color: "primary",
+      class: "h-11 w-full justify-between",
       children: ($$payload3) => {
-        $$payload3.out += `<span class="truncate">${escape_html(store_get($$store_subs ??= {}, "$tablePlotState", tablePlotState).yColumn)}</span> `;
-        ChevronDownOutline($$payload3, {
-          class: "ms-2 h-6 w-6 text-white dark:text-white"
-        });
+        $$payload3.out += `<span>Y Axis:</span> <span class="truncate font-bold text-white">${escape_html(store_get($$store_subs ??= {}, "$tablePlotState", tablePlotState).yColumn)}</span> `;
+        ChevronDownOutline($$payload3, { class: "h-5 w-5 text-gray-500" });
         $$payload3.out += `<!---->`;
       },
       $$slots: { default: true }
@@ -2313,6 +2449,7 @@ function YColumn($$payload, $$props) {
         dropdownOpen = $$value;
         $$settled = false;
       },
+      class: "w-3/4",
       children: ($$payload3) => {
         const each_array = ensure_array_like(store_get($$store_subs ??= {}, "$tablePlotState", tablePlotState).columns);
         $$payload3.out += `<!--[-->`;
@@ -2329,7 +2466,7 @@ function YColumn($$payload, $$props) {
       },
       $$slots: { default: true }
     });
-    $$payload2.out += `<!----></div>`;
+    $$payload2.out += `<!---->`;
   }
   do {
     $$settled = true;
@@ -2340,27 +2477,39 @@ function YColumn($$payload, $$props) {
   if ($$store_subs) unsubscribe_stores($$store_subs);
   pop();
 }
-function DataPointsCount($$payload, $$props) {
+function Step($$payload, $$props) {
   push();
   var $$store_subs;
   let value = "";
   let $$settled = true;
   let $$inner_payload;
   function $$render_inner($$payload2) {
-    $$payload2.out += `<div class="m-3 flex flex-col gap-2"><div class="flex items-center justify-center">Data points</div> `;
-    Input($$payload2, {
-      class: "w-24",
-      type: "number",
-      get value() {
-        return value;
+    ButtonGroup($$payload2, {
+      class: "flex h-11",
+      children: ($$payload3) => {
+        InputAddon($$payload3, {
+          class: "w-16 whitespace-nowrap !bg-transparent ",
+          children: ($$payload4) => {
+            $$payload4.out += `<!---->Step`;
+          },
+          $$slots: { default: true }
+        });
+        $$payload3.out += `<!----> `;
+        Input($$payload3, {
+          class: "w-full truncate",
+          get value() {
+            return value;
+          },
+          set value($$value) {
+            value = $$value;
+            $$settled = false;
+          },
+          placeholder: ` ${stringify(store_get($$store_subs ??= {}, "$tablePlotState", tablePlotState).step)}`
+        });
+        $$payload3.out += `<!---->`;
       },
-      set value($$value) {
-        value = $$value;
-        $$settled = false;
-      },
-      placeholder: ` ${stringify(store_get($$store_subs ??= {}, "$tablePlotState", tablePlotState).data.length)}`
+      $$slots: { default: true }
     });
-    $$payload2.out += `<!----></div>`;
   }
   do {
     $$settled = true;
@@ -2374,23 +2523,25 @@ function DataPointsCount($$payload, $$props) {
 function TablePlot($$payload, $$props) {
   push();
   var $$store_subs;
-  $$payload.out += `<section class="svelte-15zjlw6"><h2 class="mb-4 text-2xl font-semibold">Table Plot</h2> `;
+  $$payload.out += `<section class="svelte-1wmy1p7"><h2 class="mb-4 text-2xl font-semibold">Table Plot</h2> `;
   if (store_get($$store_subs ??= {}, "$tablePlotState", tablePlotState).data.length === 0) {
     $$payload.out += "<!--[-->";
-    $$payload.out += `<div class="msg svelte-15zjlw6"><p>No table data, use <code>TableSave()</code> to save data.</p></div>`;
+    $$payload.out += `<div class="msg svelte-1wmy1p7"><p>No table data, use <code>TableSave()</code> or set a non-zero autosave interval to save data.</p> <div class="mt-5 w-72">`;
+    AutoSaveInterval($$payload);
+    $$payload.out += `<!----></div></div>`;
   } else {
     $$payload.out += "<!--[!-->";
-    $$payload.out += `<div class="m-3 grid grid-cols-10 gap-2"><div class="field col-span-2 svelte-15zjlw6">`;
-    TimeStep($$payload);
-    $$payload.out += `<!----></div> <div class="field col-span-2 svelte-15zjlw6">`;
-    DataPointsCount($$payload);
-    $$payload.out += `<!----></div> <div class="field col-span-2 svelte-15zjlw6">`;
-    Step($$payload);
-    $$payload.out += `<!----></div> <div class="field col-span-2 svelte-15zjlw6">`;
+    $$payload.out += `<div class="m-1 flex flex-wrap svelte-1wmy1p7" id="parent-fields"><div class="basis-1/2 svelte-1wmy1p7">`;
     XColumn($$payload);
-    $$payload.out += `<!----></div> <div class="field col-span-2 svelte-15zjlw6">`;
+    $$payload.out += `<!----></div> <div class="basis-1/2 svelte-1wmy1p7">`;
     YColumn($$payload);
-    $$payload.out += `<!----></div></div> <hr> <div id="table-plot" class="svelte-15zjlw6"></div>`;
+    $$payload.out += `<!----></div> <div class="basis-4/12 svelte-1wmy1p7">`;
+    MaxPoints($$payload);
+    $$payload.out += `<!----></div> <div class="basis-2/12 svelte-1wmy1p7">`;
+    Step($$payload);
+    $$payload.out += `<!----></div> <div class="basis-6/12 svelte-1wmy1p7">`;
+    AutoSaveInterval($$payload);
+    $$payload.out += `<!----></div></div> <hr> <div id="table-plot" class="svelte-1wmy1p7"></div>`;
   }
   $$payload.out += `<!--]--></section>`;
   if ($$store_subs) unsubscribe_stores($$store_subs);
@@ -2419,13 +2570,13 @@ function Solver($$payload, $$props) {
   let $$settled = true;
   let $$inner_payload;
   function $$render_inner($$payload2) {
-    $$payload2.out += `<section class="svelte-pw80s0"><h2 class="mb-6 text-2xl font-semibold">Solver</h2> <div class="grid gap-6 md:grid-cols-2"><div class="space-y-4"><div>`;
+    $$payload2.out += `<section class="svelte-1ika8pl"><h2 class="mb-6 text-2xl font-semibold">Solver</h2> <div class="grid grid-cols-2 gap-x-3 gap-y-6"><div class="space-y-4"><div>`;
     Button($$payload2, {
       outline: true,
       color: "primary",
       class: "flex w-full items-center justify-between",
       children: ($$payload3) => {
-        $$payload3.out += `<span>Solver: ${escape_html(store_get($$store_subs ??= {}, "$solverState", solverState).type)}</span> `;
+        $$payload3.out += `<span>Solver:</span> <span class="truncate font-bold text-white">${escape_html(store_get($$store_subs ??= {}, "$solverState", solverState).type)}</span> `;
         ChevronDownOutline($$payload3, { class: "h-5 w-5 text-gray-500" });
         $$payload3.out += `<!---->`;
       },
@@ -2459,7 +2610,7 @@ function Solver($$payload, $$props) {
       },
       $$slots: { default: true }
     });
-    $$payload2.out += `<!----></div> <div class="flex items-center space-x-2">`;
+    $$payload2.out += `<!----></div> <div class="field svelte-1ika8pl">`;
     Button($$payload2, {
       outline: true,
       children: ($$payload3) => {
@@ -2469,7 +2620,7 @@ function Solver($$payload, $$props) {
     });
     $$payload2.out += `<!----> `;
     ButtonGroup($$payload2, {
-      class: "h-11 w-full",
+      class: "h-11 w-full pl-3",
       children: ($$payload3) => {
         Input($$payload3, {
           class: "w-full",
@@ -2495,18 +2646,17 @@ function Solver($$payload, $$props) {
       },
       $$slots: { default: true }
     });
-    $$payload2.out += `<!----></div> <div class="flex items-center space-x-2">`;
+    $$payload2.out += `<!----></div> <div class="field svelte-1ika8pl">`;
     Button($$payload2, {
-      class: "w-1/3",
+      class: "inline-flex h-11 items-center whitespace-nowrap px-4 py-2",
       outline: true,
       children: ($$payload3) => {
         $$payload3.out += `<!---->Run Steps`;
       },
       $$slots: { default: true }
     });
-    $$payload2.out += `<!----> `;
+    $$payload2.out += `<!----> <div class="w-full pl-3">`;
     Input($$payload2, {
-      class: "w-2/3",
       id: "run_steps",
       get value() {
         return runSteps;
@@ -2517,7 +2667,7 @@ function Solver($$payload, $$props) {
       },
       placeholder: "Number of steps"
     });
-    $$payload2.out += `<!----></div> <div>`;
+    $$payload2.out += `<!----></div></div> <div>`;
     Button($$payload2, {
       outline: true,
       class: "w-full",
@@ -2544,9 +2694,9 @@ function Solver($$payload, $$props) {
       },
       $$slots: { default: true }
     });
-    $$payload2.out += `<!----></div></div> <div class="space-y-4"><div class="flex items-center space-x-2">`;
+    $$payload2.out += `<!----></div></div> <div class="space-y-4"><div class="field svelte-1ika8pl">`;
     ButtonGroup($$payload2, {
-      class: "h-11 w-full",
+      class: "btn-group",
       children: ($$payload3) => {
         InputAddon($$payload3, {
           class: "w-44 !bg-transparent",
@@ -2567,9 +2717,9 @@ function Solver($$payload, $$props) {
       },
       $$slots: { default: true }
     });
-    $$payload2.out += `<!----></div> <div class="flex items-center space-x-2">`;
+    $$payload2.out += `<!----></div> <div class="field svelte-1ika8pl">`;
     ButtonGroup($$payload2, {
-      class: "h-11 w-full",
+      class: "btn-group",
       children: ($$payload3) => {
         InputAddon($$payload3, {
           class: "w-44 !bg-transparent",
@@ -2597,9 +2747,9 @@ function Solver($$payload, $$props) {
       },
       $$slots: { default: true }
     });
-    $$payload2.out += `<!----></div> <div class="flex items-center space-x-2">`;
+    $$payload2.out += `<!----></div> <div class="field svelte-1ika8pl">`;
     ButtonGroup($$payload2, {
-      class: "h-11 w-full",
+      class: "btn-group",
       children: ($$payload3) => {
         InputAddon($$payload3, {
           class: "w-44 !bg-transparent",
@@ -2627,9 +2777,9 @@ function Solver($$payload, $$props) {
       },
       $$slots: { default: true }
     });
-    $$payload2.out += `<!----></div> <div class="flex items-center space-x-2">`;
+    $$payload2.out += `<!----></div> <div class="field svelte-1ika8pl">`;
     ButtonGroup($$payload2, {
-      class: "h-11 w-full",
+      class: "btn-group",
       children: ($$payload3) => {
         InputAddon($$payload3, {
           class: "w-44 !bg-transparent",
@@ -2651,9 +2801,9 @@ function Solver($$payload, $$props) {
       },
       $$slots: { default: true }
     });
-    $$payload2.out += `<!----></div> <div class="flex items-center space-x-2">`;
+    $$payload2.out += `<!----></div> <div class="field svelte-1ika8pl">`;
     ButtonGroup($$payload2, {
-      class: "h-11 w-full",
+      class: "btn-group",
       children: ($$payload3) => {
         InputAddon($$payload3, {
           class: "w-44 !bg-transparent",
@@ -2681,9 +2831,9 @@ function Solver($$payload, $$props) {
       },
       $$slots: { default: true }
     });
-    $$payload2.out += `<!----></div> <div class="flex items-center space-x-2">`;
+    $$payload2.out += `<!----></div> <div class="field svelte-1ika8pl">`;
     ButtonGroup($$payload2, {
-      class: "h-11 w-full",
+      class: "btn-group",
       children: ($$payload3) => {
         InputAddon($$payload3, {
           class: "w-44 !bg-transparent",
@@ -2716,9 +2866,9 @@ function Solver($$payload, $$props) {
       },
       $$slots: { default: true }
     });
-    $$payload2.out += `<!----></div> <div class="flex items-center space-x-2">`;
+    $$payload2.out += `<!----></div> <div class="field svelte-1ika8pl">`;
     ButtonGroup($$payload2, {
-      class: "h-11 w-full",
+      class: "btn-group",
       children: ($$payload3) => {
         InputAddon($$payload3, {
           class: "w-44 !bg-transparent",
@@ -2751,9 +2901,9 @@ function Solver($$payload, $$props) {
       },
       $$slots: { default: true }
     });
-    $$payload2.out += `<!----></div> <div class="flex items-center space-x-2">`;
+    $$payload2.out += `<!----></div> <div class="field svelte-1ika8pl">`;
     ButtonGroup($$payload2, {
-      class: "h-11 w-full",
+      class: "btn-group",
       children: ($$payload3) => {
         InputAddon($$payload3, {
           class: "w-44 !bg-transparent",
@@ -2786,9 +2936,8 @@ function Solver($$payload, $$props) {
       },
       $$slots: { default: true }
     });
-    $$payload2.out += `<!----></div> <div class="flex items-center space-x-2">`;
+    $$payload2.out += `<!----></div> <div class="field svelte-1ika8pl"><div class="btn-group svelte-1ika8pl">`;
     ButtonGroup($$payload2, {
-      class: "h-11 w-full",
       children: ($$payload3) => {
         InputAddon($$payload3, {
           class: "w-44 !bg-transparent",
@@ -2815,9 +2964,8 @@ function Solver($$payload, $$props) {
       },
       $$slots: { default: true }
     });
-    $$payload2.out += `<!----></div> <div class="flex items-center space-x-2">`;
+    $$payload2.out += `<!----></div></div> <div class="field svelte-1ika8pl"><div class="btn-group svelte-1ika8pl">`;
     ButtonGroup($$payload2, {
-      class: "h-11 w-full",
       children: ($$payload3) => {
         InputAddon($$payload3, {
           class: "w-44 !bg-transparent",
@@ -2829,8 +2977,14 @@ function Solver($$payload, $$props) {
         $$payload3.out += `<!----> `;
         Input($$payload3, {
           class: "w-full",
-          type: "text",
-          value: store_get($$store_subs ??= {}, "$solverState", solverState).nundone,
+          type: "number",
+          get value() {
+            return store_get($$store_subs ??= {}, "$solverState", solverState).nundone;
+          },
+          set value($$value) {
+            store_mutate($$store_subs ??= {}, "$solverState", solverState, store_get($$store_subs ??= {}, "$solverState", solverState).nundone = $$value);
+            $$settled = false;
+          },
           readonly: true
         });
         $$payload3.out += `<!----> `;
@@ -2839,7 +2993,7 @@ function Solver($$payload, $$props) {
       },
       $$slots: { default: true }
     });
-    $$payload2.out += `<!----></div></div></div></section>`;
+    $$payload2.out += `<!----></div></div></div></div></section>`;
   }
   do {
     $$settled = true;
@@ -2854,7 +3008,13 @@ function Console($$payload, $$props) {
   push();
   var $$store_subs;
   let command = "";
-  $$payload.out += `<section class="svelte-x8jd19"><h2 class="mb-4 text-2xl font-semibold">Console</h2> <div class="flex flex-col gap-2"><div class="code svelte-x8jd19">${html(Prism.highlight(store_get($$store_subs ??= {}, "$consoleState", consoleState).hist, Prism.languages["go"], "go"))}</div> <br> <input placeholder="type commands here, or up/down" size="86"${attr("value", command)} class="svelte-x8jd19"></div></section>`;
+  async function scrollDown() {
+  }
+  {
+    store_get($$store_subs ??= {}, "$consoleState", consoleState).hist;
+    scrollDown();
+  }
+  $$payload.out += `<section class="svelte-1lgunmx"><h2 class="mb-4 text-2xl font-semibold">Console</h2> <div class="flex flex-col gap-2"><div class="code svelte-1lgunmx">${html(Prism.highlight(store_get($$store_subs ??= {}, "$consoleState", consoleState).hist, Prism.languages["go"], "go"))}</div> <br> <input placeholder="type commands here, or up/down" size="86"${attr("value", command)} class="svelte-1lgunmx"></div></section>`;
   if ($$store_subs) unsubscribe_stores($$store_subs);
   pop();
 }
@@ -3365,7 +3525,7 @@ function Metrics($$payload, $$props) {
 }
 function _page($$payload) {
   Header($$payload);
-  $$payload.out += `<!----> <div class="grid-container svelte-x46rse">`;
+  $$payload.out += `<!----> <div class="grid-container svelte-1otn1km">`;
   Preview($$payload);
   $$payload.out += `<!----> `;
   TablePlot($$payload);

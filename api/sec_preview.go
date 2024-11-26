@@ -38,7 +38,7 @@ type PreviewState struct {
 	YChosenSize     int   `msgpack:"yChosenSize"`
 }
 
-func initPreviewAPI(e *echo.Echo, ws *WebSocketManager) *PreviewState {
+func initPreviewAPI(e *echo.Group, ws *WebSocketManager) *PreviewState {
 	previewState := &PreviewState{
 		Quantity:             "m",
 		Component:            "3D",
@@ -229,23 +229,25 @@ func (s *PreviewState) UpdateScalarField(scalarField [][][]float32) {
 
 func (s *PreviewState) updateMask() {
 	// cuda full size geom
-	geom := engine.Geometry
-	GPU_fullsize := cuda.Buffer(geom.NComp(), geom.Buffer.Size())
-	geom.EvalTo(GPU_fullsize)
-	defer cuda.Recycle(GPU_fullsize)
-
-	// resize geom in GPU
-	GPU_resized := cuda.NewSlice(1, [3]int{s.XChosenSize, s.YChosenSize, 1})
-	defer GPU_resized.Free()
-	cuda.Resize(GPU_resized, GPU_fullsize.Comp(0), s.Layer)
-
-	// copy resized geom from GPU to CPU
-	CPU_out := data.NewSlice(1, [3]int{s.XChosenSize, s.YChosenSize, 1})
-	defer CPU_out.Free()
-	data.Copy(CPU_out.Comp(0), GPU_resized)
-
-	// extract mask from CPU slice
-	s.layerMask = CPU_out.Scalars()[0]
+	if s.XChosenSize > 0 && s.YChosenSize > 0 {
+		geom := engine.Geometry
+		GPU_fullsize := cuda.Buffer(geom.NComp(), geom.Buffer.Size())
+		geom.EvalTo(GPU_fullsize)
+		defer cuda.Recycle(GPU_fullsize)
+	
+		// resize geom in GPU
+		GPU_resized := cuda.NewSlice(1, [3]int{s.XChosenSize, s.YChosenSize, 1})
+		defer GPU_resized.Free()
+		cuda.Resize(GPU_resized, GPU_fullsize.Comp(0), s.Layer)
+	
+		// copy resized geom from GPU to CPU
+		CPU_out := data.NewSlice(1, [3]int{s.XChosenSize, s.YChosenSize, 1})
+		defer CPU_out.Free()
+		data.Copy(CPU_out.Comp(0), GPU_resized)
+	
+		// extract mask from CPU slice
+		s.layerMask = CPU_out.Scalars()[0]
+	}
 }
 
 func contains(arr []string, val string) bool {

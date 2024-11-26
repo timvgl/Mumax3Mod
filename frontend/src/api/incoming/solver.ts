@@ -25,6 +25,7 @@ export const solverState = writable<Solver>({
     mindt: 0,
     maxdt: 0,
     maxerr: 0,
-    nundone: 0
+    nundone: 0,
+
 });
 

@@ -5,11 +5,12 @@
 	import { resizeECharts } from './preview2D';
 	import { onMount } from 'svelte';
 	import { Button } from 'flowbite-svelte';
-	import QuantityDropdown from './QuantityDropdown.svelte';
-	import Component from './Component.svelte';
-	import Layer from './Layer.svelte';
-	import DataPointSlider from './DataPointSlider.svelte';
-	import { postXChosenSize, postYChosenSize } from '$api/outgoing/preview';
+	import QuantityDropdown from './inputs/QuantityDropdown.svelte';
+	import Component from './inputs/Component.svelte';
+	import Layer from './inputs/Layer.svelte';
+	import XDataPoints from './inputs/XDataPoints.svelte';
+	import YDataPoints from './inputs/YDataPoints.svelte';
+	import ResetCamera from './inputs/ResetCamera.svelte';
 
 	onMount(() => {
 		resizeECharts();
@@ -19,45 +20,41 @@
 <section>
 	<h2 class="mb-4 text-2xl font-semibold">Preview</h2>
 
-	<div class="m-3 grid grid-cols-10 gap-2">
-		<div class="field col-span-2">
+	<div class="m-1 flex flex-wrap" id="parent-fields">
+		<div class="basis-1/2">
 			<QuantityDropdown />
 		</div>
-		<div class="field col-span-4">
+		<div class="basis-1/2">
 			<Component />
 		</div>
 
-		<div class="field col-span-4">
+		<div class="basis-1/2">
 			{#if $p.xPossibleSizes.length > 0}
-				<DataPointSlider possibleSizes={$p.xPossibleSizes} postChosenSize={postXChosenSize} />
+				<XDataPoints />
 			{/if}
 		</div>
-		<div class="field col-span-4">
+		<div class="basis-1/2">
 			{#if $p.yPossibleSizes.length > 0}
-				<DataPointSlider possibleSizes={$p.yPossibleSizes} postChosenSize={postYChosenSize} />
+				<YDataPoints />
 			{/if}
 		</div>
-		{#if $threeDPreview !== null}
-			<div class="field col-span-3">
-				<Button on:click={resetCamera} outline>Reset Camera</Button>
-			</div>
-		{:else}
-			<div class="field col-span-3"></div>
-		{/if}
+		<div class="basis-1/2">
+			<ResetCamera />
+		</div>
 
-		{#if $meshState.Nz > 1}
-			<div class="field col-span-7">
-				<Layer />
-			</div>
-		{/if}
+		<div class="basis-1/2">
+			<Layer />
+		</div>
 	</div>
 	<hr />
-	{#if $p.scalarField == null && $p.vectorFieldPositions == null}
-		<div class="field col-span-4">
-			No data to display for Quantity: {$p.quantity}, Component: {$p.component}, Layer: {$p.layer}
-		</div>
-	{/if}
-	<div id="container"></div>
+	<div class="relative h-[500px] w-full">
+		{#if $p.scalarField == null && $p.vectorFieldPositions == null}
+			<div class="absolute inset-0 flex items-center justify-center text-6xl text-gray-600">
+				NO DATA
+			</div>
+		{/if}
+		<div id="container"></div>
+	</div>
 	<hr />
 </section>
 
@@ -65,11 +62,11 @@
 	section {
 		grid-area: display;
 	}
+	#parent-fields > div {
+		@apply p-1;
+	}
 	#container {
 		width: 100%;
 		height: 500px;
-	}
-	.field {
-		@apply flex items-center justify-center border-0 border-green-500;
 	}
 </style>

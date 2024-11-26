@@ -16,6 +16,7 @@ import (
 	"github.com/mumax/3/engine"
 	"github.com/mumax/3/script"
 	"github.com/mumax/3/util"
+	"github.com/mumax/3/logUI"
 )
 
 var (
@@ -107,7 +108,9 @@ func runInteractive() {
 	if ok != nil {
 		panic("Provide port as integer.")
 	}
-	go api.Start(*engine.Flag_webUIHost, castedPort, *engine.Flag_tunnel, *engine.Flag_debug)
+	host, port, path, err := parseAddrPath(*engine.Flag_webUIHost, castedPort)
+	logUI.Log.PanicIfError(err)
+	go api.Start(host, port, path, *engine.Flag_tunnel, *engine.Flag_debug)
 	openbrowser("http://127.0.0.1:" + addr)
 	engine.RunInteractive()
 }
@@ -142,7 +145,9 @@ func runScript(fname string) {
 	if ok != nil {
 		panic("Provide port as integer.")
 	}
-	go api.Start(*engine.Flag_webUIHost, castedPort, *engine.Flag_tunnel, *engine.Flag_debug)
+	host, port, path, err := parseAddrPath(*engine.Flag_webUIHost, castedPort)
+	logUI.Log.PanicIfError(err)
+	go api.Start(host, port, path, *engine.Flag_tunnel, *engine.Flag_debug)
 
 	if *engine.Flag_interactive {
 		openbrowser("http://127.0.0.1:" + *engine.Flag_port)

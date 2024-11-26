@@ -10,10 +10,16 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/mumax/3/logUI"
+	//"github.com/mumax/3/engine"
 	"github.com/mumax/3/script"
 )
 
-func Start(host string, port int, tunnel string, debug bool) {
+func Start(host string, port int, basePath string, tunnel string, debug bool) {
+	defer func() {
+		if r := recover(); r != nil {
+			logUI.Log.Warn("WebUI crashed: %v", r)
+		}
+	}()
 	e := echo.New()
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
@@ -28,32 +34,40 @@ func Start(host string, port int, tunnel string, debug bool) {
 	} else {
 		e.Logger.SetOutput(io.Discard)
 	}
+
+	api := e.Group(basePath)
+
+	// redirect "" to "/"
+	api.GET("", func(c echo.Context) error {
+		return c.Redirect(301, basePath+"/")
+	})
+
 	// Serve the `index.html` file at the root URL
-	e.GET("/", indexFileHandler())
+	api.GET("/", indexFileHandler())
 
 	// Serve the other embedded static files
-	e.GET("/*", echo.WrapHandler(staticFileHandler()))
+	api.GET("/*", echo.WrapHandler(staticFileHandler(basePath)))
 
 	wsManager := newWebSocketManager()
-	e.GET("/ws", wsManager.websocketEntrypoint)
+	api.GET("/ws", wsManager.websocketEntrypoint)
 	wsManager.startBroadcastLoop()
-	engineState := initEngineStateAPI(e, wsManager)
+	engineState := initEngineStateAPI(api, wsManager)
 	wsManager.engineState = engineState
 
-	startGuiServer(e, host, port, tunnel)
+	startGuiServer(e, host, basePath, port, tunnel)
 }
 
-func startGuiServer(e *echo.Echo, host string, port int, tunnel string) {
+func startGuiServer(e *echo.Echo, host string, basePath string, port int, tunnel string) {
 	const maxRetries = 5
 
 	for i := 0; i < maxRetries; i++ {
 		// Find an available port
-		//addr, port, err := findAvailablePort(host, port)
-		addr, _, err := findAvailablePort(host, port)
+		//addr, port, err := FindAvailablePort(host, port)
+		addr, _, err := FindAvailablePort(host, port)
 		if err != nil {
 			logUI.Log.ErrAndExit("Failed to find available port: %v", err)
 		}
-		logUI.Log.Info("Serving the web UI at http://%s", addr)
+		logUI.Log.Info("Serving the web UI at http://%s%s", addr, basePath)
 
 		if tunnel != "" {
 			go startTunnel(tunnel)
@@ -84,7 +98,7 @@ func startGuiServer(e *echo.Echo, host string, port int, tunnel string) {
 	logUI.Log.Err("Failed to start server after multiple attempts")
 }
 
-func findAvailablePort(host string, startPort int) (string, string, error) {
+func FindAvailablePort(host string, startPort int) (string, string, error) {
 	// Loop to find the first available port
 	for port := startPort; port <= 65535; port++ {
 		address := net.JoinHostPort(host, strconv.Itoa(port))

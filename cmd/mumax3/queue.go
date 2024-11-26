@@ -12,22 +12,40 @@ import (
 	"os/exec"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/mumax/3/cuda/cu"
-	"github.com/mumax/3/engine"
-)
+	"github.com/mumax/3/engine")
 
 var (
 	exitStatus       atom = 0
 	numOK, numFailed atom = 0, 0
+	QueueIndex		 int = 0
 )
 
+func get_sim_index() {
+	for i := 0; i <= 255; i++ {
+		_, ok := os.LookupEnv(fmt.Sprintf("MumaxQueue_%d", i))
+		if !ok {
+			QueueIndex = i
+			os.Setenv(fmt.Sprintf("MumaxQueue_%d", i), "running")
+			fmt.Println("env " + fmt.Sprintf("MumaxQueue_%d", i) + " set to running")
+			break
+		} else if i == 255 {
+			panic("Could not find empty queue space.")
+		}
+	}
+}
+
+
 func RunQueue(files []string) {
+	get_sim_index()
 	s := NewStateTab(files)
 	s.PrintTo(os.Stdout)
 	go s.ListenAndServe(*engine.Flag_port)
 	s.Run()
 	fmt.Println(numOK.get(), "OK, ", numFailed.get(), "failed")
+	os.Unsetenv(fmt.Sprintf("MumaxQueue_%d", QueueIndex))
 	os.Exit(int(exitStatus))
 }
 
@@ -84,6 +102,22 @@ func (s *stateTab) Run() {
 	nGPU := cu.DeviceGetCount()
 	idle := initGPUs(nGPU)
 	for {
+		_, ok := os.LookupEnv(fmt.Sprintf("MumaxQueue_%d", QueueIndex))
+		if ok {
+			if os.Getenv(fmt.Sprintf("MumaxQueue_%d", QueueIndex)) == "pause" {
+				for {
+					_, ok := os.LookupEnv(fmt.Sprintf("MumaxQueue_%d", QueueIndex))
+					if ok {
+						if os.Getenv(fmt.Sprintf("MumaxQueue_%d", QueueIndex)) == "running" {
+							break
+						}
+					} else {
+						break
+					}
+					time.Sleep(time.Second) // Sleep for a short duration before rechecking
+				}
+			}
+		}
 		gpu := <-idle
 		port := fmt.Sprintf("%v", gpu+35367)
 		j, ok := s.StartNext(port)
