@@ -100,7 +100,8 @@ Comment: Loading strains is highly experimental - if you want to use the strain 
     + __WriteNUndoneToLog__ - writes amount of reversed steps to log
     + __absPath__ - define the absolute path to the simulation folder without the folder itself -> being used in __ExecDir__
     + __Exec__ - run bash command. Args: cmd __string__
-    + __ExecDir__ - run bash command but append absolute path to output directory as arg for executed command. Args: cmd __string__
+    + __ExecDir__ - run bash command but append absolute path to output directory as arg for executed command, or replace all found %v and %s substrings with the path. Args: cmd __string__
+        - ``` ExecDir("python3 foo.py %v/fee %s/faa") -> Exec("python3 foo.py path_to_outputdir/fee path_to_outputdir/faa")```
     + __string__ - cast float or int to string. Args: interface
     + __int__ - cast castable values to integer. Args: value __float__
 
@@ -130,8 +131,4 @@ Comment: Loading strains is highly experimental - if you want to use the strain 
     Created OVF file has twice the amount of values calculated for kx for holding imag and real value.
     
     VERY EXPERIMENTAL - NOT TESTED
-
-* CMD:
-    + __Exec__ - run bash command. Args: __string__
-    + __ExecDir__ - run bash command with either output directory of mumax simulation attached, or with replacing mode for %v and %s (put as many %v or %s into the arg as a spaceholder for the path as you like). Args: __string__
 
