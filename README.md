@@ -131,4 +131,206 @@ Comment: Loading strains is highly experimental - if you want to use the strain 
     Created OVF file has twice the amount of values calculated for kx for holding imag and real value.
     
     VERY EXPERIMENTAL - NOT TESTED
+* Queue:
+   When a queue is started in mumax it cannot be paused by default. Here an env "MumaxQueue_%d" is created
+   with %d being the queue index in case that multiple queues are running. When the queue is being started this env is set to "running". By setting this env to pause no new simulation is going to be started until it is set to running again. When the env is removed the queue is also going to be continued.
+
+This part of the README file originates from the amumax repository but has been slightly modified.
+### Template Strings
+
+#### Syntax
+
+Template strings are placeholders within your `.mx3` files that define how parameters should vary across generated files. The syntax for a template string is:
+
+```go
+"{key1=value1;key2=value2;...}"
+```
+
+Each template string is enclosed in `"{...}"` and contains key-value pairs separated by semicolons.
+
+#### Available Keys
+
+- **array**: Define a specific set of values.
+  - Example: `array=[1,2,3]`
+- **start**, **end**, **step**: Define a range of values using start, end, and step (similar to `numpy.arange`).
+  - Example: `start=0;end=1;step=0.1`
+- **start**, **end**, **count**: Define a range of values with a specific count (similar to `numpy.linspace`).
+  - Example: `start=0;end=1;count=5`
+- **prefix**: A string to be added before the value in the generated filenames.
+  - Example: `prefix=param_`
+- **suffix**: A string to be added after the value in the generated filenames.
+  - Example: `suffix=_test`
+- **format**: Specifies the formatting of the value in the filename (must be a float format like `%f`).
+  - Example: `format=%.2f`
+
+#### Examples
+
+##### Example 1: Varying a Single Parameter
+
+**Template File (`template.mx3`):**
+
+```go
+Aex := "{start=0;end=2;step=1}"
+```
+
+**Command:**
+
+```bash
+mumax3 --template template1.mx3 template2.mx3 template3.mx3
+```
+
+The simulations can be encapsled into subfolders with
+```bash
+mumax3 --template --encapsle template.mx3
+```
+Each template string creates another deeper subfolder with this.
+
+
+**Generated Files:**
+
+- `0.mx3`
+- `1.mx3`
+- `2.mx3`
+
+**Explanation:**
+
+- The placeholder `{start=0;end=2;step=1}` is replaced with values from `0` to `2` in steps of `1`.
+- For each value, a new `.mx3` file is generated with the value assigned to `Aex`.
+
+##### Example 2: Using an Array of Values and Formatting
+
+**Template File (`template.mx3`):**
+
+```go
+x := "{array=[1,2,3];format=%02.0f}"
+```
+
+**Command:**
+
+```bash
+mumax3 --template template.mx3
+```
+
+**Generated Files:**
+
+- `01.mx3`
+- `02.mx3`
+- `03.mx3`
+
+**Explanation:**
+
+- The placeholder `{array=[1,2,3];format=%02.0f}` is replaced with each value in the array.
+- The `format=%02.0f` ensures that the values in the filenames are formatted with at least two digits, padding with zeros if necessary.
+
+##### Example 3: Combining Multiple Template Strings
+
+**Template File (`template.mx3`):**
+
+```go
+x := "{prefix=alpha; array=[1,2];format=%02.0f}"
+y := "{prefix=beta; array=[3,4];format=%.0f}"
+```
+
+**Command:**
+
+```bash
+mumax3 --template template.mx3
+```
+
+**Generated Files:**
+
+- `alpha01/beta3.mx3`
+- `alpha01/beta4.mx3`
+- `alpha02/beta3.mx3`
+- `alpha02/beta4.mx3`
+
+**Explanation:**
+
+- All combinations of `x` and `y` values are generated.
+- Each combination results in a new `.mx3` file with the corresponding values assigned.
+
+##### Example 4: Using Flat Output
+
+**Template File (`template.mx3`):**
+
+```go
+x := "{array=[1,2];format=%02.0f}"
+y := "{array=[3,4];format=%.0f}"
+```
+
+**Command:**
+
+```bash
+mumax --template --flat template.mx3
+```
+
+**Generated Files:**
+
+- `013.mx3`
+- `014.mx3`
+- `023.mx3`
+- `024.mx3`
+
+**Explanation:**
+
+- The `--flat` option generates files without creating subdirectories.
+- Filenames are concatenated with the formatted values.
+
+##### Example 5: Using Prefix and Suffix
+
+**Template File (`template.mx3`):**
+
+```go
+Temperature := "{prefix=T; array=[300,350]; suffix=K; format=%.0f}"
+```
+
+**Command:**
+
+```bash
+mumax3 --template template.mx3
+```
+
+**Generated Files:**
+
+- `T300K.mx3`
+- `T350K.mx3`
+
+**Explanation:**
+
+- The `prefix` and `suffix` keys add strings before and after the value in the filename.
+- The `format=%.0f` ensures no decimal places are included.
+
+#### Notes
+
+- **Formatting:** Only `%f` float formats are allowed in the `format` key (e.g., `%.2f`, `%03.0f`). Formats like `%d` are not allowed.
+- **Error Handling:** The template parser will report errors if the syntax is incorrect or required keys are missing.
+- **Variables Replacement:** Inside the `.mx3` files, the placeholders are replaced with the numerical values.
+
+#### Advanced Example
+
+**Template File (`template.mx3`):**
+
+```go
+alpha := "{prefix=alpha_; array=[0.01, 0.02, 0.03]; format=%.2f}"
+beta := "{prefix=beta_; start=0.1; end=0.3; step=0.1; format=%.1f}"
+```
+
+**Command:**
+
+```bash
+mumax3 --template template.mx3
+```
+
+**Generated Files:**
+
+- `alpha_0.01/beta_0.1.mx3`
+- `alpha_0.01/beta_0.2.mx3`
+- `alpha_0.01/beta_0.3.mx3`
+- `alpha_0.02/beta_0.1.mx3`
+- ...
+
+**Explanation:**
+
+- Generates all combinations of `alpha` and `beta`.
+- Each generated file contains the `alpha` and `beta` values replaced in the `.mx3` file.
 
