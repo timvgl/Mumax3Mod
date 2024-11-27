@@ -3,10 +3,15 @@ package engine
 import (
 	"reflect"
 	"github.com/mumax/3/cuda"
+	//"fmt"
 	"github.com/mumax/3/data"
 )
 
 var Quantities = make(map[string]Quantity)
+
+func wrapInt(vs1, vs2, vs3 int) [3]int {
+    return [3]int{vs1, vs2, vs3}
+}
 
 // Arbitrary physical quantity.
 type Quantity interface {
@@ -81,9 +86,18 @@ func MeshOf(q Quantity) *data.Mesh {
 
 func ValueOf(q Quantity) *data.Slice {
 	// TODO: check for Buffered() implementation
-	buf := cuda.Buffer(q.NComp(), SizeOf(q))
-	q.EvalTo(buf)
-	return buf
+	if s, ok := q.(interface {
+		FFTOutputSize() [3]int
+	}); ok {
+		//fmt.Println(s.FFTOutputSize())
+		buf := cuda.BufferComplex(q.NComp(), s.FFTOutputSize())
+		q.EvalTo(buf)
+		return buf
+	} else {
+		buf := cuda.Buffer(q.NComp(), SizeOf(q))
+		q.EvalTo(buf)
+		return buf
+	}
 }
 
 // Temporary shim to fit Slice into EvalTo

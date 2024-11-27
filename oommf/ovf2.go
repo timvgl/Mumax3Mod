@@ -84,8 +84,12 @@ func writeOVF2Data(out io.Writer, q *data.Slice, dataformat string) {
 		canonicalFormat = "Binary 4"
 		hdr(out, "Begin", "Data "+canonicalFormat)
 		writeOVF2DataBinary4(out, q)
+	case "binary 8":
+		canonicalFormat = "Binary 8"
+		hdr(out, "Begin", "Data "+canonicalFormat)
+		writeOVF2DataBinary4Complex(out, q)
 	default:
-		log.Fatalf("Illegal OMF data format: %v. Options are: Text, Binary 4", dataformat)
+		log.Fatalf("Illegal OMF data format: %v. Options are: Text, Binary 4, Binary 8", dataformat)
 	}
 	hdr(out, "End", "Data "+canonicalFormat)
 }
@@ -116,6 +120,33 @@ func writeOVF2DataBinary4(out io.Writer, array *data.Slice) {
 		}
 	}
 }
+
+func writeOVF2DataBinary4Complex(out io.Writer, array *data.Slice) {
+	// Extract tensor data and sizes
+	data := array.Tensors() // Fused real and imaginary parts
+	size := array.Size()
+
+	var bytes []byte
+
+	// OOMMF requires this control number at the start for format validation
+	var controlNumber float32 = OVF_CONTROL_NUMBER_8
+	bytes = (*[8]byte)(unsafe.Pointer(&controlNumber))[:]
+	out.Write(bytes)
+
+	ncomp := array.NComp() // Number of components (fused Re + Im count as one component in each index)
+	for iz := 0; iz < size[Z]; iz++ {
+		for iy := 0; iy < size[Y]; iy++ {
+			for ix := 0; ix < size[X]; ix++ {
+				for c := 0; c < ncomp; c++ {
+					// Write fused real and imaginary parts (alternating in memory)
+					bytes = (*[8]byte)(unsafe.Pointer(&data[c][iz][iy][ix]))[:]
+					out.Write(bytes)
+				}
+			}
+		}
+	}
+}
+
 
 func readOVF2DataBinary4(in io.Reader, array *data.Slice) {
 	size := array.Size()

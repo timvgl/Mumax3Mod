@@ -83,7 +83,7 @@ var reducedot_map = map[int]string{0: "",
 // reducedot PTX code for various compute capabilities.
 const (
 	reducedot_ptx_50 = `
-.version 8.2
+.version 8.5
 .target sm_50
 .address_size 64
 
@@ -244,7 +244,7 @@ $L__BB0_13:
 
 	ld.shared.f32 	%f44, [_ZZ9reducedotE5sdata];
 	cvta.to.global.u64 	%rd24, %rd11;
-	red.global.add.f32 	[%rd24], %f44;
+	atom.global.add.f32 	%f45, [%rd24], %f44;
 
 $L__BB0_15:
 	ret;
@@ -253,7 +253,7 @@ $L__BB0_15:
 
 `
 	reducedot_ptx_52 = `
-.version 8.2
+.version 8.5
 .target sm_52
 .address_size 64
 
@@ -414,7 +414,7 @@ $L__BB0_13:
 
 	ld.shared.f32 	%f44, [_ZZ9reducedotE5sdata];
 	cvta.to.global.u64 	%rd24, %rd11;
-	red.global.add.f32 	[%rd24], %f44;
+	atom.global.add.f32 	%f45, [%rd24], %f44;
 
 $L__BB0_15:
 	ret;
@@ -423,7 +423,7 @@ $L__BB0_15:
 
 `
 	reducedot_ptx_53 = `
-.version 8.2
+.version 8.5
 .target sm_53
 .address_size 64
 
@@ -584,7 +584,7 @@ $L__BB0_13:
 
 	ld.shared.f32 	%f44, [_ZZ9reducedotE5sdata];
 	cvta.to.global.u64 	%rd24, %rd11;
-	red.global.add.f32 	[%rd24], %f44;
+	atom.global.add.f32 	%f45, [%rd24], %f44;
 
 $L__BB0_15:
 	ret;
@@ -593,7 +593,7 @@ $L__BB0_15:
 
 `
 	reducedot_ptx_60 = `
-.version 8.2
+.version 8.5
 .target sm_60
 .address_size 64
 
@@ -754,7 +754,7 @@ $L__BB0_13:
 
 	ld.shared.f32 	%f44, [_ZZ9reducedotE5sdata];
 	cvta.to.global.u64 	%rd24, %rd11;
-	red.global.add.f32 	[%rd24], %f44;
+	atom.global.add.f32 	%f45, [%rd24], %f44;
 
 $L__BB0_15:
 	ret;
@@ -763,7 +763,7 @@ $L__BB0_15:
 
 `
 	reducedot_ptx_61 = `
-.version 8.2
+.version 8.5
 .target sm_61
 .address_size 64
 
@@ -924,7 +924,7 @@ $L__BB0_13:
 
 	ld.shared.f32 	%f44, [_ZZ9reducedotE5sdata];
 	cvta.to.global.u64 	%rd24, %rd11;
-	red.global.add.f32 	[%rd24], %f44;
+	atom.global.add.f32 	%f45, [%rd24], %f44;
 
 $L__BB0_15:
 	ret;
@@ -933,7 +933,7 @@ $L__BB0_15:
 
 `
 	reducedot_ptx_62 = `
-.version 8.2
+.version 8.5
 .target sm_62
 .address_size 64
 
@@ -1094,7 +1094,7 @@ $L__BB0_13:
 
 	ld.shared.f32 	%f44, [_ZZ9reducedotE5sdata];
 	cvta.to.global.u64 	%rd24, %rd11;
-	red.global.add.f32 	[%rd24], %f44;
+	atom.global.add.f32 	%f45, [%rd24], %f44;
 
 $L__BB0_15:
 	ret;
@@ -1103,7 +1103,7 @@ $L__BB0_15:
 
 `
 	reducedot_ptx_70 = `
-.version 8.2
+.version 8.5
 .target sm_70
 .address_size 64
 
@@ -1264,7 +1264,7 @@ $L__BB0_13:
 
 	ld.shared.f32 	%f44, [_ZZ9reducedotE5sdata];
 	cvta.to.global.u64 	%rd24, %rd11;
-	red.global.add.f32 	[%rd24], %f44;
+	atom.global.add.f32 	%f45, [%rd24], %f44;
 
 $L__BB0_15:
 	ret;
@@ -1273,7 +1273,7 @@ $L__BB0_15:
 
 `
 	reducedot_ptx_72 = `
-.version 8.2
+.version 8.5
 .target sm_72
 .address_size 64
 
@@ -1434,7 +1434,7 @@ $L__BB0_13:
 
 	ld.shared.f32 	%f44, [_ZZ9reducedotE5sdata];
 	cvta.to.global.u64 	%rd24, %rd11;
-	red.global.add.f32 	[%rd24], %f44;
+	atom.global.add.f32 	%f45, [%rd24], %f44;
 
 $L__BB0_15:
 	ret;
@@ -1443,7 +1443,7 @@ $L__BB0_15:
 
 `
 	reducedot_ptx_75 = `
-.version 8.2
+.version 8.5
 .target sm_75
 .address_size 64
 
@@ -1604,7 +1604,7 @@ $L__BB0_13:
 
 	ld.shared.f32 	%f44, [_ZZ9reducedotE5sdata];
 	cvta.to.global.u64 	%rd24, %rd11;
-	red.global.add.f32 	[%rd24], %f44;
+	atom.global.add.f32 	%f45, [%rd24], %f44;
 
 $L__BB0_15:
 	ret;
@@ -1613,7 +1613,7 @@ $L__BB0_15:
 
 `
 	reducedot_ptx_80 = `
-.version 8.2
+.version 8.5
 .target sm_80
 .address_size 64
 
@@ -1774,7 +1774,7 @@ $L__BB0_13:
 
 	ld.shared.f32 	%f44, [_ZZ9reducedotE5sdata];
 	cvta.to.global.u64 	%rd24, %rd11;
-	red.global.add.f32 	[%rd24], %f44;
+	atom.global.add.f32 	%f45, [%rd24], %f44;
 
 $L__BB0_15:
 	ret;

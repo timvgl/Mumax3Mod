@@ -1,7 +1,6 @@
 package engine
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"math"
@@ -10,9 +9,8 @@ import (
 	"path"
 	"path/filepath"
 	"sort"
-	"strconv"
 	"strings"
-
+	"strconv"
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/data"
 	"github.com/mumax/3/dump"
@@ -20,14 +18,15 @@ import (
 	"github.com/mumax/3/mag"
 	"github.com/mumax/3/oommf"
 	"github.com/mumax/3/util"
+	"bytes"
 )
 
 var (
-	GradMx  = NewVectorField("GradMx", "J", "", GetGradMx)
-	GradMy  = NewVectorField("GradMy", "J", "", GetGradMy)
-	GradMz  = NewVectorField("GradMz", "J", "", GetGradMz)
-	GSDir   string
-	Suffix  string
+	GradMx = NewVectorField("GradMx", "J", "", GetGradMx)
+	GradMy = NewVectorField("GradMy", "J", "", GetGradMy)
+	GradMz = NewVectorField("GradMz", "J", "", GetGradMz)
+	GSDir  string
+	Suffix string
 	absPath string = ""
 )
 
@@ -87,13 +86,13 @@ func runExec(cmdStr string) {
 
 func runExecDir(cmdStr string) {
 	if strings.Contains(cmdStr, "%v") || strings.Contains(cmdStr, "%s") {
-		argsSprintf := make([]any, strings.Count(cmdStr, "%v")+strings.Count(cmdStr, "%s"))
-		for i := range len(argsSprintf) {
-			argsSprintf[i] = absPath + OD()
+		argsSprintf := make([]any, strings.Count(cmdStr, "%v") + strings.Count(cmdStr, "%s"))
+		for i := range(len(argsSprintf)) {
+			argsSprintf[i] = absPath+OD()
 		}
 		runExec(fmt.Sprintf(cmdStr, argsSprintf...))
 	} else {
-		runExec(cmdStr + " " + absPath + OD())
+		runExec(cmdStr + " " + absPath+OD())
 	}
 }
 
@@ -107,22 +106,22 @@ func castString(val interface{}) string {
 
 func castInt(val interface{}) int {
 	switch v := val.(type) {
-	case string:
-		valStr, ok := strconv.Atoi(v)
-		if ok == nil {
-			return (valStr)
-		} else {
-			panic("Got non-castable string.")
+		case string:
+			valStr, ok := strconv.Atoi(v)
+			if ok == nil {
+				return(valStr)
+			} else {
+				panic("Got non-castable string.")
+			}
+		case int32:
+			return int(v)
+		case float32:
+			return int(v)
+		case float64:
+			return int(v)
+		default:
+			panic(fmt.Sprintf("Type not recognized for %v", v))
 		}
-	case int32:
-		return int(v)
-	case float32:
-		return int(v)
-	case float64:
-		return int(v)
-	default:
-		panic(fmt.Sprintf("Type not recognized for %v", v))
-	}
 }
 
 func EraseOD() {
@@ -137,7 +136,7 @@ func EraseOD() {
 		util.PanicErr(err)
 	}
 	for _, name := range names {
-		if name != "log.txt" && name != "gui" {
+		if name != "log.txt" && name != "gui"  && name != "table.txt" {
 			err = os.RemoveAll(filepath.Join(dir, name))
 			if err != nil {
 				util.PanicErr(err)
@@ -149,8 +148,8 @@ func EraseOD() {
 func ConcStr(strs ...string) string {
 	var resultStr string
 	for _, str := range strs {
-		resultStr += str
-	}
+        resultStr += str
+    }
 
 	return resultStr
 }

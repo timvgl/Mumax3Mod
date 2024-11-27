@@ -27,7 +27,7 @@ var (
 	precessRelax             bool    = false
 	relaxTime                float64 = 0.
 	varyTime                 bool    = false
-	usePrefixOutputRelax     bool    = true
+	usePrefixOutputRelax	 bool	 = true
 )
 
 func init() {
