@@ -114,6 +114,7 @@ Comment: Loading strains is highly experimental - if you want to use the strain 
     + __RelaxDDUThreshold__ - same as __RelaxTorqueThreshold__ but for second derivative in time of u (needs __RelaxFullCoupled__ = true)
     + __RelaxDUThreshold__ - same as __RelaxTorqueThreshold__ but for first derivative in time of u (needs __RelaxFullCoupled__ = true)
     + __IterativeHalfing__ - run the minizing process N times and half __FixDt__ each time and __SlopeTresholdEnergyRelax__/__RelaxDDUThreshold__/__RelaxDUThreshold__ each time (needs __RelaxFullCoupled__ = true)
+    + __\__\__usePrefixOutputRelax______ - suppress prefix for ovf files even though output is generated during relaxing
 
 * Regions:
     + __homogeniousRegionZ__ - set to true renders region only for one z-layer and copies to the other layers. if the region is homogenious in the z direction but the sample has n layers into the z-direction, the region is going to be rendered for one z-layer and being copied to the others
@@ -122,4 +123,15 @@ Comment: Loading strains is highly experimental - if you want to use the strain 
     + __LimitRenderRegionZ__ - limit the area in which the rendering process is supposed to be done in the z direction. Reduces computational time for generating a region. Args: from, to __int__ (cells)
     + __ReDefRegion__ - if a region has been set it cannot be removed by default - assign the cells of one region to a different one (0 for removing it). Args: oldRegion, newRegion __int__
     + __EraseAllRegions__ - erase all regions - sets all regions back to region 0 - more efficent than redefining all regions seperate 
+
+* FFT:
+    + __FFT3D__ - calculate FFT in 3D (x, y, z) and e.q. save to ovf file. Args: __Quantity__
+
+    Created OVF file has twice the amount of values calculated for kx for holding imag and real value.
+    
+    VERY EXPERIMENTAL - NOT TESTED
+
+* CMD:
+    + __Exec__ - run bash command. Args: __string__
+    + __ExecDir__ - run bash command with either output directory of mumax simulation attached, or with replacing mode for %v and %s (put as many %v or %s into the arg as a spaceholder for the path as you like). Args: __string__
 
