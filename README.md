@@ -135,7 +135,7 @@ Comment: Loading strains is highly experimental - if you want to use the strain 
    When a queue is started in mumax it cannot be paused by default. Here an env "MumaxQueue_%d" is created
    with %d being the queue index in case that multiple queues are running. When the queue is being started this env is set to "running". By setting this env to pause no new simulation is going to be started until it is set to running again. When the env is removed the queue is also going to be continued.
 
-This part of the README file originates from the amumax repository but has been slightly modified.
+#### The upcoming part of the README file originates from the amumax repository but has been slightly modified.
 ### Template Strings
 
 #### Syntax
