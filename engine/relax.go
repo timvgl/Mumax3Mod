@@ -27,6 +27,7 @@ var (
 	precessRelax             bool    = false
 	relaxTime                float64 = 0.
 	varyTime                 bool    = false
+	usePrefixOutputRelax     bool    = true
 )
 
 func init() {
@@ -35,6 +36,7 @@ func init() {
 	DeclVar("useHighEta", &useHighEta, "")
 	DeclVar("__varyTime__", &varyTime, "")
 	DeclVar("__prefix_relax__", &prefix, "")
+	DeclVar("__usePrefixOutputRelax__", &usePrefixOutputRelax, "")
 	DeclVar("__precessRelax__", &precessRelax, "")
 	DeclVar("__relaxing__", &relaxing, "")
 	DeclVar("__printSlope__", &printSlope, "")

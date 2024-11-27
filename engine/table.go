@@ -145,7 +145,11 @@ func (t *DataTable) SavePrefix(prefix string) {
 		timer.Start("io")
 	}
 	t.init()
-	fprint(t, prefix+"_", Time)
+	if usePrefixOutputRelax {
+		fprint(t, prefix+"_", Time)
+	} else {
+		fprint(t, Time)
+	}
 	//Table.Columns[0].buffer = append(Table.Columns[0].buffer, float64ToByte(Time)...)
 	t.Data["t"] = append(t.Data["t"], Time)
 	absCol := 1
