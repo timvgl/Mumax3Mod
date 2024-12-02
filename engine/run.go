@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"math"
 	"os"
-
+	"strconv"
+	"strings"
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/data"
 	"github.com/mumax/3/util"
@@ -12,6 +13,7 @@ import (
 
 // Solver globals
 var (
+	HideProgressBar			= "false"
 	Time                    float64                      // time in seconds
 	alarm                   float64                      // alarm clock marks end time of run, dt adaptation must not cross it!
 	Pause                   = true                       // set pause at any time to stop running after the current step
@@ -202,9 +204,38 @@ func adaptDt(corr float64) {
 
 // Run the simulation for a number of seconds.
 func Run(seconds float64) {
+	SanityCheck()
+	Pause = false // may be set by <-Inject
+	const output = true
+	stepper.Free() // start from a clean state
+	start := Time
 	stop := Time + seconds
 	alarm = stop // don't have dt adapt to go over alarm
-	RunWhile(func() bool { return Time < stop })
+	hideProgressBarBool := true
+	if !HideProgressBarManualSet {
+		hideProgressBarBoolTmp, err := strconv.ParseBool(strings.ToLower(HideProgressBar))
+		if err != nil {
+			fmt.Println("Failed to parse HideProgressBar from build process. Using as false.")
+			hideProgressBarBoolTmp = false
+		}
+		hideProgressBarBool = hideProgressBarBoolTmp
+	} else {
+		hideProgressBarBool = HideProgressBarManual
+	}
+	ProgressBar := NewProgressBar(start, stop, "🧲", hideProgressBarBool)
+	DoOutput()
+	for (Time < stop) && !Pause {
+		select {
+		default:
+			ProgressBar.Update(Time)
+			step(output)
+		// accept tasks form Inject channel
+		case f := <-Inject:
+			f()
+		}
+	}
+	ProgressBar.Finish()
+	Pause = true
 }
 
 // Run the simulation for a number of steps.

@@ -28,6 +28,10 @@ var (
 	GSDir  string
 	Suffix string
 	absPath string = ""
+	newestOvfFileIndex int
+	failGetNewestOvfFile bool = true
+	gotValidOvfFile bool = false
+	newestOvfFile string
 )
 
 func init() {
@@ -61,7 +65,92 @@ func init() {
 	DeclFunc("execDir", runExecDir, "")
 	DeclVar("absPath", &absPath, "")
 	DeclFunc("WriteNUndoneToLog", WriteNUndoneToLog, "")
+	DeclFunc("getNewestOvfFile", get_newest_ovf_file, "")
+	DeclVar("failGetNewestOvfFile", &failGetNewestOvfFile, "")
+	DeclFunc("OD", OD, "")
+	DeclVar("newestOvfFileIndex", &newestOvfFileIndex, "")
+	DeclVar("gotValidOvfFile", &gotValidOvfFile, "")
+	DeclVar("newestOvfFile", &newestOvfFile, "")
 
+}
+
+func castableInt(str string) bool {
+	_, err := strconv.Atoi(str)
+    if err != nil {
+        return false
+    }
+	return true
+}
+
+func ValidOvfFile(fname string) bool {
+	defer func() bool {
+        if r := recover(); r != nil {
+            return false
+        } else { return true }
+    }()
+	in, err := httpfs.Open(fname)
+	if err != nil {
+		return false
+	}
+	if path.Ext(fname) == ".dump" {
+		_, _, err = dump.Read(in)
+	} else {
+		_, _, err = oommf.Read(in)
+	}
+	return err == nil
+}
+
+func get_newest_ovf_file(q Quantity) string {
+	dir := OD()
+	d, err := os.Open(dir)
+	if err != nil {
+		util.PanicErr(err)
+	}
+	defer d.Close()
+	names, err := d.Readdirnames(-1)
+	biggestOvfIndex := 0
+	foundFile := false
+	for _, name := range(names) {
+		var (
+			index int
+			gotIndex bool = false
+		)
+		for i, subString := range(name) {
+			if castableInt(string(subString)) {
+				gotIndex = true
+				index = i
+				break
+			}
+		}
+		if gotIndex && name[:index] == NameOf(q) {
+			ovfFileNameList := strings.Split(strings.TrimLeft(name[index+1:], "0"), ".")
+			tmpOvfIndex, err := strconv.Atoi(strings.Join(ovfFileNameList[:len(ovfFileNameList)-1], "."))
+			if err == nil && tmpOvfIndex > biggestOvfIndex {
+				biggestOvfIndex = tmpOvfIndex
+				foundFile = true
+			}
+		}
+	}
+	if foundFile {
+		for i := biggestOvfIndex; i >= 0; i-- {
+			if ValidOvfFile(fmt.Sprintf("%s%s%0*d%s", OD(), NameOf(q), 6, i, ".ovf")) {
+				biggestOvfIndex = i
+				break
+			}
+			if i == 0 {
+				foundFile = false
+			}
+		}
+	}
+	if foundFile {
+		newestOvfFileIndex = biggestOvfIndex
+		gotValidOvfFile = true
+		return fmt.Sprintf("%s%0*d%s", NameOf(q), 6, biggestOvfIndex, ".ovf") 
+	} else if failGetNewestOvfFile {
+		panic("Could not find suitable ovf file.")
+	} else {
+		return ""
+	}
 }
 
 func WriteNUndoneToLog() {

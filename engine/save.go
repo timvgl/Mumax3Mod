@@ -92,10 +92,12 @@ func SaveAs(q Quantity, fname string) {
 	defer cuda.Recycle(buffer)
 	info := data.Meta{Time: Time, Name: NameOf(q), Unit: UnitOf(q), CellSize: MeshOf(q).CellSize()}
 	data := buffer.HostCopy() // must be copy (async io)
-	if _, ok := q.(interface {
+	if s, ok := q.(interface {
+		Axis() ([3]int, [3]float64, [3]float64, []string)
 		FFTOutputSize() [3]int
 	}); ok {
-		queOutput(func() { saveAsComplex_sync(fname, data, info, outputFormat)})
+		NxNyNz, startK, endK, transformedAxis := s.Axis()
+		queOutput(func() { saveAsFFT_sync(fname, data, info, outputFormat, NxNyNz, startK, endK, transformedAxis) })
 	} else {
 		queOutput(func() { saveAs_sync(fname, data, info, outputFormat) })
 	}
@@ -201,7 +203,7 @@ func saveAs_sync(fname string, s *data.Slice, info data.Meta, format OutputForma
 
 }
 
-func saveAsComplex_sync(fname string, s *data.Slice, info data.Meta, format OutputFormat) {
+func saveAsFFT_sync(fname string, s *data.Slice, info data.Meta, format OutputFormat, NxNyNz [3]int, startK, endK [3]float64, transformedAxes []string) {
 	f, err := httpfs.Create(fname)
 	util.FatalErr(err)
 	defer f.Close()
@@ -210,11 +212,11 @@ func saveAsComplex_sync(fname string, s *data.Slice, info data.Meta, format Outp
 	case OVF1_TEXT:
 		oommf.WriteOVF1(f, s, info, "text")
 	case OVF1_BINARY:
-		oommf.WriteOVF1(f, s, info, "binary 8")
+		oommf.WriteOVF1(f, s, info, "binary 4+4")
 	case OVF2_TEXT:
-		oommf.WriteOVF2(f, s, info, "text")
+		oommf.WriteOVF2FFT(f, s, info, "text", NxNyNz, startK, endK, transformedAxes)
 	case OVF2_BINARY:
-		oommf.WriteOVF2(f, s, info, "binary 8")
+		oommf.WriteOVF2FFT(f, s, info, "binary 4+4", NxNyNz, startK, endK, transformedAxes)
 	case DUMP:
 		dump.Write(f, s, info)
 	default:
