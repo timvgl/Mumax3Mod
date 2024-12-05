@@ -48,3 +48,6 @@ frontend/.svelte-kit/output/server/entries/pages/_page.svelte.js
 frontend/.svelte-kit/output/server/nodes/0.js
 frontend/.svelte-kit/output/server/nodes/1.js
 frontend/.svelte-kit/output/server/nodes/2.js
+frontend/.svelte-kit/generated/server/internal.js
+*.js
+*/*.js

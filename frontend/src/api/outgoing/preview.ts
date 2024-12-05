@@ -6,8 +6,18 @@ export function postComponent(component: string) {
 	post('preview/component', { component });
 }
 
+var newQuantity: boolean = false;
 export function postQuantity(quantity: string) {
 	post('preview/quantity', { quantity });
+	newQuantity = true
+}
+
+export function setNewQuantityFalse() {
+	newQuantity = false
+}
+
+export function getNewQuantityState() {
+	return newQuantity
 }
 
 export function postLayer(layer: number) {

@@ -1,4 +1,5 @@
-import { previewState } from '$api/incoming/preview';
+import { previewState, type Preview } from '$api/incoming/preview';
+import { getNewQuantityState, setNewQuantityFalse } from '$api/outgoing/preview';
 import * as echarts from 'echarts';
 import { get } from 'svelte/store';
 import { meshState } from '$api/incoming/mesh';
@@ -57,6 +58,55 @@ function update() {
 			}
 		]
 	});
+	if (getNewQuantityState()) {
+		let [xData, yData, xAxisName, yAxisName] = get_axis_data(ps)
+		let option = chartInstance.getOption();
+		if (Array.isArray(option.xAxis)) {
+			option.xAxis[0].data = xData;
+			option.xAxis[0].name = xAxisName;
+		} else if (option.xAxis) {
+			option.xAxis.data = xData;
+			option.xAxis.name = xAxisName;
+		}
+		
+		if (Array.isArray(option.yAxis)) {
+			option.yAxis[0].data = yData;
+			option.yAxis[0].name = yAxisName;
+		} else if (option.yAxis) {
+			option.yAxis.data = yData;
+			option.yAxis.name = yAxisName;
+		}
+
+        // Set the updated option back
+        chartInstance.setOption(option);
+		setNewQuantityFalse();
+	}
+}
+
+function get_axis_data(ps: Preview): [string[], string[], string, string] {
+	let dims = [ps.xChosenSize, ps.yChosenSize];
+	let mesh = get(meshState);
+	let xStart = get(previewState).startX;
+	let yStart = get(previewState).startY;
+	let xData;
+	let yData;
+	let xAxisName = "";
+	let yAxisName = "";
+	// console.log(mesh.Nx/ps.xChosenSize);
+	if ((get(previewState).dynQuantities["FFT"] ?? []).includes(get(previewState).quantity)) {
+		console.log(mesh.dx)
+		xData = Array.from({ length: dims[0] }, (_, i) => String(xStart + i * mesh.dx * 1e-9 * mesh.Nx / ps.xChosenSize));
+		yData = Array.from({ length: dims[1] }, (_, i) => String(yStart + i * mesh.dy * 1e-9 * mesh.Nx / ps.yChosenSize));
+		xAxisName = "kx (1/nm)"
+		yAxisName = "ky (1/nm)"
+	} else {
+		xData = Array.from({ length: dims[0] }, (_, i) => String(xStart + i * mesh.dx * 1e9 * mesh.Nx / ps.xChosenSize));
+		yData = Array.from({ length: dims[1] }, (_, i) => String(yStart + i * mesh.dy * 1e9 * mesh.Nx / ps.yChosenSize));
+		xAxisName = "x (nm)"
+		yAxisName = "y (nm)"
+	}
+	console.log(xAxisName)
+	return [xData, yData, xAxisName, yAxisName]
 }
 
 function init() {
@@ -64,13 +114,9 @@ function init() {
 	// https://apache.github.io/echarts-handbook/en/best-practices/canvas-vs-svg
 	chartInstance = echarts.init(chartDom, undefined, { renderer: 'svg' });
 	let ps = get(previewState);
-	let dims = [ps.xChosenSize, ps.yChosenSize];
-	let mesh = get(meshState);
-	// console.log(mesh.Nx/ps.xChosenSize);
-	let xData = Array.from({ length: dims[0] }, (_, i) => i * mesh.dx * 1e9 * mesh.Nx/ps.xChosenSize);
-	let yData = Array.from({ length: dims[1] }, (_, i) => i * mesh.dy * 1e9* mesh.Ny/ps.yChosenSize);
+	let [xData, yData, xAxisName, yAxisName] = get_axis_data(ps)
 
-	let aspectRatio = dims[0] / dims[1]; // Calculate the aspect ratio
+	let aspectRatio = ps.xChosenSize / ps.yChosenSize; // Calculate the aspect ratio
 
 	let gridWidth, gridHeight;
 
@@ -127,7 +173,7 @@ function init() {
 		xAxis: {
 			type: 'category',
 			data: xData,
-			name: 'x (nm)',
+			name: xAxisName,
 			nameLocation: 'middle',
 			nameGap: 25,
 			nameTextStyle: {
@@ -135,6 +181,10 @@ function init() {
 			},
 			axisTick: {
 				alignWithLabel: true,
+				interval: function (index: number) {
+					// Show ticks only at every 10th value
+					return index % 10 === 0;
+				},
 				length: 6,
 				lineStyle: {
 					type: 'solid',
@@ -143,8 +193,8 @@ function init() {
 			},
 			axisLabel: {
 				show: true,
-				formatter: function (value: string, _index: string) {
-					return parseFloat(value).toFixed(0);
+				formatter: function (value: string, index: number) {
+					return index % 10 === 0 ? parseFloat(value).toFixed(0) : '';
 				},
 				color: '#fff',
 				showMinLabel: true
@@ -153,7 +203,7 @@ function init() {
 		yAxis: {
 			type: 'category',
 			data: yData,
-			name: 'y (nm)',
+			name: yAxisName,
 			nameLocation: 'middle',
 			nameGap: 45,
 			nameTextStyle: {
@@ -161,6 +211,10 @@ function init() {
 			},
 			axisTick: {
 				alignWithLabel: true,
+				interval: function (index: number) {
+					// Show ticks only at every 10th value
+					return index % 10 === 0;
+				},
 				length: 6,
 				lineStyle: {
 					type: 'solid',
@@ -169,8 +223,8 @@ function init() {
 			},
 			axisLabel: {
 				show: true,
-				formatter: function (value: string, _index: string) {
-					return parseFloat(value).toFixed(0);
+				formatter: function (value: string, index: number) {
+					return index % 10 === 0 ? parseFloat(value).toFixed(0) : '';
 				},
 				color: '#fff',
 				showMinLabel: true

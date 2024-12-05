@@ -1759,7 +1759,10 @@ const previewState = writable({
   yPossibleSizes: [],
   xChosenSize: 0,
   yChosenSize: 0,
-  dynQuantities: {}
+  dynQuantities: {},
+  startX: 0,
+  startY: 0,
+  startZ: 0
 });
 const headerState = writable({
   path: "",
@@ -1814,6 +1817,32 @@ const tablePlotState = writable({
   maxPoints: 0,
   step: 0
 });
+async function post(endpoint, data) {
+  const response = await fetch(`./api/${endpoint}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ ...data })
+  });
+  if (!response.ok) {
+    try {
+      const errorData = await response.json();
+      setAlert(errorData.error);
+    } catch (e) {
+      setAlert("An error occurred");
+    }
+  }
+}
+function postLayer(layer) {
+  post("preview/layer", { layer });
+}
+function postXChosenSize(xChosenSize) {
+  post("preview/XChosenSize", { xChosenSize });
+}
+function postYChosenSize(yChosenSize) {
+  post("preview/YChosenSize", { yChosenSize });
+}
 const metricsState = writable({
   pid: 0,
   error: "",
@@ -1856,7 +1885,7 @@ function Header($$payload, $$props) {
     $$payload.out += "<!--[!-->";
     CloseCircleOutline($$payload, { color: "red", size: "xl" });
   }
-  $$payload.out += `<!--]--></div> <div class="min-w-0 flex-grow truncate text-3xl text-green-500">${escape_html(store_get($$store_subs ??= {}, "$headerState", headerState).path)}</div> <div class="w-40 whitespace-nowrap text-xl text-gray-500">v.${escape_html(store_get($$store_subs ??= {}, "$headerState", headerState).version)}</div></div></section>`;
+  $$payload.out += `<!--]--></div> <div class="min-w-0 flex-grow truncate text-3xl text-green-500">${escape_html(store_get($$store_subs ??= {}, "$headerState", headerState).path)}</div> <div class="w-40 whitespace-nowrap text-xl text-gray-500">v.∞</div></div></section>`;
   if ($$store_subs) unsubscribe_stores($$store_subs);
   pop();
 }
@@ -1925,32 +1954,6 @@ const quantities = {
   ]
 };
 const dynQuantities = writable({});
-async function post(endpoint, data) {
-  const response = await fetch(`./api/${endpoint}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ ...data })
-  });
-  if (!response.ok) {
-    try {
-      const errorData = await response.json();
-      setAlert(errorData.error);
-    } catch (e) {
-      setAlert("An error occurred");
-    }
-  }
-}
-function postLayer(layer) {
-  post("preview/layer", { layer });
-}
-function postXChosenSize(xChosenSize) {
-  post("preview/XChosenSize", { xChosenSize });
-}
-function postYChosenSize(yChosenSize) {
-  post("preview/YChosenSize", { yChosenSize });
-}
 function QuantityDropdown($$payload, $$props) {
   push();
   var $$store_subs;

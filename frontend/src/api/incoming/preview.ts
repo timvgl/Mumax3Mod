@@ -24,6 +24,9 @@ export interface Preview {
 	xChosenSize: number
 	yChosenSize: number
 	dynQuantities: { [key: string]: string[] };
+	startX: number,
+	startY: number,
+	startZ: number,
 
 }
 
@@ -46,5 +49,8 @@ export const previewState = writable<Preview>({
 	yPossibleSizes: [],
 	xChosenSize: 0,
 	yChosenSize: 0,
-	dynQuantities: {}
+	dynQuantities: {},
+	startX: 0,
+	startY: 0,
+	startZ: 0,
 });

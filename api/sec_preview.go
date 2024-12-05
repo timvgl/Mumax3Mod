@@ -40,6 +40,9 @@ type PreviewState struct {
 	XChosenSize     int                 `msgpack:"xChosenSize"`
 	YChosenSize     int                 `msgpack:"yChosenSize"`
 	DynQuantities   map[string][]string `msgpack:"dynQuantities"`
+	StartX          float64             `msgpack:"startX"`
+	StartY          float64             `msgpack:"startY"`
+	StartZ          float64             `msgpack:"startZ"`
 }
 
 func initPreviewAPI(e *echo.Group, ws *WebSocketManager) *PreviewState {
@@ -64,6 +67,9 @@ func initPreviewAPI(e *echo.Group, ws *WebSocketManager) *PreviewState {
 		ws:                   ws,
 		globalQuantities:     []string{"B_demag", "B_ext", "B_eff", "Edens_demag", "Edens_ext", "Edens_eff", "geom"},
 		DynQuantities:        make(map[string][]string),
+		StartX:               0,
+		StartY:               0,
+		StartZ:               0,
 	}
 	previewState.addPossibleDownscaleSizes()
 	e.POST("/api/preview/component", previewState.postPreviewComponent)
@@ -126,9 +132,21 @@ func (s *PreviewState) UpdateQuantityBuffer() {
 			if !slices.Contains(s.YPossibleSizes, s.YChosenSize) {
 				s.YChosenSize = s.YPossibleSizes[len(s.YPossibleSizes)-1]
 			}
+			if q, ok := s.getQuantity().(interface {
+				Axis() ([3]int, [3]float64, [3]float64, []string)
+			}); ok {
+				_, start, _, _ := q.Axis()
+				s.StartX = start[0]
+				s.StartY = start[1]
+				s.StartZ = start[2]
+			}
+
 		} else if !slices.Contains(s.DynQuantities["FFT"], s.Quantity) && wasFFT {
 			s.XPossibleSizes = []int{}
 			s.YPossibleSizes = []int{}
+			s.StartX = 0
+			s.StartY = 0
+			s.StartZ = 0
 			s.addPossibleDownscaleSizes()
 			wasFFT = false
 		}

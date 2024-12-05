@@ -25,7 +25,7 @@
 		</div>
 
 		<div class="w-40 whitespace-nowrap text-xl text-gray-500">
-			v.{$headerState.version}
+			v.∞
 		</div>
 	</div>
 </section>

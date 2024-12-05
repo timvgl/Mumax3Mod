@@ -72,7 +72,6 @@ export function initializeWebSocket() {
 
 export function parseMsgpack(data: ArrayBuffer) {
 	const msg = msgpack.decode(new Uint8Array(data));
-	console.debug('Raw WebSocket message:', msg)
 	consoleState.set(msg.console as Console);
 
 	headerState.set(msg.header as Header);
@@ -93,7 +92,6 @@ export function parseMsgpack(data: ArrayBuffer) {
 	} else {
 		preview2D();
 	}
-	console.log(get(previewState).dynQuantities)
 
 	metricsState.set(msg.metrics);
 }
