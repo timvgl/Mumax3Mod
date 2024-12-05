@@ -3,6 +3,7 @@ package api
 import (
 	"math"
 	"net/http"
+	"slices"
 
 	"fmt"
 
@@ -12,6 +13,8 @@ import (
 	"github.com/mumax/3/engine"
 	"github.com/mumax/3/logUI"
 )
+
+var wasFFT = false
 
 type PreviewState struct {
 	ws                   *WebSocketManager
@@ -30,16 +33,17 @@ type PreviewState struct {
 	Refresh              bool                 `msgpack:"refresh"`
 	NComp                int                  `msgpack:"nComp"`
 
-	MaxPoints       int   `msgpack:"maxPoints"`
-	DataPointsCount int   `msgpack:"dataPointsCount"`
-	XPossibleSizes  []int `msgpack:"xPossibleSizes"`
-	YPossibleSizes  []int `msgpack:"yPossibleSizes"`
-	XChosenSize     int   `msgpack:"xChosenSize"`
-	YChosenSize     int   `msgpack:"yChosenSize"`
+	MaxPoints       int                 `msgpack:"maxPoints"`
+	DataPointsCount int                 `msgpack:"dataPointsCount"`
+	XPossibleSizes  []int               `msgpack:"xPossibleSizes"`
+	YPossibleSizes  []int               `msgpack:"yPossibleSizes"`
+	XChosenSize     int                 `msgpack:"xChosenSize"`
+	YChosenSize     int                 `msgpack:"yChosenSize"`
+	DynQuantities   map[string][]string `msgpack:"dynQuantities"`
 }
 
 func initPreviewAPI(e *echo.Group, ws *WebSocketManager) *PreviewState {
-	previewState := &PreviewState{
+	previewState := PreviewState{
 		Quantity:             "m",
 		Component:            "3D",
 		Layer:                0,
@@ -59,6 +63,7 @@ func initPreviewAPI(e *echo.Group, ws *WebSocketManager) *PreviewState {
 		YChosenSize:          engine.Ny,
 		ws:                   ws,
 		globalQuantities:     []string{"B_demag", "B_ext", "B_eff", "Edens_demag", "Edens_ext", "Edens_eff", "geom"},
+		DynQuantities:        make(map[string][]string),
 	}
 	previewState.addPossibleDownscaleSizes()
 	e.POST("/api/preview/component", previewState.postPreviewComponent)
@@ -69,7 +74,7 @@ func initPreviewAPI(e *echo.Group, ws *WebSocketManager) *PreviewState {
 	e.POST("/api/preview/XChosenSize", previewState.postXChosenSize)
 	e.POST("/api/preview/YChosenSize", previewState.postYChosenSize)
 
-	return previewState
+	return &previewState
 }
 
 func (s *PreviewState) getQuantity() engine.Quantity {
@@ -89,6 +94,7 @@ func (s *PreviewState) Update() {
 }
 
 func (s *PreviewState) UpdateQuantityBuffer() {
+	s.DynQuantities["FFT"] = engine.DeclVarFFTDynAlias
 	if s.layerMask == nil {
 		s.updateMask()
 	}
@@ -97,9 +103,38 @@ func (s *PreviewState) UpdateQuantityBuffer() {
 		if s.Type == "3D" {
 			componentCount = 3
 		}
+
+		if slices.Contains(s.DynQuantities["FFT"], s.Quantity) && !wasFFT {
+			wasFFT = true
+			// iterate over engine.Nx and engine.Ny
+			NxNyNz := engine.MeshOf(s.getQuantity()).Size()
+			s.XPossibleSizes = []int{}
+			s.YPossibleSizes = []int{}
+			for dstsize := 1; dstsize <= NxNyNz[0]; dstsize++ {
+				if NxNyNz[0]%dstsize == 0 {
+					s.XPossibleSizes = append(s.XPossibleSizes, dstsize)
+				}
+			}
+			for dstsize := 1; dstsize <= NxNyNz[1]; dstsize++ {
+				if NxNyNz[1]%dstsize == 0 {
+					s.YPossibleSizes = append(s.YPossibleSizes, dstsize)
+				}
+			}
+			if !slices.Contains(s.XPossibleSizes, s.XChosenSize) {
+				s.XChosenSize = s.XPossibleSizes[len(s.XPossibleSizes)-1]
+			}
+			if !slices.Contains(s.YPossibleSizes, s.YChosenSize) {
+				s.YChosenSize = s.YPossibleSizes[len(s.YPossibleSizes)-1]
+			}
+		} else if !slices.Contains(s.DynQuantities["FFT"], s.Quantity) && wasFFT {
+			s.XPossibleSizes = []int{}
+			s.YPossibleSizes = []int{}
+			s.addPossibleDownscaleSizes()
+			wasFFT = false
+		}
+
 		GPU_in := engine.ValueOf(s.getQuantity())
 		defer cuda.Recycle(GPU_in)
-
 		CPU_out := data.NewSlice(componentCount, [3]int{s.XChosenSize, s.YChosenSize, 1})
 		GPU_out := cuda.NewSlice(1, [3]int{s.XChosenSize, s.YChosenSize, 1})
 		defer GPU_out.Free()
@@ -234,17 +269,17 @@ func (s *PreviewState) updateMask() {
 		GPU_fullsize := cuda.Buffer(geom.NComp(), geom.Buffer.Size())
 		geom.EvalTo(GPU_fullsize)
 		defer cuda.Recycle(GPU_fullsize)
-	
+
 		// resize geom in GPU
 		GPU_resized := cuda.NewSlice(1, [3]int{s.XChosenSize, s.YChosenSize, 1})
 		defer GPU_resized.Free()
 		cuda.Resize(GPU_resized, GPU_fullsize.Comp(0), s.Layer)
-	
+
 		// copy resized geom from GPU to CPU
 		CPU_out := data.NewSlice(1, [3]int{s.XChosenSize, s.YChosenSize, 1})
 		defer CPU_out.Free()
 		data.Copy(CPU_out.Comp(0), GPU_resized)
-	
+
 		// extract mask from CPU slice
 		s.layerMask = CPU_out.Scalars()[0]
 	}

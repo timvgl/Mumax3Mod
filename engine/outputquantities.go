@@ -102,9 +102,29 @@ func NewScalarField(name, unit, desc string, f func(dst *data.Slice)) ScalarFiel
 	return q
 }
 
+func NewVectorFieldFFT(name, unit, desc string, f func(dst *data.Slice), mesh *data.Mesh) VectorField {
+	v := AsVectorFieldFFT(&fieldFuncFFT{info{3, name, unit}, f, mesh})
+	DeclROnly(name, v, cat(desc, unit))
+	return v
+}
+
+// NewVectorField constructs an outputable space-dependent scalar quantity whose
+// value is provided by function f.
+func NewScalarFieldFFT(name, unit, desc string, f func(dst *data.Slice), mesh *data.Mesh) ScalarField {
+	q := AsScalarFieldFFT(&fieldFuncFFT{info{1, name, unit}, f, mesh})
+	DeclROnly(name, q, cat(desc, unit))
+	return q
+}
+
 type fieldFunc struct {
 	info
 	f func(*data.Slice)
+}
+
+type fieldFuncFFT struct {
+	info
+	f    func(*data.Slice)
+	mesh *data.Mesh
 }
 
 func (c *fieldFunc) Mesh() *data.Mesh       { return Mesh() }
@@ -114,6 +134,19 @@ func (c *fieldFunc) EvalTo(dst *data.Slice) { EvalTo(c, dst) }
 // Calculates and returns the quantity.
 // recycle is true: slice needs to be recycled.
 func (q *fieldFunc) Slice() (s *data.Slice, recycle bool) {
+	buf := cuda.Buffer(q.NComp(), q.Mesh().Size())
+	cuda.Zero(buf)
+	q.f(buf)
+	return buf, true
+}
+
+func (c *fieldFuncFFT) Mesh() *data.Mesh       { return c.mesh }
+func (c *fieldFuncFFT) average() []float64     { return qAverageUniverse(c) }
+func (c *fieldFuncFFT) EvalTo(dst *data.Slice) { EvalTo(c, dst) }
+
+// Calculates and returns the quantity.
+// recycle is true: slice needs to be recycled.
+func (q *fieldFuncFFT) Slice() (s *data.Slice, recycle bool) {
 	buf := cuda.Buffer(q.NComp(), q.Mesh().Size())
 	cuda.Zero(buf)
 	q.f(buf)
@@ -135,6 +168,13 @@ func AsScalarField(q Quantity) ScalarField {
 	return ScalarField{q}
 }
 
+func AsScalarFieldFFT(q Quantity) ScalarField {
+	if q.NComp() != 1 {
+		panic(fmt.Errorf("ScalarField(%v): need 1 component, have: %v", NameOf(q), q.NComp()))
+	}
+	return ScalarField{q}
+}
+
 func (s ScalarField) average() []float64       { return AverageOf(s.Quantity) }
 func (s ScalarField) Average() float64         { return s.average()[0] }
 func (s ScalarField) Region(r int) ScalarField { return AsScalarField(inRegion(s.Quantity, r)) }
@@ -150,6 +190,13 @@ type VectorField struct {
 // AsVectorField promotes a quantity to a VectorField,
 // enabling convenience methods particular to vectors.
 func AsVectorField(q Quantity) VectorField {
+	if q.NComp() != 3 {
+		panic(fmt.Errorf("VectorField(%v): need 3 components, have: %v", NameOf(q), q.NComp()))
+	}
+	return VectorField{q}
+}
+
+func AsVectorFieldFFT(q Quantity) VectorField {
 	if q.NComp() != 3 {
 		panic(fmt.Errorf("VectorField(%v): need 3 components, have: %v", NameOf(q), q.NComp()))
 	}

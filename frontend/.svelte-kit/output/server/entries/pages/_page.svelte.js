@@ -1758,7 +1758,8 @@ const previewState = writable({
   xPossibleSizes: [],
   yPossibleSizes: [],
   xChosenSize: 0,
-  yChosenSize: 0
+  yChosenSize: 0,
+  dynQuantities: {}
 });
 const headerState = writable({
   path: "",
@@ -1923,6 +1924,7 @@ const quantities = {
     "geom"
   ]
 };
+const dynQuantities = writable({});
 async function post(endpoint, data) {
   const response = await fetch(`./api/${endpoint}`, {
     method: "POST",
@@ -1981,6 +1983,7 @@ function QuantityDropdown($$payload, $$props) {
       children: ($$payload3) => {
         const each_array = ensure_array_like(quantities["Common"]);
         const each_array_1 = ensure_array_like(Object.entries(quantities));
+        const each_array_3 = ensure_array_like(Object.entries(store_get($$store_subs ??= {}, "$dynQuantities", dynQuantities)));
         $$payload3.out += `<!--[-->`;
         for (let $$index = 0, $$length = each_array.length; $$index < $$length; $$index++) {
           let quantity = each_array[$$index];
@@ -2034,6 +2037,42 @@ function QuantityDropdown($$payload, $$props) {
             $$payload3.out += "<!--[!-->";
           }
           $$payload3.out += `<!--]-->`;
+        }
+        $$payload3.out += `<!--]--> <!--[-->`;
+        for (let $$index_4 = 0, $$length = each_array_3.length; $$index_4 < $$length; $$index_4++) {
+          let [category, items] = each_array_3[$$index_4];
+          DropdownItem($$payload3, {
+            class: "flex items-center justify-between",
+            children: ($$payload4) => {
+              $$payload4.out += `<!---->${escape_html(category)}`;
+              ChevronRightOutline($$payload4, {
+                class: "text-primary-700 ms-2 h-6 w-6 dark:text-white"
+              });
+              $$payload4.out += `<!---->`;
+            },
+            $$slots: { default: true }
+          });
+          $$payload3.out += `<!----> `;
+          Dropdown($$payload3, {
+            placement: "right-start",
+            trigger: "hover",
+            children: ($$payload4) => {
+              const each_array_4 = ensure_array_like(items);
+              $$payload4.out += `<!--[-->`;
+              for (let $$index_3 = 0, $$length2 = each_array_4.length; $$index_3 < $$length2; $$index_3++) {
+                let quantity = each_array_4[$$index_3];
+                DropdownItem($$payload4, {
+                  children: ($$payload5) => {
+                    $$payload5.out += `<!---->${escape_html(quantity)}`;
+                  },
+                  $$slots: { default: true }
+                });
+              }
+              $$payload4.out += `<!--]-->`;
+            },
+            $$slots: { default: true }
+          });
+          $$payload3.out += `<!---->`;
         }
         $$payload3.out += `<!--]-->`;
       },

@@ -23,6 +23,8 @@ export interface Preview {
 	yPossibleSizes: number[]
 	xChosenSize: number
 	yChosenSize: number
+	dynQuantities: { [key: string]: string[] };
+
 }
 
 export const previewState = writable<Preview>({
@@ -43,5 +45,6 @@ export const previewState = writable<Preview>({
 	xPossibleSizes: [],
 	yPossibleSizes: [],
 	xChosenSize: 0,
-	yChosenSize: 0
+	yChosenSize: 0,
+	dynQuantities: {}
 });

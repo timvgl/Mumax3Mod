@@ -5,7 +5,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
-	"slices"
 	"sync"
 	"time"
 
@@ -151,7 +150,7 @@ func (t *DataTable) SavePrefix(prefix string) {
 		fprint(t, Time)
 	}
 	//Table.Columns[0].buffer = append(Table.Columns[0].buffer, float64ToByte(Time)...)
-	t.Data["t"] = append(t.Data["t"], Time)
+	t.Data["t"] = append([]float64{-Time}, t.Data["t"]...)
 	absCol := 1
 	for _, o := range t.outputs {
 		vec := AverageOf(o)
@@ -189,7 +188,7 @@ func (t *DataTable) Add(output Quantity) {
 
 func (t *DataTable) Save() {
 	if negativeTime == true {
-		slices.Reverse(t.Data["t"])
+		//slices.Reverse(t.Data["t"])
 		negativeTime = false
 	}
 	t.Flushlock.Lock() // flush during write gives errShortWrite

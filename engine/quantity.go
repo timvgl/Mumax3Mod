@@ -2,7 +2,9 @@ package engine
 
 import (
 	"reflect"
+
 	"github.com/mumax/3/cuda"
+
 	//"fmt"
 	"github.com/mumax/3/data"
 )
@@ -10,7 +12,7 @@ import (
 var Quantities = make(map[string]Quantity)
 
 func wrapInt(vs1, vs2, vs3 int) [3]int {
-    return [3]int{vs1, vs2, vs3}
+	return [3]int{vs1, vs2, vs3}
 }
 
 // Arbitrary physical quantity.

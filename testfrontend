@@ -1,0 +1,19 @@
+{#each Object.entries(dynQuantities) as [category, items]}
+    {#if category != 'Common'}
+        <DropdownItem class="flex items-center justify-between">
+            {category}<ChevronRightOutline class="text-primary-700 ms-2 h-6 w-6 dark:text-white" />
+        </DropdownItem>
+        <Dropdown placement="right-start" trigger="hover">
+            {#each items as quantity}
+                <DropdownItem
+                    on:click={(_) => {
+                        postQuantity(quantity);
+                        dropdownOpen = false;
+                    }}
+                >
+                    {quantity}
+                </DropdownItem>
+            {/each}
+        </Dropdown>
+    {/if}
+{/each}

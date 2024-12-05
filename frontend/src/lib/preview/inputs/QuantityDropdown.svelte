@@ -1,10 +1,18 @@
 <script>
 	import { Button, Dropdown, DropdownItem, DropdownDivider } from 'flowbite-svelte';
 	import { ChevronDownOutline, ChevronRightOutline } from 'flowbite-svelte-icons';
+	import { onMount } from 'svelte';
 
 	import { previewState as p } from '$api/incoming/preview';
-	import { quantities } from './quantities';
+	import { quantities, dynQuantities , updateDynQuantites } from './quantities';
 	import { postQuantity } from '$api/outgoing/preview';
+
+	onMount(() => {
+		setInterval(() => {
+			updateDynQuantites();
+		}, 1000); // Updates every second
+	});
+
 	let dropdownOpen = false;
 </script>
 
@@ -45,5 +53,22 @@
 				{/each}
 			</Dropdown>
 		{/if}
+	{/each}
+	{#each Object.entries($dynQuantities) as [category, items]}
+		<DropdownItem class="flex items-center justify-between">
+			{category}<ChevronRightOutline class="text-primary-700 ms-2 h-6 w-6 dark:text-white" />
+		</DropdownItem>
+		<Dropdown placement="right-start" trigger="hover">
+			{#each items as quantity}
+				<DropdownItem
+					on:click={(_) => {
+						postQuantity(quantity);
+						dropdownOpen = false;
+					}}
+				>
+					{quantity}
+				</DropdownItem>
+			{/each}
+		</Dropdown>
 	{/each}
 </Dropdown>

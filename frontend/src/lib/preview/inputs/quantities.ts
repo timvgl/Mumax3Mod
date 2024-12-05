@@ -1,3 +1,6 @@
+import { previewState } from '$api/incoming/preview';
+import { get, writable } from 'svelte/store';
+
 export const quantities: { [category: string]: string[] } = {
 	Common: ['m', 'torque', 'regions', 'Msat', 'Aex', 'alpha'],
 
@@ -76,3 +79,11 @@ export const quantities: { [category: string]: string[] } = {
 		'geom'
 	]
 };
+
+export const dynQuantities = writable<{ [key: string]: string[] }>({});
+
+export function updateDynQuantites() {
+	//console.log(get(previewState).dynQuantities)
+	dynQuantities.update(() => (get(previewState).dynQuantities))
+};
+
