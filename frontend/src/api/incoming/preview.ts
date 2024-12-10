@@ -27,6 +27,8 @@ export interface Preview {
 	startX: number,
 	startY: number,
 	startZ: number,
+	symmetricX: boolean,
+	symmetricY: boolean
 
 }
 
@@ -53,4 +55,6 @@ export const previewState = writable<Preview>({
 	startX: 0,
 	startY: 0,
 	startZ: 0,
+	symmetricX: false,
+	symmetricY : false
 });

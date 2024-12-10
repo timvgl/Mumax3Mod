@@ -102,6 +102,39 @@ func ValueOf(q Quantity) *data.Slice {
 	}
 }
 
+func AxisOf(q Quantity) ([3]int, [3]float64, [3]float64, []string) {
+	if s, ok := q.(interface {
+		Axis() ([3]int, [3]float64, [3]float64, []string)
+	}); ok {
+		//fmt.Println(s.FFTOutputSize())
+		return s.Axis()
+	} else {
+		c := MeshOf(q).CellSize()
+		s := MeshOf(q).Size()
+		return s, [3]float64{0., 0., 0.}, [3]float64{c[X] * float64(s[X]), c[Y] * float64(s[Y]), c[Y] * float64(s[Y])}, []string{}
+	}
+}
+
+func SymmetricXOf(q Quantity) bool {
+	if s, ok := q.(interface {
+		SymmetricX() bool
+	}); ok {
+		return s.SymmetricX()
+	} else {
+		return false
+	}
+}
+
+func SymmetricYOf(q Quantity) bool {
+	if s, ok := q.(interface {
+		SymmetricY() bool
+	}); ok {
+		return s.SymmetricY()
+	} else {
+		return false
+	}
+}
+
 // Temporary shim to fit Slice into EvalTo
 func EvalTo(q interface {
 	Slice() (*data.Slice, bool)

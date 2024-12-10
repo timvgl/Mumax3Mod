@@ -1762,7 +1762,9 @@ const previewState = writable({
   dynQuantities: {},
   startX: 0,
   startY: 0,
-  startZ: 0
+  startZ: 0,
+  symmetricX: false,
+  symmetricY: false
 });
 const headerState = writable({
   path: "",

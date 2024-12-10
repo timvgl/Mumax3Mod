@@ -18,7 +18,7 @@ export let connected = writable(false);
 export function initializeWebSocket() {
 	let retryInterval = 1000;
 	let ws: WebSocket | null = null;
-	
+
 	function connect() {
 		let wsUrl = './ws';
 		console.debug('Connecting to WebSocket server at', wsUrl);
@@ -28,6 +28,11 @@ export function initializeWebSocket() {
 		ws.onopen = function () {
 			console.debug('WebSocket connection established');
 			connected.set(true);
+			// Clear the connection timeout if it was set in tryConnect
+			if (connectionTimeout) {
+				clearTimeout(connectionTimeout);
+				connectionTimeout = null;
+			}
 		};
 
 		ws.onmessage = function (event) {
@@ -41,28 +46,54 @@ export function initializeWebSocket() {
 			console.debug(
 				'WebSocket closed. Attempting to reconnect in ' + retryInterval / 1000 + ' seconds...'
 			);
-			ws = null; // Ensure ws is set to null when it is closed
-			setTimeout(connect, retryInterval);
+			ws = null; // Ensure ws is set to null when closed
+			// Clear the connection timeout if it was set in tryConnect
+			if (connectionTimeout) {
+				clearTimeout(connectionTimeout);
+				connectionTimeout = null;
+			}
+			setTimeout(tryConnect, retryInterval);
 		};
 
 		ws.onerror = function (event) {
 			console.error('WebSocket encountered error:', event);
+			// Clear the connection timeout if it was set in tryConnect
+			if (connectionTimeout) {
+				clearTimeout(connectionTimeout);
+				connectionTimeout = null;
+			}
 			if (ws) {
 				ws.close();
 			}
 		};
 	}
 
+	let connectionTimeout: number | null = null;
+
 	function tryConnect() {
 		console.debug('Attempting WebSocket connection...');
 		try {
 			connect();
+
+			// If the connection does not open within retryInterval, consider it a timeout
+			connectionTimeout = window.setTimeout(() => {
+				console.error(`WebSocket connection timed out after ${3*retryInterval}ms`);
+				if (ws && ws.readyState !== WebSocket.OPEN) {
+					ws.close();
+					ws = null;
+					setTimeout(tryConnect, 3*retryInterval);
+				}
+			}, 3*retryInterval);
 		} catch (err) {
 			console.error(
 				'WebSocket connection failed:',
 				err,
 				'Retrying in ' + retryInterval / 1000 + ' seconds...'
 			);
+			if (connectionTimeout) {
+				clearTimeout(connectionTimeout);
+				connectionTimeout = null;
+			}
 			setTimeout(tryConnect, retryInterval);
 		}
 	}

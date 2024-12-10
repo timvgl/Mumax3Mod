@@ -102,16 +102,16 @@ func NewScalarField(name, unit, desc string, f func(dst *data.Slice)) ScalarFiel
 	return q
 }
 
-func NewVectorFieldFFT(name, unit, desc string, f func(dst *data.Slice), mesh *data.Mesh) VectorField {
-	v := AsVectorFieldFFT(&fieldFuncFFT{info{3, name, unit}, f, mesh})
+func NewVectorFieldFFT(name, unit, desc string, f func(dst *data.Slice), mesh *data.Mesh, axis func() ([3]int, [3]float64, [3]float64, []string), symmetricX, symmetricY bool) VectorField {
+	v := AsVectorFieldFFT(&fieldFuncFFT{info{3, name, unit}, f, mesh, axis, symmetricX, symmetricY})
 	DeclROnly(name, v, cat(desc, unit))
 	return v
 }
 
 // NewVectorField constructs an outputable space-dependent scalar quantity whose
 // value is provided by function f.
-func NewScalarFieldFFT(name, unit, desc string, f func(dst *data.Slice), mesh *data.Mesh) ScalarField {
-	q := AsScalarFieldFFT(&fieldFuncFFT{info{1, name, unit}, f, mesh})
+func NewScalarFieldFFT(name, unit, desc string, f func(dst *data.Slice), mesh *data.Mesh, axis func() ([3]int, [3]float64, [3]float64, []string), symmetricX, symmetricY bool) ScalarField {
+	q := AsScalarFieldFFT(&fieldFuncFFT{info{1, name, unit}, f, mesh, axis, symmetricX, symmetricY})
 	DeclROnly(name, q, cat(desc, unit))
 	return q
 }
@@ -123,8 +123,11 @@ type fieldFunc struct {
 
 type fieldFuncFFT struct {
 	info
-	f    func(*data.Slice)
-	mesh *data.Mesh
+	f          func(*data.Slice)
+	mesh       *data.Mesh
+	axis       func() ([3]int, [3]float64, [3]float64, []string)
+	symmetricX bool
+	symmetricY bool
 }
 
 func (c *fieldFunc) Mesh() *data.Mesh       { return Mesh() }
@@ -140,9 +143,12 @@ func (q *fieldFunc) Slice() (s *data.Slice, recycle bool) {
 	return buf, true
 }
 
-func (c *fieldFuncFFT) Mesh() *data.Mesh       { return c.mesh }
-func (c *fieldFuncFFT) average() []float64     { return qAverageUniverse(c) }
-func (c *fieldFuncFFT) EvalTo(dst *data.Slice) { EvalTo(c, dst) }
+func (c *fieldFuncFFT) Mesh() *data.Mesh                                 { return c.mesh }
+func (c *fieldFuncFFT) average() []float64                               { return qAverageUniverse(c) }
+func (c *fieldFuncFFT) EvalTo(dst *data.Slice)                           { EvalTo(c, dst) }
+func (c *fieldFuncFFT) Axis() ([3]int, [3]float64, [3]float64, []string) { return c.axis() }
+func (c *fieldFuncFFT) SymmetricX() bool                                 { return c.symmetricX }
+func (c *fieldFuncFFT) SymmetricY() bool                                 { return c.symmetricY }
 
 // Calculates and returns the quantity.
 // recycle is true: slice needs to be recycled.
@@ -175,11 +181,18 @@ func AsScalarFieldFFT(q Quantity) ScalarField {
 	return ScalarField{q}
 }
 
-func (s ScalarField) average() []float64       { return AverageOf(s.Quantity) }
-func (s ScalarField) Average() float64         { return s.average()[0] }
-func (s ScalarField) Region(r int) ScalarField { return AsScalarField(inRegion(s.Quantity, r)) }
-func (s ScalarField) Name() string             { return NameOf(s.Quantity) }
-func (s ScalarField) Unit() string             { return UnitOf(s.Quantity) }
+func (s ScalarField) average() []float64                               { return AverageOf(s.Quantity) }
+func (s ScalarField) Average() float64                                 { return s.average()[0] }
+func (s ScalarField) Region(r int) ScalarField                         { return AsScalarField(inRegion(s.Quantity, r)) }
+func (s ScalarField) Name() string                                     { return NameOf(s.Quantity) }
+func (s ScalarField) Unit() string                                     { return UnitOf(s.Quantity) }
+func (s ScalarField) Axis() ([3]int, [3]float64, [3]float64, []string) { return AxisOf(s.Quantity) }
+func (s ScalarField) SymmetricX() bool {
+	return SymmetricXOf(s.Quantity)
+}
+func (s ScalarField) SymmetricY() bool {
+	return SymmetricYOf(s.Quantity)
+}
 
 // VectorField enhances an outputField with methods specific to
 // a space-dependent vector quantity.
@@ -203,15 +216,24 @@ func AsVectorFieldFFT(q Quantity) VectorField {
 	return VectorField{q}
 }
 
-func (v VectorField) average() []float64       { return AverageOf(v.Quantity) }
-func (v VectorField) Average() data.Vector     { return unslice(v.average()) }
-func (v VectorField) Region(r int) VectorField { return AsVectorField(inRegion(v.Quantity, r)) }
-func (v VectorField) Comp(c int) ScalarField   { return AsScalarField(Comp(v.Quantity, c)) }
-func (v VectorField) Mesh() *data.Mesh         { return MeshOf(v.Quantity) }
-func (v VectorField) Name() string             { return NameOf(v.Quantity) }
-func (v VectorField) Unit() string             { return UnitOf(v.Quantity) }
+func (v VectorField) average() []float64                               { return AverageOf(v.Quantity) }
+func (v VectorField) Average() data.Vector                             { return unslice(v.average()) }
+func (v VectorField) Region(r int) VectorField                         { return AsVectorField(inRegion(v.Quantity, r)) }
+func (v VectorField) Comp(c int) ScalarField                           { return AsScalarField(Comp(v.Quantity, c)) }
+func (v VectorField) Mesh() *data.Mesh                                 { return MeshOf(v.Quantity) }
+func (v VectorField) Name() string                                     { return NameOf(v.Quantity) }
+func (v VectorField) Unit() string                                     { return UnitOf(v.Quantity) }
+func (v VectorField) Axis() ([3]int, [3]float64, [3]float64, []string) { return AxisOf(v.Quantity) }
+func (s VectorField) SymmetricX() bool {
+	return SymmetricXOf(s.Quantity)
+}
+func (s VectorField) SymmetricY() bool {
+	return SymmetricYOf(s.Quantity)
+}
+
 func (v VectorField) HostCopy() *data.Slice {
 	s := ValueOf(v.Quantity)
 	defer cuda.Recycle(s)
 	return s.HostCopy()
 }
+func (v VectorField) GetQuantity() Quantity { return v.Quantity }

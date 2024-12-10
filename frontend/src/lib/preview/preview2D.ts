@@ -59,22 +59,101 @@ function update() {
 		]
 	});
 	if (getNewQuantityState()) {
-		let [xData, yData, xAxisName, yAxisName] = get_axis_data(ps)
+		let isFFT = (get(previewState).dynQuantities["FFT"] ?? []).includes(get(previewState).quantity)
+		let [xData, yData, xAxisName, yAxisName] = get_axis_data(ps, isFFT)
 		let option = chartInstance.getOption();
 		if (Array.isArray(option.xAxis)) {
 			option.xAxis[0].data = xData;
 			option.xAxis[0].name = xAxisName;
+			if (option.xAxis[0].axisTick && option.xAxis[0].axisTick.interval) {
+				option.xAxis[0].axisTick.interval = ps.symmetricX ? symmetricTickIntervalTicks(xData) : function (index: number) {
+					// Show ticks only at every 10th value
+					return index % 10 === 0;
+				}	
+			}
+			if (option.xAxis[0].axisLabel) {
+				option.xAxis[0].axisLabel.formatter = ps.symmetricX ? function (value: string, index: number) {
+					return symmetricTickIntervalLabel(xData)(index) ? parseFloat(value).toFixed(0) : '';
+				} : function (value: string, index: number) {
+					return index % 10 === 0 ? parseFloat(value).toFixed(0) : '';
+				}
+				option.xAxis[0].axisLabel.interval = ps.symmetricX ? symmetricTickIntervalTicks(xData) : function (index: number) {
+					// Show ticks only at every 10th value
+					return index % 10 === 0;
+				}
+			}
 		} else if (option.xAxis) {
 			option.xAxis.data = xData;
 			option.xAxis.name = xAxisName;
+			if (option.xAxis.axisTick && option.xAxis.axisTick.interval) {
+				option.xAxis.axisTick.interval = ps.symmetricX ? symmetricTickIntervalTicks(xData) : function (index: number) {
+					// Show ticks only at every 10th value
+					return index % 10 === 0;
+				}	
+			}
+			if (option.xAxis.axisLabel) {
+				option.xAxis.axisLabel.formatter = ps.symmetricX ? function (value: string, index: number) {
+					return symmetricTickIntervalLabel(xData)(index) ? parseFloat(value).toFixed(0) : '';
+				} : function (value: string, index: number) {
+					return index % 10 === 0 ? parseFloat(value).toFixed(0) : '';
+				}
+				option.xAxis.axisLabel.interval = ps.symmetricX ? symmetricTickIntervalTicks(xData) : function (index: number) {
+					// Show ticks only at every 10th value
+					return index % 10 === 0;
+				}
+			}
 		}
 		
 		if (Array.isArray(option.yAxis)) {
 			option.yAxis[0].data = yData;
 			option.yAxis[0].name = yAxisName;
+			if (option.yAxis[0].axisTick && option.yAxis[0].axisTick.interval) {
+				option.yAxis[0].axisTick.interval = ps.symmetricY ? symmetricTickIntervalTicks(yData) : function (index: number) {
+					// Show ticks only at every 10th value
+					return index % 10 === 0;
+				}	
+			}
+			if (option.yAxis[0].axisLabel) {
+				option.yAxis[0].axisLabel.formatter = ps.symmetricY ? function (value: string, index: number): string {
+					return symmetricTickIntervalLabel(yData)(index) ? parseFloat(value).toFixed(0) : '';
+				} : function (value: string, index: number) {
+					return index % 10 === 0 ? parseFloat(value).toFixed(0) : '';
+				}
+				option.yAxis[0].axisLabel.interval = ps.symmetricY ? symmetricTickIntervalTicks(yData) : function (index: number) {
+					// Show ticks only at every 10th value
+					return index % 10 === 0;
+				}
+			}
 		} else if (option.yAxis) {
 			option.yAxis.data = yData;
 			option.yAxis.name = yAxisName;
+			if (option.yAxis.axisTick && option.yAxis.axisTick.interval) {
+				option.yAxis.axisTick.interval = ps.symmetricY ? symmetricTickIntervalTicks(yData) : function (index: number) {
+					// Show ticks only at every 10th value
+					return index % 10 === 0;
+				}	
+			}
+			if (option.yAxis.axisLabel) {
+				option.yAxis.axisLabel.interval = ps.symmetricY ? symmetricTickIntervalTicks(yData) : function (index: number) {
+					// Show ticks only at every 10th value
+					return index % 10 === 0;
+				}
+				option.yAxis.axisLabel.formatter = ps.symmetricY ? function (value: string, index: number): String {
+					return symmetricTickIntervalLabel(yData)(index) ? parseFloat(value).toFixed(0) : '';
+				} : function (value: string, index: number) {
+					return index % 10 === 0 ? parseFloat(value).toFixed(0) : '';
+				}
+			}
+		}
+
+		if (option.axisPointer && option.axisPointer.label) {
+			option.axisPointer.label.formatter =  function (params: any) {
+				if (params.value === undefined) {
+					return 'NaN';
+				}
+				let unit = isFFT ? "1/μm" : "nm"
+				return ` ${parseFloat(params.value).toFixed(0)} ${unit}`;
+			}
 		}
 
         // Set the updated option back
@@ -83,29 +162,103 @@ function update() {
 	}
 }
 
-function get_axis_data(ps: Preview): [string[], string[], string, string] {
+function symmetricTickIntervalLabel(data: any[]): (index: number) => boolean {
+    const total = data.length;
+
+    if (total < 5) {
+        return () => true; // Show all ticks if data is too small
+    }
+
+    const low = 0;
+    const high = total - 1;
+    const mid = Math.floor(total / 2);
+    const quarter = Math.floor((mid - low) / 2);
+    const threeQuarter = mid + quarter;
+
+    // Return a function to align with ECharts' scaling
+    return (index: number) => [low, quarter, mid, threeQuarter, high].includes(index);
+}
+
+function symmetricTickIntervalTicks(data: any[]): (index: number) => boolean {
+    const total = data.length;
+
+    // If there's too little data, just show all ticks
+    if (total < 5) {
+        return () => true;
+    }
+
+    // Key indices
+    const low = 0;
+    const high = total - 1;
+    const mid = Math.floor(total / 2);
+    const quarter = Math.floor((mid - low) / 2);
+    const threeQuarter = mid + quarter;
+
+    // This function subdivides an interval [start, end] into (intermediates + 1) segments,
+    // returning all intermediate points including start and end.
+    // For example, if intermediates = 3 and start=0, end=10:
+    // It returns [0, 2, 4, 6, 8, 10] (5 segments = 4 intervals).
+    function subdivideInterval(start: number, end: number, intermediates: number): number[] {
+        const step = (end - start) / (intermediates + 1);
+        const points: number[] = [];
+        for (let i = 0; i <= intermediates + 1; i++) {
+            // Use Math.round to ensure indices remain integers
+            points.push(Math.round(start + step * i));
+        }
+        return points;
+    }
+
+    // Main intervals to subdivide
+    const intervals = [
+        [low, quarter],
+        [quarter, mid],
+        [mid, threeQuarter],
+        [threeQuarter, high]
+    ];
+
+    let ticks: number[] = [];
+
+    // Subdivide each interval and combine them
+    intervals.forEach((interval, index) => {
+        let [start, end] = interval;
+        let subdivided = subdivideInterval(start, end, 3);
+        // Avoid duplicating endpoints: after the first interval, remove the first point
+        // because it was the end of the previous interval.
+        if (index > 0) {
+            subdivided.shift();
+        }
+        ticks = ticks.concat(subdivided);
+    });
+
+    // Convert to a set for O(1) lookups and ensure uniqueness
+    const tickSet = new Set(ticks);
+
+    // Return a function that checks if the given index is a tick
+    return (index: number) => tickSet.has(index);
+}
+
+
+function get_axis_data(ps: Preview, isFFT: boolean): [string[], string[], string, string] {
 	let dims = [ps.xChosenSize, ps.yChosenSize];
 	let mesh = get(meshState);
-	let xStart = get(previewState).startX;
-	let yStart = get(previewState).startY;
+	let xStart = ps.startX;
+	let yStart = ps.startY;
 	let xData;
 	let yData;
 	let xAxisName = "";
 	let yAxisName = "";
 	// console.log(mesh.Nx/ps.xChosenSize);
-	if ((get(previewState).dynQuantities["FFT"] ?? []).includes(get(previewState).quantity)) {
-		console.log(mesh.dx)
-		xData = Array.from({ length: dims[0] }, (_, i) => String(xStart + i * mesh.dx * 1e-9 * mesh.Nx / ps.xChosenSize));
-		yData = Array.from({ length: dims[1] }, (_, i) => String(yStart + i * mesh.dy * 1e-9 * mesh.Nx / ps.yChosenSize));
+	if (isFFT === true) {
+		xData = Array.from({ length: dims[0] }, (_, i) => String((xStart * 1e-6 + i * mesh.dx * 1e-6) * (mesh.Nx) / ps.xChosenSize));
+		yData = Array.from({ length: dims[1] }, (_, i) => String((yStart * 1e-6 + i * mesh.dy * 1e-6) * (mesh.Ny) / ps.yChosenSize));
 		xAxisName = "kx (1/nm)"
 		yAxisName = "ky (1/nm)"
 	} else {
-		xData = Array.from({ length: dims[0] }, (_, i) => String(xStart + i * mesh.dx * 1e9 * mesh.Nx / ps.xChosenSize));
-		yData = Array.from({ length: dims[1] }, (_, i) => String(yStart + i * mesh.dy * 1e9 * mesh.Nx / ps.yChosenSize));
+		xData = Array.from({ length: dims[0] }, (_, i) => String((xStart * 1e9 + i * mesh.dx * 1e9) * mesh.Nx / ps.xChosenSize));
+		yData = Array.from({ length: dims[1] }, (_, i) => String((yStart * 1e9 + i * mesh.dy * 1e9) * mesh.Ny / ps.yChosenSize));
 		xAxisName = "x (nm)"
 		yAxisName = "y (nm)"
 	}
-	console.log(xAxisName)
 	return [xData, yData, xAxisName, yAxisName]
 }
 
@@ -114,7 +267,8 @@ function init() {
 	// https://apache.github.io/echarts-handbook/en/best-practices/canvas-vs-svg
 	chartInstance = echarts.init(chartDom, undefined, { renderer: 'svg' });
 	let ps = get(previewState);
-	let [xData, yData, xAxisName, yAxisName] = get_axis_data(ps)
+	let isFFT = (get(previewState).dynQuantities["FFT"] ?? []).includes(get(previewState).quantity);
+	let [xData, yData, xAxisName, yAxisName] = get_axis_data(ps, isFFT);
 
 	let aspectRatio = ps.xChosenSize / ps.yChosenSize; // Calculate the aspect ratio
 
@@ -163,7 +317,8 @@ function init() {
 					if (params.value === undefined) {
 						return 'NaN';
 					}
-					return ` ${parseFloat(params.value).toFixed(0)} nm`;
+					let unit = isFFT ? "1/μm" : "nm"
+					return ` ${parseFloat(params.value).toFixed(0)} ${unit}`;
 				},
 				padding: [8, 5, 8, 5],
 				borderColor: '#6e9bcb',
@@ -181,7 +336,7 @@ function init() {
 			},
 			axisTick: {
 				alignWithLabel: true,
-				interval: function (index: number) {
+				interval: ps.symmetricX ? symmetricTickIntervalTicks(xData) : function (index: number) {
 					// Show ticks only at every 10th value
 					return index % 10 === 0;
 				},
@@ -193,7 +348,13 @@ function init() {
 			},
 			axisLabel: {
 				show: true,
-				formatter: function (value: string, index: number) {
+				interval: ps.symmetricX ? symmetricTickIntervalTicks(xData) : function (index: number) {
+					// Show ticks only at every 10th value
+					return index % 10 === 0;
+				},
+				formatter: ps.symmetricX ? function (value: string, index: number) {
+					return symmetricTickIntervalLabel(xData)(index) ? parseFloat(value).toFixed(0) : '';
+				} : function (value: string, index: number) {
 					return index % 10 === 0 ? parseFloat(value).toFixed(0) : '';
 				},
 				color: '#fff',
@@ -211,7 +372,7 @@ function init() {
 			},
 			axisTick: {
 				alignWithLabel: true,
-				interval: function (index: number) {
+				interval: ps.symmetricY ? symmetricTickIntervalTicks(yData) : function (index: number) {
 					// Show ticks only at every 10th value
 					return index % 10 === 0;
 				},
@@ -223,7 +384,13 @@ function init() {
 			},
 			axisLabel: {
 				show: true,
-				formatter: function (value: string, index: number) {
+				interval: ps.symmetricY ? symmetricTickIntervalTicks(yData) : function (index: number) {
+					// Show ticks only at every 10th value
+					return index % 10 === 0;
+				},
+				formatter: ps.symmetricY ? function (value: string, index: number): String{
+					return symmetricTickIntervalLabel(yData)(index) ? parseFloat(value).toFixed(0) : '';
+				} : function (value: string, index: number) {
 					return index % 10 === 0 ? parseFloat(value).toFixed(0) : '';
 				},
 				color: '#fff',

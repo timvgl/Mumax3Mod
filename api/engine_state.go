@@ -31,7 +31,7 @@ func (es *EngineState) Update() {
 	es.Console.Update()
 	es.Preview.Update()
 	es.Solver.Update()
-	es.Mesh.Update()
+	es.Mesh.Update(*es.Preview)
 	es.Params.Update()
 	es.TablePlot.Update()
 	es.Metrics.Update()

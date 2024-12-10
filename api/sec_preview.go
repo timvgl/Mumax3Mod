@@ -1,6 +1,7 @@
 package api
 
 import (
+	"maps"
 	"math"
 	"net/http"
 	"slices"
@@ -14,7 +15,7 @@ import (
 	"github.com/mumax/3/logUI"
 )
 
-var wasFFT = false
+var dynQuantityPreview = false
 
 type PreviewState struct {
 	ws                   *WebSocketManager
@@ -43,6 +44,8 @@ type PreviewState struct {
 	StartX          float64             `msgpack:"startX"`
 	StartY          float64             `msgpack:"startY"`
 	StartZ          float64             `msgpack:"startZ"`
+	SymmetricX      bool                `msgpack:"symmetricX"`
+	SymmetricY      bool                `msgpack:"symmetricY"`
 }
 
 func initPreviewAPI(e *echo.Group, ws *WebSocketManager) *PreviewState {
@@ -70,6 +73,8 @@ func initPreviewAPI(e *echo.Group, ws *WebSocketManager) *PreviewState {
 		StartX:               0,
 		StartY:               0,
 		StartZ:               0,
+		SymmetricX:           false,
+		SymmetricY:           false,
 	}
 	previewState.addPossibleDownscaleSizes()
 	e.POST("/api/preview/component", previewState.postPreviewComponent)
@@ -110,8 +115,8 @@ func (s *PreviewState) UpdateQuantityBuffer() {
 			componentCount = 3
 		}
 
-		if slices.Contains(s.DynQuantities["FFT"], s.Quantity) && !wasFFT {
-			wasFFT = true
+		if slices.Contains(slices.Concat(slices.Collect(maps.Values(s.DynQuantities))...), s.Quantity) && !dynQuantityPreview {
+			dynQuantityPreview = true
 			// iterate over engine.Nx and engine.Ny
 			NxNyNz := engine.MeshOf(s.getQuantity()).Size()
 			s.XPossibleSizes = []int{}
@@ -132,23 +137,24 @@ func (s *PreviewState) UpdateQuantityBuffer() {
 			if !slices.Contains(s.YPossibleSizes, s.YChosenSize) {
 				s.YChosenSize = s.YPossibleSizes[len(s.YPossibleSizes)-1]
 			}
-			if q, ok := s.getQuantity().(interface {
-				Axis() ([3]int, [3]float64, [3]float64, []string)
-			}); ok {
-				_, start, _, _ := q.Axis()
-				s.StartX = start[0]
-				s.StartY = start[1]
-				s.StartZ = start[2]
-			}
+			_, start, _, _ := engine.AxisOf(s.getQuantity())
+			s.StartX = start[0]
+			s.StartY = start[1]
+			s.StartZ = start[2]
+			s.SymmetricX = engine.SymmetricXOf(s.getQuantity())
+			s.SymmetricY = engine.SymmetricYOf(s.getQuantity())
 
-		} else if !slices.Contains(s.DynQuantities["FFT"], s.Quantity) && wasFFT {
+		} else if !slices.Contains(slices.Concat(slices.Collect(maps.Values(s.DynQuantities))...), s.Quantity) && dynQuantityPreview {
 			s.XPossibleSizes = []int{}
 			s.YPossibleSizes = []int{}
-			s.StartX = 0
-			s.StartY = 0
-			s.StartZ = 0
+			s.SymmetricX = engine.SymmetricXOf(s.getQuantity())
+			s.SymmetricY = engine.SymmetricYOf(s.getQuantity())
+			_, start, _, _ := engine.AxisOf(s.getQuantity())
+			s.StartX = start[0]
+			s.StartY = start[1]
+			s.StartZ = start[2]
 			s.addPossibleDownscaleSizes()
-			wasFFT = false
+			dynQuantityPreview = false
 		}
 
 		GPU_in := engine.ValueOf(s.getQuantity())

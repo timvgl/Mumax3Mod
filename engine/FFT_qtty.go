@@ -59,8 +59,8 @@ func FFT3D(q Quantity) *fftOperation3D {
 	FFTEvaluatedImag[q] = false
 	if !slices.Contains(DeclVarFFTDyn, q) {
 		if q.NComp() == 3 {
-			NewVectorFieldFFT("FFT_"+NameOf(q)+"_real", "a.u.", "get FFT of last save run - to costly otherwise", fftOP3D.Real().EvalTo, fftOP3D.Real().Mesh())
-			NewVectorFieldFFT("FFT_"+NameOf(q)+"_imag", "a.u.", "get FFT of last save run - to costly otherwise", fftOP3D.Imag().EvalTo, fftOP3D.Imag().Mesh())
+			NewVectorFieldFFT("FFT_"+NameOf(q)+"_real", "a.u.", "get FFT of last save run - to costly otherwise", fftOP3D.Real().EvalTo, fftOP3D.Real().Mesh(), fftOP3D.Real().Axis, fftOP3D.Real().SymmetricX(), fftOP3D.Real().SymmetricY())
+			NewVectorFieldFFT("FFT_"+NameOf(q)+"_imag", "a.u.", "get FFT of last save run - to costly otherwise", fftOP3D.Imag().EvalTo, fftOP3D.Imag().Mesh(), fftOP3D.Imag().Axis, fftOP3D.Imag().SymmetricX(), fftOP3D.Imag().SymmetricY())
 			DeclVarFFTDyn = append(DeclVarFFTDyn, fftOP3D.Real())
 			DeclVarFFTDyn = append(DeclVarFFTDyn, fftOP3D.Imag())
 
@@ -68,8 +68,8 @@ func FFT3D(q Quantity) *fftOperation3D {
 			DeclVarFFTDynAlias = append(DeclVarFFTDynAlias, "FFT_"+NameOf(q)+"_imag")
 			FFT3DData[q] = cuda.Buffer(3, fftOP3D.FFTOutputSize())
 		} else if q.NComp() == 1 {
-			NewScalarFieldFFT("FFT_"+NameOf(q)+"_real", "a.u.", "get FFT of last save run - to costly otherwise", fftOP3D.Real().EvalTo, fftOP3D.Real().Mesh())
-			NewScalarFieldFFT("FFT_"+NameOf(q)+"_imag", "a.u.", "get FFT of last save run - to costly otherwise", fftOP3D.Imag().EvalTo, fftOP3D.Imag().Mesh())
+			NewScalarFieldFFT("FFT_"+NameOf(q)+"_real", "a.u.", "get FFT of last save run - to costly otherwise", fftOP3D.Real().EvalTo, fftOP3D.Real().Mesh(), fftOP3D.Real().Axis, fftOP3D.Real().SymmetricX(), fftOP3D.Real().SymmetricY())
+			NewScalarFieldFFT("FFT_"+NameOf(q)+"_imag", "a.u.", "get FFT of last save run - to costly otherwise", fftOP3D.Imag().EvalTo, fftOP3D.Imag().Mesh(), fftOP3D.Imag().Axis, fftOP3D.Imag().SymmetricX(), fftOP3D.Imag().SymmetricY())
 			DeclVarFFTDyn = append(DeclVarFFTDyn, fftOP3D.Real())
 			DeclVarFFTDyn = append(DeclVarFFTDyn, fftOP3D.Imag())
 
@@ -101,7 +101,7 @@ func (d *fftOperation3D) evalIntern() {
 func (d *fftOperation3D) Mesh() *data.Mesh {
 	s := d.FFTOutputSize()
 	c := Mesh().CellSize()
-	return data.NewMesh(s[X]/2, s[Y], s[Z], 1/(2*c[X]*float64(s[X])), 1/(2*c[Y]*float64(s[Y])), 1/(2*c[Z]*float64(s[Z])))
+	return data.NewMesh(s[X]/2, s[Y], s[Z], 1/(c[X]*float64(s[X])), 1/(c[Y]*float64(s[Y])), 1/(c[Z]*float64(s[Z])))
 }
 
 func (d *fftOperation3D) Name() string {
@@ -130,6 +130,14 @@ func (d *fftOperation3D) Imag() *fftOperation3DImag {
 	return &fftOperation3DImag{fieldOp{d.q, d.q, d.q.NComp()}, "k_x_y_z_" + NameOf(d.q) + "_imag", d.q, *d}
 }
 
+func (d *fftOperation3D) SymmetricX() bool {
+	return false
+}
+
+func (d *fftOperation3D) SymmetricY() bool {
+	return true
+}
+
 func (d *fftOperation3DReal) EvalTo(dst *data.Slice) {
 	if !FFTEvaluated[d.q] && !FFTEvaluatedImag[d.q] {
 		d.op.evalIntern()
@@ -144,7 +152,7 @@ func (d *fftOperation3DReal) EvalTo(dst *data.Slice) {
 func (d *fftOperation3DReal) Mesh() *data.Mesh {
 	s := d.fftOutputSize()
 	c := Mesh().CellSize()
-	return data.NewMesh(s[X], s[Y], s[Z], 1/(2*c[X]*float64(s[X])), 1/(2*c[Y]*float64(s[Y])), 1/(2*c[Z]*float64(s[Z])))
+	return data.NewMesh(s[X], s[Y], s[Z], 1/(c[X]*float64(s[X])), 1/(c[Y]*float64(s[Y])), 1/(c[Z]*float64(s[Z])))
 }
 
 func (d *fftOperation3DReal) Name() string {
@@ -164,6 +172,14 @@ func (d *fftOperation3DReal) Axis() ([3]int, [3]float64, [3]float64, []string) {
 	return s, [3]float64{0., -1 / (2 * c[Y]), -1 / (2 * c[Z])}, [3]float64{1 / (2 * c[Y]), 1 / (2 * c[Y]), 1 / (2 * c[Z])}, []string{"x", "y", "z"}
 }
 
+func (d *fftOperation3DReal) SymmetricX() bool {
+	return false
+}
+
+func (d *fftOperation3DReal) SymmetricY() bool {
+	return true
+}
+
 func (d *fftOperation3DImag) EvalTo(dst *data.Slice) {
 	if !FFTEvaluated[d.q] && !FFTEvaluatedReal[d.q] {
 		d.op.evalIntern()
@@ -178,7 +194,7 @@ func (d *fftOperation3DImag) EvalTo(dst *data.Slice) {
 func (d *fftOperation3DImag) Mesh() *data.Mesh {
 	s := d.fftOutputSize()
 	c := Mesh().CellSize()
-	return data.NewMesh(s[X], s[Y], s[Z], 1/(2*c[X]*float64(s[X])), 1/(2*c[Y]*float64(s[Y])), 1/(2*c[Z]*float64(s[Z])))
+	return data.NewMesh(s[X], s[Y], s[Z], 1/(c[X]*float64(s[X])), 1/(c[Y]*float64(s[Y])), 1/(c[Z]*float64(s[Z])))
 }
 
 func (d *fftOperation3DImag) Name() string {
@@ -196,6 +212,14 @@ func (d *fftOperation3DImag) Axis() ([3]int, [3]float64, [3]float64, []string) {
 	c := Mesh().CellSize()
 	s := d.fftOutputSize()
 	return s, [3]float64{0., -1 / (2 * c[Y]), -1 / (2 * c[Z])}, [3]float64{1 / (2 * c[Y]), 1 / (2 * c[Y]), 1 / (2 * c[Z])}, []string{"x", "y", "z"}
+}
+
+func (d *fftOperation3DImag) SymmetricX() bool {
+	return false
+}
+
+func (d *fftOperation3DImag) SymmetricY() bool {
+	return true
 }
 
 /*
