@@ -48,7 +48,6 @@ func newSliceInt(nComp int, size [3]int, alloc func(int64) unsafe.Pointer, memTy
 //	return newSlice(nComp, m, cu.MemAllocHost, data.UnifiedMemory)
 //}
 
-
 // wrappers for data.EnableGPU arguments
 
 func memFree(ptr unsafe.Pointer) { cu.MemFree(cu.DevicePtr(uintptr(ptr))) }
@@ -101,7 +100,9 @@ func Zero(s *data.Slice) {
 
 func SetConstValue(s *data.Slice, v float32) {
 	var array = make([]float32, s.NComp())
-	array[0] = v
+	for i := range s.NComp() {
+		array[i] = v
+	}
 	Memset(s, array...)
 }
 

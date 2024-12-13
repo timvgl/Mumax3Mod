@@ -59,23 +59,32 @@ func FFT3D(q Quantity) *fftOperation3D {
 	FFTEvaluatedImag[q] = false
 	if !slices.Contains(DeclVarFFTDyn, q) {
 		if q.NComp() == 3 {
-			NewVectorFieldFFT("FFT_"+NameOf(q)+"_real", "a.u.", "get FFT of last save run - to costly otherwise", fftOP3D.Real().EvalTo, fftOP3D.Real().Mesh(), fftOP3D.Real().Axis, fftOP3D.Real().SymmetricX(), fftOP3D.Real().SymmetricY())
-			NewVectorFieldFFT("FFT_"+NameOf(q)+"_imag", "a.u.", "get FFT of last save run - to costly otherwise", fftOP3D.Imag().EvalTo, fftOP3D.Imag().Mesh(), fftOP3D.Imag().Axis, fftOP3D.Imag().SymmetricX(), fftOP3D.Imag().SymmetricY())
-			DeclVarFFTDyn = append(DeclVarFFTDyn, fftOP3D.Real())
-			DeclVarFFTDyn = append(DeclVarFFTDyn, fftOP3D.Imag())
-
-			DeclVarFFTDynAlias = append(DeclVarFFTDynAlias, "FFT_"+NameOf(q)+"_real")
-			DeclVarFFTDynAlias = append(DeclVarFFTDynAlias, "FFT_"+NameOf(q)+"_imag")
+			if !slices.Contains(DeclVarFFTDynAlias, "FFT_"+NameOf(q)+"_real") {
+				NewVectorFieldFFT("FFT_"+NameOf(q)+"_real", "a.u.", "get FFT of last save run - to costly otherwise", fftOP3D.Real().EvalTo, fftOP3D.Real().Mesh(), fftOP3D.Real().Axis, fftOP3D.Real().SymmetricX(), fftOP3D.Real().SymmetricY())
+				DeclVarFFTDyn = append(DeclVarFFTDyn, fftOP3D.Real())
+				DeclVarFFTDynAlias = append(DeclVarFFTDynAlias, "FFT_"+NameOf(q)+"_real")
+			}
+			if !slices.Contains(DeclVarFFTDynAlias, "FFT_"+NameOf(q)+"_imag") {
+				NewVectorFieldFFT("FFT_"+NameOf(q)+"_imag", "a.u.", "get FFT of last save run - to costly otherwise", fftOP3D.Imag().EvalTo, fftOP3D.Imag().Mesh(), fftOP3D.Imag().Axis, fftOP3D.Imag().SymmetricX(), fftOP3D.Imag().SymmetricY())
+				DeclVarFFTDyn = append(DeclVarFFTDyn, fftOP3D.Imag())
+				DeclVarFFTDynAlias = append(DeclVarFFTDynAlias, "FFT_"+NameOf(q)+"_imag")
+			}
 			FFT3DData[q] = cuda.Buffer(3, fftOP3D.FFTOutputSize())
+			cuda.Zero(FFT3DData[q])
+			//fmt.Println(FFT3DData[q].HostCopy().Tensors())
 		} else if q.NComp() == 1 {
-			NewScalarFieldFFT("FFT_"+NameOf(q)+"_real", "a.u.", "get FFT of last save run - to costly otherwise", fftOP3D.Real().EvalTo, fftOP3D.Real().Mesh(), fftOP3D.Real().Axis, fftOP3D.Real().SymmetricX(), fftOP3D.Real().SymmetricY())
-			NewScalarFieldFFT("FFT_"+NameOf(q)+"_imag", "a.u.", "get FFT of last save run - to costly otherwise", fftOP3D.Imag().EvalTo, fftOP3D.Imag().Mesh(), fftOP3D.Imag().Axis, fftOP3D.Imag().SymmetricX(), fftOP3D.Imag().SymmetricY())
-			DeclVarFFTDyn = append(DeclVarFFTDyn, fftOP3D.Real())
-			DeclVarFFTDyn = append(DeclVarFFTDyn, fftOP3D.Imag())
-
-			DeclVarFFTDynAlias = append(DeclVarFFTDynAlias, "FFT_"+NameOf(q)+"_real")
-			DeclVarFFTDynAlias = append(DeclVarFFTDynAlias, "FFT_"+NameOf(q)+"_imag")
+			if !slices.Contains(DeclVarFFTDynAlias, "FFT_"+NameOf(q)+"_real") {
+				NewScalarFieldFFT("FFT_"+NameOf(q)+"_real", "a.u.", "get FFT of last save run - to costly otherwise", fftOP3D.Real().EvalTo, fftOP3D.Real().Mesh(), fftOP3D.Real().Axis, fftOP3D.Real().SymmetricX(), fftOP3D.Real().SymmetricY())
+				DeclVarFFTDyn = append(DeclVarFFTDyn, fftOP3D.Real())
+				DeclVarFFTDynAlias = append(DeclVarFFTDynAlias, "FFT_"+NameOf(q)+"_real")
+			}
+			if !slices.Contains(DeclVarFFTDynAlias, "FFT_"+NameOf(q)+"_imag") {
+				NewScalarFieldFFT("FFT_"+NameOf(q)+"_imag", "a.u.", "get FFT of last save run - to costly otherwise", fftOP3D.Imag().EvalTo, fftOP3D.Imag().Mesh(), fftOP3D.Imag().Axis, fftOP3D.Imag().SymmetricX(), fftOP3D.Imag().SymmetricY())
+				DeclVarFFTDyn = append(DeclVarFFTDyn, fftOP3D.Imag())
+				DeclVarFFTDynAlias = append(DeclVarFFTDynAlias, "FFT_"+NameOf(q)+"_imag")
+			}
 			FFT3DData[q] = cuda.Buffer(1, fftOP3D.FFTOutputSize())
+			cuda.Zero(FFT3DData[q])
 		}
 	}
 	return fftOP3D
@@ -92,10 +101,13 @@ func (d *fftOperation3D) EvalTo(dst *data.Slice) {
 func (d *fftOperation3D) evalIntern() {
 	input := ValueOf(d.a)
 	defer cuda.Recycle(input)
-	cuda.Zero(FFT3DData[d.q])
+	buf := cuda.Buffer(d.nComp, d.FFTOutputSize())
+	cuda.Zero(buf)
+	defer cuda.Recycle(buf)
 	for i := range d.nComp {
-		cuda.Perform3DR2CFFT(input.Comp(i), FFT3DData[d.q].Comp(i), FFT3DR2CPlans[d.q])
+		cuda.Perform3DR2CFFT(input.Comp(i), buf.Comp(i), FFT3DR2CPlans[d.q])
 	}
+	cuda.ReorderCufftData(FFT3DData[d.q], buf)
 }
 
 func (d *fftOperation3D) Mesh() *data.Mesh {
@@ -143,10 +155,7 @@ func (d *fftOperation3DReal) EvalTo(dst *data.Slice) {
 		d.op.evalIntern()
 		FFTEvaluatedReal[d.q] = true
 	}
-	buf := cuda.Buffer(d.q.NComp(), d.Mesh().Size())
-	defer cuda.Recycle(buf)
-	cuda.Real(buf, FFT3DData[d.q])
-	cuda.ReorderCufftData(dst, buf, d.Mesh())
+	cuda.Real(dst, FFT3DData[d.q])
 }
 
 func (d *fftOperation3DReal) Mesh() *data.Mesh {
@@ -185,10 +194,7 @@ func (d *fftOperation3DImag) EvalTo(dst *data.Slice) {
 		d.op.evalIntern()
 		FFTEvaluatedImag[d.q] = true
 	}
-	buf := cuda.Buffer(d.q.NComp(), d.Mesh().Size())
-	defer cuda.Recycle(buf)
-	cuda.Imag(buf, FFT3DData[d.q])
-	cuda.ReorderCufftData(dst, buf, d.Mesh())
+	cuda.Imag(dst, FFT3DData[d.q])
 }
 
 func (d *fftOperation3DImag) Mesh() *data.Mesh {

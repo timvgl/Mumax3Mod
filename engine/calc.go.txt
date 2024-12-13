@@ -1,0 +1,19 @@
+package engine
+
+import (
+	"slices"
+
+	"github.com/mumax/3/data"
+)
+
+var (
+	DeclVarCalcDyn      = []Quantity{}
+	DeclVarCalcDynAlias = []string{}
+	Calc3DData          = make(map[Quantity]*data.Slice)
+	Calc3DR2CPlans      = make(map[Quantity]interface{})
+	CalcEvaluated       = make(map[Quantity]bool)
+)
+
+func Calc(q Quantity) {
+	slices.Contains(slices.Concat(DeclVarCalcDynAlias, DeclVarFFTDynAlias), NameOf(q))
+}
