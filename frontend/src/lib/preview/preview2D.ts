@@ -251,8 +251,8 @@ function get_axis_data(ps: Preview, isFFT: boolean): [string[], string[], string
 	if (isFFT === true) {
 		xData = Array.from({ length: dims[0] }, (_, i) => String((xStart * 1e-6 + i * mesh.dx * 1e-6) * (mesh.Nx) / ps.xChosenSize));
 		yData = Array.from({ length: dims[1] }, (_, i) => String((yStart * 1e-6 + i * mesh.dy * 1e-6) * (mesh.Ny) / ps.yChosenSize));
-		xAxisName = "kx (1/nm)"
-		yAxisName = "ky (1/nm)"
+		xAxisName = "kx (1/μm)"
+		yAxisName = "ky (1/μm)"
 	} else {
 		xData = Array.from({ length: dims[0] }, (_, i) => String((xStart * 1e9 + i * mesh.dx * 1e9) * mesh.Nx / ps.xChosenSize));
 		yData = Array.from({ length: dims[1] }, (_, i) => String((yStart * 1e9 + i * mesh.dy * 1e9) * mesh.Ny / ps.yChosenSize));
