@@ -125,7 +125,7 @@ Comment: Loading strains is highly experimental - if you want to use the strain 
     + __EraseAllRegions__ - erase all regions - sets all regions back to region 0 - more efficent than redefining all regions seperate 
 
 * FFT:
-    + __FFT3D__ - calculate FFT in 3D (x, y, z) and e.g. save to ovf file. Args: __Quantity__
+    + __FFT3D__ - calculate FFT in 3D (x, y, z) and e.g. save to ovf file. When this command is runned the real and imag part the FFT is visible in the Web-UI. The data in the WebUI is being updated, when this command is called again, so in case of AutoSave every dt s. Args: __Quantity__
 
     Created OVF file has twice the amount of values calculated for kx for holding imag and real value.
     Can be imported into xarray by making use of mumaxXR. Please don't combine data holding non-FFT data and FFT data
