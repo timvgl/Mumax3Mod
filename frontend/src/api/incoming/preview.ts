@@ -28,7 +28,8 @@ export interface Preview {
 	startY: number,
 	startZ: number,
 	symmetricX: boolean,
-	symmetricY: boolean
+	symmetricY: boolean,
+	dynQuantitiesCat: string[]
 
 }
 
@@ -56,5 +57,6 @@ export const previewState = writable<Preview>({
 	startY: 0,
 	startZ: 0,
 	symmetricX: false,
-	symmetricY : false
+	symmetricY: false,
+	dynQuantitiesCat: []
 });

@@ -15,7 +15,7 @@ import (
 	"github.com/mumax/3/logUI"
 )
 
-var dynQuantityPreview = false
+var oldQPreview engine.Quantity
 
 type PreviewState struct {
 	ws                   *WebSocketManager
@@ -34,47 +34,49 @@ type PreviewState struct {
 	Refresh              bool                 `msgpack:"refresh"`
 	NComp                int                  `msgpack:"nComp"`
 
-	MaxPoints       int                 `msgpack:"maxPoints"`
-	DataPointsCount int                 `msgpack:"dataPointsCount"`
-	XPossibleSizes  []int               `msgpack:"xPossibleSizes"`
-	YPossibleSizes  []int               `msgpack:"yPossibleSizes"`
-	XChosenSize     int                 `msgpack:"xChosenSize"`
-	YChosenSize     int                 `msgpack:"yChosenSize"`
-	DynQuantities   map[string][]string `msgpack:"dynQuantities"`
-	StartX          float64             `msgpack:"startX"`
-	StartY          float64             `msgpack:"startY"`
-	StartZ          float64             `msgpack:"startZ"`
-	SymmetricX      bool                `msgpack:"symmetricX"`
-	SymmetricY      bool                `msgpack:"symmetricY"`
+	MaxPoints               int                 `msgpack:"maxPoints"`
+	DataPointsCount         int                 `msgpack:"dataPointsCount"`
+	XPossibleSizes          []int               `msgpack:"xPossibleSizes"`
+	YPossibleSizes          []int               `msgpack:"yPossibleSizes"`
+	XChosenSize             int                 `msgpack:"xChosenSize"`
+	YChosenSize             int                 `msgpack:"yChosenSize"`
+	DynQuantities           map[string][]string `msgpack:"dynQuantities"`
+	StartX                  float64             `msgpack:"startX"`
+	StartY                  float64             `msgpack:"startY"`
+	StartZ                  float64             `msgpack:"startZ"`
+	SymmetricX              bool                `msgpack:"symmetricX"`
+	SymmetricY              bool                `msgpack:"symmetricY"`
+	DynQuantitiesCategories []string            `msgpack:"dynQuantitiesCat"`
 }
 
 func initPreviewAPI(e *echo.Group, ws *WebSocketManager) *PreviewState {
 	previewState := PreviewState{
-		Quantity:             "m",
-		Component:            "3D",
-		Layer:                0,
-		MaxPoints:            8192,
-		Type:                 "3D",
-		VectorFieldValues:    nil,
-		VectorFieldPositions: nil,
-		ScalarField:          nil,
-		Min:                  0,
-		Max:                  0,
-		Refresh:              true,
-		NComp:                3,
-		DataPointsCount:      0,
-		XPossibleSizes:       nil,
-		YPossibleSizes:       nil,
-		XChosenSize:          engine.Nx,
-		YChosenSize:          engine.Ny,
-		ws:                   ws,
-		globalQuantities:     []string{"B_demag", "B_ext", "B_eff", "Edens_demag", "Edens_ext", "Edens_eff", "geom"},
-		DynQuantities:        make(map[string][]string),
-		StartX:               0,
-		StartY:               0,
-		StartZ:               0,
-		SymmetricX:           false,
-		SymmetricY:           false,
+		Quantity:                "m",
+		Component:               "3D",
+		Layer:                   0,
+		MaxPoints:               8192,
+		Type:                    "3D",
+		VectorFieldValues:       nil,
+		VectorFieldPositions:    nil,
+		ScalarField:             nil,
+		Min:                     0,
+		Max:                     0,
+		Refresh:                 true,
+		NComp:                   3,
+		DataPointsCount:         0,
+		XPossibleSizes:          nil,
+		YPossibleSizes:          nil,
+		XChosenSize:             engine.Nx,
+		YChosenSize:             engine.Ny,
+		ws:                      ws,
+		globalQuantities:        []string{"B_demag", "B_ext", "B_eff", "Edens_demag", "Edens_ext", "Edens_eff", "geom"},
+		DynQuantities:           make(map[string][]string),
+		StartX:                  0,
+		StartY:                  0,
+		StartZ:                  0,
+		SymmetricX:              false,
+		SymmetricY:              false,
+		DynQuantitiesCategories: engine.Categories,
 	}
 	previewState.addPossibleDownscaleSizes()
 	e.POST("/api/preview/component", previewState.postPreviewComponent)
@@ -105,7 +107,12 @@ func (s *PreviewState) Update() {
 }
 
 func (s *PreviewState) UpdateQuantityBuffer() {
+	s.DynQuantitiesCategories = engine.Categories
+	s.DynQuantitiesCategories = append(s.DynQuantitiesCategories, "FFT")
 	s.DynQuantities["FFT"] = engine.DeclVarFFTDynAlias
+	for key, value := range engine.DeclVarCalcDynAlias {
+		s.DynQuantities[key] = value
+	}
 	if s.layerMask == nil {
 		s.updateMask()
 	}
@@ -115,8 +122,8 @@ func (s *PreviewState) UpdateQuantityBuffer() {
 			componentCount = 3
 		}
 
-		if slices.Contains(slices.Concat(slices.Collect(maps.Values(s.DynQuantities))...), s.Quantity) && !dynQuantityPreview {
-			dynQuantityPreview = true
+		if slices.Contains(slices.Concat(slices.Collect(maps.Values(s.DynQuantities))...), s.Quantity) && oldQPreview != s.getQuantity() {
+			oldQPreview = s.getQuantity()
 			// iterate over engine.Nx and engine.Ny
 			NxNyNz := engine.MeshOf(s.getQuantity()).Size()
 			s.XPossibleSizes = []int{}
@@ -144,7 +151,7 @@ func (s *PreviewState) UpdateQuantityBuffer() {
 			s.SymmetricX = engine.SymmetricXOf(s.getQuantity())
 			s.SymmetricY = engine.SymmetricYOf(s.getQuantity())
 
-		} else if !slices.Contains(slices.Concat(slices.Collect(maps.Values(s.DynQuantities))...), s.Quantity) && dynQuantityPreview {
+		} else if !slices.Contains(slices.Concat(slices.Collect(maps.Values(s.DynQuantities))...), s.Quantity) && oldQPreview != s.getQuantity() {
 			s.XPossibleSizes = []int{}
 			s.YPossibleSizes = []int{}
 			s.SymmetricX = engine.SymmetricXOf(s.getQuantity())
@@ -154,7 +161,7 @@ func (s *PreviewState) UpdateQuantityBuffer() {
 			s.StartY = start[1]
 			s.StartZ = start[2]
 			s.addPossibleDownscaleSizes()
-			dynQuantityPreview = false
+			oldQPreview = s.getQuantity()
 		}
 
 		GPU_in := engine.ValueOf(s.getQuantity())

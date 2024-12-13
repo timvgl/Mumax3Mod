@@ -121,60 +121,168 @@ func SaveAsAt(q Quantity, fname, dir string) {
 	defer cuda.Recycle(buffer)
 	info := data.Meta{Time: Time, Name: NameOf(q), Unit: UnitOf(q), CellSize: MeshOf(q).CellSize()}
 	data := buffer.HostCopy() // must be copy (async io)
-	queOutput(func() { saveAs_sync(fname, data, info, outputFormat) })
+	if s, ok := q.(interface {
+		Axis() ([3]int, [3]float64, [3]float64, []string)
+		FFTOutputSize() [3]int
+	}); ok {
+		NxNyNz, startK, endK, transformedAxis := s.Axis()
+		queOutput(func() { saveAsFFT_sync(fname, data, info, outputFormat, NxNyNz, startK, endK, transformedAxis, true) })
+	} else if s, ok := q.(interface {
+		Axis() ([3]int, [3]float64, [3]float64, []string)
+	}); ok {
+		NxNyNz, startK, endK, transformedAxis := s.Axis()
+		queOutput(func() { saveAsFFT_sync(fname, data, info, outputFormat, NxNyNz, startK, endK, transformedAxis, false) })
+	} else {
+		queOutput(func() { saveAs_sync(fname, data, info, outputFormat) })
+	}
 }
 
 // Save image once, with auto file name
 func Snapshot(q Quantity) {
 	qname := NameOf(q)
-	fname := fmt.Sprintf(OD()+FilenameFormat+"."+SnapshotFormat, qname, autonumSnapshots[qname])
-	s := ValueOf(q)
-	defer cuda.Recycle(s)
-	data := s.HostCopy() // must be copy (asyncio)
-	queOutput(func() { snapshot_sync(fname, data) })
+	if s, ok := q.(interface {
+		Real() *fftOperation3DReal
+		Imag() *fftOperation3DImag
+	}); ok {
+		fnameReal := fmt.Sprintf(OD()+FilenameFormat+"."+SnapshotFormat, qname+"_real", autonumSnapshots[qname])
+		size, _, _, _ := s.Real().Axis()
+		buf := cuda.Buffer(s.Real().nComp, size)
+		cuda.Zero(buf)
+		defer cuda.Recycle(buf)
+		s.Real().EvalTo(buf)
+		dataReal := buf.HostCopy()
+		queOutput(func() { snapshot_sync(fnameReal, dataReal) })
+
+		fnameImag := fmt.Sprintf(OD()+FilenameFormat+"."+SnapshotFormat, qname+"_imag", autonumSnapshots[qname])
+		cuda.Zero(buf)
+		s.Imag().EvalTo(buf)
+		dataImag := buf.HostCopy()
+		queOutput(func() { snapshot_sync(fnameImag, dataImag) })
+	} else {
+		s := ValueOf(q)
+		defer cuda.Recycle(s)
+		data := s.HostCopy() // must be copy (asyncio)
+		fname := fmt.Sprintf(OD()+FilenameFormat+"."+SnapshotFormat, qname, autonumSnapshots[qname])
+		queOutput(func() { snapshot_sync(fname, data) })
+	}
 	autonumSnapshots[qname]++
 }
 
 func SnapshotPrefix(q Quantity, prefix string) {
 	qname := NameOf(q)
-	fname := fmt.Sprintf(OD()+FilenameFormat+"."+SnapshotFormat, prefix+"_"+qname, autonumSnapshotsPrefix[qname])
-	s := ValueOf(q)
-	defer cuda.Recycle(s)
-	data := s.HostCopy() // must be copy (asyncio)
-	queOutput(func() { snapshot_sync(fname, data) })
+
+	if s, ok := q.(interface {
+		Real() *fftOperation3DReal
+		Imag() *fftOperation3DImag
+	}); ok {
+		fnameReal := fmt.Sprintf(OD()+FilenameFormat+"."+SnapshotFormat, prefix+"_"+qname+"_real", autonumSnapshotsPrefix[qname])
+		size, _, _, _ := s.Real().Axis()
+		buf := cuda.Buffer(s.Real().nComp, size)
+		cuda.Zero(buf)
+		defer cuda.Recycle(buf)
+		s.Real().EvalTo(buf)
+		dataReal := buf.HostCopy()
+		queOutput(func() { snapshot_sync(fnameReal, dataReal) })
+
+		fnameImag := fmt.Sprintf(OD()+FilenameFormat+"."+SnapshotFormat, prefix+"_"+qname+"_imag", autonumSnapshotsPrefix[qname])
+		cuda.Zero(buf)
+		s.Imag().EvalTo(buf)
+		dataImag := buf.HostCopy()
+		queOutput(func() { snapshot_sync(fnameImag, dataImag) })
+	} else {
+		s := ValueOf(q)
+		defer cuda.Recycle(s)
+		data := s.HostCopy() // must be copy (asyncio)
+		fname := fmt.Sprintf(OD()+FilenameFormat+"."+SnapshotFormat, prefix+"_"+qname, autonumSnapshotsPrefix[qname])
+		queOutput(func() { snapshot_sync(fname, data) })
+	}
 	autonumSnapshotsPrefix[qname]++
 }
 
 func SnapshotAsOverwrite(q Quantity, name string) {
-	fname := fmt.Sprintf(OD()+FilenameFormat+"."+SnapshotFormat, name, autonumSnapshotsAs[name])
-	s := ValueOf(q)
-	defer cuda.Recycle(s)
-	data := s.HostCopy() // must be copy (asyncio)
-	queOutput(func() { snapshot_sync(fname, data) })
+	if s, ok := q.(interface {
+		Real() *fftOperation3DReal
+		Imag() *fftOperation3DImag
+	}); ok {
+		fnameReal := fmt.Sprintf(OD()+FilenameFormat+"."+SnapshotFormat, name+"_real", autonumSnapshotsAs[name])
+		size, _, _, _ := s.Real().Axis()
+		buf := cuda.Buffer(s.Real().nComp, size)
+		cuda.Zero(buf)
+		defer cuda.Recycle(buf)
+		s.Real().EvalTo(buf)
+		dataReal := buf.HostCopy()
+		queOutput(func() { snapshot_sync(fnameReal, dataReal) })
+
+		fnameImag := fmt.Sprintf(OD()+FilenameFormat+"."+SnapshotFormat, name+"_imag", autonumSnapshotsAs[name])
+		cuda.Zero(buf)
+		s.Imag().EvalTo(buf)
+		dataImag := buf.HostCopy()
+		queOutput(func() { snapshot_sync(fnameImag, dataImag) })
+	} else {
+		s := ValueOf(q)
+		defer cuda.Recycle(s)
+		data := s.HostCopy() // must be copy (asyncio)
+		fname := fmt.Sprintf(OD()+FilenameFormat+"."+SnapshotFormat, name, autonumSnapshotsAs[name])
+		queOutput(func() { snapshot_sync(fname, data) })
+	}
 	autonumSnapshotsAs[name]++
 }
 
 func SnapshotAsOverwritePrefix(q Quantity, prefix, name string) {
-	fname := fmt.Sprintf(OD()+FilenameFormat+"."+SnapshotFormat, prefix+"_"+name, autonumSnapshotsPrefixAs[name])
-	s := ValueOf(q)
-	defer cuda.Recycle(s)
-	data := s.HostCopy() // must be copy (asyncio)
-	queOutput(func() { snapshot_sync(fname, data) })
+	if s, ok := q.(interface {
+		Real() *fftOperation3DReal
+		Imag() *fftOperation3DImag
+	}); ok {
+		fnameReal := fmt.Sprintf(OD()+FilenameFormat+"."+SnapshotFormat, prefix+"_"+name+"_real", autonumSnapshotsPrefixAs[name])
+		size, _, _, _ := s.Real().Axis()
+		buf := cuda.Buffer(s.Real().nComp, size)
+		cuda.Zero(buf)
+		defer cuda.Recycle(buf)
+		s.Real().EvalTo(buf)
+		dataReal := buf.HostCopy()
+		queOutput(func() { snapshot_sync(fnameReal, dataReal) })
+
+		fnameImag := fmt.Sprintf(OD()+FilenameFormat+"."+SnapshotFormat, prefix+"_"+name+"_imag", autonumSnapshotsPrefixAs[name])
+		cuda.Zero(buf)
+		s.Imag().EvalTo(buf)
+		dataImag := buf.HostCopy()
+		queOutput(func() { snapshot_sync(fnameImag, dataImag) })
+	} else {
+		s := ValueOf(q)
+		defer cuda.Recycle(s)
+		data := s.HostCopy() // must be copy (asyncio)
+		fname := fmt.Sprintf(OD()+FilenameFormat+"."+SnapshotFormat, prefix+"_"+name, autonumSnapshotsPrefixAs[name])
+		queOutput(func() { snapshot_sync(fname, data) })
+	}
 	autonumSnapshotsPrefixAs[name]++
 }
 
 func SnapshotAs(q Quantity, fname string) {
-	if !strings.HasPrefix(fname, OD()) {
-		fname = OD() + fname // don't clean, turns http:// in http:/
-	}
+	if s, ok := q.(interface {
+		Real() *fftOperation3DReal
+		Imag() *fftOperation3DImag
+	}); ok {
+		fnameReal := fmt.Sprintf(OD() + fname + "_real" + "." + SnapshotFormat)
+		size, _, _, _ := s.Real().Axis()
+		buf := cuda.Buffer(s.Real().nComp, size)
+		cuda.Zero(buf)
+		defer cuda.Recycle(buf)
+		s.Real().EvalTo(buf)
+		dataReal := buf.HostCopy()
+		queOutput(func() { snapshot_sync(fnameReal, dataReal) })
 
-	if path.Ext(fname) == "" {
-		fname += ("." + StringFromOutputFormat[outputFormat])
+		fnameImag := fmt.Sprintf(OD() + fname + "_imag" + "." + SnapshotFormat)
+		cuda.Zero(buf)
+		s.Imag().EvalTo(buf)
+		dataImag := buf.HostCopy()
+		queOutput(func() { snapshot_sync(fnameImag, dataImag) })
+	} else {
+		s := ValueOf(q)
+		defer cuda.Recycle(s)
+		data := s.HostCopy() // must be copy (asyncio)
+		fname := fmt.Sprintf(OD() + fname + "." + SnapshotFormat)
+		queOutput(func() { snapshot_sync(fname, data) })
 	}
-	s := ValueOf(q)
-	defer cuda.Recycle(s)
-	data := s.HostCopy() // must be copy (asyncio)
-	queOutput(func() { snapshot_sync(fname, data) })
 }
 
 // synchronous snapshot
@@ -214,10 +322,6 @@ func saveAsFFT_sync(fname string, s *data.Slice, info data.Meta, format OutputFo
 	defer f.Close()
 
 	switch format {
-	case OVF1_TEXT:
-		oommf.WriteOVF1(f, s, info, "text")
-	case OVF1_BINARY:
-		oommf.WriteOVF1(f, s, info, "binary 4+4")
 	case OVF2_TEXT:
 		oommf.WriteOVF2FFT(f, s, info, "text", NxNyNz, startK, endK, transformedAxes)
 	case OVF2_BINARY:
@@ -229,7 +333,7 @@ func saveAsFFT_sync(fname string, s *data.Slice, info data.Meta, format OutputFo
 	case DUMP:
 		dump.Write(f, s, info)
 	default:
-		panic("invalid output format")
+		panic("Invalid output format. OVF1 not supported for complex data.")
 	}
 
 }

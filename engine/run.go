@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/data"
 	"github.com/mumax/3/util"
@@ -13,7 +14,7 @@ import (
 
 // Solver globals
 var (
-	HideProgressBar			= "false"
+	HideProgressBar         = "false"
 	Time                    float64                      // time in seconds
 	alarm                   float64                      // alarm clock marks end time of run, dt adaptation must not cross it!
 	Pause                   = true                       // set pause at any time to stop running after the current step
@@ -30,8 +31,8 @@ var (
 	stepper                 Stepper                      // generic step, can be EulerStep, HeunStep, etc
 	FixDtM                  float64                      // fixed time step?
 	FixDtU                  float64                      // fixed time step?
-	MoreStepsM				bool = true
-	FactorTimeMvsU			float64 = 10.
+	MoreStepsM              bool     = true
+	FactorTimeMvsU          float64  = 10.
 
 	Solvertype int
 

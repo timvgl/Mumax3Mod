@@ -4,7 +4,7 @@
 	import { onMount } from 'svelte';
 
 	import { previewState as p } from '$api/incoming/preview';
-	import { quantities, dynQuantities , updateDynQuantites } from './quantities';
+	import { quantities, dynQuantities, updateDynQuantites, dynQuantitiesCat } from './quantities';
 	import { postQuantity } from '$api/outgoing/preview';
 
 	onMount(() => {
@@ -54,12 +54,12 @@
 			</Dropdown>
 		{/if}
 	{/each}
-	{#each Object.entries($dynQuantities) as [category, items]}
+	{#each $dynQuantitiesCat as category}
 		<DropdownItem class="flex items-center justify-between">
 			{category}<ChevronRightOutline class="text-primary-700 ms-2 h-6 w-6 dark:text-white" />
 		</DropdownItem>
 		<Dropdown placement="right-start" trigger="hover">
-			{#each items as quantity}
+			{#each $dynQuantities[category] as quantity}
 				<DropdownItem
 					on:click={(_) => {
 						postQuantity(quantity);

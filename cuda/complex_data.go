@@ -13,9 +13,9 @@ func Real(dst, src *data.Slice) {
 	N := dst.Len()
 	cfg := make1DConf(N)
 
-	k_real_async(dst.DevPtr(X), src.DevPtr(X), N, cfg)
-	k_real_async(dst.DevPtr(Y), src.DevPtr(Y), N, cfg)
-	k_real_async(dst.DevPtr(Z), src.DevPtr(Z), N, cfg)
+	for c := range dst.NComp() {
+		k_real_async(dst.DevPtr(c), src.DevPtr(c), N, cfg)
+	}
 }
 
 func Imag(dst, src *data.Slice) {
@@ -25,8 +25,7 @@ func Imag(dst, src *data.Slice) {
 
 	N := dst.Len()
 	cfg := make1DConf(N)
-
-	k_imag_async(dst.DevPtr(X), src.DevPtr(X), N, cfg)
-	k_imag_async(dst.DevPtr(Y), src.DevPtr(Y), N, cfg)
-	k_imag_async(dst.DevPtr(Z), src.DevPtr(Z), N, cfg)
+	for c := range dst.NComp() {
+		k_imag_async(dst.DevPtr(c), src.DevPtr(c), N, cfg)
+	}
 }

@@ -14,12 +14,13 @@ type EngineState struct {
 }
 
 func initEngineStateAPI(e *echo.Group, ws *WebSocketManager) *EngineState {
+	preview := initPreviewAPI(e, ws)
 	return &EngineState{
 		Header:    initHeaderAPI(),
 		Console:   initConsoleAPI(e, ws),
-		Preview:   initPreviewAPI(e, ws),
+		Preview:   preview,
 		Solver:    initSolverAPI(e, ws),
-		Mesh:      initMeshAPI(e, ws),
+		Mesh:      initMeshAPI(e, ws, *preview),
 		Params:    initParameterAPI(e, ws),
 		TablePlot: initTablePlotAPI(e, ws),
 		Metrics:   initMetricsAPI(e, ws),

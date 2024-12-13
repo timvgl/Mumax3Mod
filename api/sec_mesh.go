@@ -9,7 +9,7 @@ import (
 	"github.com/mumax/3/engine"
 )
 
-var dynQuantityMesh = false
+var oldQMesh engine.Quantity
 
 type MeshState struct {
 	ws   *WebSocketManager
@@ -27,7 +27,7 @@ type MeshState struct {
 	PBCz int     `msgpack:"PBCz"`
 }
 
-func initMeshAPI(e *echo.Group, ws *WebSocketManager) *MeshState {
+func initMeshAPI(e *echo.Group, ws *WebSocketManager, Preview PreviewState) *MeshState {
 	meshState := MeshState{
 		ws:   ws,
 		Dx:   engine.Dx,
@@ -44,13 +44,14 @@ func initMeshAPI(e *echo.Group, ws *WebSocketManager) *MeshState {
 		PBCz: engine.PBCz,
 	}
 	e.POST("/api/mesh", meshState.postMesh)
+	oldQMesh = Preview.getQuantity()
 	return &meshState
 }
 
 func (m *MeshState) Update(Preview PreviewState) {
-	if slices.Contains(slices.Concat(slices.Collect(maps.Values(Preview.DynQuantities))...), Preview.Quantity) && !dynQuantityMesh {
+	if slices.Contains(slices.Concat(slices.Collect(maps.Values(Preview.DynQuantities))...), Preview.Quantity) && oldQMesh != Preview.getQuantity() {
 		mesh := engine.MeshOf(Preview.getQuantity())
-		dynQuantityMesh = true
+		oldQMesh = Preview.getQuantity()
 		m.Nx = mesh.Nx()
 		m.Ny = mesh.Ny()
 		m.Nz = mesh.Nz()
@@ -62,8 +63,8 @@ func (m *MeshState) Update(Preview PreviewState) {
 		m.Ty = float64(m.Ny) * m.Dy
 		m.Tz = float64(m.Nz) * m.Dz
 
-	} else if !slices.Contains(slices.Concat(slices.Collect(maps.Values(Preview.DynQuantities))...), Preview.Quantity) && dynQuantityMesh {
-		dynQuantityMesh = false
+	} else if !slices.Contains(slices.Concat(slices.Collect(maps.Values(Preview.DynQuantities))...), Preview.Quantity) && oldQMesh != Preview.getQuantity() {
+		oldQMesh = Preview.getQuantity()
 		m.Nx = engine.Nx
 		m.Ny = engine.Ny
 		m.Nz = engine.Nz

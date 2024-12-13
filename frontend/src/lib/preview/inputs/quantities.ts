@@ -81,9 +81,10 @@ export const quantities: { [category: string]: string[] } = {
 };
 
 export const dynQuantities = writable<{ [key: string]: string[] }>({});
-
+export const dynQuantitiesCat = writable<string[]>([]);
 export function updateDynQuantites() {
-	//console.log(get(previewState).dynQuantities)
-	dynQuantities.update(() => (get(previewState).dynQuantities))
+	const ps = get(previewState);
+    dynQuantitiesCat.set(ps.dynQuantitiesCat || []);
+	dynQuantities.set(ps.dynQuantities || {});
 };
 

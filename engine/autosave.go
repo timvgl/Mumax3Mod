@@ -5,15 +5,15 @@ package engine
 import "fmt"
 
 var (
-	output  = make(map[Quantity]*autosave) // when to save quantities
-	autonum = make(map[string]int)         // auto number for out file
-	autonumPrefix = make(map[string]int)   // auto number for out file
-	autonumSnapshots = make(map[string]int)         // auto number for out file
-	autonumSnapshotsPrefix = make(map[string]int)   // auto number for out file
-	autonumAs = make(map[string]int)         // auto number for out file
-	autonumPrefixAs = make(map[string]int)   // auto number for out file
-	autonumSnapshotsAs = make(map[string]int)         // auto number for out file
-	autonumSnapshotsPrefixAs = make(map[string]int)   // auto number for out file
+	output                   = make(map[Quantity]*autosave) // when to save quantities
+	autonum                  = make(map[string]int)         // auto number for out file
+	autonumPrefix            = make(map[string]int)         // auto number for out file
+	autonumSnapshots         = make(map[string]int)         // auto number for out file
+	autonumSnapshotsPrefix   = make(map[string]int)         // auto number for out file
+	autonumAs                = make(map[string]int)         // auto number for out file
+	autonumPrefixAs          = make(map[string]int)         // auto number for out file
+	autonumSnapshotsAs       = make(map[string]int)         // auto number for out file
+	autonumSnapshotsPrefixAs = make(map[string]int)         // auto number for out file
 )
 
 func init() {
@@ -116,24 +116,69 @@ func DoOutputPrefix(prefix string) {
 
 // Register quant to be auto-saved every period.
 // period == 0 stops autosaving.
-func AutoSave(q Quantity, period float64) {
+func AutoSave(q Quantity, period float64, args ...string) {
+	if len(args) > 1 {
+		panic("Too many arguments provided. Please provide maximal three arguments: Quantity, dt, category for UI")
+	}
+	_, ok := Quantities[NameOf(q)]
+	if !ok {
+		if len(args) == 1 {
+			Calc(q, args[0])
+		} else {
+			Calc(q, "unknown")
+		}
+	}
 	autonum[NameOf(q)] = 0
 	autonumPrefix[NameOf(q)] = 0
 	autoSave(q, period, Save, SavePrefix)
 }
-func AutoSaveAs(q Quantity, period float64, name string) {
+func AutoSaveAs(q Quantity, period float64, name string, args ...string) {
+	if len(args) > 1 {
+		panic("Too many arguments provided. Please provide maximal four arguments: Quantity, dt, name, category for UI")
+	}
+	_, ok := Quantities[NameOf(q)]
+	if !ok {
+		if len(args) == 1 {
+			CalcAs(q, name, args[0])
+		} else {
+			CalcAs(q, name, "unknown")
+		}
+	}
 	autonumAs[name] = 0
 	autonumPrefixAs[name] = 0
 	autoSaveAs(q, period, Save, SavePrefix, SaveAsOverwrite, SaveAsOverwritePrefix, name)
 }
+
 // Register quant to be auto-saved as image, every period.
-func AutoSnapshot(q Quantity, period float64) {
+func AutoSnapshot(q Quantity, period float64, args ...string) {
+	if len(args) > 1 {
+		panic("Too many arguments provided. Please provide maximal three arguments: Quantity, dt, category for UI")
+	}
+	_, ok := Quantities[NameOf(q)]
+	if !ok {
+		if len(args) == 1 {
+			Calc(q, args[0])
+		} else {
+			Calc(q, "unknown")
+		}
+	}
 	autonumSnapshots[NameOf(q)] = 0
 	autonumSnapshotsPrefix[NameOf(q)] = 0
 	autoSave(q, period, Snapshot, SnapshotPrefix)
 }
 
-func AutoSnapshotAs(q Quantity, period float64, name string) {
+func AutoSnapshotAs(q Quantity, period float64, name string, args ...string) {
+	if len(args) > 1 {
+		panic("Too many arguments provided. Please provide maximal four arguments: Quantity, dt, name, category for UI")
+	}
+	_, ok := Quantities[NameOf(q)]
+	if !ok {
+		if len(args) == 1 {
+			CalcAs(q, name, args[0])
+		} else {
+			CalcAs(q, name, "unknown")
+		}
+	}
 	autonumSnapshotsAs[name] = 0
 	autonumSnapshotsPrefixAs[name] = 0
 	autoSaveAs(q, period, Snapshot, SnapshotPrefix, SnapshotAsOverwrite, SnapshotAsOverwritePrefix, name)
@@ -158,25 +203,26 @@ func autoSaveAs(q Quantity, period float64, save func(Quantity), savePrefix, Sav
 }
 
 // generate auto file name based on save count and FilenameFormat. E.g.:
-// 	m000001.ovf
+//
+//	m000001.ovf
 func autoFname(name string, format OutputFormat, num int) string {
 	return fmt.Sprintf(OD()+FilenameFormat+"."+StringFromOutputFormat[format], name, num)
 }
 
 func autoFnamePrefix(prefix, name string, format OutputFormat, num int) string {
-	return fmt.Sprintf(OD()+FilenameFormat+"."+StringFromOutputFormat[format], prefix + "_" + name, num)
+	return fmt.Sprintf(OD()+FilenameFormat+"."+StringFromOutputFormat[format], prefix+"_"+name, num)
 }
 
 // keeps info needed to decide when a quantity needs to be periodically saved
 type autosave struct {
-	period float64        // How often to save
-	start  float64        // Starting point
-	count  int            // Number of times it has been autosaved
-	save   func(Quantity) // called to do the actual save
+	period       float64                // How often to save
+	start        float64                // Starting point
+	count        int                    // Number of times it has been autosaved
+	save         func(Quantity)         // called to do the actual save
 	savePrefix   func(Quantity, string) //prefix if autosave is runned during relaxing
-	saveAs   func(Quantity, string)
-	saveAsPrefix   func(Quantity, string, string)
-	qname string //rename file so that if data is cropped good names are possible
+	saveAs       func(Quantity, string)
+	saveAsPrefix func(Quantity, string, string)
+	qname        string //rename file so that if data is cropped good names are possible
 }
 
 // returns true when the time is right to save.

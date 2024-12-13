@@ -1764,7 +1764,8 @@ const previewState = writable({
   startY: 0,
   startZ: 0,
   symmetricX: false,
-  symmetricY: false
+  symmetricY: false,
+  dynQuantitiesCat: []
 });
 const headerState = writable({
   path: "",
@@ -1956,6 +1957,7 @@ const quantities = {
   ]
 };
 const dynQuantities = writable({});
+const dynQuantitiesCat = writable([]);
 function QuantityDropdown($$payload, $$props) {
   push();
   var $$store_subs;
@@ -1988,7 +1990,7 @@ function QuantityDropdown($$payload, $$props) {
       children: ($$payload3) => {
         const each_array = ensure_array_like(quantities["Common"]);
         const each_array_1 = ensure_array_like(Object.entries(quantities));
-        const each_array_3 = ensure_array_like(Object.entries(store_get($$store_subs ??= {}, "$dynQuantities", dynQuantities)));
+        const each_array_3 = ensure_array_like(store_get($$store_subs ??= {}, "$dynQuantitiesCat", dynQuantitiesCat));
         $$payload3.out += `<!--[-->`;
         for (let $$index = 0, $$length = each_array.length; $$index < $$length; $$index++) {
           let quantity = each_array[$$index];
@@ -2045,7 +2047,7 @@ function QuantityDropdown($$payload, $$props) {
         }
         $$payload3.out += `<!--]--> <!--[-->`;
         for (let $$index_4 = 0, $$length = each_array_3.length; $$index_4 < $$length; $$index_4++) {
-          let [category, items] = each_array_3[$$index_4];
+          let category = each_array_3[$$index_4];
           DropdownItem($$payload3, {
             class: "flex items-center justify-between",
             children: ($$payload4) => {
@@ -2062,7 +2064,7 @@ function QuantityDropdown($$payload, $$props) {
             placement: "right-start",
             trigger: "hover",
             children: ($$payload4) => {
-              const each_array_4 = ensure_array_like(items);
+              const each_array_4 = ensure_array_like(store_get($$store_subs ??= {}, "$dynQuantities", dynQuantities)[category]);
               $$payload4.out += `<!--[-->`;
               for (let $$index_3 = 0, $$length2 = each_array_4.length; $$index_3 < $$length2; $$index_3++) {
                 let quantity = each_array_4[$$index_3];
