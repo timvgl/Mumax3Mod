@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"math"
@@ -9,8 +10,9 @@ import (
 	"path"
 	"path/filepath"
 	"sort"
-	"strings"
 	"strconv"
+	"strings"
+
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/data"
 	"github.com/mumax/3/dump"
@@ -18,20 +20,19 @@ import (
 	"github.com/mumax/3/mag"
 	"github.com/mumax/3/oommf"
 	"github.com/mumax/3/util"
-	"bytes"
 )
 
 var (
-	GradMx = NewVectorField("GradMx", "J", "", GetGradMx)
-	GradMy = NewVectorField("GradMy", "J", "", GetGradMy)
-	GradMz = NewVectorField("GradMz", "J", "", GetGradMz)
-	GSDir  string
-	Suffix string
-	absPath string = ""
-	newestOvfFileIndex int
+	GradMx               = NewVectorField("GradMx", "J", "", GetGradMx)
+	GradMy               = NewVectorField("GradMy", "J", "", GetGradMy)
+	GradMz               = NewVectorField("GradMz", "J", "", GetGradMz)
+	GSDir                string
+	Suffix               string
+	absPath              string = ""
+	newestOvfFileIndex   int
 	failGetNewestOvfFile bool = true
-	gotValidOvfFile bool = false
-	newestOvfFile string
+	gotValidOvfFile      bool = false
+	newestOvfFile        string
 )
 
 func init() {
@@ -61,8 +62,8 @@ func init() {
 	DeclFunc("int", castInt, "")
 	DeclFunc("string", castString, "")
 	DeclFunc("NUndoneToLog", NUndoneToLog, "")
-	DeclFunc("exec", runExec, "")
-	DeclFunc("execDir", runExecDir, "")
+	DeclFunc("exec", RunExec, "")
+	DeclFunc("execDir", RunExecDir, "")
 	DeclVar("absPath", &absPath, "")
 	DeclFunc("WriteNUndoneToLog", WriteNUndoneToLog, "")
 	DeclFunc("getNewestOvfFile", get_newest_ovf_file, "")
@@ -76,18 +77,20 @@ func init() {
 
 func castableInt(str string) bool {
 	_, err := strconv.Atoi(str)
-    if err != nil {
-        return false
-    }
+	if err != nil {
+		return false
+	}
 	return true
 }
 
 func ValidOvfFile(fname string) bool {
 	defer func() bool {
-        if r := recover(); r != nil {
-            return false
-        } else { return true }
-    }()
+		if r := recover(); r != nil {
+			return false
+		} else {
+			return true
+		}
+	}()
 	in, err := httpfs.Open(fname)
 	if err != nil {
 		return false
@@ -110,12 +113,12 @@ func get_newest_ovf_file(q Quantity) string {
 	names, err := d.Readdirnames(-1)
 	biggestOvfIndex := 0
 	foundFile := false
-	for _, name := range(names) {
+	for _, name := range names {
 		var (
-			index int
+			index    int
 			gotIndex bool = false
 		)
-		for i, subString := range(name) {
+		for i, subString := range name {
 			if castableInt(string(subString)) {
 				gotIndex = true
 				index = i
@@ -145,7 +148,7 @@ func get_newest_ovf_file(q Quantity) string {
 	if foundFile {
 		newestOvfFileIndex = biggestOvfIndex
 		gotValidOvfFile = true
-		return fmt.Sprintf("%s%0*d%s", NameOf(q), 6, biggestOvfIndex, ".ovf") 
+		return fmt.Sprintf("%s%0*d%s", NameOf(q), 6, biggestOvfIndex, ".ovf")
 	} else if failGetNewestOvfFile {
 		panic("Could not find suitable ovf file.")
 	} else {
@@ -157,7 +160,7 @@ func WriteNUndoneToLog() {
 	LogOut(fmt.Sprintf("NUndone: %v", NUndone))
 }
 
-func runExec(cmdStr string) {
+func RunExec(cmdStr string) {
 	fmt.Println(cmdStr)
 	path, err := exec.LookPath(strings.Split(cmdStr, " ")[0])
 	if err != nil {
@@ -173,15 +176,15 @@ func runExec(cmdStr string) {
 	fmt.Println("out:", outb.String(), "err:", errb.String())
 }
 
-func runExecDir(cmdStr string) {
+func RunExecDir(cmdStr string) {
 	if strings.Contains(cmdStr, "%v") || strings.Contains(cmdStr, "%s") {
-		argsSprintf := make([]any, strings.Count(cmdStr, "%v") + strings.Count(cmdStr, "%s"))
-		for i := range(len(argsSprintf)) {
-			argsSprintf[i] = absPath+OD()
+		argsSprintf := make([]any, strings.Count(cmdStr, "%v")+strings.Count(cmdStr, "%s"))
+		for i := range len(argsSprintf) {
+			argsSprintf[i] = absPath + OD()
 		}
-		runExec(fmt.Sprintf(cmdStr, argsSprintf...))
+		RunExec(fmt.Sprintf(cmdStr, argsSprintf...))
 	} else {
-		runExec(cmdStr + " " + absPath+OD())
+		RunExec(cmdStr + " " + absPath + OD())
 	}
 }
 
@@ -195,22 +198,22 @@ func castString(val interface{}) string {
 
 func castInt(val interface{}) int {
 	switch v := val.(type) {
-		case string:
-			valStr, ok := strconv.Atoi(v)
-			if ok == nil {
-				return(valStr)
-			} else {
-				panic("Got non-castable string.")
-			}
-		case int32:
-			return int(v)
-		case float32:
-			return int(v)
-		case float64:
-			return int(v)
-		default:
-			panic(fmt.Sprintf("Type not recognized for %v", v))
+	case string:
+		valStr, ok := strconv.Atoi(v)
+		if ok == nil {
+			return (valStr)
+		} else {
+			panic("Got non-castable string.")
 		}
+	case int32:
+		return int(v)
+	case float32:
+		return int(v)
+	case float64:
+		return int(v)
+	default:
+		panic(fmt.Sprintf("Type not recognized for %v", v))
+	}
 }
 
 func EraseOD() {
@@ -225,7 +228,7 @@ func EraseOD() {
 		util.PanicErr(err)
 	}
 	for _, name := range names {
-		if name != "log.txt" && name != "gui"  && name != "table.txt" {
+		if name != "log.txt" && name != "gui" && name != "table.txt" {
 			err = os.RemoveAll(filepath.Join(dir, name))
 			if err != nil {
 				util.PanicErr(err)
@@ -237,8 +240,8 @@ func EraseOD() {
 func ConcStr(strs ...string) string {
 	var resultStr string
 	for _, str := range strs {
-        resultStr += str
-    }
+		resultStr += str
+	}
 
 	return resultStr
 }

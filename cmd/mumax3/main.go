@@ -14,9 +14,9 @@ import (
 	"github.com/mumax/3/api"
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/engine"
+	"github.com/mumax/3/logUI"
 	"github.com/mumax/3/script"
 	"github.com/mumax/3/util"
-	"github.com/mumax/3/logUI"
 )
 
 var (
@@ -62,15 +62,21 @@ func main() {
 		if len(args) > *flag_pipeline {
 			panic(fmt.Sprintf("Found unparsed args.\n %v", args))
 		}
-		mmx3Scripts := make([]string, 0)
 		for i := range args {
-			mmx3ScriptsTmp, err := template(args[i], *flag_flat)
+			mmx3ScriptsTmp, SweepExec, err := template(args[i], *flag_flat)
 			if err != nil {
 				panic(err)
 			}
-			mmx3Scripts = append(mmx3Scripts, mmx3ScriptsTmp...)
+			RunQueue(mmx3ScriptsTmp)
+			for _, expr := range SweepExec {
+				if expr.Dir {
+					engine.RunExecDir(expr.Arg)
+				} else {
+					engine.RunExec(expr.Arg)
+				}
+			}
 		}
-		RunQueue(mmx3Scripts)
+		os.Exit(int(exitStatus))
 	} else {
 		switch flag.NArg() {
 		case 0:

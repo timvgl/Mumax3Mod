@@ -120,12 +120,16 @@ func AutoSave(q Quantity, period float64, args ...string) {
 	if len(args) > 1 {
 		panic("Too many arguments provided. Please provide maximal three arguments: Quantity, dt, category for UI")
 	}
-	_, ok := Quantities[NameOf(q)]
-	if !ok {
-		if len(args) == 1 {
-			Calc(q, args[0])
-		} else {
-			Calc(q, "unknown")
+	if _, isFFT := q.(interface {
+		FFTOutputSize() [3]int
+	}); !isFFT {
+		_, ok := Quantities[NameOf(q)]
+		if !ok {
+			if len(args) == 1 {
+				Calc(q, args[0])
+			} else {
+				Calc(q, "unknown")
+			}
 		}
 	}
 	autonum[NameOf(q)] = 0
@@ -136,12 +140,17 @@ func AutoSaveAs(q Quantity, period float64, name string, args ...string) {
 	if len(args) > 1 {
 		panic("Too many arguments provided. Please provide maximal four arguments: Quantity, dt, name, category for UI")
 	}
-	_, ok := Quantities[NameOf(q)]
-	if !ok {
-		if len(args) == 1 {
-			CalcAs(q, name, args[0])
-		} else {
-			CalcAs(q, name, "unknown")
+	if _, isFFT := q.(interface {
+		FFTOutputSize() [3]int
+	}); !isFFT {
+		_, ok := Quantities[NameOf(q)]
+
+		if !ok {
+			if len(args) == 1 {
+				CalcAs(q, name, args[0])
+			} else {
+				CalcAs(q, name, "unknown")
+			}
 		}
 	}
 	autonumAs[name] = 0

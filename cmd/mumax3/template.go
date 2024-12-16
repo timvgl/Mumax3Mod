@@ -18,6 +18,12 @@ type Expression struct {
 	IsNumeric bool
 }
 
+type ExpressionSweep struct {
+	LineIndex int
+	Arg       string
+	Dir       bool
+}
+
 func (e Expression) PrettyPrint() {
 	fmt.Printf("Prefix: %s\nArray: %v\nFormat: %s\nSuffix: %s\nOriginal: %s\n", e.Prefix, e.Array, e.Format, e.Suffix, e.Original)
 }
@@ -257,7 +263,7 @@ func parseExpression(exprMap map[string]string) (Expression, error) {
 }
 
 // Finds expressions in the mx3 template and parses them
-func findExpressions(mx3 string) (expressions []Expression, err error) {
+func findExpressions(mx3 string) (expressions []Expression, SweepExec []ExpressionSweep, err error) {
 	regex := regexp.MustCompile(`"\{(.*?)\}"`)
 	matches := regex.FindAllStringSubmatch(mx3, -1)
 
@@ -273,27 +279,58 @@ func findExpressions(mx3 string) (expressions []Expression, err error) {
 				keyVal := strings.SplitN(part, "=", 2)
 				exprMap[strings.ReplaceAll(keyVal[0], " ", "")] = keyVal[1]
 			} else {
-				return nil, fmt.Errorf("invalid expression part: %s", part)
+				return nil, make([]ExpressionSweep, 0), fmt.Errorf("invalid expression part: %s", part)
 			}
 		}
 
 		if err = validateFields(exprMap); err != nil {
-			return nil, err
+			return nil, make([]ExpressionSweep, 0), err
 		}
 		exp, err := parseExpression(exprMap)
 		if err != nil {
-			return nil, err
+			return nil, make([]ExpressionSweep, 0), err
 		}
 		expressions = append(expressions, exp)
 	}
 	if len(expressions) == 0 {
-		return nil, fmt.Errorf("no expressions found")
+		return nil, make([]ExpressionSweep, 0), fmt.Errorf("no expressions found")
 	}
-	return expressions, nil
+	regexSweepExec := regexp.MustCompile(`\b(ExecSweep(?:Dir)?)\("([^"]*)"\)`)
+	for i, line := range strings.Split(mx3, "\n") {
+		matchesSweepExec := regexSweepExec.FindAllStringSubmatch(line, -1)
+		if matches != nil {
+			for _, match := range matchesSweepExec {
+				if len(match) == 3 {
+					functionName := match[1]
+					if functionName == "ExecSweep" {
+						SweepExec = append(SweepExec, ExpressionSweep{i, match[2], false})
+					} else if functionName == "ExecSweepDir" {
+						SweepExec = append(SweepExec, ExpressionSweep{i, match[2], true})
+					} else {
+						panic("Loading of ExecSweep/ExecSweepDir failed.")
+					}
+				}
+			}
+		}
+	}
+	if len(SweepExec) > 1 {
+		for i, _ := range SweepExec {
+			if i > 0 {
+				if SweepExec[i].LineIndex != SweepExec[i-1].LineIndex+1 {
+					panic("No normal command or empty lines are allowed between sweep commands.")
+				}
+			}
+		}
+	} else if len(SweepExec) == 1 {
+		if SweepExec[0].LineIndex != len(strings.Split(mx3, "\n"))-1 {
+			panic("No normal commands or empty lines after sweep commands allowed!")
+		}
+	}
+	return expressions, SweepExec, nil
 }
 
 // Generates the files with the processed expressions
-func generateFiles(parentDir, mx3, orgScriptName string, expressions []Expression, flat bool) ([]string, error) {
+func generateFiles(parentDir, mx3, orgScriptName string, expressions []Expression, expressionsSweep []ExpressionSweep, flat bool) ([]string, error) {
 	// Generate combinations of all arrays using cartesian product
 	combinationCount := 1
 	for _, exp := range expressions {
@@ -330,6 +367,11 @@ func generateFiles(parentDir, mx3, orgScriptName string, expressions []Expressio
 			// Build path parts and replace placeholders
 			pathParts[j] = fmt.Sprintf("%s%s%s", exp.Prefix, formattedValue, exp.Suffix)
 			newMx3 = strings.Replace(newMx3, `"{`+exp.Original+`}"`, value, 1)
+		}
+		shiftLine := 0
+		for _, exp := range expressionsSweep {
+			newMx3List := strings.Split(newMx3, "\n")
+			newMx3 = strings.Join(append(newMx3List[:exp.LineIndex-shiftLine], newMx3List[exp.LineIndex+1:]...), "\n")
 		}
 
 		var joinedPath string
@@ -377,29 +419,29 @@ func generateFiles(parentDir, mx3, orgScriptName string, expressions []Expressio
 }
 
 // Main function for handling the template logic
-func template(path string, flat bool) ([]string, error) {
+func template(path string, flat bool) ([]string, []ExpressionSweep, error) {
 	var err error
 	path, err = filepath.Abs(path)
 	if err != nil {
-		return make([]string, 0), fmt.Errorf("error getting absolute path: %v", err)
+		return make([]string, 0), make([]ExpressionSweep, 0), fmt.Errorf("error getting absolute path: %v", err)
 	}
 
 	parentDir := filepath.Dir(path)
 
 	mx3, err := parseTemplate(path)
 	if err != nil {
-		return make([]string, 0), fmt.Errorf("error parsing template: %v", err)
+		return make([]string, 0), make([]ExpressionSweep, 0), fmt.Errorf("error parsing template: %v", err)
 	}
 
-	expressions, err := findExpressions(mx3)
+	expressions, SweepExp, err := findExpressions(mx3)
 	if err != nil {
-		return make([]string, 0), fmt.Errorf("error finding expressions: %v", err)
+		return make([]string, 0), make([]ExpressionSweep, 0), fmt.Errorf("error finding expressions: %v", err)
 	}
 	mx3ScriptsPaths := make([]string, 0)
 	_, filename := filepath.Split(path)
-	mx3ScriptsPaths, err = generateFiles(parentDir, mx3, filename, expressions, flat)
+	mx3ScriptsPaths, err = generateFiles(parentDir, mx3, filename, expressions, SweepExp, flat)
 	if err != nil {
-		return make([]string, 0), fmt.Errorf("error generating files: %v", err)
+		return make([]string, 0), make([]ExpressionSweep, 0), fmt.Errorf("error generating files: %v", err)
 	}
-	return mx3ScriptsPaths, nil
+	return mx3ScriptsPaths, SweepExp, nil
 }

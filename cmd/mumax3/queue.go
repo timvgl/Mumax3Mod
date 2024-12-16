@@ -15,12 +15,13 @@ import (
 	"time"
 
 	"github.com/mumax/3/cuda/cu"
-	"github.com/mumax/3/engine")
+	"github.com/mumax/3/engine"
+)
 
 var (
 	exitStatus       atom = 0
 	numOK, numFailed atom = 0, 0
-	QueueIndex		 int = 0
+	QueueIndex       int  = 0
 )
 
 func get_sim_index() {
@@ -37,7 +38,6 @@ func get_sim_index() {
 	}
 }
 
-
 func RunQueue(files []string) {
 	get_sim_index()
 	s := NewStateTab(files)
@@ -46,7 +46,6 @@ func RunQueue(files []string) {
 	s.Run()
 	fmt.Println(numOK.get(), "OK, ", numFailed.get(), "failed")
 	os.Unsetenv(fmt.Sprintf("MumaxQueue_%d", QueueIndex))
-	os.Exit(int(exitStatus))
 }
 
 // StateTab holds the queue state (list of jobs + statuses).
