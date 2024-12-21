@@ -125,35 +125,58 @@ func (s *fftOperation4D) Eval() {
 	dataT := FFT3DData[s.q]
 	mu.Lock()
 	FFT_T_OPDataCopied[s] = true
-	fmt.Println("copieeeeded")
 	condDataCopied.Broadcast()
 	mu.Unlock()
-	bufCPU := data.NewSlice(dataT.NComp(), dataT.Size())
-	defer bufCPU.Free()
-	bufGPUIP := cuda.BufferFFT_T(dataT.NComp(), dataT.Size(), NameOf(s.q))
-	defer cuda.Recycle(bufGPUIP)
-	bufGPUOP := cuda.BufferFFT_T(dataT.NComp(), dataT.Size(), NameOf(s.q))
-	defer cuda.Recycle(bufGPUOP)
 	NxNyNz, startK, endK, transformedAxis := FFTOP.Axis()
-	fmt.Println("iterate files")
-	for i := range int((s.maxF - s.minF) / s.dF) {
-		//fmt.Println(fmt.Sprintf(FilenameFormat, "k_x_y_z_f_"+NameOf(s.q), i) + ".ovf")
-		in, err := httpfs.Open(OD() + fmt.Sprintf(FilenameFormat, "k_x_y_z_f_"+NameOf(s.q), i) + ".ovf")
-		if err == nil {
-			err := oommf.ReadOVF2DataBinary4Optimized(in, bufCPU)
-			if err != nil {
-				data.Zero(bufCPU)
-			}
-			in.Close()
-		} else {
-			data.Zero(bufCPU)
-		}
-		data.Copy(bufGPUIP, bufCPU)
-		angle := -2i * complex64(complex(math.Pi*float64(i)*Time*s.dF, 0))
-		cuda.FFT_T_Step(bufGPUOP, bufGPUIP, dataT, real(angle), imag(angle), int((s.maxF-s.minF)/s.dF))
-		info := data.Meta{Freq: s.minF + float64(i)*s.dF, Name: "k_x_y_z_f_" + NameOf(s.q), Unit: UnitOf(FFTOP), CellSize: MeshOf(FFTOP).CellSize()}
-		saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, "k_x_y_z_f_"+NameOf(s.q), i)+".ovf", bufGPUOP.HostCopy(), info, outputFormat, NxNyNz, startK, endK, transformedAxis, true, false)
+	wg := sync.WaitGroup{}
+	cores := runtime.NumCPU()
+	filesPerCore := int(int((s.maxF-s.minF)/s.dF) / cores)
+	bufsCPU := make([]*data.Slice, 0)
+	bufsGPUIP := make([]*data.Slice, 0)
+	bufsGPUOP := make([]*data.Slice, 0)
+	for core := range cores {
+		bufsCPU = append(bufsCPU, data.NewSlice(dataT.NComp(), dataT.Size()))
+		bufsGPUIP = append(bufsGPUIP, cuda.BufferFFT_T(dataT.NComp(), dataT.Size(), fmt.Sprint(NameOf(s.q)+"_%d", core)))
+		bufsGPUOP = append(bufsGPUOP, cuda.BufferFFT_T(dataT.NComp(), dataT.Size(), fmt.Sprint(NameOf(s.q)+"_%d", core)))
 	}
+	for core := range cores {
+		upperEnd := 0
+		if (core+1)*filesPerCore < int((s.maxF-s.minF)/s.dF) {
+			upperEnd = (core + 1) * filesPerCore
+		} else {
+			upperEnd = int((s.maxF - s.minF) / s.dF)
+		}
+		wg.Add(1)
+		go func(core int, s *fftOperation4D, startIndex, endIndex int, bufCPU, bufGPUIP, bufGPUOP, dataT *data.Slice, FFTOP *fftOperation3D, NxNyNz [3]int, startK, endK [3]float64, transformedAxis []string) {
+			runtime.LockOSThread()
+			cuda.SetCurrent_Ctx()
+			for i := startIndex; i <= endIndex; i++ {
+				in, err := httpfs.Open(OD() + fmt.Sprintf(FilenameFormat, "k_x_y_z_f_"+NameOf(s.q), i) + ".ovf")
+				if err == nil {
+					err := oommf.ReadOVF2DataBinary4Optimized(in, bufCPU)
+					if err != nil {
+						data.Zero(bufCPU)
+					}
+					in.Close()
+				} else {
+					data.Zero(bufCPU)
+				}
+				data.Copy(bufGPUIP, bufCPU)
+				angle := -2i * complex64(complex(math.Pi*float64(i)*Time*s.dF, 0))
+				cuda.FFT_T_Step(bufGPUOP, bufGPUIP, dataT, real(angle), imag(angle), int((s.maxF-s.minF)/s.dF))
+				info := data.Meta{Freq: s.minF + float64(i)*s.dF, Name: "k_x_y_z_f_" + NameOf(s.q), Unit: UnitOf(FFTOP), CellSize: MeshOf(FFTOP).CellSize()}
+				saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, "k_x_y_z_f_"+NameOf(s.q), i)+".ovf", bufGPUOP.HostCopy(), info, outputFormat, NxNyNz, startK, endK, transformedAxis, true, false)
+			}
+			wg.Done()
+		}(core, s, core*filesPerCore, upperEnd, bufsCPU[core], bufsGPUIP[core], bufsGPUOP[core], dataT, FFTOP, NxNyNz, startK, endK, transformedAxis)
+	}
+	wg.Wait()
+	for core := range cores {
+		bufsCPU[core].Free()
+		cuda.Recycle(bufsGPUIP[core])
+		cuda.Recycle(bufsGPUOP[core])
+	}
+	//fmt.Println(fmt.Sprintf(FilenameFormat, "k_x_y_z_f_"+NameOf(s.q), i) + ".ovf")
 	mu.Lock()
 	FFT_T_OPRunning[s] = false
 	condCalcComplete.Broadcast()
@@ -173,9 +196,7 @@ func (s *fftOperation4D) waitUntilCopied() {
 	// cond.Wait() will release the mutex and put the goroutine to sleep,
 	// allowing other goroutines to change "val" and then wake us up.
 	for !FFT_T_OPDataCopied[s] {
-		fmt.Println(FFT_T_OPDataCopied[s])
 		condDataCopied.Wait()
-		fmt.Println(FFT_T_OPDataCopied[s])
 	}
 	// Once val != old, we can return the new val.
 }

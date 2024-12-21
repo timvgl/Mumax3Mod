@@ -129,6 +129,28 @@ func Recycle(s *data.Slice) {
 	buf_pool[N] = pool
 }
 
+func Recycle_FFT_T(s *data.Slice) {
+	if Synchronous {
+		Sync()
+	}
+
+	N := s.Len()
+	pool := buf_pool[N]
+	// put each component buffer back on the stack
+	for i := 0; i < s.NComp(); i++ {
+		ptr := s.DevPtr(i)
+		if ptr == unsafe.Pointer(uintptr(0)) {
+			continue
+		}
+		if _, ok := buf_check[ptr]; !ok {
+			log.Panic("recyle: was not obtained with getbuffer")
+		}
+		pool = append(pool, ptr)
+	}
+	s.Disable() // make it unusable, protect against accidental use after recycle
+	buf_pool[N] = pool
+}
+
 // Frees all buffers. Called after mesh resize.
 func FreeBuffers() {
 	Sync()

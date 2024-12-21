@@ -1,6 +1,8 @@
 package engine
 
 import (
+	"fmt"
+	"runtime"
 	"slices"
 
 	"github.com/mumax/3/cuda"
@@ -91,6 +93,7 @@ func FFT3D(q Quantity) *fftOperation3D {
 			FFT3DData[q] = cuda.Buffer(1, fftOP3D.FFTOutputSize())
 			cuda.Zero(FFT3DData[q])
 		}
+		DeclVarFFTDyn = append(DeclVarFFTDyn, q)
 	}
 	return fftOP3D
 }
@@ -98,8 +101,11 @@ func FFT3D(q Quantity) *fftOperation3D {
 func FFT3D_FFT_T(q Quantity) *fftOperation3D {
 
 	s := MeshOf(q).Size()
-	//fmt.Println(fmt.Sprintf("Initializing with %d, %d and %d", s[X], s[Y], s[Z]))
 	cuda.Create_Stream(NameOf(q))
+	//fmt.Println(fmt.Sprintf("Initializing with %d, %d and %d", s[X], s[Y], s[Z]))
+	for i := range runtime.NumCPU() {
+		cuda.Create_Stream(NameOf(q) + fmt.Sprintf("_%d", i))
+	}
 	FFT3DR2CPlans[q] = cuda.Initialize3DR2CFFT_FFT_T(s[X], s[Y], s[Z], cuda.Get_Stream(NameOf(q)))
 	fftOP3D := &fftOperation3D{fieldOp{q, q, q.NComp()}, "k_x_y_z_" + NameOf(q), q, true}
 	FFTEvaluated[q] = false
@@ -107,33 +113,14 @@ func FFT3D_FFT_T(q Quantity) *fftOperation3D {
 	FFTEvaluatedImag[q] = false
 	if !slices.Contains(DeclVarFFTDyn, q) {
 		if q.NComp() == 3 {
-			if !slices.Contains(DeclVarFFTDynAlias, "FFT_"+NameOf(q)+"_real") {
-				NewVectorFieldFFT("FFT_"+NameOf(q)+"_real", "a.u.", "get FFT of last save run - to costly otherwise", fftOP3D.Real().EvalTo, fftOP3D.Real().Mesh(), fftOP3D.Real().Axis, fftOP3D.Real().SymmetricX(), fftOP3D.Real().SymmetricY())
-				DeclVarFFTDyn = append(DeclVarFFTDyn, fftOP3D.Real())
-				DeclVarFFTDynAlias = append(DeclVarFFTDynAlias, "FFT_"+NameOf(q)+"_real")
-			}
-			if !slices.Contains(DeclVarFFTDynAlias, "FFT_"+NameOf(q)+"_imag") {
-				NewVectorFieldFFT("FFT_"+NameOf(q)+"_imag", "a.u.", "get FFT of last save run - to costly otherwise", fftOP3D.Imag().EvalTo, fftOP3D.Imag().Mesh(), fftOP3D.Imag().Axis, fftOP3D.Imag().SymmetricX(), fftOP3D.Imag().SymmetricY())
-				DeclVarFFTDyn = append(DeclVarFFTDyn, fftOP3D.Imag())
-				DeclVarFFTDynAlias = append(DeclVarFFTDynAlias, "FFT_"+NameOf(q)+"_imag")
-			}
 			FFT3DData[q] = cuda.BufferFFT_T(3, fftOP3D.FFTOutputSize(), NameOf(q))
 			cuda.ZeroFFT_T(FFT3DData[q], NameOf(q))
 			//fmt.Println(FFT3DData[q].HostCopy().Tensors())
 		} else if q.NComp() == 1 {
-			if !slices.Contains(DeclVarFFTDynAlias, "FFT_"+NameOf(q)+"_real") {
-				NewScalarFieldFFT("FFT_"+NameOf(q)+"_real", "a.u.", "get FFT of last save run - to costly otherwise", fftOP3D.Real().EvalTo, fftOP3D.Real().Mesh(), fftOP3D.Real().Axis, fftOP3D.Real().SymmetricX(), fftOP3D.Real().SymmetricY())
-				DeclVarFFTDyn = append(DeclVarFFTDyn, fftOP3D.Real())
-				DeclVarFFTDynAlias = append(DeclVarFFTDynAlias, "FFT_"+NameOf(q)+"_real")
-			}
-			if !slices.Contains(DeclVarFFTDynAlias, "FFT_"+NameOf(q)+"_imag") {
-				NewScalarFieldFFT("FFT_"+NameOf(q)+"_imag", "a.u.", "get FFT of last save run - to costly otherwise", fftOP3D.Imag().EvalTo, fftOP3D.Imag().Mesh(), fftOP3D.Imag().Axis, fftOP3D.Imag().SymmetricX(), fftOP3D.Imag().SymmetricY())
-				DeclVarFFTDyn = append(DeclVarFFTDyn, fftOP3D.Imag())
-				DeclVarFFTDynAlias = append(DeclVarFFTDynAlias, "FFT_"+NameOf(q)+"_imag")
-			}
 			FFT3DData[q] = cuda.BufferFFT_T(1, fftOP3D.FFTOutputSize(), NameOf(q))
 			cuda.ZeroFFT_T(FFT3DData[q], NameOf(q))
 		}
+		DeclVarFFTDyn = append(DeclVarFFTDyn, q)
 	}
 	return fftOP3D
 }
