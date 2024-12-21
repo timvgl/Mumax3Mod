@@ -4,12 +4,13 @@ package oommf
 import (
 	"bufio"
 	"fmt"
-	"github.com/mumax/3/data"
-	"github.com/mumax/3/util"
 	"io"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/mumax/3/data"
+	"github.com/mumax/3/util"
 )
 
 // Read any OOMMF file, autodetect OVF1/OVF2 format
@@ -37,9 +38,9 @@ func Read(in io.Reader) (s *data.Slice, meta data.Meta, err error) {
 	case format == "binary 8" && ovf == 1:
 		readOVF1DataBinary8(in, data_)
 	case format == "binary 4" && ovf == 2:
-		readOVF2DataBinary4(in, data_)
-	case format == "binary 8" && ovf == 2:
-		readOVF2DataBinary8(in, data_)
+		ReadOVF2DataBinary4(in, data_)
+	case format == "binary 4+4" && ovf == 2:
+		ReadOVF2DataBinary4Optimized(in, data_)
 	}
 
 	return data_, data.Meta{Name: info.Title, Time: info.TotalTime, Unit: info.ValueUnit, CellSize: info.StepSize}, nil
@@ -77,6 +78,14 @@ type Info struct {
 	SizeofFloat     int // 4/8
 	StepSize        [3]float64
 	MeshUnit        string
+}
+
+func readHeaderDummy(in io.Reader) {
+	line, eof := readLine(in)
+	line, eof = readLine(in)
+	for !eof && !isHeaderEnd(line) {
+		line, eof = readLine(in)
+	}
 }
 
 // Parses the header part of the OVF1/OVF2 file
@@ -191,6 +200,7 @@ func isHeaderEnd(str string) bool {
 }
 
 const OVF_CONTROL_NUMBER_4 = 1234567.0 // The omf format requires the first encoded number in the binary data section to be this control number
+const OVF_CONTROL_NUMBER_4_4 = 3.4749898e+09
 const OVF_CONTROL_NUMBER_8 = 123456789012345.0
 
 // read data block in text format, for OVF1 and OVF2

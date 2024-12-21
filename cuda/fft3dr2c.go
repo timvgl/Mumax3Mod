@@ -23,6 +23,12 @@ func newFFT3DR2C(Nx, Ny, Nz int) fft3DR2CPlan {
 	return fft3DR2CPlan{fftplan{handle}, [3]int{Nx, Ny, Nz}}
 }
 
+func newFFT3DR2C_FFT_T(Nx, Ny, Nz int, streamFFT_T_ cu.Stream) fft3DR2CPlan {
+	handle := cufft.Plan3d(Nz, Ny, Nx, cufft.R2C) // new xyz swap
+	handle.SetStream(streamFFT_T_)
+	return fft3DR2CPlan{fftplan{handle}, [3]int{Nx, Ny, Nz}}
+}
+
 // Execute the FFT plan, asynchronous.
 // src and dst are 3D arrays stored 1D arrays.
 func (p *fft3DR2CPlan) ExecAsync(src, dst *data.Slice) {

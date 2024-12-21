@@ -44,7 +44,8 @@ func MaxAbs(in *data.Slice) float32 {
 }
 
 // Maximum of the norms of all vectors (x[i], y[i], z[i]).
-// 	max_i sqrt( x[i]*x[i] + y[i]*y[i] + z[i]*z[i] )
+//
+//	max_i sqrt( x[i]*x[i] + y[i]*y[i] + z[i]*z[i] )
 func MaxVecNorm(v *data.Slice) float64 {
 	out := reduceBuf(0)
 	k_reducemaxvecnorm2_async(v.DevPtr(0), v.DevPtr(1), v.DevPtr(2), out, 0, v.Len(), reducecfg)
@@ -54,12 +55,12 @@ func MaxVecNorm(v *data.Slice) float64 {
 // // Minimum of the norms of all vectors (x[i], y[i], z[i]).
 // // 	min_i sqrt( x[i]*x[i] + y[i]*y[i] + z[i]*z[i] )
 func MinVecNorm(v *data.Slice) float64 {
- 	out := reduceBuf(0)
- 	k_reduceminvecnorm2_async(v.DevPtr(0), v.DevPtr(1), v.DevPtr(2), out, 0, v.Len(), reducecfg)
- 	return math.Sqrt(float64(copyback(out)))
+	out := reduceBuf(0)
+	k_reduceminvecnorm2_async(v.DevPtr(0), v.DevPtr(1), v.DevPtr(2), out, 0, v.Len(), reducecfg)
+	return math.Sqrt(float64(copyback(out)))
 }
 
-func MaxvecCellZComp(data, vals, idx, blk_vals, blk_idxs *data.Slice, mesh  *data.Mesh) ([]int, float32, float32, float32, float32, float32) {
+func MaxvecCellZComp(data, vals, idx, blk_vals, blk_idxs *data.Slice, mesh *data.Mesh) ([]int, float32, float32, float32, float32, float32) {
 	outIdxX := reduceBufInt(0)
 	outIdxY := reduceBufInt(0)
 	outIdxZ := reduceBufInt(0)
@@ -70,7 +71,7 @@ func MaxvecCellZComp(data, vals, idx, blk_vals, blk_idxs *data.Slice, mesh  *dat
 	outVal_p1Y := reduceBuf(0)
 	blk_num := reduceBufInt(0)
 	N := mesh.Size()
-	
+
 	k_max_idx_kernel_async(data.DevPtr(2), vals.DevPtr(0), idx.DevPtr(0), blk_vals.DevPtr(0), blk_idxs.DevPtr(0), blk_num, N[X], N[Y], N[Z], outIdxX, outIdxY, outIdxZ, outVal, outVal_n1X, outVal_p1X, outVal_n1Y, outVal_p1Y, reducecfg)
 	outIdx := make([]int, 3)
 	outIdx[0] = int(copybackInt(outIdxX))
@@ -80,8 +81,9 @@ func MaxvecCellZComp(data, vals, idx, blk_vals, blk_idxs *data.Slice, mesh  *dat
 }
 
 // Maximum of the norms of the difference between all vectors (x1,y1,z1) and (x2,y2,z2)
-// 	(dx, dy, dz) = (x1, y1, z1) - (x2, y2, z2)
-// 	max_i sqrt( dx[i]*dx[i] + dy[i]*dy[i] + dz[i]*dz[i] )
+//
+//	(dx, dy, dz) = (x1, y1, z1) - (x2, y2, z2)
+//	max_i sqrt( dx[i]*dx[i] + dy[i]*dy[i] + dz[i]*dz[i] )
 func MaxVecDiff(x, y *data.Slice) float64 {
 	util.Argument(x.Len() == y.Len())
 	out := reduceBuf(0)
@@ -92,8 +94,9 @@ func MaxVecDiff(x, y *data.Slice) float64 {
 }
 
 // Relative Maximum of the norms of the difference between all vectors (x1,y1,z1) and (x2,y2,z2)
-// 	(dx, dy, dz) = ((x1, y1, z1) - (x2, y2, z2))/(x1, y1, z1)
-// 	max_i sqrt( dx[i]*dx[i] + dy[i]*dy[i] + dz[i]*dz[i] )
+//
+//	(dx, dy, dz) = ((x1, y1, z1) - (x2, y2, z2))/(x1, y1, z1)
+//	max_i sqrt( dx[i]*dx[i] + dy[i]*dy[i] + dz[i]*dz[i] )
 func RelMaxVecDiff(x, y *data.Slice) float64 {
 	util.Argument(x.Len() == y.Len())
 	out := reduceBuf(0)
@@ -116,12 +119,30 @@ func reduceBuf(initVal float32) unsafe.Pointer {
 	return buf
 }
 
+func reduceBufFFT_T(initVal float32, key string) unsafe.Pointer {
+	if reduceBuffers == nil {
+		initReduceBuf()
+	}
+	buf := <-reduceBuffers
+	cu.MemsetD32Async(cu.DevicePtr(uintptr(buf)), math.Float32bits(initVal), 1, Get_Stream(key))
+	return buf
+}
+
 func reduceBufInt(initVal int) unsafe.Pointer {
 	if reduceBuffers == nil {
 		initReduceBuf()
 	}
 	buf := <-reduceBuffers
 	cu.MemsetD32Async(cu.DevicePtr(uintptr(buf)), uint32(initVal), 1, stream0)
+	return buf
+}
+
+func reduceBufIntFFT_T(initVal int, key string) unsafe.Pointer {
+	if reduceBuffers == nil {
+		initReduceBuf()
+	}
+	buf := <-reduceBuffers
+	cu.MemsetD32Async(cu.DevicePtr(uintptr(buf)), uint32(initVal), 1, Get_Stream(key))
 	return buf
 }
 

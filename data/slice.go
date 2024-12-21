@@ -38,6 +38,20 @@ func EnableGPU(free, freeHost func(unsafe.Pointer),
 	memCpyHtoD = cpyHtoD
 }
 
+func Zero(data *Slice) {
+	array := data.Tensors()
+	size := data.size
+	for iz := 0; iz < size[Z]; iz++ {
+		for iy := 0; iy < size[Y]; iy++ {
+			for ix := 0; ix < size[X]; ix++ {
+				for c := 0; c < data.NComp(); c++ {
+					array[c][iz][iy][ix] = 0
+				}
+			}
+		}
+	}
+}
+
 // Make a CPU Slice with nComp components of size length.
 func NewSlice(nComp int, size [3]int) *Slice {
 	length := prod(size)

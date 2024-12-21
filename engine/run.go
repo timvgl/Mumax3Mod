@@ -36,12 +36,16 @@ var (
 
 	Solvertype int
 
-	BoolAllowInhomogeniousMECoupling bool = false
-	useBoundaries                    bool = false
-	Timetravel                       bool = false
-	overwriteUndoBackup              bool = true
-	undoMistakes                     int  = 0
-	printedUndoMistakes              bool = false
+	BoolAllowInhomogeniousMECoupling bool    = false
+	useBoundaries                    bool    = false
+	Timetravel                       bool    = false
+	overwriteUndoBackup              bool    = true
+	undoMistakes                     int     = 0
+	printedUndoMistakes              bool    = false
+	running                          bool    = false
+	stepping                         bool    = false
+	runningWhile                     bool    = false
+	currentRunningTime               float64 = 0.
 	//InsertTimeDepDisplacement 			int		= 0					 //1 for True, 0 for False
 	//InsertTimeDepDisplacementFunc 		func(arg1, arg2, arg3, arg4, arg5 float64) Config //func for calc displacement that is supposed to be added
 	//InsertTimeDepDisplacementFuncArgs	[]func(t float64) float64	 //slices of funcs that are going to be used as args for InsertTimeDepDisplacementFunc
@@ -206,6 +210,8 @@ func adaptDt(corr float64) {
 // Run the simulation for a number of seconds.
 func Run(seconds float64) {
 	SanityCheck()
+	running = true
+	currentRunningTime = seconds
 	Pause = false // may be set by <-Inject
 	const output = true
 	stepper.Free() // start from a clean state
@@ -225,6 +231,7 @@ func Run(seconds float64) {
 	}
 	ProgressBar := NewProgressBar(start, stop, "🧲", hideProgressBarBool)
 	DoOutput()
+	DoFFT4D()
 	for (Time < stop) && !Pause {
 		select {
 		default:
@@ -237,26 +244,32 @@ func Run(seconds float64) {
 	}
 	ProgressBar.Finish()
 	Pause = true
+	running = false
 }
 
 // Run the simulation for a number of steps.
 func Steps(n int) {
+	stepping = true
 	stop := NSteps + n
 	RunWhile(func() bool { return NSteps < stop })
+	stepping = false
 }
 
 // Runs as long as condition returns true, saves output.
 func RunWhile(condition func() bool) {
+	runningWhile = true
 	SanityCheck()
 	Pause = false // may be set by <-Inject
 	const output = true
 	stepper.Free() // start from a clean state
 	runWhile(condition, output)
 	Pause = true
+	runningWhile = false
 }
 
 func runWhile(condition func() bool, output bool) {
 	DoOutput() // allow t=0 output
+	//DoFFT4D()
 	for condition() && !Pause {
 		select {
 		default:
@@ -305,6 +318,7 @@ func step(output bool) {
 	}
 	if output {
 		DoOutput()
+		DoFFT4D()
 	}
 }
 

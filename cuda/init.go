@@ -18,7 +18,7 @@ var (
 	Synchronous   bool       // for debug: synchronize stream0 at every kernel launch
 	cudaCtx       cu.Context // global CUDA context
 	cudaCC        int        // compute capablity (used for fatbin)
-	GPUIndex	  int
+	GPUIndex      int
 )
 
 // Locks to an OS thread and initializes CUDA for that thread.
@@ -51,6 +51,58 @@ func Init(gpu int) {
 	// test PTX load so that we can catch CUDA_ERROR_NO_BINARY_FOR_GPU early
 	fatbinLoad(madd2_map, "madd2")
 }
+func SetCurrent_Ctx() {
+	cudaCtx.SetCurrent()
+}
+
+/*
+type cudaContext struct {
+	DriverVersion int        // cuda driver version
+	DevName       string     // GPU name
+	TotalMem      int64      // total GPU memory
+	GPUInfo       string     // Human-readable GPU description
+	cudaCtx       cu.Context // global CUDA context
+	cudaCC        int        // compute capablity (used for fatbin)
+	GPUIndex      int
+}
+
+func Set_cudaCtx(cudaCtxTmp cudaContext) {
+	cudaCtx = cudaCtxTmp.cudaCtx
+}
+
+func Set_cudaCC(cudaCtxTmp cudaContext) {
+	cudaCC = cudaCtxTmp.cudaCC
+}
+
+func Get_cudaCtx(cudaCtxTmp cudaContext) cu.Context {
+	return cudaCtxTmp.cudaCtx
+}
+
+func InitFFT4D(gpu int) cudaContext {
+
+	runtime.LockOSThread()
+	tryCuInit()
+	dev := cu.Device(gpu)
+	cudaCtxFFT4D := cu.CtxCreate(cu.CTX_SCHED_YIELD, dev)
+	cudaCtxFFT4D.SetCurrent()
+
+	M, m := dev.ComputeCapability()
+	cudaCCFFT4D := 10*M + m
+	DriverVersionFFT4D := cu.Version()
+	DevNameFFT4D := dev.Name()
+	TotalMemFFT4D := dev.TotalMem()
+	GPUInfoFFT4D := fmt.Sprintf("%s(%dMB), CUDA Driver %d.%d, cc=%d.%d",
+		DevNameFFT4D, (TotalMemFFT4D)/(1024*1024), DriverVersionFFT4D/1000, (DriverVersionFFT4D%1000)/10, M, m)
+
+	if M < 2 {
+		log.Fatalln("GPU has insufficient compute capability, need 2.0 or higher.")
+	}
+	GPUIndex = gpu
+	// test PTX load so that we can catch CUDA_ERROR_NO_BINARY_FOR_GPU early
+	fatbinLoad(madd2_map, "madd2")
+	return cudaContext{DriverVersionFFT4D, DevNameFFT4D, TotalMemFFT4D, GPUInfoFFT4D, cudaCtxFFT4D, cudaCCFFT4D, GPUIndex}
+}
+*/
 
 // cu.Init(), but error is fatal and does not dump stack.
 func tryCuInit() {
@@ -67,8 +119,23 @@ func tryCuInit() {
 // Global stream used for everything
 const stream0 = cu.Stream(0)
 
+var StreamMap = make(map[string]cu.Stream)
+
+// Hhahaha not quiet - so we need a new stream for the async FFT in time - one Stream per FFT parallelization
+func Create_Stream(key string) {
+	StreamMap[key] = cu.Stream(0)
+}
+
+func Get_Stream(key string) cu.Stream {
+	return StreamMap[key]
+}
+
 // Synchronize the global stream
 // This is called before and after all memcopy operations between host and device.
 func Sync() {
 	stream0.Synchronize()
+}
+
+func SyncFFT_T(key string) {
+	StreamMap[key].Synchronize()
 }

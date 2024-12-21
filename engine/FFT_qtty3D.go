@@ -1,7 +1,6 @@
 package engine
 
 import (
-	"fmt"
 	"slices"
 
 	"github.com/mumax/3/cuda"
@@ -25,36 +24,41 @@ func init() {
 
 type fftOperation3DReal struct {
 	fieldOp
-	name string
-	q    Quantity
-	op   fftOperation3D
+	name  string
+	q     Quantity
+	op    fftOperation3D
+	FFT_T bool
 }
 
 type fftOperation3DImag struct {
 	fieldOp
-	name string
-	q    Quantity
-	op   fftOperation3D
+	name  string
+	q     Quantity
+	op    fftOperation3D
+	FFT_T bool
 }
 
 type fftOperation3D struct {
 	fieldOp
-	name string
-	q    Quantity
+	name  string
+	q     Quantity
+	FFT_T bool
 }
 
+/*
 type fftOperation2D struct {
 	fieldOp
 	name string
 	axis [2]string
 }
+*/
 
 func FFT3D(q Quantity) *fftOperation3D {
 
 	s := MeshOf(q).Size()
 	//fmt.Println(fmt.Sprintf("Initializing with %d, %d and %d", s[X], s[Y], s[Z]))
 	FFT3DR2CPlans[q] = cuda.Initialize3DR2CFFT(s[X], s[Y], s[Z])
-	fftOP3D := &fftOperation3D{fieldOp{q, q, q.NComp()}, "k_x_y_z_" + NameOf(q), q}
+	fftOP3D := &fftOperation3D{fieldOp{q, q, q.NComp()}, "k_x_y_z_" + NameOf(q), q, false}
 	FFTEvaluated[q] = false
 	FFTEvaluatedReal[q] = false
 	FFTEvaluatedImag[q] = false
@@ -89,16 +93,55 @@ func FFT3D(q Quantity) *fftOperation3D {
 		}
 	}
 	return fftOP3D
-
 }
 
-// ///not working!!!!
-func FFT3DAs(q Quantity, name string) *fftOperation3D {
+func FFT3D_FFT_T(q Quantity) *fftOperation3D {
 
 	s := MeshOf(q).Size()
-	fmt.Println(fmt.Sprintf("Initializing with %d, %d and %d", s[X], s[Y], s[Z]))
+	//fmt.Println(fmt.Sprintf("Initializing with %d, %d and %d", s[X], s[Y], s[Z]))
+	cuda.Create_Stream(NameOf(q))
+	FFT3DR2CPlans[q] = cuda.Initialize3DR2CFFT_FFT_T(s[X], s[Y], s[Z], cuda.Get_Stream(NameOf(q)))
+	fftOP3D := &fftOperation3D{fieldOp{q, q, q.NComp()}, "k_x_y_z_" + NameOf(q), q, true}
+	FFTEvaluated[q] = false
+	FFTEvaluatedReal[q] = false
+	FFTEvaluatedImag[q] = false
+	if !slices.Contains(DeclVarFFTDyn, q) {
+		if q.NComp() == 3 {
+			if !slices.Contains(DeclVarFFTDynAlias, "FFT_"+NameOf(q)+"_real") {
+				NewVectorFieldFFT("FFT_"+NameOf(q)+"_real", "a.u.", "get FFT of last save run - to costly otherwise", fftOP3D.Real().EvalTo, fftOP3D.Real().Mesh(), fftOP3D.Real().Axis, fftOP3D.Real().SymmetricX(), fftOP3D.Real().SymmetricY())
+				DeclVarFFTDyn = append(DeclVarFFTDyn, fftOP3D.Real())
+				DeclVarFFTDynAlias = append(DeclVarFFTDynAlias, "FFT_"+NameOf(q)+"_real")
+			}
+			if !slices.Contains(DeclVarFFTDynAlias, "FFT_"+NameOf(q)+"_imag") {
+				NewVectorFieldFFT("FFT_"+NameOf(q)+"_imag", "a.u.", "get FFT of last save run - to costly otherwise", fftOP3D.Imag().EvalTo, fftOP3D.Imag().Mesh(), fftOP3D.Imag().Axis, fftOP3D.Imag().SymmetricX(), fftOP3D.Imag().SymmetricY())
+				DeclVarFFTDyn = append(DeclVarFFTDyn, fftOP3D.Imag())
+				DeclVarFFTDynAlias = append(DeclVarFFTDynAlias, "FFT_"+NameOf(q)+"_imag")
+			}
+			FFT3DData[q] = cuda.BufferFFT_T(3, fftOP3D.FFTOutputSize(), NameOf(q))
+			cuda.ZeroFFT_T(FFT3DData[q], NameOf(q))
+			//fmt.Println(FFT3DData[q].HostCopy().Tensors())
+		} else if q.NComp() == 1 {
+			if !slices.Contains(DeclVarFFTDynAlias, "FFT_"+NameOf(q)+"_real") {
+				NewScalarFieldFFT("FFT_"+NameOf(q)+"_real", "a.u.", "get FFT of last save run - to costly otherwise", fftOP3D.Real().EvalTo, fftOP3D.Real().Mesh(), fftOP3D.Real().Axis, fftOP3D.Real().SymmetricX(), fftOP3D.Real().SymmetricY())
+				DeclVarFFTDyn = append(DeclVarFFTDyn, fftOP3D.Real())
+				DeclVarFFTDynAlias = append(DeclVarFFTDynAlias, "FFT_"+NameOf(q)+"_real")
+			}
+			if !slices.Contains(DeclVarFFTDynAlias, "FFT_"+NameOf(q)+"_imag") {
+				NewScalarFieldFFT("FFT_"+NameOf(q)+"_imag", "a.u.", "get FFT of last save run - to costly otherwise", fftOP3D.Imag().EvalTo, fftOP3D.Imag().Mesh(), fftOP3D.Imag().Axis, fftOP3D.Imag().SymmetricX(), fftOP3D.Imag().SymmetricY())
+				DeclVarFFTDyn = append(DeclVarFFTDyn, fftOP3D.Imag())
+				DeclVarFFTDynAlias = append(DeclVarFFTDynAlias, "FFT_"+NameOf(q)+"_imag")
+			}
+			FFT3DData[q] = cuda.BufferFFT_T(1, fftOP3D.FFTOutputSize(), NameOf(q))
+			cuda.ZeroFFT_T(FFT3DData[q], NameOf(q))
+		}
+	}
+	return fftOP3D
+}
+
+func FFT3DAs(q Quantity, name string) *fftOperation3D {
+	s := MeshOf(q).Size()
 	FFT3DR2CPlans[q] = cuda.Initialize3DR2CFFT(s[X], s[Y], s[Z])
-	fftOP3D := &fftOperation3D{fieldOp{q, q, q.NComp()}, "k_x_y_z_" + NameOf(q), q}
+	fftOP3D := &fftOperation3D{fieldOp{q, q, q.NComp()}, "k_x_y_z_" + NameOf(q), q, false}
 	FFTEvaluated[q] = false
 	FFTEvaluatedReal[q] = false
 	FFTEvaluatedImag[q] = false
@@ -144,15 +187,27 @@ func (d *fftOperation3D) EvalTo(dst *data.Slice) {
 }
 
 func (d *fftOperation3D) evalIntern() {
-	input := ValueOf(d.a)
-	defer cuda.Recycle(input)
-	buf := cuda.Buffer(d.nComp, d.FFTOutputSize())
-	cuda.Zero(buf)
-	defer cuda.Recycle(buf)
-	for i := range d.nComp {
-		cuda.Perform3DR2CFFT(input.Comp(i), buf.Comp(i), FFT3DR2CPlans[d.q])
+	if !d.FFT_T {
+		input := ValueOf(d.a)
+		defer cuda.Recycle(input)
+		buf := cuda.Buffer(d.nComp, d.FFTOutputSize())
+		cuda.Zero(buf)
+		defer cuda.Recycle(buf)
+		for i := range d.nComp {
+			cuda.Perform3DR2CFFT(input.Comp(i), buf.Comp(i), FFT3DR2CPlans[d.q])
+		}
+		cuda.ReorderCufftData(FFT3DData[d.q], buf)
+	} else {
+		input := ValueOf(d.a)
+		defer cuda.Recycle(input)
+		buf := cuda.BufferFFT_T(d.nComp, d.FFTOutputSize(), NameOf(d.q))
+		cuda.ZeroFFT_T(buf, NameOf(d.q))
+		defer cuda.Recycle(buf)
+		for i := range d.nComp {
+			cuda.Perform3DR2CFFT(input.Comp(i), buf.Comp(i), FFT3DR2CPlans[d.q])
+		}
+		cuda.ReorderCufftData(FFT3DData[d.q], buf)
 	}
-	cuda.ReorderCufftData(FFT3DData[d.q], buf)
 }
 
 func (d *fftOperation3D) Mesh() *data.Mesh {
@@ -180,11 +235,11 @@ func (d *fftOperation3D) Axis() ([3]int, [3]float64, [3]float64, []string) {
 }
 
 func (d *fftOperation3D) Real() *fftOperation3DReal {
-	return &fftOperation3DReal{fieldOp{d.q, d.q, d.q.NComp()}, "k_x_y_z_" + NameOf(d.q) + "_real", d.q, *d}
+	return &fftOperation3DReal{fieldOp{d.q, d.q, d.q.NComp()}, "k_x_y_z_" + NameOf(d.q) + "_real", d.q, *d, false}
 }
 
 func (d *fftOperation3D) Imag() *fftOperation3DImag {
-	return &fftOperation3DImag{fieldOp{d.q, d.q, d.q.NComp()}, "k_x_y_z_" + NameOf(d.q) + "_imag", d.q, *d}
+	return &fftOperation3DImag{fieldOp{d.q, d.q, d.q.NComp()}, "k_x_y_z_" + NameOf(d.q) + "_imag", d.q, *d, false}
 }
 
 func (d *fftOperation3D) SymmetricX() bool {

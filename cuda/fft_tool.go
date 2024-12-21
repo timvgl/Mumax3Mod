@@ -2,6 +2,7 @@ package cuda
 
 import (
 	//"github.com/mumax/3/cuda/cu"
+	"github.com/mumax/3/cuda/cu"
 	"github.com/mumax/3/data"
 	//"github.com/mumax/3/engine"
 	//"github.com/mumax/3/engine"
@@ -15,6 +16,10 @@ var (
 
 func Initialize3DR2CFFT(Nx, Ny, Nz int) fft3DR2CPlan {
 	return newFFT3DR2C(Nx, Ny, Nz)
+}
+
+func Initialize3DR2CFFT_FFT_T(Nx, Ny, Nz int, streamFFT_T_ cu.Stream) fft3DR2CPlan {
+	return newFFT3DR2C_FFT_T(Nx, Ny, Nz, streamFFT_T_)
 }
 
 func Perform3DR2CFFT(src, dst *data.Slice, FFT3DR2CPlanInterface interface{}) {

@@ -1,11 +1,14 @@
 package oommf
 
 import (
+	"bufio"
+	"encoding/binary"
 	"fmt"
 	"io"
 	"log"
 	"slices"
 	"strings"
+	"sync"
 	"unsafe"
 
 	"github.com/mumax/3/data"
@@ -17,8 +20,8 @@ func WriteOVF2(out io.Writer, q *data.Slice, meta data.Meta, dataformat string) 
 	hdr(out, "End", "Segment")
 }
 
-func WriteOVF2FFT(out io.Writer, q *data.Slice, meta data.Meta, dataformat string, NxNyNz [3]int, startK, endK [3]float64, transformedAxes []string) {
-	writeOVF2HeaderFFT(out, q, meta, NxNyNz, startK, endK, transformedAxes)
+func WriteOVF2FFT(out io.Writer, q *data.Slice, meta data.Meta, dataformat string, NxNyNz [3]int, startK, endK [3]float64, transformedAxes []string, timeSpace bool) {
+	writeOVF2HeaderFFT(out, q, meta, NxNyNz, startK, endK, transformedAxes, timeSpace)
 	writeOVF2Data(out, q, dataformat)
 	hdr(out, "End", "Segment")
 }
@@ -81,7 +84,7 @@ func writeOVF2Header(out io.Writer, q *data.Slice, meta data.Meta) {
 	hdr(out, "End", "Header")
 }
 
-func writeOVF2HeaderFFT(out io.Writer, q *data.Slice, meta data.Meta, NxNyNz [3]int, startK, endK [3]float64, transformedAxes []string) {
+func writeOVF2HeaderFFT(out io.Writer, q *data.Slice, meta data.Meta, NxNyNz [3]int, startK, endK [3]float64, transformedAxes []string, timeSpace bool) {
 	gridsize := NxNyNz
 	cellsize := meta.CellSize
 
@@ -148,7 +151,11 @@ func writeOVF2HeaderFFT(out io.Writer, q *data.Slice, meta data.Meta, NxNyNz [3]
 
 	// We don't really have stages
 	//fmt.Fprintln(out, "# Desc: Stage simulation time: ", meta.TimeStep, " s") // TODO
-	hdr(out, "Desc", "Total simulation time: ", meta.Time, " s")
+	if timeSpace {
+		hdr(out, "Desc", "Total simulation time: ", meta.Time, " s")
+	} else {
+		hdr(out, "Desc", "Frequency: ", meta.Freq, " Hz")
+	}
 
 	hdr(out, "xbase", cellsize[X])
 	hdr(out, "ybase", cellsize[Y])
@@ -210,12 +217,70 @@ func writeOVF2DataBinary4(out io.Writer, array *data.Slice) {
 	}
 }
 
-func readOVF2DataBinary4(in io.Reader, array *data.Slice) {
+func ReadOVF2DataBinary4Optimized(in io.Reader, array *data.Slice) error {
+	readHeaderDummy(in)
+	size := array.Size()
+	data := array.Tensors()
+	controlNumber, err := readFloat32(in)
+	if err != nil {
+		return nil
+	}
+	if controlNumber != OVF_CONTROL_NUMBER_4 {
+		panic("invalid OVF2 control number: " + fmt.Sprint(controlNumber))
+	}
+	if controlNumber != OVF_CONTROL_NUMBER_4 {
+		fmt.Println(controlNumber)
+		//return fmt.Errorf("invalid OVF2 control number: %v", controlNumber)
+	}
+
+	bufferedReader := bufio.NewReader(in)
+	ncomp := array.NComp()
+	totalElements := size[0] * size[1] * size[2] * ncomp
+	floatBuffer := make([]float32, totalElements)
+
+	// Read all float32 data at once
+	if err := binary.Read(bufferedReader, binary.LittleEndian, floatBuffer); err != nil {
+		return fmt.Errorf("failed to read float data: %v", err)
+	}
+	if len(floatBuffer) < array.Len() {
+		return fmt.Errorf("floatBuffer smaller than expected data")
+	}
+	var wg sync.WaitGroup
+	var batchSize = slices.Max(size[:])
+	for start := 0; start < totalElements; start += batchSize {
+		end := start + batchSize
+		if end > totalElements {
+			end = totalElements
+		}
+		wg.Add(1)
+		go func(start, end int) {
+			defer wg.Done()
+			for i := start; i < end; i++ {
+				// Calculate multi-dimensional indices
+				c := i / (size[0] * size[1] * size[2])
+				rem := i % (size[0] * size[1] * size[2])
+				iz := rem / (size[0] * size[1])
+				rem = rem % (size[0] * size[1])
+				iy := rem / size[0]
+				ix := rem % size[0]
+
+				data[c][iz][iy][ix] = floatBuffer[i]
+			}
+		}(start, end)
+	}
+
+	return nil
+}
+
+func ReadOVF2DataBinary4(in io.Reader, array *data.Slice) error {
 	size := array.Size()
 	data := array.Tensors()
 
 	// OOMMF requires this number to be first to check the format
-	controlnumber := readFloat32(in)
+	controlnumber, err := readFloat32(in)
+	if err != nil {
+		return err
+	}
 	if controlnumber != OVF_CONTROL_NUMBER_4 {
 		panic("invalid OVF2 control number: " + fmt.Sprint(controlnumber))
 	}
@@ -225,44 +290,55 @@ func readOVF2DataBinary4(in io.Reader, array *data.Slice) {
 		for iy := 0; iy < size[Y]; iy++ {
 			for ix := 0; ix < size[X]; ix++ {
 				for c := 0; c < ncomp; c++ {
-					data[c][iz][iy][ix] = readFloat32(in)
+					val, _ := readFloat32(in)
+					data[c][iz][iy][ix] = val
 				}
 			}
 		}
 	}
+	return nil
 }
 
 // fully read buf, panic on error
-func readFull(in io.Reader, buf []byte) {
+func readFull(in io.Reader, buf []byte) error {
 	_, err := io.ReadFull(in, buf)
 	if err != nil {
-		panic(err)
+		return err
 	}
-	return
+	return nil
 }
 
 // read float32 in machine endianess, panic on error
-func readFloat32(in io.Reader) float32 {
+func readFloat32(in io.Reader) (float32, error) {
 	var bytes4 [4]byte
 	bytes := bytes4[:]
-	readFull(in, bytes)
-	return *((*float32)(unsafe.Pointer(&bytes4)))
+	err := readFull(in, bytes)
+	if err != nil {
+		return -1, err
+	}
+	return *((*float32)(unsafe.Pointer(&bytes4))), nil
 }
 
 // read float64 in machine endianess, panic on error
-func readFloat64(in io.Reader) float64 {
+func readFloat64(in io.Reader) (float64, error) {
 	var bytes8 [8]byte
 	bytes := bytes8[:]
-	readFull(in, bytes)
-	return *((*float64)(unsafe.Pointer(&bytes8)))
+	err := readFull(in, bytes)
+	if err != nil {
+		return -1, err
+	}
+	return *((*float64)(unsafe.Pointer(&bytes8))), nil
 }
 
-func readOVF2DataBinary8(in io.Reader, array *data.Slice) {
+func readOVF2DataBinary8(in io.Reader, array *data.Slice) error {
 	size := array.Size()
 	data := array.Tensors()
 
 	// OOMMF requires this number to be first to check the format
-	controlnumber := readFloat64(in)
+	controlnumber, err := readFloat64(in)
+	if err != nil {
+		return err
+	}
 	if controlnumber != OVF_CONTROL_NUMBER_8 {
 		panic("invalid OVF2 control number: " + fmt.Sprint(controlnumber))
 	}
@@ -272,9 +348,11 @@ func readOVF2DataBinary8(in io.Reader, array *data.Slice) {
 		for iy := 0; iy < size[Y]; iy++ {
 			for ix := 0; ix < size[X]; ix++ {
 				for c := 0; c < ncomp; c++ {
-					data[c][iz][iy][ix] = float32(readFloat64(in))
+					val, _ := readFloat64(in)
+					data[c][iz][iy][ix] = float32(val)
 				}
 			}
 		}
 	}
+	return nil
 }

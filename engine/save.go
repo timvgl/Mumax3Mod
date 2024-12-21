@@ -97,12 +97,16 @@ func SaveAs(q Quantity, fname string) {
 		FFTOutputSize() [3]int
 	}); ok {
 		NxNyNz, startK, endK, transformedAxis := s.Axis()
-		queOutput(func() { saveAsFFT_sync(fname, data, info, outputFormat, NxNyNz, startK, endK, transformedAxis, true) })
+		queOutput(func() {
+			saveAsFFT_sync(fname, data, info, outputFormat, NxNyNz, startK, endK, transformedAxis, true, true)
+		})
 	} else if s, ok := q.(interface {
 		Axis() ([3]int, [3]float64, [3]float64, []string)
 	}); ok {
 		NxNyNz, startK, endK, transformedAxis := s.Axis()
-		queOutput(func() { saveAsFFT_sync(fname, data, info, outputFormat, NxNyNz, startK, endK, transformedAxis, false) })
+		queOutput(func() {
+			saveAsFFT_sync(fname, data, info, outputFormat, NxNyNz, startK, endK, transformedAxis, false, true)
+		})
 	} else {
 		queOutput(func() { saveAs_sync(fname, data, info, outputFormat) })
 	}
@@ -126,12 +130,16 @@ func SaveAsAt(q Quantity, fname, dir string) {
 		FFTOutputSize() [3]int
 	}); ok {
 		NxNyNz, startK, endK, transformedAxis := s.Axis()
-		queOutput(func() { saveAsFFT_sync(fname, data, info, outputFormat, NxNyNz, startK, endK, transformedAxis, true) })
+		queOutput(func() {
+			saveAsFFT_sync(fname, data, info, outputFormat, NxNyNz, startK, endK, transformedAxis, true, true)
+		})
 	} else if s, ok := q.(interface {
 		Axis() ([3]int, [3]float64, [3]float64, []string)
 	}); ok {
 		NxNyNz, startK, endK, transformedAxis := s.Axis()
-		queOutput(func() { saveAsFFT_sync(fname, data, info, outputFormat, NxNyNz, startK, endK, transformedAxis, false) })
+		queOutput(func() {
+			saveAsFFT_sync(fname, data, info, outputFormat, NxNyNz, startK, endK, transformedAxis, false, true)
+		})
 	} else {
 		queOutput(func() { saveAs_sync(fname, data, info, outputFormat) })
 	}
@@ -316,19 +324,19 @@ func saveAs_sync(fname string, s *data.Slice, info data.Meta, format OutputForma
 
 }
 
-func saveAsFFT_sync(fname string, s *data.Slice, info data.Meta, format OutputFormat, NxNyNz [3]int, startK, endK [3]float64, transformedAxes []string, complex bool) {
+func saveAsFFT_sync(fname string, s *data.Slice, info data.Meta, format OutputFormat, NxNyNz [3]int, startK, endK [3]float64, transformedAxes []string, complex bool, timeSpace bool) {
 	f, err := httpfs.Create(fname)
 	util.FatalErr(err)
 	defer f.Close()
 
 	switch format {
 	case OVF2_TEXT:
-		oommf.WriteOVF2FFT(f, s, info, "text", NxNyNz, startK, endK, transformedAxes)
+		oommf.WriteOVF2FFT(f, s, info, "text", NxNyNz, startK, endK, transformedAxes, timeSpace)
 	case OVF2_BINARY:
 		if complex {
-			oommf.WriteOVF2FFT(f, s, info, "binary 4+4", NxNyNz, startK, endK, transformedAxes)
+			oommf.WriteOVF2FFT(f, s, info, "binary 4+4", NxNyNz, startK, endK, transformedAxes, timeSpace)
 		} else {
-			oommf.WriteOVF2FFT(f, s, info, "binary 4", NxNyNz, startK, endK, transformedAxes)
+			oommf.WriteOVF2FFT(f, s, info, "binary 4", NxNyNz, startK, endK, transformedAxes, timeSpace)
 		}
 	case DUMP:
 		dump.Write(f, s, info)

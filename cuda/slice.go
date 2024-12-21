@@ -76,6 +76,14 @@ func MemCpy(dst, src unsafe.Pointer, bytes int64) {
 	timer.Stop("memcpy")
 }
 
+func MemCpyFFT_T(dst, src unsafe.Pointer, bytes int64, key string) {
+	SyncFFT_T(key)
+	timer.Start("memcpy")
+	cu.MemcpyAsync(cu.DevicePtr(uintptr(dst)), cu.DevicePtr(uintptr(src)), bytes, Get_Stream(key))
+	SyncFFT_T(key)
+	timer.Stop("memcpy")
+}
+
 // Memset sets the Slice's components to the specified values.
 // To be carefully used on unified slice (need sync)
 func Memset(s *data.Slice, val ...float32) {
@@ -93,9 +101,28 @@ func Memset(s *data.Slice, val ...float32) {
 	}
 }
 
+func MemsetFFT_T(s *data.Slice, key string, val ...float32) {
+	if Synchronous { // debug
+		SyncFFT_T(key)
+		timer.Start("memset")
+	}
+	util.Argument(len(val) == s.NComp())
+	for c, v := range val {
+		cu.MemsetD32Async(cu.DevicePtr(uintptr(s.DevPtr(c))), math.Float32bits(v), int64(s.Len()), Get_Stream(key))
+	}
+	if Synchronous { //debug
+		SyncFFT_T(key)
+		timer.Stop("memset")
+	}
+}
+
 // Set all elements of all components to zero.
 func Zero(s *data.Slice) {
 	Memset(s, make([]float32, s.NComp())...)
+}
+
+func ZeroFFT_T(s *data.Slice, key string) {
+	MemsetFFT_T(s, key, make([]float32, s.NComp())...)
 }
 
 func SetConstValue(s *data.Slice, v float32) {
