@@ -144,6 +144,7 @@ func (s *fftOperation4D) Eval() {
 	bufsGPUOP := make([]*data.Slice, 0)
 	bufInitalized := slices.Contains(slices.Collect(maps.Keys(bufsCPU_map)), s.q)
 	if !bufInitalized {
+		cuda.IncreaseBufMax(cores * 3)
 		for core := range cores {
 			bufsCPU = append(bufsCPU, data.NewSlice(dataT.NComp(), dataT.Size()))
 			bufsGPUIP = append(bufsGPUIP, cuda.BufferFFT_T(dataT.NComp(), dataT.Size(), fmt.Sprint(NameOf(s.q)+"_%d", core)))
