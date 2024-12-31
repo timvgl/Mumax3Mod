@@ -26,9 +26,9 @@ var (
 	mu                 = new(sync.Mutex)
 	condDataCopied     = sync.NewCond(mu)
 	condCalcComplete   = sync.NewCond(mu)
-	bufsCPU_map        = make(map[Quantity][]*data.Slice)
-	bufsGPUIP_map      = make(map[Quantity][]*data.Slice)
-	bufsGPUOP_map      = make(map[Quantity][]*data.Slice)
+	bufsCPU_map        = make(map[Quantity][]*data.SliceBinary)
+	bufsGPUIP_map      = make(map[Quantity][]*data.SliceBinary)
+	bufsGPUOP_map      = make(map[Quantity][]*data.SliceBinary)
 )
 
 func init() {
@@ -139,25 +139,29 @@ func (s *fftOperation4D) Eval() {
 	if int((s.maxF-s.minF)/s.dF)%cores != 0 {
 		cores += 1
 	}
-	bufsCPU := make([]*data.Slice, 0)
-	bufsGPUIP := make([]*data.Slice, 0)
-	bufsGPUOP := make([]*data.Slice, 0)
+	bufsCPU := make([]*data.SliceBinary, 0)
+	bufsGPUIP := make([]*data.SliceBinary, 0)
+	bufsGPUOP := make([]*data.SliceBinary, 0)
 	bufInitalized := slices.Contains(slices.Collect(maps.Keys(bufsCPU_map)), s.q)
+	binarySize := dataT.Size()
+	binarySize[0] *= 4
 	if !bufInitalized {
 		cuda.IncreaseBufMax(cores * 3)
 		for core := range cores {
-			bufsCPU = append(bufsCPU, data.NewSlice(dataT.NComp(), dataT.Size()))
-			bufsGPUIP = append(bufsGPUIP, cuda.BufferFFT_T(dataT.NComp(), dataT.Size(), fmt.Sprint(NameOf(s.q)+"_%d", core)))
-			bufsGPUOP = append(bufsGPUOP, cuda.BufferFFT_T(dataT.NComp(), dataT.Size(), fmt.Sprint(NameOf(s.q)+"_%d", core)))
+			bufsCPU = append(bufsCPU, data.NewSliceBinary(dataT.NComp(), binarySize, prod(binarySize)))
+			bufsGPUIP = append(bufsGPUIP, cuda.BufferBinary(dataT.NComp(), binarySize, fmt.Sprint(NameOf(s.q)+"_%d", core)))
+			bufsGPUOP = append(bufsGPUOP, cuda.BufferBinary(dataT.NComp(), binarySize, fmt.Sprint(NameOf(s.q)+"_%d", core)))
 		}
 		bufsCPU_map[s.q] = bufsCPU
 		bufsGPUIP_map[s.q] = bufsGPUIP
 		bufsGPUOP_map[s.q] = bufsGPUOP
 	}
+	dataTCompressed := cuda.BufferBinary(dataT.NComp(), binarySize, "")
 	mu.Lock()
 	FFT_T_OPDataCopied[s] = true
 	condDataCopied.Broadcast()
 	mu.Unlock()
+	compressedSize := cuda.Compress(dataTCompressed, dataT)
 	if bufInitalized {
 		bufsCPU = bufsCPU_map[s.q]
 		bufsGPUIP = bufsGPUIP_map[s.q]
@@ -173,7 +177,7 @@ func (s *fftOperation4D) Eval() {
 			upperEnd = int((s.maxF - s.minF) / s.dF)
 		}
 		wg.Add(1)
-		go func(core int, s *fftOperation4D, startIndex, endIndex int, bufCPU, bufGPUIP, bufGPUOP, dataT *data.Slice, FFTOP *fftOperation3D, NxNyNz [3]int, startK, endK [3]float64, transformedAxis []string) {
+		go func(core int, s *fftOperation4D, startIndex, endIndex int, bufCPU, bufGPUIP, bufGPUOP, dataT *data.SliceBinary, FFTOP *fftOperation3D, NxNyNz [3]int, startK, endK [3]float64, transformedAxis []string) {
 			runtime.LockOSThread()
 			cuda.SetCurrent_Ctx()
 			for i := startIndex; i <= endIndex; i++ {
@@ -181,20 +185,20 @@ func (s *fftOperation4D) Eval() {
 				if err == nil {
 					err := oommf.ReadOVF2DataBinary4Optimized(in, bufCPU)
 					if err != nil {
-						data.Zero(bufCPU)
+						data.ZeroBinary(bufCPU)
 					}
 					in.Close()
 				} else {
-					data.Zero(bufCPU)
+					data.ZeroBinary(bufCPU)
 				}
-				data.Copy(bufGPUIP, bufCPU)
+				data.CopyBinary(bufGPUIP, bufCPU)
 				angle := -2i * complex64(complex(math.Pi*float64(i)*Time*s.dF, 0))
 				cuda.FFT_T_Step(bufGPUOP, bufGPUIP, dataT, real(angle), imag(angle), int((s.maxF-s.minF)/s.dF))
 				info := data.Meta{Freq: s.minF + float64(i)*s.dF, Name: "k_x_y_z_f_" + NameOf(s.q), Unit: UnitOf(FFTOP), CellSize: MeshOf(FFTOP).CellSize()}
-				saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, "k_x_y_z_f_"+NameOf(s.q), i)+".ovf", bufGPUOP.HostCopy(), info, outputFormat, NxNyNz, startK, endK, transformedAxis, true, false)
+				saveAsFFTCompressed_sync(OD()+fmt.Sprintf(FilenameFormat, "k_x_y_z_f_"+NameOf(s.q), i)+".ovf", bufGPUOP.HostCopy(), info, outputFormat, NxNyNz, startK, endK, transformedAxis, true, false, compressedSize)
 			}
 			wg.Done()
-		}(core, s, lowerEnd, upperEnd, bufsCPU[core], bufsGPUIP[core], bufsGPUOP[core], dataT, FFTOP, NxNyNz, startK, endK, transformedAxis)
+		}(core, s, lowerEnd, upperEnd, bufsCPU[core], bufsGPUIP[core], bufsGPUOP[core], dataTCompressed, FFTOP, NxNyNz, startK, endK, transformedAxis)
 		lowerEnd += filesPerCore
 	}
 	wg.Wait()

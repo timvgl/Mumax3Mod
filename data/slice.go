@@ -19,6 +19,14 @@ type Slice struct {
 	memType int8
 }
 
+type SliceBinary struct {
+	ptrs    unsafe.Pointer
+	size    [3]int
+	comp    int
+	memType int8
+	length  int
+}
+
 // this package must not depend on CUDA. If CUDA is
 // loaded, these functions are set to cu.MemFree, ...
 // NOTE: cpyDtoH and cpuHtoD are only needed to support 32-bit builds,
@@ -52,6 +60,16 @@ func Zero(data *Slice) {
 	}
 }
 
+const (
+	ZERO_MARKER     byte = 0x00
+	NON_ZERO_MARKER byte = 0xFF
+)
+
+func ZeroBinary(data *SliceBinary) {
+	array := data.Tensors()
+	array = append(array, ZERO_MARKER, byte(data.Len()))
+}
+
 // Make a CPU Slice with nComp components of size length.
 func NewSlice(nComp int, size [3]int) *Slice {
 	length := prod(size)
@@ -60,6 +78,10 @@ func NewSlice(nComp int, size [3]int) *Slice {
 		ptrs[i] = unsafe.Pointer(&(make([]float32, length)[0]))
 	}
 	return SliceFromPtrs(size, CPUMemory, ptrs)
+}
+
+func NewSliceBinary(nComp int, size [3]int, length int) *SliceBinary {
+	return SliceBinaryFromPtrs(size, CPUMemory, unsafe.Pointer(&(make([]byte, length)[0])))
 }
 
 func SliceFromArray(data [][]float32, size [3]int) *Slice {
@@ -91,6 +113,16 @@ func SliceFromPtrs(size [3]int, memType int8, ptrs []unsafe.Pointer) *Slice {
 	for c := range ptrs {
 		s.ptrs[c] = ptrs[c]
 	}
+	s.memType = memType
+	return s
+}
+
+func SliceBinaryFromPtrs(size [3]int, memType int8, ptrs unsafe.Pointer) *SliceBinary {
+	length := prod(size)
+	util.Argument(length > 0)
+	s := new(SliceBinary)
+	s.size = size
+	s.ptrs = ptrs
 	s.memType = memType
 	return s
 }
@@ -148,9 +180,17 @@ func (s *Slice) GPUAccess() bool {
 	return s.memType&GPUMemory != 0
 }
 
+func (s *SliceBinary) GPUAccess() bool {
+	return s.memType&GPUMemory != 0
+}
+
 // CPUAccess returns whether the Slice is accessible by the CPU.
 // true means it is stored in host memory.
 func (s *Slice) CPUAccess() bool {
+	return s.memType&CPUMemory != 0
+}
+
+func (s *SliceBinary) CPUAccess() bool {
 	return s.memType&CPUMemory != 0
 }
 
@@ -159,12 +199,26 @@ func (s *Slice) NComp() int {
 	return len(s.ptrs)
 }
 
+func (s *SliceBinary) NComp() int {
+	return s.comp
+}
+
 // Len returns the number of elements per component.
 func (s *Slice) Len() int {
 	return prod(s.size)
 }
 
+func (s *SliceBinary) Len() int {
+	return prod(s.size)
+}
+
 func (s *Slice) Size() [3]int {
+	if s == nil {
+		return [3]int{0, 0, 0}
+	}
+	return s.size
+}
+func (s *SliceBinary) Size() [3]int {
 	if s == nil {
 		return [3]int{0, 0, 0}
 	}
@@ -211,6 +265,16 @@ func (s *Slice) DevPtr(component int) unsafe.Pointer {
 	return s.ptrs[component]
 }
 
+func (s *SliceBinary) DevPtr() unsafe.Pointer {
+	if s == nil {
+		return nil
+	}
+	if !s.GPUAccess() {
+		panic("slice not accessible by GPU")
+	}
+	return s.ptrs
+}
+
 const SIZEOF_FLOAT32 = 4
 
 // Host returns the Slice as a [][]float32 indexed by component, cell number.
@@ -229,11 +293,35 @@ func (s *Slice) Host() [][]float32 {
 	return list
 }
 
+func (s *SliceBinary) Host() []byte {
+	if !s.CPUAccess() {
+		log.Panic("slice not accessible by CPU")
+	}
+	list := make([]byte, 0)
+	for c := range list {
+		hdr := (*reflect.SliceHeader)(unsafe.Pointer(&list[c]))
+		hdr.Data = uintptr(s.ptrs)
+		hdr.Len = s.Len()
+		hdr.Cap = hdr.Len
+	}
+	return list
+}
+
 // Returns a copy of the Slice, allocated on CPU.
 func (s *Slice) HostCopy() *Slice {
 	cpy := NewSlice(s.NComp(), s.Size())
 	Copy(cpy, s)
 	return cpy
+}
+
+func (s *SliceBinary) HostCopy() *SliceBinary {
+	cpy := NewSliceBinary(s.NComp(), s.Size(), s.Length())
+	CopyBinary(cpy, s)
+	return cpy
+}
+
+func (s *SliceBinary) Length() int {
+	return s.length
 }
 
 func Copy(dst, src *Slice) {
@@ -262,6 +350,27 @@ func Copy(dst, src *Slice) {
 		for c := range dst {
 			copy(dst[c], src[c])
 		}
+	}
+}
+
+func CopyBinary(dst, src *SliceBinary) {
+	if dst.NComp() != src.NComp() || dst.Len() != src.Len() {
+		panic(fmt.Sprintf("slice copy: illegal sizes: dst: %vx%v, src: %vx%v", dst.NComp(), dst.Len(), src.NComp(), src.Len()))
+	}
+	d, s := dst.GPUAccess(), src.GPUAccess()
+	bytes := SIZEOF_FLOAT32 * int64(dst.Len())
+	switch {
+	default:
+		panic("bug")
+	case d && s:
+		memCpy(dst.DevPtr(), src.DevPtr(), bytes)
+	case s && !d:
+		memCpyDtoH(dst.ptrs, src.DevPtr(), bytes)
+	case !s && d:
+		memCpyHtoD(dst.DevPtr(), src.ptrs, bytes)
+	case !d && !s:
+		dst, src := dst.Host(), src.Host()
+		copy(dst, src)
 	}
 }
 
@@ -297,6 +406,11 @@ func (f *Slice) Tensors() [][][][]float32 {
 		tensors[i] = reshape(host[i], f.Size())
 	}
 	return tensors
+}
+
+func (f *SliceBinary) Tensors() []byte {
+	host := f.Host()
+	return host
 }
 
 // IsNil returns true if either s is nil or s.pointer[0] == nil

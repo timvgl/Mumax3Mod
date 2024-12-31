@@ -137,5 +137,9 @@ func Sync() {
 }
 
 func SyncFFT_T(key string) {
-	StreamMap[key].Synchronize()
+	if len(key) > 0 {
+		StreamMap[key].Synchronize()
+	} else {
+		stream0.Synchronize()
+	}
 }

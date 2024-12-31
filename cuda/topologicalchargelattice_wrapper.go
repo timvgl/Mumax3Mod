@@ -113,11 +113,11 @@ const (
 	.param .u8 settopologicalchargelattice_param_8
 )
 {
-	.reg .pred 	%p<85>;
-	.reg .b16 	%rs<4>;
-	.reg .f32 	%f<296>;
-	.reg .b32 	%r<181>;
-	.reg .b64 	%rd<46>;
+	.reg .pred 	%p&lt;85&gt;;
+	.reg .b16 	%rs&lt;4&gt;;
+	.reg .f32 	%f&lt;296&gt;;
+	.reg .b32 	%r&lt;181&gt;;
+	.reg .b64 	%rd&lt;46&gt;;
 
 
 	ld.param.u8 	%rs3, [settopologicalchargelattice_param_8];
@@ -901,11 +901,11 @@ $L__BB0_72:
 	.param .u8 settopologicalchargelattice_param_8
 )
 {
-	.reg .pred 	%p<85>;
-	.reg .b16 	%rs<4>;
-	.reg .f32 	%f<296>;
-	.reg .b32 	%r<181>;
-	.reg .b64 	%rd<46>;
+	.reg .pred 	%p&lt;85&gt;;
+	.reg .b16 	%rs&lt;4&gt;;
+	.reg .f32 	%f&lt;296&gt;;
+	.reg .b32 	%r&lt;181&gt;;
+	.reg .b64 	%rd&lt;46&gt;;
 
 
 	ld.param.u8 	%rs3, [settopologicalchargelattice_param_8];
@@ -1689,11 +1689,11 @@ $L__BB0_72:
 	.param .u8 settopologicalchargelattice_param_8
 )
 {
-	.reg .pred 	%p<85>;
-	.reg .b16 	%rs<4>;
-	.reg .f32 	%f<296>;
-	.reg .b32 	%r<181>;
-	.reg .b64 	%rd<46>;
+	.reg .pred 	%p&lt;85&gt;;
+	.reg .b16 	%rs&lt;4&gt;;
+	.reg .f32 	%f&lt;296&gt;;
+	.reg .b32 	%r&lt;181&gt;;
+	.reg .b64 	%rd&lt;46&gt;;
 
 
 	ld.param.u8 	%rs3, [settopologicalchargelattice_param_8];
@@ -2477,11 +2477,11 @@ $L__BB0_72:
 	.param .u8 settopologicalchargelattice_param_8
 )
 {
-	.reg .pred 	%p<85>;
-	.reg .b16 	%rs<4>;
-	.reg .f32 	%f<296>;
-	.reg .b32 	%r<181>;
-	.reg .b64 	%rd<46>;
+	.reg .pred 	%p&lt;85&gt;;
+	.reg .b16 	%rs&lt;4&gt;;
+	.reg .f32 	%f&lt;296&gt;;
+	.reg .b32 	%r&lt;181&gt;;
+	.reg .b64 	%rd&lt;46&gt;;
 
 
 	ld.param.u8 	%rs3, [settopologicalchargelattice_param_8];
@@ -3265,11 +3265,11 @@ $L__BB0_72:
 	.param .u8 settopologicalchargelattice_param_8
 )
 {
-	.reg .pred 	%p<85>;
-	.reg .b16 	%rs<4>;
-	.reg .f32 	%f<296>;
-	.reg .b32 	%r<181>;
-	.reg .b64 	%rd<46>;
+	.reg .pred 	%p&lt;85&gt;;
+	.reg .b16 	%rs&lt;4&gt;;
+	.reg .f32 	%f&lt;296&gt;;
+	.reg .b32 	%r&lt;181&gt;;
+	.reg .b64 	%rd&lt;46&gt;;
 
 
 	ld.param.u8 	%rs3, [settopologicalchargelattice_param_8];
@@ -4053,11 +4053,11 @@ $L__BB0_72:
 	.param .u8 settopologicalchargelattice_param_8
 )
 {
-	.reg .pred 	%p<85>;
-	.reg .b16 	%rs<4>;
-	.reg .f32 	%f<296>;
-	.reg .b32 	%r<181>;
-	.reg .b64 	%rd<46>;
+	.reg .pred 	%p&lt;85&gt;;
+	.reg .b16 	%rs&lt;4&gt;;
+	.reg .f32 	%f&lt;296&gt;;
+	.reg .b32 	%r&lt;181&gt;;
+	.reg .b64 	%rd&lt;46&gt;;
 
 
 	ld.param.u8 	%rs3, [settopologicalchargelattice_param_8];
@@ -4841,11 +4841,11 @@ $L__BB0_72:
 	.param .u8 settopologicalchargelattice_param_8
 )
 {
-	.reg .pred 	%p<85>;
-	.reg .b16 	%rs<4>;
-	.reg .f32 	%f<296>;
-	.reg .b32 	%r<181>;
-	.reg .b64 	%rd<46>;
+	.reg .pred 	%p&lt;85&gt;;
+	.reg .b16 	%rs&lt;4&gt;;
+	.reg .f32 	%f&lt;296&gt;;
+	.reg .b32 	%r&lt;181&gt;;
+	.reg .b64 	%rd&lt;46&gt;;
 
 
 	ld.param.u8 	%rs3, [settopologicalchargelattice_param_8];
@@ -5629,11 +5629,11 @@ $L__BB0_72:
 	.param .u8 settopologicalchargelattice_param_8
 )
 {
-	.reg .pred 	%p<85>;
-	.reg .b16 	%rs<4>;
-	.reg .f32 	%f<296>;
-	.reg .b32 	%r<181>;
-	.reg .b64 	%rd<46>;
+	.reg .pred 	%p&lt;85&gt;;
+	.reg .b16 	%rs&lt;4&gt;;
+	.reg .f32 	%f&lt;296&gt;;
+	.reg .b32 	%r&lt;181&gt;;
+	.reg .b64 	%rd&lt;46&gt;;
 
 
 	ld.param.u8 	%rs3, [settopologicalchargelattice_param_8];
@@ -6417,11 +6417,11 @@ $L__BB0_72:
 	.param .u8 settopologicalchargelattice_param_8
 )
 {
-	.reg .pred 	%p<85>;
-	.reg .b16 	%rs<4>;
-	.reg .f32 	%f<296>;
-	.reg .b32 	%r<181>;
-	.reg .b64 	%rd<46>;
+	.reg .pred 	%p&lt;85&gt;;
+	.reg .b16 	%rs&lt;4&gt;;
+	.reg .f32 	%f&lt;296&gt;;
+	.reg .b32 	%r&lt;181&gt;;
+	.reg .b64 	%rd&lt;46&gt;;
 
 
 	ld.param.u8 	%rs3, [settopologicalchargelattice_param_8];
@@ -7205,11 +7205,11 @@ $L__BB0_72:
 	.param .u8 settopologicalchargelattice_param_8
 )
 {
-	.reg .pred 	%p<85>;
-	.reg .b16 	%rs<4>;
-	.reg .f32 	%f<296>;
-	.reg .b32 	%r<181>;
-	.reg .b64 	%rd<46>;
+	.reg .pred 	%p&lt;85&gt;;
+	.reg .b16 	%rs&lt;4&gt;;
+	.reg .f32 	%f&lt;296&gt;;
+	.reg .b32 	%r&lt;181&gt;;
+	.reg .b64 	%rd&lt;46&gt;;
 
 
 	ld.param.u8 	%rs3, [settopologicalchargelattice_param_8];

@@ -93,11 +93,11 @@ const (
 	.param .u32 regiondecode_param_3
 )
 {
-	.reg .pred 	%p<2>;
-	.reg .b16 	%rs<2>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<11>;
-	.reg .b64 	%rd<13>;
+	.reg .pred 	%p&lt;2&gt;;
+	.reg .b16 	%rs&lt;2&gt;;
+	.reg .f32 	%f&lt;2&gt;;
+	.reg .b32 	%r&lt;11&gt;;
+	.reg .b64 	%rd&lt;13&gt;;
 
 
 	ld.param.u64 	%rd1, [regiondecode_param_0];
@@ -149,11 +149,11 @@ $L__BB0_2:
 	.param .u32 regiondecode_param_3
 )
 {
-	.reg .pred 	%p<2>;
-	.reg .b16 	%rs<2>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<11>;
-	.reg .b64 	%rd<13>;
+	.reg .pred 	%p&lt;2&gt;;
+	.reg .b16 	%rs&lt;2&gt;;
+	.reg .f32 	%f&lt;2&gt;;
+	.reg .b32 	%r&lt;11&gt;;
+	.reg .b64 	%rd&lt;13&gt;;
 
 
 	ld.param.u64 	%rd1, [regiondecode_param_0];
@@ -205,11 +205,11 @@ $L__BB0_2:
 	.param .u32 regiondecode_param_3
 )
 {
-	.reg .pred 	%p<2>;
-	.reg .b16 	%rs<2>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<11>;
-	.reg .b64 	%rd<13>;
+	.reg .pred 	%p&lt;2&gt;;
+	.reg .b16 	%rs&lt;2&gt;;
+	.reg .f32 	%f&lt;2&gt;;
+	.reg .b32 	%r&lt;11&gt;;
+	.reg .b64 	%rd&lt;13&gt;;
 
 
 	ld.param.u64 	%rd1, [regiondecode_param_0];
@@ -261,11 +261,11 @@ $L__BB0_2:
 	.param .u32 regiondecode_param_3
 )
 {
-	.reg .pred 	%p<2>;
-	.reg .b16 	%rs<2>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<11>;
-	.reg .b64 	%rd<13>;
+	.reg .pred 	%p&lt;2&gt;;
+	.reg .b16 	%rs&lt;2&gt;;
+	.reg .f32 	%f&lt;2&gt;;
+	.reg .b32 	%r&lt;11&gt;;
+	.reg .b64 	%rd&lt;13&gt;;
 
 
 	ld.param.u64 	%rd1, [regiondecode_param_0];
@@ -317,11 +317,11 @@ $L__BB0_2:
 	.param .u32 regiondecode_param_3
 )
 {
-	.reg .pred 	%p<2>;
-	.reg .b16 	%rs<2>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<11>;
-	.reg .b64 	%rd<13>;
+	.reg .pred 	%p&lt;2&gt;;
+	.reg .b16 	%rs&lt;2&gt;;
+	.reg .f32 	%f&lt;2&gt;;
+	.reg .b32 	%r&lt;11&gt;;
+	.reg .b64 	%rd&lt;13&gt;;
 
 
 	ld.param.u64 	%rd1, [regiondecode_param_0];
@@ -373,11 +373,11 @@ $L__BB0_2:
 	.param .u32 regiondecode_param_3
 )
 {
-	.reg .pred 	%p<2>;
-	.reg .b16 	%rs<2>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<11>;
-	.reg .b64 	%rd<13>;
+	.reg .pred 	%p&lt;2&gt;;
+	.reg .b16 	%rs&lt;2&gt;;
+	.reg .f32 	%f&lt;2&gt;;
+	.reg .b32 	%r&lt;11&gt;;
+	.reg .b64 	%rd&lt;13&gt;;
 
 
 	ld.param.u64 	%rd1, [regiondecode_param_0];
@@ -429,11 +429,11 @@ $L__BB0_2:
 	.param .u32 regiondecode_param_3
 )
 {
-	.reg .pred 	%p<2>;
-	.reg .b16 	%rs<2>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<11>;
-	.reg .b64 	%rd<13>;
+	.reg .pred 	%p&lt;2&gt;;
+	.reg .b16 	%rs&lt;2&gt;;
+	.reg .f32 	%f&lt;2&gt;;
+	.reg .b32 	%r&lt;11&gt;;
+	.reg .b64 	%rd&lt;13&gt;;
 
 
 	ld.param.u64 	%rd1, [regiondecode_param_0];
@@ -485,11 +485,11 @@ $L__BB0_2:
 	.param .u32 regiondecode_param_3
 )
 {
-	.reg .pred 	%p<2>;
-	.reg .b16 	%rs<2>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<11>;
-	.reg .b64 	%rd<13>;
+	.reg .pred 	%p&lt;2&gt;;
+	.reg .b16 	%rs&lt;2&gt;;
+	.reg .f32 	%f&lt;2&gt;;
+	.reg .b32 	%r&lt;11&gt;;
+	.reg .b64 	%rd&lt;13&gt;;
 
 
 	ld.param.u64 	%rd1, [regiondecode_param_0];
@@ -541,11 +541,11 @@ $L__BB0_2:
 	.param .u32 regiondecode_param_3
 )
 {
-	.reg .pred 	%p<2>;
-	.reg .b16 	%rs<2>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<11>;
-	.reg .b64 	%rd<13>;
+	.reg .pred 	%p&lt;2&gt;;
+	.reg .b16 	%rs&lt;2&gt;;
+	.reg .f32 	%f&lt;2&gt;;
+	.reg .b32 	%r&lt;11&gt;;
+	.reg .b64 	%rd&lt;13&gt;;
 
 
 	ld.param.u64 	%rd1, [regiondecode_param_0];
@@ -597,11 +597,11 @@ $L__BB0_2:
 	.param .u32 regiondecode_param_3
 )
 {
-	.reg .pred 	%p<2>;
-	.reg .b16 	%rs<2>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<11>;
-	.reg .b64 	%rd<13>;
+	.reg .pred 	%p&lt;2&gt;;
+	.reg .b16 	%rs&lt;2&gt;;
+	.reg .f32 	%f&lt;2&gt;;
+	.reg .b32 	%r&lt;11&gt;;
+	.reg .b64 	%rd&lt;13&gt;;
 
 
 	ld.param.u64 	%rd1, [regiondecode_param_0];

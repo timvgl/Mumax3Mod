@@ -93,10 +93,10 @@ const (
 	.param .u32 mul_param_3
 )
 {
-	.reg .pred 	%p<2>;
-	.reg .f32 	%f<4>;
-	.reg .b32 	%r<9>;
-	.reg .b64 	%rd<11>;
+	.reg .pred 	%p&lt;2&gt;;
+	.reg .f32 	%f&lt;4&gt;;
+	.reg .b32 	%r&lt;9&gt;;
+	.reg .b64 	%rd&lt;11&gt;;
 
 
 	ld.param.u64 	%rd1, [mul_param_0];
@@ -145,10 +145,10 @@ $L__BB0_2:
 	.param .u32 mul_param_3
 )
 {
-	.reg .pred 	%p<2>;
-	.reg .f32 	%f<4>;
-	.reg .b32 	%r<9>;
-	.reg .b64 	%rd<11>;
+	.reg .pred 	%p&lt;2&gt;;
+	.reg .f32 	%f&lt;4&gt;;
+	.reg .b32 	%r&lt;9&gt;;
+	.reg .b64 	%rd&lt;11&gt;;
 
 
 	ld.param.u64 	%rd1, [mul_param_0];
@@ -197,10 +197,10 @@ $L__BB0_2:
 	.param .u32 mul_param_3
 )
 {
-	.reg .pred 	%p<2>;
-	.reg .f32 	%f<4>;
-	.reg .b32 	%r<9>;
-	.reg .b64 	%rd<11>;
+	.reg .pred 	%p&lt;2&gt;;
+	.reg .f32 	%f&lt;4&gt;;
+	.reg .b32 	%r&lt;9&gt;;
+	.reg .b64 	%rd&lt;11&gt;;
 
 
 	ld.param.u64 	%rd1, [mul_param_0];
@@ -249,10 +249,10 @@ $L__BB0_2:
 	.param .u32 mul_param_3
 )
 {
-	.reg .pred 	%p<2>;
-	.reg .f32 	%f<4>;
-	.reg .b32 	%r<9>;
-	.reg .b64 	%rd<11>;
+	.reg .pred 	%p&lt;2&gt;;
+	.reg .f32 	%f&lt;4&gt;;
+	.reg .b32 	%r&lt;9&gt;;
+	.reg .b64 	%rd&lt;11&gt;;
 
 
 	ld.param.u64 	%rd1, [mul_param_0];
@@ -301,10 +301,10 @@ $L__BB0_2:
 	.param .u32 mul_param_3
 )
 {
-	.reg .pred 	%p<2>;
-	.reg .f32 	%f<4>;
-	.reg .b32 	%r<9>;
-	.reg .b64 	%rd<11>;
+	.reg .pred 	%p&lt;2&gt;;
+	.reg .f32 	%f&lt;4&gt;;
+	.reg .b32 	%r&lt;9&gt;;
+	.reg .b64 	%rd&lt;11&gt;;
 
 
 	ld.param.u64 	%rd1, [mul_param_0];
@@ -353,10 +353,10 @@ $L__BB0_2:
 	.param .u32 mul_param_3
 )
 {
-	.reg .pred 	%p<2>;
-	.reg .f32 	%f<4>;
-	.reg .b32 	%r<9>;
-	.reg .b64 	%rd<11>;
+	.reg .pred 	%p&lt;2&gt;;
+	.reg .f32 	%f&lt;4&gt;;
+	.reg .b32 	%r&lt;9&gt;;
+	.reg .b64 	%rd&lt;11&gt;;
 
 
 	ld.param.u64 	%rd1, [mul_param_0];
@@ -405,10 +405,10 @@ $L__BB0_2:
 	.param .u32 mul_param_3
 )
 {
-	.reg .pred 	%p<2>;
-	.reg .f32 	%f<4>;
-	.reg .b32 	%r<9>;
-	.reg .b64 	%rd<11>;
+	.reg .pred 	%p&lt;2&gt;;
+	.reg .f32 	%f&lt;4&gt;;
+	.reg .b32 	%r&lt;9&gt;;
+	.reg .b64 	%rd&lt;11&gt;;
 
 
 	ld.param.u64 	%rd1, [mul_param_0];
@@ -457,10 +457,10 @@ $L__BB0_2:
 	.param .u32 mul_param_3
 )
 {
-	.reg .pred 	%p<2>;
-	.reg .f32 	%f<4>;
-	.reg .b32 	%r<9>;
-	.reg .b64 	%rd<11>;
+	.reg .pred 	%p&lt;2&gt;;
+	.reg .f32 	%f&lt;4&gt;;
+	.reg .b32 	%r&lt;9&gt;;
+	.reg .b64 	%rd&lt;11&gt;;
 
 
 	ld.param.u64 	%rd1, [mul_param_0];
@@ -509,10 +509,10 @@ $L__BB0_2:
 	.param .u32 mul_param_3
 )
 {
-	.reg .pred 	%p<2>;
-	.reg .f32 	%f<4>;
-	.reg .b32 	%r<9>;
-	.reg .b64 	%rd<11>;
+	.reg .pred 	%p&lt;2&gt;;
+	.reg .f32 	%f&lt;4&gt;;
+	.reg .b32 	%r&lt;9&gt;;
+	.reg .b64 	%rd&lt;11&gt;;
 
 
 	ld.param.u64 	%rd1, [mul_param_0];
@@ -561,10 +561,10 @@ $L__BB0_2:
 	.param .u32 mul_param_3
 )
 {
-	.reg .pred 	%p<2>;
-	.reg .f32 	%f<4>;
-	.reg .b32 	%r<9>;
-	.reg .b64 	%rd<11>;
+	.reg .pred 	%p&lt;2&gt;;
+	.reg .f32 	%f&lt;4&gt;;
+	.reg .b32 	%r&lt;9&gt;;
+	.reg .b64 	%rd&lt;11&gt;;
 
 
 	ld.param.u64 	%rd1, [mul_param_0];

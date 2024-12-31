@@ -102,10 +102,10 @@ const (
 	.param .u32 reducemaxvecCellZCompIndex_param_5
 )
 {
-	.reg .pred 	%p<13>;
-	.reg .f32 	%f<52>;
-	.reg .b32 	%r<189>;
-	.reg .b64 	%rd<17>;
+	.reg .pred 	%p&lt;13&gt;;
+	.reg .f32 	%f&lt;52&gt;;
+	.reg .b32 	%r&lt;189&gt;;
+	.reg .b64 	%rd&lt;17&gt;;
 	// demoted variable
 	.shared .align 4 .b8 _ZZ26reducemaxvecCellZCompIndexE5sdata[2048];
 
@@ -159,7 +159,7 @@ const (
 	cvta.to.global.u64 	%rd5, %rd3;
 
 $L__BB0_3:
-	.pragma "nounroll";
+	.pragma &#34;nounroll&#34;;
 	mul.wide.s32 	%rd6, %r184, 4;
 	add.s64 	%rd7, %rd5, %rd6;
 	ld.global.nc.f32 	%f11, [%rd7];
@@ -245,27 +245,27 @@ $L__BB0_11:
 	setp.gt.s32 	%p9, %r130, 31;
 	@%p9 bra 	$L__BB0_13;
 
-	ld.volatile.shared.f32 	%f27, [%r133+128];
+	ld.volatile.shared.f32 	%f27, [%r133&#43;128];
 	ld.volatile.shared.f32 	%f28, [%r133];
 	max.f32 	%f29, %f28, %f27;
 	st.volatile.shared.f32 	[%r133], %f29;
-	ld.volatile.shared.f32 	%f30, [%r133+64];
+	ld.volatile.shared.f32 	%f30, [%r133&#43;64];
 	ld.volatile.shared.f32 	%f31, [%r133];
 	max.f32 	%f32, %f31, %f30;
 	st.volatile.shared.f32 	[%r133], %f32;
-	ld.volatile.shared.f32 	%f33, [%r133+32];
+	ld.volatile.shared.f32 	%f33, [%r133&#43;32];
 	ld.volatile.shared.f32 	%f34, [%r133];
 	max.f32 	%f35, %f34, %f33;
 	st.volatile.shared.f32 	[%r133], %f35;
-	ld.volatile.shared.f32 	%f36, [%r133+16];
+	ld.volatile.shared.f32 	%f36, [%r133&#43;16];
 	ld.volatile.shared.f32 	%f37, [%r133];
 	max.f32 	%f38, %f37, %f36;
 	st.volatile.shared.f32 	[%r133], %f38;
-	ld.volatile.shared.f32 	%f39, [%r133+8];
+	ld.volatile.shared.f32 	%f39, [%r133&#43;8];
 	ld.volatile.shared.f32 	%f40, [%r133];
 	max.f32 	%f41, %f40, %f39;
 	st.volatile.shared.f32 	[%r133], %f41;
-	ld.volatile.shared.f32 	%f42, [%r133+4];
+	ld.volatile.shared.f32 	%f42, [%r133&#43;4];
 	ld.volatile.shared.f32 	%f43, [%r133];
 	max.f32 	%f44, %f43, %f42;
 	st.volatile.shared.f32 	[%r133], %f44;
@@ -312,10 +312,10 @@ $L__BB0_17:
 	.param .u32 reducemaxvecCellZCompIndex_param_5
 )
 {
-	.reg .pred 	%p<13>;
-	.reg .f32 	%f<52>;
-	.reg .b32 	%r<189>;
-	.reg .b64 	%rd<17>;
+	.reg .pred 	%p&lt;13&gt;;
+	.reg .f32 	%f&lt;52&gt;;
+	.reg .b32 	%r&lt;189&gt;;
+	.reg .b64 	%rd&lt;17&gt;;
 	// demoted variable
 	.shared .align 4 .b8 _ZZ26reducemaxvecCellZCompIndexE5sdata[2048];
 
@@ -369,7 +369,7 @@ $L__BB0_17:
 	cvta.to.global.u64 	%rd5, %rd3;
 
 $L__BB0_3:
-	.pragma "nounroll";
+	.pragma &#34;nounroll&#34;;
 	mul.wide.s32 	%rd6, %r184, 4;
 	add.s64 	%rd7, %rd5, %rd6;
 	ld.global.nc.f32 	%f11, [%rd7];
@@ -455,27 +455,27 @@ $L__BB0_11:
 	setp.gt.s32 	%p9, %r130, 31;
 	@%p9 bra 	$L__BB0_13;
 
-	ld.volatile.shared.f32 	%f27, [%r133+128];
+	ld.volatile.shared.f32 	%f27, [%r133&#43;128];
 	ld.volatile.shared.f32 	%f28, [%r133];
 	max.f32 	%f29, %f28, %f27;
 	st.volatile.shared.f32 	[%r133], %f29;
-	ld.volatile.shared.f32 	%f30, [%r133+64];
+	ld.volatile.shared.f32 	%f30, [%r133&#43;64];
 	ld.volatile.shared.f32 	%f31, [%r133];
 	max.f32 	%f32, %f31, %f30;
 	st.volatile.shared.f32 	[%r133], %f32;
-	ld.volatile.shared.f32 	%f33, [%r133+32];
+	ld.volatile.shared.f32 	%f33, [%r133&#43;32];
 	ld.volatile.shared.f32 	%f34, [%r133];
 	max.f32 	%f35, %f34, %f33;
 	st.volatile.shared.f32 	[%r133], %f35;
-	ld.volatile.shared.f32 	%f36, [%r133+16];
+	ld.volatile.shared.f32 	%f36, [%r133&#43;16];
 	ld.volatile.shared.f32 	%f37, [%r133];
 	max.f32 	%f38, %f37, %f36;
 	st.volatile.shared.f32 	[%r133], %f38;
-	ld.volatile.shared.f32 	%f39, [%r133+8];
+	ld.volatile.shared.f32 	%f39, [%r133&#43;8];
 	ld.volatile.shared.f32 	%f40, [%r133];
 	max.f32 	%f41, %f40, %f39;
 	st.volatile.shared.f32 	[%r133], %f41;
-	ld.volatile.shared.f32 	%f42, [%r133+4];
+	ld.volatile.shared.f32 	%f42, [%r133&#43;4];
 	ld.volatile.shared.f32 	%f43, [%r133];
 	max.f32 	%f44, %f43, %f42;
 	st.volatile.shared.f32 	[%r133], %f44;
@@ -522,10 +522,10 @@ $L__BB0_17:
 	.param .u32 reducemaxvecCellZCompIndex_param_5
 )
 {
-	.reg .pred 	%p<13>;
-	.reg .f32 	%f<52>;
-	.reg .b32 	%r<189>;
-	.reg .b64 	%rd<17>;
+	.reg .pred 	%p&lt;13&gt;;
+	.reg .f32 	%f&lt;52&gt;;
+	.reg .b32 	%r&lt;189&gt;;
+	.reg .b64 	%rd&lt;17&gt;;
 	// demoted variable
 	.shared .align 4 .b8 _ZZ26reducemaxvecCellZCompIndexE5sdata[2048];
 
@@ -579,7 +579,7 @@ $L__BB0_17:
 	cvta.to.global.u64 	%rd5, %rd3;
 
 $L__BB0_3:
-	.pragma "nounroll";
+	.pragma &#34;nounroll&#34;;
 	mul.wide.s32 	%rd6, %r184, 4;
 	add.s64 	%rd7, %rd5, %rd6;
 	ld.global.nc.f32 	%f11, [%rd7];
@@ -665,27 +665,27 @@ $L__BB0_11:
 	setp.gt.s32 	%p9, %r130, 31;
 	@%p9 bra 	$L__BB0_13;
 
-	ld.volatile.shared.f32 	%f27, [%r133+128];
+	ld.volatile.shared.f32 	%f27, [%r133&#43;128];
 	ld.volatile.shared.f32 	%f28, [%r133];
 	max.f32 	%f29, %f28, %f27;
 	st.volatile.shared.f32 	[%r133], %f29;
-	ld.volatile.shared.f32 	%f30, [%r133+64];
+	ld.volatile.shared.f32 	%f30, [%r133&#43;64];
 	ld.volatile.shared.f32 	%f31, [%r133];
 	max.f32 	%f32, %f31, %f30;
 	st.volatile.shared.f32 	[%r133], %f32;
-	ld.volatile.shared.f32 	%f33, [%r133+32];
+	ld.volatile.shared.f32 	%f33, [%r133&#43;32];
 	ld.volatile.shared.f32 	%f34, [%r133];
 	max.f32 	%f35, %f34, %f33;
 	st.volatile.shared.f32 	[%r133], %f35;
-	ld.volatile.shared.f32 	%f36, [%r133+16];
+	ld.volatile.shared.f32 	%f36, [%r133&#43;16];
 	ld.volatile.shared.f32 	%f37, [%r133];
 	max.f32 	%f38, %f37, %f36;
 	st.volatile.shared.f32 	[%r133], %f38;
-	ld.volatile.shared.f32 	%f39, [%r133+8];
+	ld.volatile.shared.f32 	%f39, [%r133&#43;8];
 	ld.volatile.shared.f32 	%f40, [%r133];
 	max.f32 	%f41, %f40, %f39;
 	st.volatile.shared.f32 	[%r133], %f41;
-	ld.volatile.shared.f32 	%f42, [%r133+4];
+	ld.volatile.shared.f32 	%f42, [%r133&#43;4];
 	ld.volatile.shared.f32 	%f43, [%r133];
 	max.f32 	%f44, %f43, %f42;
 	st.volatile.shared.f32 	[%r133], %f44;
@@ -732,10 +732,10 @@ $L__BB0_17:
 	.param .u32 reducemaxvecCellZCompIndex_param_5
 )
 {
-	.reg .pred 	%p<13>;
-	.reg .f32 	%f<52>;
-	.reg .b32 	%r<189>;
-	.reg .b64 	%rd<17>;
+	.reg .pred 	%p&lt;13&gt;;
+	.reg .f32 	%f&lt;52&gt;;
+	.reg .b32 	%r&lt;189&gt;;
+	.reg .b64 	%rd&lt;17&gt;;
 	// demoted variable
 	.shared .align 4 .b8 _ZZ26reducemaxvecCellZCompIndexE5sdata[2048];
 
@@ -789,7 +789,7 @@ $L__BB0_17:
 	cvta.to.global.u64 	%rd5, %rd3;
 
 $L__BB0_3:
-	.pragma "nounroll";
+	.pragma &#34;nounroll&#34;;
 	mul.wide.s32 	%rd6, %r184, 4;
 	add.s64 	%rd7, %rd5, %rd6;
 	ld.global.nc.f32 	%f11, [%rd7];
@@ -875,27 +875,27 @@ $L__BB0_11:
 	setp.gt.s32 	%p9, %r130, 31;
 	@%p9 bra 	$L__BB0_13;
 
-	ld.volatile.shared.f32 	%f27, [%r133+128];
+	ld.volatile.shared.f32 	%f27, [%r133&#43;128];
 	ld.volatile.shared.f32 	%f28, [%r133];
 	max.f32 	%f29, %f28, %f27;
 	st.volatile.shared.f32 	[%r133], %f29;
-	ld.volatile.shared.f32 	%f30, [%r133+64];
+	ld.volatile.shared.f32 	%f30, [%r133&#43;64];
 	ld.volatile.shared.f32 	%f31, [%r133];
 	max.f32 	%f32, %f31, %f30;
 	st.volatile.shared.f32 	[%r133], %f32;
-	ld.volatile.shared.f32 	%f33, [%r133+32];
+	ld.volatile.shared.f32 	%f33, [%r133&#43;32];
 	ld.volatile.shared.f32 	%f34, [%r133];
 	max.f32 	%f35, %f34, %f33;
 	st.volatile.shared.f32 	[%r133], %f35;
-	ld.volatile.shared.f32 	%f36, [%r133+16];
+	ld.volatile.shared.f32 	%f36, [%r133&#43;16];
 	ld.volatile.shared.f32 	%f37, [%r133];
 	max.f32 	%f38, %f37, %f36;
 	st.volatile.shared.f32 	[%r133], %f38;
-	ld.volatile.shared.f32 	%f39, [%r133+8];
+	ld.volatile.shared.f32 	%f39, [%r133&#43;8];
 	ld.volatile.shared.f32 	%f40, [%r133];
 	max.f32 	%f41, %f40, %f39;
 	st.volatile.shared.f32 	[%r133], %f41;
-	ld.volatile.shared.f32 	%f42, [%r133+4];
+	ld.volatile.shared.f32 	%f42, [%r133&#43;4];
 	ld.volatile.shared.f32 	%f43, [%r133];
 	max.f32 	%f44, %f43, %f42;
 	st.volatile.shared.f32 	[%r133], %f44;
@@ -942,10 +942,10 @@ $L__BB0_17:
 	.param .u32 reducemaxvecCellZCompIndex_param_5
 )
 {
-	.reg .pred 	%p<13>;
-	.reg .f32 	%f<52>;
-	.reg .b32 	%r<189>;
-	.reg .b64 	%rd<17>;
+	.reg .pred 	%p&lt;13&gt;;
+	.reg .f32 	%f&lt;52&gt;;
+	.reg .b32 	%r&lt;189&gt;;
+	.reg .b64 	%rd&lt;17&gt;;
 	// demoted variable
 	.shared .align 4 .b8 _ZZ26reducemaxvecCellZCompIndexE5sdata[2048];
 
@@ -999,7 +999,7 @@ $L__BB0_17:
 	cvta.to.global.u64 	%rd5, %rd3;
 
 $L__BB0_3:
-	.pragma "nounroll";
+	.pragma &#34;nounroll&#34;;
 	mul.wide.s32 	%rd6, %r184, 4;
 	add.s64 	%rd7, %rd5, %rd6;
 	ld.global.nc.f32 	%f11, [%rd7];
@@ -1085,27 +1085,27 @@ $L__BB0_11:
 	setp.gt.s32 	%p9, %r130, 31;
 	@%p9 bra 	$L__BB0_13;
 
-	ld.volatile.shared.f32 	%f27, [%r133+128];
+	ld.volatile.shared.f32 	%f27, [%r133&#43;128];
 	ld.volatile.shared.f32 	%f28, [%r133];
 	max.f32 	%f29, %f28, %f27;
 	st.volatile.shared.f32 	[%r133], %f29;
-	ld.volatile.shared.f32 	%f30, [%r133+64];
+	ld.volatile.shared.f32 	%f30, [%r133&#43;64];
 	ld.volatile.shared.f32 	%f31, [%r133];
 	max.f32 	%f32, %f31, %f30;
 	st.volatile.shared.f32 	[%r133], %f32;
-	ld.volatile.shared.f32 	%f33, [%r133+32];
+	ld.volatile.shared.f32 	%f33, [%r133&#43;32];
 	ld.volatile.shared.f32 	%f34, [%r133];
 	max.f32 	%f35, %f34, %f33;
 	st.volatile.shared.f32 	[%r133], %f35;
-	ld.volatile.shared.f32 	%f36, [%r133+16];
+	ld.volatile.shared.f32 	%f36, [%r133&#43;16];
 	ld.volatile.shared.f32 	%f37, [%r133];
 	max.f32 	%f38, %f37, %f36;
 	st.volatile.shared.f32 	[%r133], %f38;
-	ld.volatile.shared.f32 	%f39, [%r133+8];
+	ld.volatile.shared.f32 	%f39, [%r133&#43;8];
 	ld.volatile.shared.f32 	%f40, [%r133];
 	max.f32 	%f41, %f40, %f39;
 	st.volatile.shared.f32 	[%r133], %f41;
-	ld.volatile.shared.f32 	%f42, [%r133+4];
+	ld.volatile.shared.f32 	%f42, [%r133&#43;4];
 	ld.volatile.shared.f32 	%f43, [%r133];
 	max.f32 	%f44, %f43, %f42;
 	st.volatile.shared.f32 	[%r133], %f44;
@@ -1152,10 +1152,10 @@ $L__BB0_17:
 	.param .u32 reducemaxvecCellZCompIndex_param_5
 )
 {
-	.reg .pred 	%p<13>;
-	.reg .f32 	%f<52>;
-	.reg .b32 	%r<189>;
-	.reg .b64 	%rd<17>;
+	.reg .pred 	%p&lt;13&gt;;
+	.reg .f32 	%f&lt;52&gt;;
+	.reg .b32 	%r&lt;189&gt;;
+	.reg .b64 	%rd&lt;17&gt;;
 	// demoted variable
 	.shared .align 4 .b8 _ZZ26reducemaxvecCellZCompIndexE5sdata[2048];
 
@@ -1209,7 +1209,7 @@ $L__BB0_17:
 	cvta.to.global.u64 	%rd5, %rd3;
 
 $L__BB0_3:
-	.pragma "nounroll";
+	.pragma &#34;nounroll&#34;;
 	mul.wide.s32 	%rd6, %r184, 4;
 	add.s64 	%rd7, %rd5, %rd6;
 	ld.global.nc.f32 	%f11, [%rd7];
@@ -1295,27 +1295,27 @@ $L__BB0_11:
 	setp.gt.s32 	%p9, %r130, 31;
 	@%p9 bra 	$L__BB0_13;
 
-	ld.volatile.shared.f32 	%f27, [%r133+128];
+	ld.volatile.shared.f32 	%f27, [%r133&#43;128];
 	ld.volatile.shared.f32 	%f28, [%r133];
 	max.f32 	%f29, %f28, %f27;
 	st.volatile.shared.f32 	[%r133], %f29;
-	ld.volatile.shared.f32 	%f30, [%r133+64];
+	ld.volatile.shared.f32 	%f30, [%r133&#43;64];
 	ld.volatile.shared.f32 	%f31, [%r133];
 	max.f32 	%f32, %f31, %f30;
 	st.volatile.shared.f32 	[%r133], %f32;
-	ld.volatile.shared.f32 	%f33, [%r133+32];
+	ld.volatile.shared.f32 	%f33, [%r133&#43;32];
 	ld.volatile.shared.f32 	%f34, [%r133];
 	max.f32 	%f35, %f34, %f33;
 	st.volatile.shared.f32 	[%r133], %f35;
-	ld.volatile.shared.f32 	%f36, [%r133+16];
+	ld.volatile.shared.f32 	%f36, [%r133&#43;16];
 	ld.volatile.shared.f32 	%f37, [%r133];
 	max.f32 	%f38, %f37, %f36;
 	st.volatile.shared.f32 	[%r133], %f38;
-	ld.volatile.shared.f32 	%f39, [%r133+8];
+	ld.volatile.shared.f32 	%f39, [%r133&#43;8];
 	ld.volatile.shared.f32 	%f40, [%r133];
 	max.f32 	%f41, %f40, %f39;
 	st.volatile.shared.f32 	[%r133], %f41;
-	ld.volatile.shared.f32 	%f42, [%r133+4];
+	ld.volatile.shared.f32 	%f42, [%r133&#43;4];
 	ld.volatile.shared.f32 	%f43, [%r133];
 	max.f32 	%f44, %f43, %f42;
 	st.volatile.shared.f32 	[%r133], %f44;
@@ -1362,10 +1362,10 @@ $L__BB0_17:
 	.param .u32 reducemaxvecCellZCompIndex_param_5
 )
 {
-	.reg .pred 	%p<13>;
-	.reg .f32 	%f<52>;
-	.reg .b32 	%r<189>;
-	.reg .b64 	%rd<17>;
+	.reg .pred 	%p&lt;13&gt;;
+	.reg .f32 	%f&lt;52&gt;;
+	.reg .b32 	%r&lt;189&gt;;
+	.reg .b64 	%rd&lt;17&gt;;
 	// demoted variable
 	.shared .align 4 .b8 _ZZ26reducemaxvecCellZCompIndexE5sdata[2048];
 
@@ -1419,7 +1419,7 @@ $L__BB0_17:
 	cvta.to.global.u64 	%rd5, %rd3;
 
 $L__BB0_3:
-	.pragma "nounroll";
+	.pragma &#34;nounroll&#34;;
 	mul.wide.s32 	%rd6, %r184, 4;
 	add.s64 	%rd7, %rd5, %rd6;
 	ld.global.nc.f32 	%f11, [%rd7];
@@ -1505,27 +1505,27 @@ $L__BB0_11:
 	setp.gt.s32 	%p9, %r130, 31;
 	@%p9 bra 	$L__BB0_13;
 
-	ld.volatile.shared.f32 	%f27, [%r133+128];
+	ld.volatile.shared.f32 	%f27, [%r133&#43;128];
 	ld.volatile.shared.f32 	%f28, [%r133];
 	max.f32 	%f29, %f28, %f27;
 	st.volatile.shared.f32 	[%r133], %f29;
-	ld.volatile.shared.f32 	%f30, [%r133+64];
+	ld.volatile.shared.f32 	%f30, [%r133&#43;64];
 	ld.volatile.shared.f32 	%f31, [%r133];
 	max.f32 	%f32, %f31, %f30;
 	st.volatile.shared.f32 	[%r133], %f32;
-	ld.volatile.shared.f32 	%f33, [%r133+32];
+	ld.volatile.shared.f32 	%f33, [%r133&#43;32];
 	ld.volatile.shared.f32 	%f34, [%r133];
 	max.f32 	%f35, %f34, %f33;
 	st.volatile.shared.f32 	[%r133], %f35;
-	ld.volatile.shared.f32 	%f36, [%r133+16];
+	ld.volatile.shared.f32 	%f36, [%r133&#43;16];
 	ld.volatile.shared.f32 	%f37, [%r133];
 	max.f32 	%f38, %f37, %f36;
 	st.volatile.shared.f32 	[%r133], %f38;
-	ld.volatile.shared.f32 	%f39, [%r133+8];
+	ld.volatile.shared.f32 	%f39, [%r133&#43;8];
 	ld.volatile.shared.f32 	%f40, [%r133];
 	max.f32 	%f41, %f40, %f39;
 	st.volatile.shared.f32 	[%r133], %f41;
-	ld.volatile.shared.f32 	%f42, [%r133+4];
+	ld.volatile.shared.f32 	%f42, [%r133&#43;4];
 	ld.volatile.shared.f32 	%f43, [%r133];
 	max.f32 	%f44, %f43, %f42;
 	st.volatile.shared.f32 	[%r133], %f44;
@@ -1572,10 +1572,10 @@ $L__BB0_17:
 	.param .u32 reducemaxvecCellZCompIndex_param_5
 )
 {
-	.reg .pred 	%p<13>;
-	.reg .f32 	%f<52>;
-	.reg .b32 	%r<189>;
-	.reg .b64 	%rd<17>;
+	.reg .pred 	%p&lt;13&gt;;
+	.reg .f32 	%f&lt;52&gt;;
+	.reg .b32 	%r&lt;189&gt;;
+	.reg .b64 	%rd&lt;17&gt;;
 	// demoted variable
 	.shared .align 4 .b8 _ZZ26reducemaxvecCellZCompIndexE5sdata[2048];
 
@@ -1629,7 +1629,7 @@ $L__BB0_17:
 	cvta.to.global.u64 	%rd5, %rd3;
 
 $L__BB0_3:
-	.pragma "nounroll";
+	.pragma &#34;nounroll&#34;;
 	mul.wide.s32 	%rd6, %r184, 4;
 	add.s64 	%rd7, %rd5, %rd6;
 	ld.global.nc.f32 	%f11, [%rd7];
@@ -1715,27 +1715,27 @@ $L__BB0_11:
 	setp.gt.s32 	%p9, %r130, 31;
 	@%p9 bra 	$L__BB0_13;
 
-	ld.volatile.shared.f32 	%f27, [%r133+128];
+	ld.volatile.shared.f32 	%f27, [%r133&#43;128];
 	ld.volatile.shared.f32 	%f28, [%r133];
 	max.f32 	%f29, %f28, %f27;
 	st.volatile.shared.f32 	[%r133], %f29;
-	ld.volatile.shared.f32 	%f30, [%r133+64];
+	ld.volatile.shared.f32 	%f30, [%r133&#43;64];
 	ld.volatile.shared.f32 	%f31, [%r133];
 	max.f32 	%f32, %f31, %f30;
 	st.volatile.shared.f32 	[%r133], %f32;
-	ld.volatile.shared.f32 	%f33, [%r133+32];
+	ld.volatile.shared.f32 	%f33, [%r133&#43;32];
 	ld.volatile.shared.f32 	%f34, [%r133];
 	max.f32 	%f35, %f34, %f33;
 	st.volatile.shared.f32 	[%r133], %f35;
-	ld.volatile.shared.f32 	%f36, [%r133+16];
+	ld.volatile.shared.f32 	%f36, [%r133&#43;16];
 	ld.volatile.shared.f32 	%f37, [%r133];
 	max.f32 	%f38, %f37, %f36;
 	st.volatile.shared.f32 	[%r133], %f38;
-	ld.volatile.shared.f32 	%f39, [%r133+8];
+	ld.volatile.shared.f32 	%f39, [%r133&#43;8];
 	ld.volatile.shared.f32 	%f40, [%r133];
 	max.f32 	%f41, %f40, %f39;
 	st.volatile.shared.f32 	[%r133], %f41;
-	ld.volatile.shared.f32 	%f42, [%r133+4];
+	ld.volatile.shared.f32 	%f42, [%r133&#43;4];
 	ld.volatile.shared.f32 	%f43, [%r133];
 	max.f32 	%f44, %f43, %f42;
 	st.volatile.shared.f32 	[%r133], %f44;
@@ -1782,10 +1782,10 @@ $L__BB0_17:
 	.param .u32 reducemaxvecCellZCompIndex_param_5
 )
 {
-	.reg .pred 	%p<13>;
-	.reg .f32 	%f<52>;
-	.reg .b32 	%r<189>;
-	.reg .b64 	%rd<17>;
+	.reg .pred 	%p&lt;13&gt;;
+	.reg .f32 	%f&lt;52&gt;;
+	.reg .b32 	%r&lt;189&gt;;
+	.reg .b64 	%rd&lt;17&gt;;
 	// demoted variable
 	.shared .align 4 .b8 _ZZ26reducemaxvecCellZCompIndexE5sdata[2048];
 
@@ -1839,7 +1839,7 @@ $L__BB0_17:
 	cvta.to.global.u64 	%rd5, %rd3;
 
 $L__BB0_3:
-	.pragma "nounroll";
+	.pragma &#34;nounroll&#34;;
 	mul.wide.s32 	%rd6, %r184, 4;
 	add.s64 	%rd7, %rd5, %rd6;
 	ld.global.nc.f32 	%f11, [%rd7];
@@ -1925,27 +1925,27 @@ $L__BB0_11:
 	setp.gt.s32 	%p9, %r130, 31;
 	@%p9 bra 	$L__BB0_13;
 
-	ld.volatile.shared.f32 	%f27, [%r133+128];
+	ld.volatile.shared.f32 	%f27, [%r133&#43;128];
 	ld.volatile.shared.f32 	%f28, [%r133];
 	max.f32 	%f29, %f28, %f27;
 	st.volatile.shared.f32 	[%r133], %f29;
-	ld.volatile.shared.f32 	%f30, [%r133+64];
+	ld.volatile.shared.f32 	%f30, [%r133&#43;64];
 	ld.volatile.shared.f32 	%f31, [%r133];
 	max.f32 	%f32, %f31, %f30;
 	st.volatile.shared.f32 	[%r133], %f32;
-	ld.volatile.shared.f32 	%f33, [%r133+32];
+	ld.volatile.shared.f32 	%f33, [%r133&#43;32];
 	ld.volatile.shared.f32 	%f34, [%r133];
 	max.f32 	%f35, %f34, %f33;
 	st.volatile.shared.f32 	[%r133], %f35;
-	ld.volatile.shared.f32 	%f36, [%r133+16];
+	ld.volatile.shared.f32 	%f36, [%r133&#43;16];
 	ld.volatile.shared.f32 	%f37, [%r133];
 	max.f32 	%f38, %f37, %f36;
 	st.volatile.shared.f32 	[%r133], %f38;
-	ld.volatile.shared.f32 	%f39, [%r133+8];
+	ld.volatile.shared.f32 	%f39, [%r133&#43;8];
 	ld.volatile.shared.f32 	%f40, [%r133];
 	max.f32 	%f41, %f40, %f39;
 	st.volatile.shared.f32 	[%r133], %f41;
-	ld.volatile.shared.f32 	%f42, [%r133+4];
+	ld.volatile.shared.f32 	%f42, [%r133&#43;4];
 	ld.volatile.shared.f32 	%f43, [%r133];
 	max.f32 	%f44, %f43, %f42;
 	st.volatile.shared.f32 	[%r133], %f44;
@@ -1992,10 +1992,10 @@ $L__BB0_17:
 	.param .u32 reducemaxvecCellZCompIndex_param_5
 )
 {
-	.reg .pred 	%p<13>;
-	.reg .f32 	%f<52>;
-	.reg .b32 	%r<189>;
-	.reg .b64 	%rd<17>;
+	.reg .pred 	%p&lt;13&gt;;
+	.reg .f32 	%f&lt;52&gt;;
+	.reg .b32 	%r&lt;189&gt;;
+	.reg .b64 	%rd&lt;17&gt;;
 	// demoted variable
 	.shared .align 4 .b8 _ZZ26reducemaxvecCellZCompIndexE5sdata[2048];
 
@@ -2049,7 +2049,7 @@ $L__BB0_17:
 	cvta.to.global.u64 	%rd5, %rd3;
 
 $L__BB0_3:
-	.pragma "nounroll";
+	.pragma &#34;nounroll&#34;;
 	mul.wide.s32 	%rd6, %r184, 4;
 	add.s64 	%rd7, %rd5, %rd6;
 	ld.global.nc.f32 	%f11, [%rd7];
@@ -2135,27 +2135,27 @@ $L__BB0_11:
 	setp.gt.s32 	%p9, %r130, 31;
 	@%p9 bra 	$L__BB0_13;
 
-	ld.volatile.shared.f32 	%f27, [%r133+128];
+	ld.volatile.shared.f32 	%f27, [%r133&#43;128];
 	ld.volatile.shared.f32 	%f28, [%r133];
 	max.f32 	%f29, %f28, %f27;
 	st.volatile.shared.f32 	[%r133], %f29;
-	ld.volatile.shared.f32 	%f30, [%r133+64];
+	ld.volatile.shared.f32 	%f30, [%r133&#43;64];
 	ld.volatile.shared.f32 	%f31, [%r133];
 	max.f32 	%f32, %f31, %f30;
 	st.volatile.shared.f32 	[%r133], %f32;
-	ld.volatile.shared.f32 	%f33, [%r133+32];
+	ld.volatile.shared.f32 	%f33, [%r133&#43;32];
 	ld.volatile.shared.f32 	%f34, [%r133];
 	max.f32 	%f35, %f34, %f33;
 	st.volatile.shared.f32 	[%r133], %f35;
-	ld.volatile.shared.f32 	%f36, [%r133+16];
+	ld.volatile.shared.f32 	%f36, [%r133&#43;16];
 	ld.volatile.shared.f32 	%f37, [%r133];
 	max.f32 	%f38, %f37, %f36;
 	st.volatile.shared.f32 	[%r133], %f38;
-	ld.volatile.shared.f32 	%f39, [%r133+8];
+	ld.volatile.shared.f32 	%f39, [%r133&#43;8];
 	ld.volatile.shared.f32 	%f40, [%r133];
 	max.f32 	%f41, %f40, %f39;
 	st.volatile.shared.f32 	[%r133], %f41;
-	ld.volatile.shared.f32 	%f42, [%r133+4];
+	ld.volatile.shared.f32 	%f42, [%r133&#43;4];
 	ld.volatile.shared.f32 	%f43, [%r133];
 	max.f32 	%f44, %f43, %f42;
 	st.volatile.shared.f32 	[%r133], %f44;

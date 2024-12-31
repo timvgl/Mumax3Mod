@@ -109,10 +109,10 @@ const (
 	.param .u8 pointwise_norm_param_7
 )
 {
-	.reg .pred 	%p<21>;
-	.reg .f32 	%f<34>;
-	.reg .b32 	%r<33>;
-	.reg .b64 	%rd<18>;
+	.reg .pred 	%p&lt;21&gt;;
+	.reg .f32 	%f&lt;34&gt;;
+	.reg .b32 	%r&lt;33&gt;;
+	.reg .b64 	%rd&lt;18&gt;;
 
 
 	ld.param.u64 	%rd5, [pointwise_norm_param_0];
@@ -258,10 +258,10 @@ $L__BB0_17:
 	.param .u8 pointwise_norm_param_7
 )
 {
-	.reg .pred 	%p<21>;
-	.reg .f32 	%f<34>;
-	.reg .b32 	%r<33>;
-	.reg .b64 	%rd<18>;
+	.reg .pred 	%p&lt;21&gt;;
+	.reg .f32 	%f&lt;34&gt;;
+	.reg .b32 	%r&lt;33&gt;;
+	.reg .b64 	%rd&lt;18&gt;;
 
 
 	ld.param.u64 	%rd5, [pointwise_norm_param_0];
@@ -407,10 +407,10 @@ $L__BB0_17:
 	.param .u8 pointwise_norm_param_7
 )
 {
-	.reg .pred 	%p<21>;
-	.reg .f32 	%f<34>;
-	.reg .b32 	%r<33>;
-	.reg .b64 	%rd<18>;
+	.reg .pred 	%p&lt;21&gt;;
+	.reg .f32 	%f&lt;34&gt;;
+	.reg .b32 	%r&lt;33&gt;;
+	.reg .b64 	%rd&lt;18&gt;;
 
 
 	ld.param.u64 	%rd5, [pointwise_norm_param_0];
@@ -556,10 +556,10 @@ $L__BB0_17:
 	.param .u8 pointwise_norm_param_7
 )
 {
-	.reg .pred 	%p<21>;
-	.reg .f32 	%f<34>;
-	.reg .b32 	%r<33>;
-	.reg .b64 	%rd<18>;
+	.reg .pred 	%p&lt;21&gt;;
+	.reg .f32 	%f&lt;34&gt;;
+	.reg .b32 	%r&lt;33&gt;;
+	.reg .b64 	%rd&lt;18&gt;;
 
 
 	ld.param.u64 	%rd5, [pointwise_norm_param_0];
@@ -705,10 +705,10 @@ $L__BB0_17:
 	.param .u8 pointwise_norm_param_7
 )
 {
-	.reg .pred 	%p<21>;
-	.reg .f32 	%f<34>;
-	.reg .b32 	%r<33>;
-	.reg .b64 	%rd<18>;
+	.reg .pred 	%p&lt;21&gt;;
+	.reg .f32 	%f&lt;34&gt;;
+	.reg .b32 	%r&lt;33&gt;;
+	.reg .b64 	%rd&lt;18&gt;;
 
 
 	ld.param.u64 	%rd5, [pointwise_norm_param_0];
@@ -854,10 +854,10 @@ $L__BB0_17:
 	.param .u8 pointwise_norm_param_7
 )
 {
-	.reg .pred 	%p<21>;
-	.reg .f32 	%f<34>;
-	.reg .b32 	%r<33>;
-	.reg .b64 	%rd<18>;
+	.reg .pred 	%p&lt;21&gt;;
+	.reg .f32 	%f&lt;34&gt;;
+	.reg .b32 	%r&lt;33&gt;;
+	.reg .b64 	%rd&lt;18&gt;;
 
 
 	ld.param.u64 	%rd5, [pointwise_norm_param_0];
@@ -1003,10 +1003,10 @@ $L__BB0_17:
 	.param .u8 pointwise_norm_param_7
 )
 {
-	.reg .pred 	%p<21>;
-	.reg .f32 	%f<34>;
-	.reg .b32 	%r<33>;
-	.reg .b64 	%rd<18>;
+	.reg .pred 	%p&lt;21&gt;;
+	.reg .f32 	%f&lt;34&gt;;
+	.reg .b32 	%r&lt;33&gt;;
+	.reg .b64 	%rd&lt;18&gt;;
 
 
 	ld.param.u64 	%rd5, [pointwise_norm_param_0];
@@ -1152,10 +1152,10 @@ $L__BB0_17:
 	.param .u8 pointwise_norm_param_7
 )
 {
-	.reg .pred 	%p<21>;
-	.reg .f32 	%f<34>;
-	.reg .b32 	%r<33>;
-	.reg .b64 	%rd<18>;
+	.reg .pred 	%p&lt;21&gt;;
+	.reg .f32 	%f&lt;34&gt;;
+	.reg .b32 	%r&lt;33&gt;;
+	.reg .b64 	%rd&lt;18&gt;;
 
 
 	ld.param.u64 	%rd5, [pointwise_norm_param_0];
@@ -1301,10 +1301,10 @@ $L__BB0_17:
 	.param .u8 pointwise_norm_param_7
 )
 {
-	.reg .pred 	%p<21>;
-	.reg .f32 	%f<34>;
-	.reg .b32 	%r<33>;
-	.reg .b64 	%rd<18>;
+	.reg .pred 	%p&lt;21&gt;;
+	.reg .f32 	%f&lt;34&gt;;
+	.reg .b32 	%r&lt;33&gt;;
+	.reg .b64 	%rd&lt;18&gt;;
 
 
 	ld.param.u64 	%rd5, [pointwise_norm_param_0];
@@ -1450,10 +1450,10 @@ $L__BB0_17:
 	.param .u8 pointwise_norm_param_7
 )
 {
-	.reg .pred 	%p<21>;
-	.reg .f32 	%f<34>;
-	.reg .b32 	%r<33>;
-	.reg .b64 	%rd<18>;
+	.reg .pred 	%p&lt;21&gt;;
+	.reg .f32 	%f&lt;34&gt;;
+	.reg .b32 	%r&lt;33&gt;;
+	.reg .b64 	%rd&lt;18&gt;;
 
 
 	ld.param.u64 	%rd5, [pointwise_norm_param_0];

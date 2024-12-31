@@ -101,10 +101,10 @@ const (
 	.param .u32 setPhi_param_5
 )
 {
-	.reg .pred 	%p<16>;
-	.reg .f32 	%f<36>;
-	.reg .b32 	%r<34>;
-	.reg .b64 	%rd<13>;
+	.reg .pred 	%p&lt;16&gt;;
+	.reg .f32 	%f&lt;36&gt;;
+	.reg .b32 	%r&lt;34&gt;;
+	.reg .b64 	%rd&lt;13&gt;;
 
 
 	ld.param.u64 	%rd2, [setPhi_param_0];
@@ -242,10 +242,10 @@ $L__BB0_7:
 	.param .u32 setPhi_param_5
 )
 {
-	.reg .pred 	%p<16>;
-	.reg .f32 	%f<36>;
-	.reg .b32 	%r<34>;
-	.reg .b64 	%rd<13>;
+	.reg .pred 	%p&lt;16&gt;;
+	.reg .f32 	%f&lt;36&gt;;
+	.reg .b32 	%r&lt;34&gt;;
+	.reg .b64 	%rd&lt;13&gt;;
 
 
 	ld.param.u64 	%rd2, [setPhi_param_0];
@@ -383,10 +383,10 @@ $L__BB0_7:
 	.param .u32 setPhi_param_5
 )
 {
-	.reg .pred 	%p<16>;
-	.reg .f32 	%f<36>;
-	.reg .b32 	%r<34>;
-	.reg .b64 	%rd<13>;
+	.reg .pred 	%p&lt;16&gt;;
+	.reg .f32 	%f&lt;36&gt;;
+	.reg .b32 	%r&lt;34&gt;;
+	.reg .b64 	%rd&lt;13&gt;;
 
 
 	ld.param.u64 	%rd2, [setPhi_param_0];
@@ -524,10 +524,10 @@ $L__BB0_7:
 	.param .u32 setPhi_param_5
 )
 {
-	.reg .pred 	%p<16>;
-	.reg .f32 	%f<36>;
-	.reg .b32 	%r<34>;
-	.reg .b64 	%rd<13>;
+	.reg .pred 	%p&lt;16&gt;;
+	.reg .f32 	%f&lt;36&gt;;
+	.reg .b32 	%r&lt;34&gt;;
+	.reg .b64 	%rd&lt;13&gt;;
 
 
 	ld.param.u64 	%rd2, [setPhi_param_0];
@@ -665,10 +665,10 @@ $L__BB0_7:
 	.param .u32 setPhi_param_5
 )
 {
-	.reg .pred 	%p<16>;
-	.reg .f32 	%f<36>;
-	.reg .b32 	%r<34>;
-	.reg .b64 	%rd<13>;
+	.reg .pred 	%p&lt;16&gt;;
+	.reg .f32 	%f&lt;36&gt;;
+	.reg .b32 	%r&lt;34&gt;;
+	.reg .b64 	%rd&lt;13&gt;;
 
 
 	ld.param.u64 	%rd2, [setPhi_param_0];
@@ -806,10 +806,10 @@ $L__BB0_7:
 	.param .u32 setPhi_param_5
 )
 {
-	.reg .pred 	%p<16>;
-	.reg .f32 	%f<36>;
-	.reg .b32 	%r<34>;
-	.reg .b64 	%rd<13>;
+	.reg .pred 	%p&lt;16&gt;;
+	.reg .f32 	%f&lt;36&gt;;
+	.reg .b32 	%r&lt;34&gt;;
+	.reg .b64 	%rd&lt;13&gt;;
 
 
 	ld.param.u64 	%rd2, [setPhi_param_0];
@@ -947,10 +947,10 @@ $L__BB0_7:
 	.param .u32 setPhi_param_5
 )
 {
-	.reg .pred 	%p<16>;
-	.reg .f32 	%f<36>;
-	.reg .b32 	%r<34>;
-	.reg .b64 	%rd<13>;
+	.reg .pred 	%p&lt;16&gt;;
+	.reg .f32 	%f&lt;36&gt;;
+	.reg .b32 	%r&lt;34&gt;;
+	.reg .b64 	%rd&lt;13&gt;;
 
 
 	ld.param.u64 	%rd2, [setPhi_param_0];
@@ -1088,10 +1088,10 @@ $L__BB0_7:
 	.param .u32 setPhi_param_5
 )
 {
-	.reg .pred 	%p<16>;
-	.reg .f32 	%f<36>;
-	.reg .b32 	%r<34>;
-	.reg .b64 	%rd<13>;
+	.reg .pred 	%p&lt;16&gt;;
+	.reg .f32 	%f&lt;36&gt;;
+	.reg .b32 	%r&lt;34&gt;;
+	.reg .b64 	%rd&lt;13&gt;;
 
 
 	ld.param.u64 	%rd2, [setPhi_param_0];
@@ -1229,10 +1229,10 @@ $L__BB0_7:
 	.param .u32 setPhi_param_5
 )
 {
-	.reg .pred 	%p<16>;
-	.reg .f32 	%f<36>;
-	.reg .b32 	%r<34>;
-	.reg .b64 	%rd<13>;
+	.reg .pred 	%p&lt;16&gt;;
+	.reg .f32 	%f&lt;36&gt;;
+	.reg .b32 	%r&lt;34&gt;;
+	.reg .b64 	%rd&lt;13&gt;;
 
 
 	ld.param.u64 	%rd2, [setPhi_param_0];
@@ -1370,10 +1370,10 @@ $L__BB0_7:
 	.param .u32 setPhi_param_5
 )
 {
-	.reg .pred 	%p<16>;
-	.reg .f32 	%f<36>;
-	.reg .b32 	%r<34>;
-	.reg .b64 	%rd<13>;
+	.reg .pred 	%p&lt;16&gt;;
+	.reg .f32 	%f&lt;36&gt;;
+	.reg .b32 	%r&lt;34&gt;;
+	.reg .b64 	%rd&lt;13&gt;;
 
 
 	ld.param.u64 	%rd2, [setPhi_param_0];

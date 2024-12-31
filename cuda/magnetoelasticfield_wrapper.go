@@ -153,10 +153,10 @@ const (
 	.param .u32 addmagnetoelasticfield_param_18
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<55>;
-	.reg .b32 	%r<9>;
-	.reg .b64 	%rd<52>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;55&gt;;
+	.reg .b32 	%r&lt;9&gt;;
+	.reg .b64 	%rd&lt;52&gt;;
 
 
 	ld.param.u64 	%rd2, [addmagnetoelasticfield_param_0];
@@ -326,10 +326,10 @@ $L__BB0_10:
 	.param .u32 addmagnetoelasticfield_param_18
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<55>;
-	.reg .b32 	%r<9>;
-	.reg .b64 	%rd<52>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;55&gt;;
+	.reg .b32 	%r&lt;9&gt;;
+	.reg .b64 	%rd&lt;52&gt;;
 
 
 	ld.param.u64 	%rd2, [addmagnetoelasticfield_param_0];
@@ -499,10 +499,10 @@ $L__BB0_10:
 	.param .u32 addmagnetoelasticfield_param_18
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<55>;
-	.reg .b32 	%r<9>;
-	.reg .b64 	%rd<52>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;55&gt;;
+	.reg .b32 	%r&lt;9&gt;;
+	.reg .b64 	%rd&lt;52&gt;;
 
 
 	ld.param.u64 	%rd2, [addmagnetoelasticfield_param_0];
@@ -672,10 +672,10 @@ $L__BB0_10:
 	.param .u32 addmagnetoelasticfield_param_18
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<55>;
-	.reg .b32 	%r<9>;
-	.reg .b64 	%rd<52>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;55&gt;;
+	.reg .b32 	%r&lt;9&gt;;
+	.reg .b64 	%rd&lt;52&gt;;
 
 
 	ld.param.u64 	%rd2, [addmagnetoelasticfield_param_0];
@@ -845,10 +845,10 @@ $L__BB0_10:
 	.param .u32 addmagnetoelasticfield_param_18
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<55>;
-	.reg .b32 	%r<9>;
-	.reg .b64 	%rd<52>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;55&gt;;
+	.reg .b32 	%r&lt;9&gt;;
+	.reg .b64 	%rd&lt;52&gt;;
 
 
 	ld.param.u64 	%rd2, [addmagnetoelasticfield_param_0];
@@ -1018,10 +1018,10 @@ $L__BB0_10:
 	.param .u32 addmagnetoelasticfield_param_18
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<55>;
-	.reg .b32 	%r<9>;
-	.reg .b64 	%rd<52>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;55&gt;;
+	.reg .b32 	%r&lt;9&gt;;
+	.reg .b64 	%rd&lt;52&gt;;
 
 
 	ld.param.u64 	%rd2, [addmagnetoelasticfield_param_0];
@@ -1191,10 +1191,10 @@ $L__BB0_10:
 	.param .u32 addmagnetoelasticfield_param_18
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<55>;
-	.reg .b32 	%r<9>;
-	.reg .b64 	%rd<52>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;55&gt;;
+	.reg .b32 	%r&lt;9&gt;;
+	.reg .b64 	%rd&lt;52&gt;;
 
 
 	ld.param.u64 	%rd2, [addmagnetoelasticfield_param_0];
@@ -1364,10 +1364,10 @@ $L__BB0_10:
 	.param .u32 addmagnetoelasticfield_param_18
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<55>;
-	.reg .b32 	%r<9>;
-	.reg .b64 	%rd<52>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;55&gt;;
+	.reg .b32 	%r&lt;9&gt;;
+	.reg .b64 	%rd&lt;52&gt;;
 
 
 	ld.param.u64 	%rd2, [addmagnetoelasticfield_param_0];
@@ -1537,10 +1537,10 @@ $L__BB0_10:
 	.param .u32 addmagnetoelasticfield_param_18
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<55>;
-	.reg .b32 	%r<9>;
-	.reg .b64 	%rd<52>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;55&gt;;
+	.reg .b32 	%r&lt;9&gt;;
+	.reg .b64 	%rd&lt;52&gt;;
 
 
 	ld.param.u64 	%rd2, [addmagnetoelasticfield_param_0];
@@ -1710,10 +1710,10 @@ $L__BB0_10:
 	.param .u32 addmagnetoelasticfield_param_18
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<55>;
-	.reg .b32 	%r<9>;
-	.reg .b64 	%rd<52>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;55&gt;;
+	.reg .b32 	%r&lt;9&gt;;
+	.reg .b64 	%rd&lt;52&gt;;
 
 
 	ld.param.u64 	%rd2, [addmagnetoelasticfield_param_0];

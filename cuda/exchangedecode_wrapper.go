@@ -117,11 +117,11 @@ const (
 	.param .u8 exchangedecode_param_9
 )
 {
-	.reg .pred 	%p<13>;
-	.reg .b16 	%rs<36>;
-	.reg .f32 	%f<15>;
-	.reg .b32 	%r<111>;
-	.reg .b64 	%rd<35>;
+	.reg .pred 	%p&lt;13&gt;;
+	.reg .b16 	%rs&lt;36&gt;;
+	.reg .f32 	%f&lt;15&gt;;
+	.reg .b32 	%r&lt;111&gt;;
+	.reg .b64 	%rd&lt;35&gt;;
 
 
 	ld.param.u8 	%rs5, [exchangedecode_param_9];
@@ -388,11 +388,11 @@ $L__BB0_22:
 	.param .u8 exchangedecode_param_9
 )
 {
-	.reg .pred 	%p<13>;
-	.reg .b16 	%rs<36>;
-	.reg .f32 	%f<15>;
-	.reg .b32 	%r<111>;
-	.reg .b64 	%rd<35>;
+	.reg .pred 	%p&lt;13&gt;;
+	.reg .b16 	%rs&lt;36&gt;;
+	.reg .f32 	%f&lt;15&gt;;
+	.reg .b32 	%r&lt;111&gt;;
+	.reg .b64 	%rd&lt;35&gt;;
 
 
 	ld.param.u8 	%rs5, [exchangedecode_param_9];
@@ -659,11 +659,11 @@ $L__BB0_22:
 	.param .u8 exchangedecode_param_9
 )
 {
-	.reg .pred 	%p<13>;
-	.reg .b16 	%rs<36>;
-	.reg .f32 	%f<15>;
-	.reg .b32 	%r<111>;
-	.reg .b64 	%rd<35>;
+	.reg .pred 	%p&lt;13&gt;;
+	.reg .b16 	%rs&lt;36&gt;;
+	.reg .f32 	%f&lt;15&gt;;
+	.reg .b32 	%r&lt;111&gt;;
+	.reg .b64 	%rd&lt;35&gt;;
 
 
 	ld.param.u8 	%rs5, [exchangedecode_param_9];
@@ -930,11 +930,11 @@ $L__BB0_22:
 	.param .u8 exchangedecode_param_9
 )
 {
-	.reg .pred 	%p<13>;
-	.reg .b16 	%rs<36>;
-	.reg .f32 	%f<15>;
-	.reg .b32 	%r<111>;
-	.reg .b64 	%rd<35>;
+	.reg .pred 	%p&lt;13&gt;;
+	.reg .b16 	%rs&lt;36&gt;;
+	.reg .f32 	%f&lt;15&gt;;
+	.reg .b32 	%r&lt;111&gt;;
+	.reg .b64 	%rd&lt;35&gt;;
 
 
 	ld.param.u8 	%rs5, [exchangedecode_param_9];
@@ -1201,11 +1201,11 @@ $L__BB0_22:
 	.param .u8 exchangedecode_param_9
 )
 {
-	.reg .pred 	%p<13>;
-	.reg .b16 	%rs<36>;
-	.reg .f32 	%f<15>;
-	.reg .b32 	%r<111>;
-	.reg .b64 	%rd<35>;
+	.reg .pred 	%p&lt;13&gt;;
+	.reg .b16 	%rs&lt;36&gt;;
+	.reg .f32 	%f&lt;15&gt;;
+	.reg .b32 	%r&lt;111&gt;;
+	.reg .b64 	%rd&lt;35&gt;;
 
 
 	ld.param.u8 	%rs5, [exchangedecode_param_9];
@@ -1472,11 +1472,11 @@ $L__BB0_22:
 	.param .u8 exchangedecode_param_9
 )
 {
-	.reg .pred 	%p<13>;
-	.reg .b16 	%rs<36>;
-	.reg .f32 	%f<15>;
-	.reg .b32 	%r<111>;
-	.reg .b64 	%rd<35>;
+	.reg .pred 	%p&lt;13&gt;;
+	.reg .b16 	%rs&lt;36&gt;;
+	.reg .f32 	%f&lt;15&gt;;
+	.reg .b32 	%r&lt;111&gt;;
+	.reg .b64 	%rd&lt;35&gt;;
 
 
 	ld.param.u8 	%rs5, [exchangedecode_param_9];
@@ -1743,11 +1743,11 @@ $L__BB0_22:
 	.param .u8 exchangedecode_param_9
 )
 {
-	.reg .pred 	%p<13>;
-	.reg .b16 	%rs<36>;
-	.reg .f32 	%f<15>;
-	.reg .b32 	%r<111>;
-	.reg .b64 	%rd<35>;
+	.reg .pred 	%p&lt;13&gt;;
+	.reg .b16 	%rs&lt;36&gt;;
+	.reg .f32 	%f&lt;15&gt;;
+	.reg .b32 	%r&lt;111&gt;;
+	.reg .b64 	%rd&lt;35&gt;;
 
 
 	ld.param.u8 	%rs5, [exchangedecode_param_9];
@@ -2014,11 +2014,11 @@ $L__BB0_22:
 	.param .u8 exchangedecode_param_9
 )
 {
-	.reg .pred 	%p<13>;
-	.reg .b16 	%rs<36>;
-	.reg .f32 	%f<15>;
-	.reg .b32 	%r<111>;
-	.reg .b64 	%rd<35>;
+	.reg .pred 	%p&lt;13&gt;;
+	.reg .b16 	%rs&lt;36&gt;;
+	.reg .f32 	%f&lt;15&gt;;
+	.reg .b32 	%r&lt;111&gt;;
+	.reg .b64 	%rd&lt;35&gt;;
 
 
 	ld.param.u8 	%rs5, [exchangedecode_param_9];
@@ -2285,11 +2285,11 @@ $L__BB0_22:
 	.param .u8 exchangedecode_param_9
 )
 {
-	.reg .pred 	%p<13>;
-	.reg .b16 	%rs<36>;
-	.reg .f32 	%f<15>;
-	.reg .b32 	%r<111>;
-	.reg .b64 	%rd<35>;
+	.reg .pred 	%p&lt;13&gt;;
+	.reg .b16 	%rs&lt;36&gt;;
+	.reg .f32 	%f&lt;15&gt;;
+	.reg .b32 	%r&lt;111&gt;;
+	.reg .b64 	%rd&lt;35&gt;;
 
 
 	ld.param.u8 	%rs5, [exchangedecode_param_9];
@@ -2556,11 +2556,11 @@ $L__BB0_22:
 	.param .u8 exchangedecode_param_9
 )
 {
-	.reg .pred 	%p<13>;
-	.reg .b16 	%rs<36>;
-	.reg .f32 	%f<15>;
-	.reg .b32 	%r<111>;
-	.reg .b64 	%rd<35>;
+	.reg .pred 	%p&lt;13&gt;;
+	.reg .b16 	%rs&lt;36&gt;;
+	.reg .f32 	%f&lt;15&gt;;
+	.reg .b32 	%r&lt;111&gt;;
+	.reg .b64 	%rd&lt;35&gt;;
 
 
 	ld.param.u8 	%rs5, [exchangedecode_param_9];

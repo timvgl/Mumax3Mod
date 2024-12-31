@@ -121,11 +121,11 @@ const (
 	.param .u8 pointwise_grad_param_10
 )
 {
-	.reg .pred 	%p<42>;
-	.reg .b16 	%rs<5>;
-	.reg .f32 	%f<71>;
-	.reg .b32 	%r<73>;
-	.reg .b64 	%rd<29>;
+	.reg .pred 	%p&lt;42&gt;;
+	.reg .b16 	%rs&lt;5&gt;;
+	.reg .f32 	%f&lt;71&gt;;
+	.reg .b32 	%r&lt;73&gt;;
+	.reg .b64 	%rd&lt;29&gt;;
 
 
 	ld.param.u8 	%rs4, [pointwise_grad_param_10];
@@ -482,11 +482,11 @@ $L__BB0_53:
 	.param .u8 pointwise_grad_param_10
 )
 {
-	.reg .pred 	%p<42>;
-	.reg .b16 	%rs<5>;
-	.reg .f32 	%f<71>;
-	.reg .b32 	%r<73>;
-	.reg .b64 	%rd<29>;
+	.reg .pred 	%p&lt;42&gt;;
+	.reg .b16 	%rs&lt;5&gt;;
+	.reg .f32 	%f&lt;71&gt;;
+	.reg .b32 	%r&lt;73&gt;;
+	.reg .b64 	%rd&lt;29&gt;;
 
 
 	ld.param.u8 	%rs4, [pointwise_grad_param_10];
@@ -843,11 +843,11 @@ $L__BB0_53:
 	.param .u8 pointwise_grad_param_10
 )
 {
-	.reg .pred 	%p<42>;
-	.reg .b16 	%rs<5>;
-	.reg .f32 	%f<71>;
-	.reg .b32 	%r<73>;
-	.reg .b64 	%rd<29>;
+	.reg .pred 	%p&lt;42&gt;;
+	.reg .b16 	%rs&lt;5&gt;;
+	.reg .f32 	%f&lt;71&gt;;
+	.reg .b32 	%r&lt;73&gt;;
+	.reg .b64 	%rd&lt;29&gt;;
 
 
 	ld.param.u8 	%rs4, [pointwise_grad_param_10];
@@ -1204,11 +1204,11 @@ $L__BB0_53:
 	.param .u8 pointwise_grad_param_10
 )
 {
-	.reg .pred 	%p<42>;
-	.reg .b16 	%rs<5>;
-	.reg .f32 	%f<71>;
-	.reg .b32 	%r<73>;
-	.reg .b64 	%rd<29>;
+	.reg .pred 	%p&lt;42&gt;;
+	.reg .b16 	%rs&lt;5&gt;;
+	.reg .f32 	%f&lt;71&gt;;
+	.reg .b32 	%r&lt;73&gt;;
+	.reg .b64 	%rd&lt;29&gt;;
 
 
 	ld.param.u8 	%rs4, [pointwise_grad_param_10];
@@ -1565,11 +1565,11 @@ $L__BB0_53:
 	.param .u8 pointwise_grad_param_10
 )
 {
-	.reg .pred 	%p<42>;
-	.reg .b16 	%rs<5>;
-	.reg .f32 	%f<71>;
-	.reg .b32 	%r<73>;
-	.reg .b64 	%rd<29>;
+	.reg .pred 	%p&lt;42&gt;;
+	.reg .b16 	%rs&lt;5&gt;;
+	.reg .f32 	%f&lt;71&gt;;
+	.reg .b32 	%r&lt;73&gt;;
+	.reg .b64 	%rd&lt;29&gt;;
 
 
 	ld.param.u8 	%rs4, [pointwise_grad_param_10];
@@ -1926,11 +1926,11 @@ $L__BB0_53:
 	.param .u8 pointwise_grad_param_10
 )
 {
-	.reg .pred 	%p<42>;
-	.reg .b16 	%rs<5>;
-	.reg .f32 	%f<71>;
-	.reg .b32 	%r<73>;
-	.reg .b64 	%rd<29>;
+	.reg .pred 	%p&lt;42&gt;;
+	.reg .b16 	%rs&lt;5&gt;;
+	.reg .f32 	%f&lt;71&gt;;
+	.reg .b32 	%r&lt;73&gt;;
+	.reg .b64 	%rd&lt;29&gt;;
 
 
 	ld.param.u8 	%rs4, [pointwise_grad_param_10];
@@ -2287,11 +2287,11 @@ $L__BB0_53:
 	.param .u8 pointwise_grad_param_10
 )
 {
-	.reg .pred 	%p<42>;
-	.reg .b16 	%rs<5>;
-	.reg .f32 	%f<71>;
-	.reg .b32 	%r<73>;
-	.reg .b64 	%rd<29>;
+	.reg .pred 	%p&lt;42&gt;;
+	.reg .b16 	%rs&lt;5&gt;;
+	.reg .f32 	%f&lt;71&gt;;
+	.reg .b32 	%r&lt;73&gt;;
+	.reg .b64 	%rd&lt;29&gt;;
 
 
 	ld.param.u8 	%rs4, [pointwise_grad_param_10];
@@ -2648,11 +2648,11 @@ $L__BB0_53:
 	.param .u8 pointwise_grad_param_10
 )
 {
-	.reg .pred 	%p<42>;
-	.reg .b16 	%rs<5>;
-	.reg .f32 	%f<71>;
-	.reg .b32 	%r<73>;
-	.reg .b64 	%rd<29>;
+	.reg .pred 	%p&lt;42&gt;;
+	.reg .b16 	%rs&lt;5&gt;;
+	.reg .f32 	%f&lt;71&gt;;
+	.reg .b32 	%r&lt;73&gt;;
+	.reg .b64 	%rd&lt;29&gt;;
 
 
 	ld.param.u8 	%rs4, [pointwise_grad_param_10];
@@ -3009,11 +3009,11 @@ $L__BB0_53:
 	.param .u8 pointwise_grad_param_10
 )
 {
-	.reg .pred 	%p<42>;
-	.reg .b16 	%rs<5>;
-	.reg .f32 	%f<71>;
-	.reg .b32 	%r<73>;
-	.reg .b64 	%rd<29>;
+	.reg .pred 	%p&lt;42&gt;;
+	.reg .b16 	%rs&lt;5&gt;;
+	.reg .f32 	%f&lt;71&gt;;
+	.reg .b32 	%r&lt;73&gt;;
+	.reg .b64 	%rd&lt;29&gt;;
 
 
 	ld.param.u8 	%rs4, [pointwise_grad_param_10];
@@ -3370,11 +3370,11 @@ $L__BB0_53:
 	.param .u8 pointwise_grad_param_10
 )
 {
-	.reg .pred 	%p<42>;
-	.reg .b16 	%rs<5>;
-	.reg .f32 	%f<71>;
-	.reg .b32 	%r<73>;
-	.reg .b64 	%rd<29>;
+	.reg .pred 	%p&lt;42&gt;;
+	.reg .b16 	%rs&lt;5&gt;;
+	.reg .f32 	%f&lt;71&gt;;
+	.reg .b32 	%r&lt;73&gt;;
+	.reg .b64 	%rd&lt;29&gt;;
 
 
 	ld.param.u8 	%rs4, [pointwise_grad_param_10];

@@ -54,6 +54,28 @@ func Buffer(nComp int, size [3]int) *data.Slice {
 	return data.SliceFromPtrs(size, data.GPUMemory, ptrs)
 }
 
+func BufferBinary(nComp int, size [3]int, key string) *data.SliceBinary {
+	if Synchronous {
+		SyncFFT_T(key)
+	}
+
+	// re-use as many buffers as possible form our stack
+	N := prod(size)
+	pool := buf_pool[N]
+	nFromPool := iMin(nComp, len(pool))
+	ptrs := pool[len(pool)-1]
+	buf_pool[N] = pool[:len(pool)-nFromPool]
+
+	// allocate as much new memory as needed
+	if len(buf_check) >= buf_max {
+		log.Panic("too many buffers in use, possible memory leak")
+	}
+	ptrs = MemAlloc(int64(cu.SIZEOF_BYTE * N))
+	buf_check[ptrs] = struct{}{} // mark this pointer as mine
+
+	return data.SliceBinaryFromPtrs(size, data.GPUMemory, ptrs)
+}
+
 func BufferFFT_T(nComp int, size [3]int, key string) *data.Slice {
 	if Synchronous {
 		SyncFFT_T(key)

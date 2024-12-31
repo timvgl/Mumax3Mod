@@ -40,7 +40,7 @@ func Read(in io.Reader) (s *data.Slice, meta data.Meta, err error) {
 	case format == "binary 4" && ovf == 2:
 		ReadOVF2DataBinary4(in, data_)
 	case format == "binary 4+4" && ovf == 2:
-		ReadOVF2DataBinary4Optimized(in, data_)
+		ReadOVF2DataBinary4(in, data_)
 	}
 
 	return data_, data.Meta{Name: info.Title, Time: info.TotalTime, Unit: info.ValueUnit, CellSize: info.StepSize}, nil

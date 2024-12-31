@@ -185,10 +185,10 @@ const (
 	.param .u32 addcubicanisotropy2_param_26
 )
 {
-	.reg .pred 	%p<15>;
-	.reg .f32 	%f<187>;
-	.reg .b32 	%r<9>;
-	.reg .b64 	%rd<60>;
+	.reg .pred 	%p&lt;15&gt;;
+	.reg .f32 	%f&lt;187&gt;;
+	.reg .b32 	%r&lt;9&gt;;
+	.reg .b64 	%rd&lt;60&gt;;
 
 
 	ld.param.u64 	%rd1, [addcubicanisotropy2_param_0];
@@ -533,10 +533,10 @@ $L__BB0_28:
 	.param .u32 addcubicanisotropy2_param_26
 )
 {
-	.reg .pred 	%p<15>;
-	.reg .f32 	%f<187>;
-	.reg .b32 	%r<9>;
-	.reg .b64 	%rd<60>;
+	.reg .pred 	%p&lt;15&gt;;
+	.reg .f32 	%f&lt;187&gt;;
+	.reg .b32 	%r&lt;9&gt;;
+	.reg .b64 	%rd&lt;60&gt;;
 
 
 	ld.param.u64 	%rd1, [addcubicanisotropy2_param_0];
@@ -881,10 +881,10 @@ $L__BB0_28:
 	.param .u32 addcubicanisotropy2_param_26
 )
 {
-	.reg .pred 	%p<15>;
-	.reg .f32 	%f<187>;
-	.reg .b32 	%r<9>;
-	.reg .b64 	%rd<60>;
+	.reg .pred 	%p&lt;15&gt;;
+	.reg .f32 	%f&lt;187&gt;;
+	.reg .b32 	%r&lt;9&gt;;
+	.reg .b64 	%rd&lt;60&gt;;
 
 
 	ld.param.u64 	%rd1, [addcubicanisotropy2_param_0];
@@ -1229,10 +1229,10 @@ $L__BB0_28:
 	.param .u32 addcubicanisotropy2_param_26
 )
 {
-	.reg .pred 	%p<15>;
-	.reg .f32 	%f<187>;
-	.reg .b32 	%r<9>;
-	.reg .b64 	%rd<60>;
+	.reg .pred 	%p&lt;15&gt;;
+	.reg .f32 	%f&lt;187&gt;;
+	.reg .b32 	%r&lt;9&gt;;
+	.reg .b64 	%rd&lt;60&gt;;
 
 
 	ld.param.u64 	%rd1, [addcubicanisotropy2_param_0];
@@ -1577,10 +1577,10 @@ $L__BB0_28:
 	.param .u32 addcubicanisotropy2_param_26
 )
 {
-	.reg .pred 	%p<15>;
-	.reg .f32 	%f<187>;
-	.reg .b32 	%r<9>;
-	.reg .b64 	%rd<60>;
+	.reg .pred 	%p&lt;15&gt;;
+	.reg .f32 	%f&lt;187&gt;;
+	.reg .b32 	%r&lt;9&gt;;
+	.reg .b64 	%rd&lt;60&gt;;
 
 
 	ld.param.u64 	%rd1, [addcubicanisotropy2_param_0];
@@ -1925,10 +1925,10 @@ $L__BB0_28:
 	.param .u32 addcubicanisotropy2_param_26
 )
 {
-	.reg .pred 	%p<15>;
-	.reg .f32 	%f<187>;
-	.reg .b32 	%r<9>;
-	.reg .b64 	%rd<60>;
+	.reg .pred 	%p&lt;15&gt;;
+	.reg .f32 	%f&lt;187&gt;;
+	.reg .b32 	%r&lt;9&gt;;
+	.reg .b64 	%rd&lt;60&gt;;
 
 
 	ld.param.u64 	%rd1, [addcubicanisotropy2_param_0];
@@ -2273,10 +2273,10 @@ $L__BB0_28:
 	.param .u32 addcubicanisotropy2_param_26
 )
 {
-	.reg .pred 	%p<15>;
-	.reg .f32 	%f<187>;
-	.reg .b32 	%r<9>;
-	.reg .b64 	%rd<60>;
+	.reg .pred 	%p&lt;15&gt;;
+	.reg .f32 	%f&lt;187&gt;;
+	.reg .b32 	%r&lt;9&gt;;
+	.reg .b64 	%rd&lt;60&gt;;
 
 
 	ld.param.u64 	%rd1, [addcubicanisotropy2_param_0];
@@ -2621,10 +2621,10 @@ $L__BB0_28:
 	.param .u32 addcubicanisotropy2_param_26
 )
 {
-	.reg .pred 	%p<15>;
-	.reg .f32 	%f<187>;
-	.reg .b32 	%r<9>;
-	.reg .b64 	%rd<60>;
+	.reg .pred 	%p&lt;15&gt;;
+	.reg .f32 	%f&lt;187&gt;;
+	.reg .b32 	%r&lt;9&gt;;
+	.reg .b64 	%rd&lt;60&gt;;
 
 
 	ld.param.u64 	%rd1, [addcubicanisotropy2_param_0];
@@ -2969,10 +2969,10 @@ $L__BB0_28:
 	.param .u32 addcubicanisotropy2_param_26
 )
 {
-	.reg .pred 	%p<15>;
-	.reg .f32 	%f<187>;
-	.reg .b32 	%r<9>;
-	.reg .b64 	%rd<60>;
+	.reg .pred 	%p&lt;15&gt;;
+	.reg .f32 	%f&lt;187&gt;;
+	.reg .b32 	%r&lt;9&gt;;
+	.reg .b64 	%rd&lt;60&gt;;
 
 
 	ld.param.u64 	%rd1, [addcubicanisotropy2_param_0];
@@ -3317,10 +3317,10 @@ $L__BB0_28:
 	.param .u32 addcubicanisotropy2_param_26
 )
 {
-	.reg .pred 	%p<15>;
-	.reg .f32 	%f<187>;
-	.reg .b32 	%r<9>;
-	.reg .b64 	%rd<60>;
+	.reg .pred 	%p&lt;15&gt;;
+	.reg .f32 	%f&lt;187&gt;;
+	.reg .b32 	%r&lt;9&gt;;
+	.reg .b64 	%rd&lt;60&gt;;
 
 
 	ld.param.u64 	%rd1, [addcubicanisotropy2_param_0];

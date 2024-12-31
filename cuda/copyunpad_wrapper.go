@@ -109,10 +109,10 @@ const (
 	.param .u32 copyunpad_param_7
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<22>;
-	.reg .b64 	%rd<9>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;2&gt;;
+	.reg .b32 	%r&lt;22&gt;;
+	.reg .b64 	%rd&lt;9&gt;;
 
 
 	ld.param.u64 	%rd1, [copyunpad_param_0];
@@ -178,10 +178,10 @@ $L__BB0_2:
 	.param .u32 copyunpad_param_7
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<22>;
-	.reg .b64 	%rd<9>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;2&gt;;
+	.reg .b32 	%r&lt;22&gt;;
+	.reg .b64 	%rd&lt;9&gt;;
 
 
 	ld.param.u64 	%rd1, [copyunpad_param_0];
@@ -247,10 +247,10 @@ $L__BB0_2:
 	.param .u32 copyunpad_param_7
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<22>;
-	.reg .b64 	%rd<9>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;2&gt;;
+	.reg .b32 	%r&lt;22&gt;;
+	.reg .b64 	%rd&lt;9&gt;;
 
 
 	ld.param.u64 	%rd1, [copyunpad_param_0];
@@ -316,10 +316,10 @@ $L__BB0_2:
 	.param .u32 copyunpad_param_7
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<22>;
-	.reg .b64 	%rd<9>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;2&gt;;
+	.reg .b32 	%r&lt;22&gt;;
+	.reg .b64 	%rd&lt;9&gt;;
 
 
 	ld.param.u64 	%rd1, [copyunpad_param_0];
@@ -385,10 +385,10 @@ $L__BB0_2:
 	.param .u32 copyunpad_param_7
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<22>;
-	.reg .b64 	%rd<9>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;2&gt;;
+	.reg .b32 	%r&lt;22&gt;;
+	.reg .b64 	%rd&lt;9&gt;;
 
 
 	ld.param.u64 	%rd1, [copyunpad_param_0];
@@ -454,10 +454,10 @@ $L__BB0_2:
 	.param .u32 copyunpad_param_7
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<22>;
-	.reg .b64 	%rd<9>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;2&gt;;
+	.reg .b32 	%r&lt;22&gt;;
+	.reg .b64 	%rd&lt;9&gt;;
 
 
 	ld.param.u64 	%rd1, [copyunpad_param_0];
@@ -523,10 +523,10 @@ $L__BB0_2:
 	.param .u32 copyunpad_param_7
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<22>;
-	.reg .b64 	%rd<9>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;2&gt;;
+	.reg .b32 	%r&lt;22&gt;;
+	.reg .b64 	%rd&lt;9&gt;;
 
 
 	ld.param.u64 	%rd1, [copyunpad_param_0];
@@ -592,10 +592,10 @@ $L__BB0_2:
 	.param .u32 copyunpad_param_7
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<22>;
-	.reg .b64 	%rd<9>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;2&gt;;
+	.reg .b32 	%r&lt;22&gt;;
+	.reg .b64 	%rd&lt;9&gt;;
 
 
 	ld.param.u64 	%rd1, [copyunpad_param_0];
@@ -661,10 +661,10 @@ $L__BB0_2:
 	.param .u32 copyunpad_param_7
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<22>;
-	.reg .b64 	%rd<9>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;2&gt;;
+	.reg .b32 	%r&lt;22&gt;;
+	.reg .b64 	%rd&lt;9&gt;;
 
 
 	ld.param.u64 	%rd1, [copyunpad_param_0];
@@ -730,10 +730,10 @@ $L__BB0_2:
 	.param .u32 copyunpad_param_7
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<22>;
-	.reg .b64 	%rd<9>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;2&gt;;
+	.reg .b32 	%r&lt;22&gt;;
+	.reg .b64 	%rd&lt;9&gt;;
 
 
 	ld.param.u64 	%rd1, [copyunpad_param_0];

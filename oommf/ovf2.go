@@ -8,7 +8,6 @@ import (
 	"log"
 	"slices"
 	"strings"
-	"sync"
 	"unsafe"
 
 	"github.com/mumax/3/data"
@@ -23,6 +22,12 @@ func WriteOVF2(out io.Writer, q *data.Slice, meta data.Meta, dataformat string) 
 func WriteOVF2FFT(out io.Writer, q *data.Slice, meta data.Meta, dataformat string, NxNyNz [3]int, startK, endK [3]float64, transformedAxes []string, timeSpace bool) {
 	writeOVF2HeaderFFT(out, q, meta, NxNyNz, startK, endK, transformedAxes, timeSpace)
 	writeOVF2Data(out, q, dataformat)
+	hdr(out, "End", "Segment")
+}
+
+func WriteOVF2FFTCompressed(out io.Writer, q *data.SliceBinary, meta data.Meta, dataformat string, NxNyNz [3]int, startK, endK [3]float64, transformedAxes []string, timeSpace bool) {
+	writeOVF2HeaderFFTCompressed(out, q, meta, NxNyNz, startK, endK, transformedAxes, timeSpace)
+	writeOVF2DataCompressed(out, q, dataformat)
 	hdr(out, "End", "Segment")
 }
 
@@ -169,6 +174,91 @@ func writeOVF2HeaderFFT(out io.Writer, q *data.Slice, meta data.Meta, NxNyNz [3]
 	hdr(out, "End", "Header")
 }
 
+func writeOVF2HeaderFFTCompressed(out io.Writer, q *data.SliceBinary, meta data.Meta, NxNyNz [3]int, startK, endK [3]float64, transformedAxes []string, timeSpace bool) {
+	gridsize := NxNyNz
+	cellsize := meta.CellSize
+
+	fmt.Fprintln(out, "# OOMMF OVF 2.0")
+	hdr(out, "Segment count", "1")
+	hdr(out, "Begin", "Segment")
+	hdr(out, "Begin", "Header")
+
+	hdr(out, "Title", meta.Name)
+	hdr(out, "meshtype", "rectangular")
+	hdr(out, "meshunit", "m")
+	if slices.Contains(transformedAxes, "x") {
+		hdr(out, "k_xmin", startK[0])
+	} else {
+		hdr(out, "xmin", startK[0])
+	}
+	if slices.Contains(transformedAxes, "y") {
+		hdr(out, "k_ymin", startK[1])
+	} else {
+		hdr(out, "ymin", startK[1])
+	}
+	if slices.Contains(transformedAxes, "z") {
+		hdr(out, "k_zmin", startK[2])
+	} else {
+		hdr(out, "zmin", startK[2])
+	}
+
+	if slices.Contains(transformedAxes, "x") {
+		hdr(out, "k_xmax", endK[0])
+	} else {
+		hdr(out, "xmax", endK[0])
+	}
+	if slices.Contains(transformedAxes, "y") {
+		hdr(out, "k_ymax", endK[1])
+	} else {
+		hdr(out, "ymax", endK[1])
+	}
+	if slices.Contains(transformedAxes, "z") {
+		hdr(out, "k_zmax", endK[2])
+	} else {
+		hdr(out, "zmax", endK[2])
+	}
+
+	name := meta.Name
+	var labels []interface{}
+	if q.NComp() == 1 {
+		labels = []interface{}{name}
+	} else {
+		for i := 0; i < q.NComp(); i++ {
+			labels = append(labels, name+"_"+string('x'+i))
+		}
+	}
+	hdr(out, "valuedim", q.NComp())
+	hdr(out, "valuelabels", labels...) // TODO
+	unit := meta.Unit
+	if unit == "" {
+		unit = "1"
+	}
+	if q.NComp() == 1 {
+		hdr(out, "valueunits", unit)
+	} else {
+		hdr(out, "valueunits", unit, unit, unit)
+	}
+
+	// We don't really have stages
+	//fmt.Fprintln(out, "# Desc: Stage simulation time: ", meta.TimeStep, " s") // TODO
+	if timeSpace {
+		hdr(out, "Desc", "Total simulation time: ", meta.Time, " s")
+	} else {
+		hdr(out, "Desc", "Frequency: ", meta.Freq, " Hz")
+	}
+
+	hdr(out, "xbase", cellsize[X])
+	hdr(out, "ybase", cellsize[Y])
+	hdr(out, "zbase", cellsize[Z])
+	hdr(out, "xnodes", gridsize[X])
+	hdr(out, "ynodes", gridsize[Y])
+	hdr(out, "znodes", gridsize[Z])
+	hdr(out, "xstepsize", cellsize[X])
+	hdr(out, "ystepsize", cellsize[Y])
+	hdr(out, "zstepsize", cellsize[Z])
+	hdr(out, "End", "Header")
+}
+
 func writeOVF2Data(out io.Writer, q *data.Slice, dataformat string) {
 	canonicalFormat := ""
 	switch strings.ToLower(dataformat) {
@@ -186,6 +276,23 @@ func writeOVF2Data(out io.Writer, q *data.Slice, dataformat string) {
 		writeOVF2DataBinary4(out, q)
 	default:
 		log.Fatalf("Illegal OMF data format: %v. Options are: Text, Binary 4, Binary 4+4", dataformat)
+	}
+	hdr(out, "End", "Data "+canonicalFormat)
+}
+
+func writeOVF2DataCompressed(out io.Writer, q *data.SliceBinary, dataformat string) {
+	canonicalFormat := ""
+	switch strings.ToLower(dataformat) {
+	case "binary", "binary 4":
+		canonicalFormat = "Binary 4"
+		hdr(out, "Begin", "Data "+canonicalFormat)
+		writeOVF2DataBinary4Compressed(out, q)
+	case "binary 4+4":
+		canonicalFormat = "Binary 4+4"
+		hdr(out, "Begin", "Data "+canonicalFormat)
+		writeOVF2DataBinary4Compressed(out, q)
+	default:
+		log.Fatalf("Illegal OMF data format: %v. Options are: Binary 4, Binary 4+4", dataformat)
 	}
 	hdr(out, "End", "Data "+canonicalFormat)
 }
@@ -217,9 +324,27 @@ func writeOVF2DataBinary4(out io.Writer, array *data.Slice) {
 	}
 }
 
-func ReadOVF2DataBinary4Optimized(in io.Reader, array *data.Slice) error {
+func writeOVF2DataBinary4Compressed(out io.Writer, array *data.SliceBinary) {
+
+	//w.count(w.out.Write((*(*[1<<31 - 1]byte)(unsafe.Pointer(&list[0])))[0 : 4*len(list)])) // (shortcut)
+
+	data := array.Tensors()
+
+	var bytes []byte
+
+	// OOMMF requires this number to be first to check the format
+	var controlnumber float32 = OVF_CONTROL_NUMBER_4
+	bytes = (*[4]byte)(unsafe.Pointer(&controlnumber))[:]
+	out.Write(bytes)
+
+	for i := 0; i < array.Length(); i++ {
+		bytes = (*[4]byte)(unsafe.Pointer(&data[i]))[:]
+		out.Write(bytes)
+	}
+}
+
+func ReadOVF2DataBinary4Optimized(in io.Reader, array *data.SliceBinary) error {
 	readHeaderDummy(in)
-	size := array.Size()
 	data := array.Tensors()
 	controlNumber, err := readFloat32(in)
 	if err != nil {
@@ -234,41 +359,11 @@ func ReadOVF2DataBinary4Optimized(in io.Reader, array *data.Slice) error {
 	}
 
 	bufferedReader := bufio.NewReader(in)
-	ncomp := array.NComp()
-	totalElements := size[0] * size[1] * size[2] * ncomp
-	floatBuffer := make([]float32, totalElements)
 
 	// Read all float32 data at once
-	if err := binary.Read(bufferedReader, binary.LittleEndian, floatBuffer); err != nil {
+	if err := binary.Read(bufferedReader, binary.LittleEndian, data); err != nil {
 		return fmt.Errorf("failed to read float data: %v", err)
 	}
-	if len(floatBuffer) < array.Len() {
-		return fmt.Errorf("floatBuffer smaller than expected data")
-	}
-	var wg sync.WaitGroup
-	var batchSize = slices.Max(size[:])
-	for start := 0; start < totalElements; start += batchSize {
-		end := start + batchSize
-		if end > totalElements {
-			end = totalElements
-		}
-		wg.Add(1)
-		go func(start, end int) {
-			defer wg.Done()
-			for i := start; i < end; i++ {
-				// Calculate multi-dimensional indices
-				c := i / (size[0] * size[1] * size[2])
-				rem := i % (size[0] * size[1] * size[2])
-				iz := rem / (size[0] * size[1])
-				rem = rem % (size[0] * size[1])
-				iy := rem / size[0]
-				ix := rem % size[0]
-
-				data[c][iz][iy][ix] = floatBuffer[i]
-			}
-		}(start, end)
-	}
-
 	return nil
 }
 

@@ -97,10 +97,10 @@ const (
 	.param .u32 fftshift3D_partial_param_4
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<30>;
-	.reg .b64 	%rd<9>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;2&gt;;
+	.reg .b32 	%r&lt;30&gt;;
+	.reg .b64 	%rd&lt;9&gt;;
 
 
 	ld.param.u64 	%rd1, [fftshift3D_partial_param_0];
@@ -171,10 +171,10 @@ $L__BB0_2:
 	.param .u32 fftshift3D_partial_param_4
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<30>;
-	.reg .b64 	%rd<9>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;2&gt;;
+	.reg .b32 	%r&lt;30&gt;;
+	.reg .b64 	%rd&lt;9&gt;;
 
 
 	ld.param.u64 	%rd1, [fftshift3D_partial_param_0];
@@ -245,10 +245,10 @@ $L__BB0_2:
 	.param .u32 fftshift3D_partial_param_4
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<30>;
-	.reg .b64 	%rd<9>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;2&gt;;
+	.reg .b32 	%r&lt;30&gt;;
+	.reg .b64 	%rd&lt;9&gt;;
 
 
 	ld.param.u64 	%rd1, [fftshift3D_partial_param_0];
@@ -319,10 +319,10 @@ $L__BB0_2:
 	.param .u32 fftshift3D_partial_param_4
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<30>;
-	.reg .b64 	%rd<9>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;2&gt;;
+	.reg .b32 	%r&lt;30&gt;;
+	.reg .b64 	%rd&lt;9&gt;;
 
 
 	ld.param.u64 	%rd1, [fftshift3D_partial_param_0];
@@ -393,10 +393,10 @@ $L__BB0_2:
 	.param .u32 fftshift3D_partial_param_4
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<30>;
-	.reg .b64 	%rd<9>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;2&gt;;
+	.reg .b32 	%r&lt;30&gt;;
+	.reg .b64 	%rd&lt;9&gt;;
 
 
 	ld.param.u64 	%rd1, [fftshift3D_partial_param_0];
@@ -467,10 +467,10 @@ $L__BB0_2:
 	.param .u32 fftshift3D_partial_param_4
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<30>;
-	.reg .b64 	%rd<9>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;2&gt;;
+	.reg .b32 	%r&lt;30&gt;;
+	.reg .b64 	%rd&lt;9&gt;;
 
 
 	ld.param.u64 	%rd1, [fftshift3D_partial_param_0];
@@ -541,10 +541,10 @@ $L__BB0_2:
 	.param .u32 fftshift3D_partial_param_4
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<30>;
-	.reg .b64 	%rd<9>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;2&gt;;
+	.reg .b32 	%r&lt;30&gt;;
+	.reg .b64 	%rd&lt;9&gt;;
 
 
 	ld.param.u64 	%rd1, [fftshift3D_partial_param_0];
@@ -615,10 +615,10 @@ $L__BB0_2:
 	.param .u32 fftshift3D_partial_param_4
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<30>;
-	.reg .b64 	%rd<9>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;2&gt;;
+	.reg .b32 	%r&lt;30&gt;;
+	.reg .b64 	%rd&lt;9&gt;;
 
 
 	ld.param.u64 	%rd1, [fftshift3D_partial_param_0];
@@ -689,10 +689,10 @@ $L__BB0_2:
 	.param .u32 fftshift3D_partial_param_4
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<30>;
-	.reg .b64 	%rd<9>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;2&gt;;
+	.reg .b32 	%r&lt;30&gt;;
+	.reg .b64 	%rd&lt;9&gt;;
 
 
 	ld.param.u64 	%rd1, [fftshift3D_partial_param_0];
@@ -763,10 +763,10 @@ $L__BB0_2:
 	.param .u32 fftshift3D_partial_param_4
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<30>;
-	.reg .b64 	%rd<9>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;2&gt;;
+	.reg .b32 	%r&lt;30&gt;;
+	.reg .b64 	%rd&lt;9&gt;;
 
 
 	ld.param.u64 	%rd1, [fftshift3D_partial_param_0];

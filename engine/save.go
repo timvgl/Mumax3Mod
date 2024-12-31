@@ -346,6 +346,24 @@ func saveAsFFT_sync(fname string, s *data.Slice, info data.Meta, format OutputFo
 
 }
 
+func saveAsFFTCompressed_sync(fname string, s *data.SliceBinary, info data.Meta, format OutputFormat, NxNyNz [3]int, startK, endK [3]float64, transformedAxes []string, complex bool, timeSpace bool, length int) {
+	f, err := httpfs.Create(fname)
+	util.FatalErr(err)
+	defer f.Close()
+
+	switch format {
+	case OVF2_BINARY:
+		if complex {
+			oommf.WriteOVF2FFTCompressed(f, s, info, "binary 4+4", NxNyNz, startK, endK, transformedAxes, timeSpace)
+		} else {
+			oommf.WriteOVF2FFTCompressed(f, s, info, "binary 4", NxNyNz, startK, endK, transformedAxes, timeSpace)
+		}
+	default:
+		panic("Invalid output format. OVF1 and Text not supported for compressed data.")
+	}
+
+}
+
 type OutputFormat int
 
 const (

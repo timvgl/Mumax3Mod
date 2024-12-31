@@ -97,10 +97,10 @@ const (
 	.param .u32 setTheta_param_4
 )
 {
-	.reg .pred 	%p<9>;
-	.reg .f32 	%f<37>;
-	.reg .b32 	%r<22>;
-	.reg .b64 	%rd<8>;
+	.reg .pred 	%p&lt;9&gt;;
+	.reg .f32 	%f&lt;37&gt;;
+	.reg .b32 	%r&lt;22&gt;;
+	.reg .b64 	%rd&lt;8&gt;;
 
 
 	ld.param.u64 	%rd1, [setTheta_param_0];
@@ -200,10 +200,10 @@ $L__BB0_2:
 	.param .u32 setTheta_param_4
 )
 {
-	.reg .pred 	%p<9>;
-	.reg .f32 	%f<37>;
-	.reg .b32 	%r<22>;
-	.reg .b64 	%rd<8>;
+	.reg .pred 	%p&lt;9&gt;;
+	.reg .f32 	%f&lt;37&gt;;
+	.reg .b32 	%r&lt;22&gt;;
+	.reg .b64 	%rd&lt;8&gt;;
 
 
 	ld.param.u64 	%rd1, [setTheta_param_0];
@@ -303,10 +303,10 @@ $L__BB0_2:
 	.param .u32 setTheta_param_4
 )
 {
-	.reg .pred 	%p<9>;
-	.reg .f32 	%f<37>;
-	.reg .b32 	%r<22>;
-	.reg .b64 	%rd<8>;
+	.reg .pred 	%p&lt;9&gt;;
+	.reg .f32 	%f&lt;37&gt;;
+	.reg .b32 	%r&lt;22&gt;;
+	.reg .b64 	%rd&lt;8&gt;;
 
 
 	ld.param.u64 	%rd1, [setTheta_param_0];
@@ -406,10 +406,10 @@ $L__BB0_2:
 	.param .u32 setTheta_param_4
 )
 {
-	.reg .pred 	%p<9>;
-	.reg .f32 	%f<37>;
-	.reg .b32 	%r<22>;
-	.reg .b64 	%rd<8>;
+	.reg .pred 	%p&lt;9&gt;;
+	.reg .f32 	%f&lt;37&gt;;
+	.reg .b32 	%r&lt;22&gt;;
+	.reg .b64 	%rd&lt;8&gt;;
 
 
 	ld.param.u64 	%rd1, [setTheta_param_0];
@@ -509,10 +509,10 @@ $L__BB0_2:
 	.param .u32 setTheta_param_4
 )
 {
-	.reg .pred 	%p<9>;
-	.reg .f32 	%f<37>;
-	.reg .b32 	%r<22>;
-	.reg .b64 	%rd<8>;
+	.reg .pred 	%p&lt;9&gt;;
+	.reg .f32 	%f&lt;37&gt;;
+	.reg .b32 	%r&lt;22&gt;;
+	.reg .b64 	%rd&lt;8&gt;;
 
 
 	ld.param.u64 	%rd1, [setTheta_param_0];
@@ -612,10 +612,10 @@ $L__BB0_2:
 	.param .u32 setTheta_param_4
 )
 {
-	.reg .pred 	%p<9>;
-	.reg .f32 	%f<37>;
-	.reg .b32 	%r<22>;
-	.reg .b64 	%rd<8>;
+	.reg .pred 	%p&lt;9&gt;;
+	.reg .f32 	%f&lt;37&gt;;
+	.reg .b32 	%r&lt;22&gt;;
+	.reg .b64 	%rd&lt;8&gt;;
 
 
 	ld.param.u64 	%rd1, [setTheta_param_0];
@@ -715,10 +715,10 @@ $L__BB0_2:
 	.param .u32 setTheta_param_4
 )
 {
-	.reg .pred 	%p<9>;
-	.reg .f32 	%f<37>;
-	.reg .b32 	%r<22>;
-	.reg .b64 	%rd<8>;
+	.reg .pred 	%p&lt;9&gt;;
+	.reg .f32 	%f&lt;37&gt;;
+	.reg .b32 	%r&lt;22&gt;;
+	.reg .b64 	%rd&lt;8&gt;;
 
 
 	ld.param.u64 	%rd1, [setTheta_param_0];
@@ -818,10 +818,10 @@ $L__BB0_2:
 	.param .u32 setTheta_param_4
 )
 {
-	.reg .pred 	%p<9>;
-	.reg .f32 	%f<37>;
-	.reg .b32 	%r<22>;
-	.reg .b64 	%rd<8>;
+	.reg .pred 	%p&lt;9&gt;;
+	.reg .f32 	%f&lt;37&gt;;
+	.reg .b32 	%r&lt;22&gt;;
+	.reg .b64 	%rd&lt;8&gt;;
 
 
 	ld.param.u64 	%rd1, [setTheta_param_0];
@@ -921,10 +921,10 @@ $L__BB0_2:
 	.param .u32 setTheta_param_4
 )
 {
-	.reg .pred 	%p<9>;
-	.reg .f32 	%f<37>;
-	.reg .b32 	%r<22>;
-	.reg .b64 	%rd<8>;
+	.reg .pred 	%p&lt;9&gt;;
+	.reg .f32 	%f&lt;37&gt;;
+	.reg .b32 	%r&lt;22&gt;;
+	.reg .b64 	%rd&lt;8&gt;;
 
 
 	ld.param.u64 	%rd1, [setTheta_param_0];
@@ -1024,10 +1024,10 @@ $L__BB0_2:
 	.param .u32 setTheta_param_4
 )
 {
-	.reg .pred 	%p<9>;
-	.reg .f32 	%f<37>;
-	.reg .b32 	%r<22>;
-	.reg .b64 	%rd<8>;
+	.reg .pred 	%p&lt;9&gt;;
+	.reg .f32 	%f&lt;37&gt;;
+	.reg .b32 	%r&lt;22&gt;;
+	.reg .b64 	%rd&lt;8&gt;;
 
 
 	ld.param.u64 	%rd1, [setTheta_param_0];

@@ -121,10 +121,10 @@ const (
 	.param .u32 resize_param_10
 )
 {
-	.reg .pred 	%p<33>;
-	.reg .f32 	%f<80>;
-	.reg .b32 	%r<49>;
-	.reg .b64 	%rd<11>;
+	.reg .pred 	%p&lt;33&gt;;
+	.reg .f32 	%f&lt;80&gt;;
+	.reg .b32 	%r&lt;49&gt;;
+	.reg .b64 	%rd&lt;11&gt;;
 
 
 	ld.param.u64 	%rd4, [resize_param_0];
@@ -200,7 +200,7 @@ $L__BB0_8:
 	or.pred  	%p12, %p8, %p10;
 	@%p12 bra 	$L__BB0_10;
 
-	ld.global.nc.f32 	%f47, [%rd2+4];
+	ld.global.nc.f32 	%f47, [%rd2&#43;4];
 	add.f32 	%f60, %f60, %f47;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -210,7 +210,7 @@ $L__BB0_10:
 	or.pred  	%p15, %p8, %p13;
 	@%p15 bra 	$L__BB0_12;
 
-	ld.global.nc.f32 	%f48, [%rd2+8];
+	ld.global.nc.f32 	%f48, [%rd2&#43;8];
 	add.f32 	%f60, %f60, %f48;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -220,7 +220,7 @@ $L__BB0_12:
 	or.pred  	%p18, %p8, %p16;
 	@%p18 bra 	$L__BB0_14;
 
-	ld.global.nc.f32 	%f49, [%rd2+12];
+	ld.global.nc.f32 	%f49, [%rd2&#43;12];
 	add.f32 	%f60, %f60, %f49;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -256,7 +256,7 @@ $L__BB0_18:
 	or.pred  	%p27, %p21, %p26;
 	@%p27 bra 	$L__BB0_21;
 
-	ld.global.nc.f32 	%f51, [%rd3+4];
+	ld.global.nc.f32 	%f51, [%rd3&#43;4];
 	add.f32 	%f60, %f60, %f51;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -269,7 +269,7 @@ $L__BB0_21:
 	or.pred  	%p31, %p21, %p30;
 	@%p31 bra 	$L__BB0_24;
 
-	ld.global.nc.f32 	%f52, [%rd3+8];
+	ld.global.nc.f32 	%f52, [%rd3&#43;8];
 	add.f32 	%f60, %f60, %f52;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -313,10 +313,10 @@ $L__BB0_26:
 	.param .u32 resize_param_10
 )
 {
-	.reg .pred 	%p<33>;
-	.reg .f32 	%f<80>;
-	.reg .b32 	%r<49>;
-	.reg .b64 	%rd<11>;
+	.reg .pred 	%p&lt;33&gt;;
+	.reg .f32 	%f&lt;80&gt;;
+	.reg .b32 	%r&lt;49&gt;;
+	.reg .b64 	%rd&lt;11&gt;;
 
 
 	ld.param.u64 	%rd4, [resize_param_0];
@@ -392,7 +392,7 @@ $L__BB0_8:
 	or.pred  	%p12, %p8, %p10;
 	@%p12 bra 	$L__BB0_10;
 
-	ld.global.nc.f32 	%f47, [%rd2+4];
+	ld.global.nc.f32 	%f47, [%rd2&#43;4];
 	add.f32 	%f60, %f60, %f47;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -402,7 +402,7 @@ $L__BB0_10:
 	or.pred  	%p15, %p8, %p13;
 	@%p15 bra 	$L__BB0_12;
 
-	ld.global.nc.f32 	%f48, [%rd2+8];
+	ld.global.nc.f32 	%f48, [%rd2&#43;8];
 	add.f32 	%f60, %f60, %f48;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -412,7 +412,7 @@ $L__BB0_12:
 	or.pred  	%p18, %p8, %p16;
 	@%p18 bra 	$L__BB0_14;
 
-	ld.global.nc.f32 	%f49, [%rd2+12];
+	ld.global.nc.f32 	%f49, [%rd2&#43;12];
 	add.f32 	%f60, %f60, %f49;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -448,7 +448,7 @@ $L__BB0_18:
 	or.pred  	%p27, %p21, %p26;
 	@%p27 bra 	$L__BB0_21;
 
-	ld.global.nc.f32 	%f51, [%rd3+4];
+	ld.global.nc.f32 	%f51, [%rd3&#43;4];
 	add.f32 	%f60, %f60, %f51;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -461,7 +461,7 @@ $L__BB0_21:
 	or.pred  	%p31, %p21, %p30;
 	@%p31 bra 	$L__BB0_24;
 
-	ld.global.nc.f32 	%f52, [%rd3+8];
+	ld.global.nc.f32 	%f52, [%rd3&#43;8];
 	add.f32 	%f60, %f60, %f52;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -505,10 +505,10 @@ $L__BB0_26:
 	.param .u32 resize_param_10
 )
 {
-	.reg .pred 	%p<33>;
-	.reg .f32 	%f<80>;
-	.reg .b32 	%r<49>;
-	.reg .b64 	%rd<11>;
+	.reg .pred 	%p&lt;33&gt;;
+	.reg .f32 	%f&lt;80&gt;;
+	.reg .b32 	%r&lt;49&gt;;
+	.reg .b64 	%rd&lt;11&gt;;
 
 
 	ld.param.u64 	%rd4, [resize_param_0];
@@ -584,7 +584,7 @@ $L__BB0_8:
 	or.pred  	%p12, %p8, %p10;
 	@%p12 bra 	$L__BB0_10;
 
-	ld.global.nc.f32 	%f47, [%rd2+4];
+	ld.global.nc.f32 	%f47, [%rd2&#43;4];
 	add.f32 	%f60, %f60, %f47;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -594,7 +594,7 @@ $L__BB0_10:
 	or.pred  	%p15, %p8, %p13;
 	@%p15 bra 	$L__BB0_12;
 
-	ld.global.nc.f32 	%f48, [%rd2+8];
+	ld.global.nc.f32 	%f48, [%rd2&#43;8];
 	add.f32 	%f60, %f60, %f48;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -604,7 +604,7 @@ $L__BB0_12:
 	or.pred  	%p18, %p8, %p16;
 	@%p18 bra 	$L__BB0_14;
 
-	ld.global.nc.f32 	%f49, [%rd2+12];
+	ld.global.nc.f32 	%f49, [%rd2&#43;12];
 	add.f32 	%f60, %f60, %f49;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -640,7 +640,7 @@ $L__BB0_18:
 	or.pred  	%p27, %p21, %p26;
 	@%p27 bra 	$L__BB0_21;
 
-	ld.global.nc.f32 	%f51, [%rd3+4];
+	ld.global.nc.f32 	%f51, [%rd3&#43;4];
 	add.f32 	%f60, %f60, %f51;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -653,7 +653,7 @@ $L__BB0_21:
 	or.pred  	%p31, %p21, %p30;
 	@%p31 bra 	$L__BB0_24;
 
-	ld.global.nc.f32 	%f52, [%rd3+8];
+	ld.global.nc.f32 	%f52, [%rd3&#43;8];
 	add.f32 	%f60, %f60, %f52;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -697,10 +697,10 @@ $L__BB0_26:
 	.param .u32 resize_param_10
 )
 {
-	.reg .pred 	%p<33>;
-	.reg .f32 	%f<80>;
-	.reg .b32 	%r<49>;
-	.reg .b64 	%rd<11>;
+	.reg .pred 	%p&lt;33&gt;;
+	.reg .f32 	%f&lt;80&gt;;
+	.reg .b32 	%r&lt;49&gt;;
+	.reg .b64 	%rd&lt;11&gt;;
 
 
 	ld.param.u64 	%rd4, [resize_param_0];
@@ -776,7 +776,7 @@ $L__BB0_8:
 	or.pred  	%p12, %p8, %p10;
 	@%p12 bra 	$L__BB0_10;
 
-	ld.global.nc.f32 	%f47, [%rd2+4];
+	ld.global.nc.f32 	%f47, [%rd2&#43;4];
 	add.f32 	%f60, %f60, %f47;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -786,7 +786,7 @@ $L__BB0_10:
 	or.pred  	%p15, %p8, %p13;
 	@%p15 bra 	$L__BB0_12;
 
-	ld.global.nc.f32 	%f48, [%rd2+8];
+	ld.global.nc.f32 	%f48, [%rd2&#43;8];
 	add.f32 	%f60, %f60, %f48;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -796,7 +796,7 @@ $L__BB0_12:
 	or.pred  	%p18, %p8, %p16;
 	@%p18 bra 	$L__BB0_14;
 
-	ld.global.nc.f32 	%f49, [%rd2+12];
+	ld.global.nc.f32 	%f49, [%rd2&#43;12];
 	add.f32 	%f60, %f60, %f49;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -832,7 +832,7 @@ $L__BB0_18:
 	or.pred  	%p27, %p21, %p26;
 	@%p27 bra 	$L__BB0_21;
 
-	ld.global.nc.f32 	%f51, [%rd3+4];
+	ld.global.nc.f32 	%f51, [%rd3&#43;4];
 	add.f32 	%f60, %f60, %f51;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -845,7 +845,7 @@ $L__BB0_21:
 	or.pred  	%p31, %p21, %p30;
 	@%p31 bra 	$L__BB0_24;
 
-	ld.global.nc.f32 	%f52, [%rd3+8];
+	ld.global.nc.f32 	%f52, [%rd3&#43;8];
 	add.f32 	%f60, %f60, %f52;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -889,10 +889,10 @@ $L__BB0_26:
 	.param .u32 resize_param_10
 )
 {
-	.reg .pred 	%p<33>;
-	.reg .f32 	%f<80>;
-	.reg .b32 	%r<49>;
-	.reg .b64 	%rd<11>;
+	.reg .pred 	%p&lt;33&gt;;
+	.reg .f32 	%f&lt;80&gt;;
+	.reg .b32 	%r&lt;49&gt;;
+	.reg .b64 	%rd&lt;11&gt;;
 
 
 	ld.param.u64 	%rd4, [resize_param_0];
@@ -968,7 +968,7 @@ $L__BB0_8:
 	or.pred  	%p12, %p8, %p10;
 	@%p12 bra 	$L__BB0_10;
 
-	ld.global.nc.f32 	%f47, [%rd2+4];
+	ld.global.nc.f32 	%f47, [%rd2&#43;4];
 	add.f32 	%f60, %f60, %f47;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -978,7 +978,7 @@ $L__BB0_10:
 	or.pred  	%p15, %p8, %p13;
 	@%p15 bra 	$L__BB0_12;
 
-	ld.global.nc.f32 	%f48, [%rd2+8];
+	ld.global.nc.f32 	%f48, [%rd2&#43;8];
 	add.f32 	%f60, %f60, %f48;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -988,7 +988,7 @@ $L__BB0_12:
 	or.pred  	%p18, %p8, %p16;
 	@%p18 bra 	$L__BB0_14;
 
-	ld.global.nc.f32 	%f49, [%rd2+12];
+	ld.global.nc.f32 	%f49, [%rd2&#43;12];
 	add.f32 	%f60, %f60, %f49;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -1024,7 +1024,7 @@ $L__BB0_18:
 	or.pred  	%p27, %p21, %p26;
 	@%p27 bra 	$L__BB0_21;
 
-	ld.global.nc.f32 	%f51, [%rd3+4];
+	ld.global.nc.f32 	%f51, [%rd3&#43;4];
 	add.f32 	%f60, %f60, %f51;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -1037,7 +1037,7 @@ $L__BB0_21:
 	or.pred  	%p31, %p21, %p30;
 	@%p31 bra 	$L__BB0_24;
 
-	ld.global.nc.f32 	%f52, [%rd3+8];
+	ld.global.nc.f32 	%f52, [%rd3&#43;8];
 	add.f32 	%f60, %f60, %f52;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -1081,10 +1081,10 @@ $L__BB0_26:
 	.param .u32 resize_param_10
 )
 {
-	.reg .pred 	%p<33>;
-	.reg .f32 	%f<80>;
-	.reg .b32 	%r<49>;
-	.reg .b64 	%rd<11>;
+	.reg .pred 	%p&lt;33&gt;;
+	.reg .f32 	%f&lt;80&gt;;
+	.reg .b32 	%r&lt;49&gt;;
+	.reg .b64 	%rd&lt;11&gt;;
 
 
 	ld.param.u64 	%rd4, [resize_param_0];
@@ -1160,7 +1160,7 @@ $L__BB0_8:
 	or.pred  	%p12, %p8, %p10;
 	@%p12 bra 	$L__BB0_10;
 
-	ld.global.nc.f32 	%f47, [%rd2+4];
+	ld.global.nc.f32 	%f47, [%rd2&#43;4];
 	add.f32 	%f60, %f60, %f47;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -1170,7 +1170,7 @@ $L__BB0_10:
 	or.pred  	%p15, %p8, %p13;
 	@%p15 bra 	$L__BB0_12;
 
-	ld.global.nc.f32 	%f48, [%rd2+8];
+	ld.global.nc.f32 	%f48, [%rd2&#43;8];
 	add.f32 	%f60, %f60, %f48;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -1180,7 +1180,7 @@ $L__BB0_12:
 	or.pred  	%p18, %p8, %p16;
 	@%p18 bra 	$L__BB0_14;
 
-	ld.global.nc.f32 	%f49, [%rd2+12];
+	ld.global.nc.f32 	%f49, [%rd2&#43;12];
 	add.f32 	%f60, %f60, %f49;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -1216,7 +1216,7 @@ $L__BB0_18:
 	or.pred  	%p27, %p21, %p26;
 	@%p27 bra 	$L__BB0_21;
 
-	ld.global.nc.f32 	%f51, [%rd3+4];
+	ld.global.nc.f32 	%f51, [%rd3&#43;4];
 	add.f32 	%f60, %f60, %f51;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -1229,7 +1229,7 @@ $L__BB0_21:
 	or.pred  	%p31, %p21, %p30;
 	@%p31 bra 	$L__BB0_24;
 
-	ld.global.nc.f32 	%f52, [%rd3+8];
+	ld.global.nc.f32 	%f52, [%rd3&#43;8];
 	add.f32 	%f60, %f60, %f52;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -1273,10 +1273,10 @@ $L__BB0_26:
 	.param .u32 resize_param_10
 )
 {
-	.reg .pred 	%p<33>;
-	.reg .f32 	%f<80>;
-	.reg .b32 	%r<49>;
-	.reg .b64 	%rd<11>;
+	.reg .pred 	%p&lt;33&gt;;
+	.reg .f32 	%f&lt;80&gt;;
+	.reg .b32 	%r&lt;49&gt;;
+	.reg .b64 	%rd&lt;11&gt;;
 
 
 	ld.param.u64 	%rd4, [resize_param_0];
@@ -1352,7 +1352,7 @@ $L__BB0_8:
 	or.pred  	%p12, %p8, %p10;
 	@%p12 bra 	$L__BB0_10;
 
-	ld.global.nc.f32 	%f47, [%rd2+4];
+	ld.global.nc.f32 	%f47, [%rd2&#43;4];
 	add.f32 	%f60, %f60, %f47;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -1362,7 +1362,7 @@ $L__BB0_10:
 	or.pred  	%p15, %p8, %p13;
 	@%p15 bra 	$L__BB0_12;
 
-	ld.global.nc.f32 	%f48, [%rd2+8];
+	ld.global.nc.f32 	%f48, [%rd2&#43;8];
 	add.f32 	%f60, %f60, %f48;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -1372,7 +1372,7 @@ $L__BB0_12:
 	or.pred  	%p18, %p8, %p16;
 	@%p18 bra 	$L__BB0_14;
 
-	ld.global.nc.f32 	%f49, [%rd2+12];
+	ld.global.nc.f32 	%f49, [%rd2&#43;12];
 	add.f32 	%f60, %f60, %f49;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -1408,7 +1408,7 @@ $L__BB0_18:
 	or.pred  	%p27, %p21, %p26;
 	@%p27 bra 	$L__BB0_21;
 
-	ld.global.nc.f32 	%f51, [%rd3+4];
+	ld.global.nc.f32 	%f51, [%rd3&#43;4];
 	add.f32 	%f60, %f60, %f51;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -1421,7 +1421,7 @@ $L__BB0_21:
 	or.pred  	%p31, %p21, %p30;
 	@%p31 bra 	$L__BB0_24;
 
-	ld.global.nc.f32 	%f52, [%rd3+8];
+	ld.global.nc.f32 	%f52, [%rd3&#43;8];
 	add.f32 	%f60, %f60, %f52;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -1465,10 +1465,10 @@ $L__BB0_26:
 	.param .u32 resize_param_10
 )
 {
-	.reg .pred 	%p<33>;
-	.reg .f32 	%f<80>;
-	.reg .b32 	%r<49>;
-	.reg .b64 	%rd<11>;
+	.reg .pred 	%p&lt;33&gt;;
+	.reg .f32 	%f&lt;80&gt;;
+	.reg .b32 	%r&lt;49&gt;;
+	.reg .b64 	%rd&lt;11&gt;;
 
 
 	ld.param.u64 	%rd4, [resize_param_0];
@@ -1544,7 +1544,7 @@ $L__BB0_8:
 	or.pred  	%p12, %p8, %p10;
 	@%p12 bra 	$L__BB0_10;
 
-	ld.global.nc.f32 	%f47, [%rd2+4];
+	ld.global.nc.f32 	%f47, [%rd2&#43;4];
 	add.f32 	%f60, %f60, %f47;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -1554,7 +1554,7 @@ $L__BB0_10:
 	or.pred  	%p15, %p8, %p13;
 	@%p15 bra 	$L__BB0_12;
 
-	ld.global.nc.f32 	%f48, [%rd2+8];
+	ld.global.nc.f32 	%f48, [%rd2&#43;8];
 	add.f32 	%f60, %f60, %f48;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -1564,7 +1564,7 @@ $L__BB0_12:
 	or.pred  	%p18, %p8, %p16;
 	@%p18 bra 	$L__BB0_14;
 
-	ld.global.nc.f32 	%f49, [%rd2+12];
+	ld.global.nc.f32 	%f49, [%rd2&#43;12];
 	add.f32 	%f60, %f60, %f49;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -1600,7 +1600,7 @@ $L__BB0_18:
 	or.pred  	%p27, %p21, %p26;
 	@%p27 bra 	$L__BB0_21;
 
-	ld.global.nc.f32 	%f51, [%rd3+4];
+	ld.global.nc.f32 	%f51, [%rd3&#43;4];
 	add.f32 	%f60, %f60, %f51;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -1613,7 +1613,7 @@ $L__BB0_21:
 	or.pred  	%p31, %p21, %p30;
 	@%p31 bra 	$L__BB0_24;
 
-	ld.global.nc.f32 	%f52, [%rd3+8];
+	ld.global.nc.f32 	%f52, [%rd3&#43;8];
 	add.f32 	%f60, %f60, %f52;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -1657,10 +1657,10 @@ $L__BB0_26:
 	.param .u32 resize_param_10
 )
 {
-	.reg .pred 	%p<33>;
-	.reg .f32 	%f<80>;
-	.reg .b32 	%r<49>;
-	.reg .b64 	%rd<11>;
+	.reg .pred 	%p&lt;33&gt;;
+	.reg .f32 	%f&lt;80&gt;;
+	.reg .b32 	%r&lt;49&gt;;
+	.reg .b64 	%rd&lt;11&gt;;
 
 
 	ld.param.u64 	%rd4, [resize_param_0];
@@ -1736,7 +1736,7 @@ $L__BB0_8:
 	or.pred  	%p12, %p8, %p10;
 	@%p12 bra 	$L__BB0_10;
 
-	ld.global.nc.f32 	%f47, [%rd2+4];
+	ld.global.nc.f32 	%f47, [%rd2&#43;4];
 	add.f32 	%f60, %f60, %f47;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -1746,7 +1746,7 @@ $L__BB0_10:
 	or.pred  	%p15, %p8, %p13;
 	@%p15 bra 	$L__BB0_12;
 
-	ld.global.nc.f32 	%f48, [%rd2+8];
+	ld.global.nc.f32 	%f48, [%rd2&#43;8];
 	add.f32 	%f60, %f60, %f48;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -1756,7 +1756,7 @@ $L__BB0_12:
 	or.pred  	%p18, %p8, %p16;
 	@%p18 bra 	$L__BB0_14;
 
-	ld.global.nc.f32 	%f49, [%rd2+12];
+	ld.global.nc.f32 	%f49, [%rd2&#43;12];
 	add.f32 	%f60, %f60, %f49;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -1792,7 +1792,7 @@ $L__BB0_18:
 	or.pred  	%p27, %p21, %p26;
 	@%p27 bra 	$L__BB0_21;
 
-	ld.global.nc.f32 	%f51, [%rd3+4];
+	ld.global.nc.f32 	%f51, [%rd3&#43;4];
 	add.f32 	%f60, %f60, %f51;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -1805,7 +1805,7 @@ $L__BB0_21:
 	or.pred  	%p31, %p21, %p30;
 	@%p31 bra 	$L__BB0_24;
 
-	ld.global.nc.f32 	%f52, [%rd3+8];
+	ld.global.nc.f32 	%f52, [%rd3&#43;8];
 	add.f32 	%f60, %f60, %f52;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -1849,10 +1849,10 @@ $L__BB0_26:
 	.param .u32 resize_param_10
 )
 {
-	.reg .pred 	%p<33>;
-	.reg .f32 	%f<80>;
-	.reg .b32 	%r<49>;
-	.reg .b64 	%rd<11>;
+	.reg .pred 	%p&lt;33&gt;;
+	.reg .f32 	%f&lt;80&gt;;
+	.reg .b32 	%r&lt;49&gt;;
+	.reg .b64 	%rd&lt;11&gt;;
 
 
 	ld.param.u64 	%rd4, [resize_param_0];
@@ -1928,7 +1928,7 @@ $L__BB0_8:
 	or.pred  	%p12, %p8, %p10;
 	@%p12 bra 	$L__BB0_10;
 
-	ld.global.nc.f32 	%f47, [%rd2+4];
+	ld.global.nc.f32 	%f47, [%rd2&#43;4];
 	add.f32 	%f60, %f60, %f47;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -1938,7 +1938,7 @@ $L__BB0_10:
 	or.pred  	%p15, %p8, %p13;
 	@%p15 bra 	$L__BB0_12;
 
-	ld.global.nc.f32 	%f48, [%rd2+8];
+	ld.global.nc.f32 	%f48, [%rd2&#43;8];
 	add.f32 	%f60, %f60, %f48;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -1948,7 +1948,7 @@ $L__BB0_12:
 	or.pred  	%p18, %p8, %p16;
 	@%p18 bra 	$L__BB0_14;
 
-	ld.global.nc.f32 	%f49, [%rd2+12];
+	ld.global.nc.f32 	%f49, [%rd2&#43;12];
 	add.f32 	%f60, %f60, %f49;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -1984,7 +1984,7 @@ $L__BB0_18:
 	or.pred  	%p27, %p21, %p26;
 	@%p27 bra 	$L__BB0_21;
 
-	ld.global.nc.f32 	%f51, [%rd3+4];
+	ld.global.nc.f32 	%f51, [%rd3&#43;4];
 	add.f32 	%f60, %f60, %f51;
 	add.f32 	%f61, %f61, 0f3F800000;
 
@@ -1997,7 +1997,7 @@ $L__BB0_21:
 	or.pred  	%p31, %p21, %p30;
 	@%p31 bra 	$L__BB0_24;
 
-	ld.global.nc.f32 	%f52, [%rd3+8];
+	ld.global.nc.f32 	%f52, [%rd3&#43;8];
 	add.f32 	%f60, %f60, %f52;
 	add.f32 	%f61, %f61, 0f3F800000;
 

@@ -159,11 +159,11 @@ const (
 	.local .align 8 .b8 	__local_depot0[8];
 	.reg .b64 	%SP;
 	.reg .b64 	%SPL;
-	.reg .pred 	%p<26>;
-	.reg .f32 	%f<51>;
-	.reg .b32 	%r<111>;
-	.reg .f64 	%fd<2>;
-	.reg .b64 	%rd<85>;
+	.reg .pred 	%p&lt;26&gt;;
+	.reg .f32 	%f&lt;51&gt;;
+	.reg .b32 	%r&lt;111&gt;;
+	.reg .f64 	%fd&lt;2&gt;;
+	.reg .b64 	%rd&lt;85&gt;;
 
 
 	mov.u64 	%SPL, __local_depot0;
@@ -297,12 +297,12 @@ $L__BB0_9:
 	mul.wide.u32 	%rd42, %r58, 4;
 	add.s64 	%rd43, %rd3, %rd42;
 	st.global.u32 	[%rd43], %r57;
-	ld.global.u32 	%r59, [%rd5+4];
+	ld.global.u32 	%r59, [%rd5&#43;4];
 	add.s32 	%r60, %r58, 1;
 	mul.wide.u32 	%rd44, %r60, 4;
 	add.s64 	%rd45, %rd3, %rd44;
 	st.global.u32 	[%rd45], %r59;
-	ld.global.u32 	%r61, [%rd5+8];
+	ld.global.u32 	%r61, [%rd5&#43;8];
 	add.s32 	%r62, %r58, 2;
 	mul.wide.u32 	%rd46, %r62, 4;
 	add.s64 	%rd47, %rd3, %rd46;
@@ -341,8 +341,8 @@ $L__BB0_14:
 	mul.wide.s32 	%rd51, %r72, 4;
 	add.s64 	%rd52, %rd3, %rd51;
 	ld.global.u32 	%r104, [%rd52];
-	ld.global.u32 	%r105, [%rd52+4];
-	ld.global.u32 	%r106, [%rd52+8];
+	ld.global.u32 	%r105, [%rd52&#43;4];
+	ld.global.u32 	%r106, [%rd52&#43;8];
 	mov.f32 	%f44, %f8;
 
 $L__BB0_16:
@@ -407,9 +407,9 @@ $L__BB0_22:
 	{ // callseq 0, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd64;
+	st.param.b64 	[param0&#43;0], %rd64;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -417,7 +417,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r79, [retval0+0];
+	ld.param.b32 	%r79, [retval0&#43;0];
 	} // callseq 0
 	st.local.u32 	[%rd62], %r38;
 	mov.u64 	%rd65, $str$1;
@@ -425,9 +425,9 @@ $L__BB0_22:
 	{ // callseq 1, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd66;
+	st.param.b64 	[param0&#43;0], %rd66;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -435,7 +435,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r80, [retval0+0];
+	ld.param.b32 	%r80, [retval0&#43;0];
 	} // callseq 1
 	st.local.u32 	[%rd62], %r39;
 	mov.u64 	%rd67, $str$2;
@@ -443,9 +443,9 @@ $L__BB0_22:
 	{ // callseq 2, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd68;
+	st.param.b64 	[param0&#43;0], %rd68;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -453,7 +453,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r81, [retval0+0];
+	ld.param.b32 	%r81, [retval0&#43;0];
 	} // callseq 2
 	ld.global.f32 	%f35, [%rd6];
 	cvt.f64.f32 	%fd1, %f35;
@@ -463,9 +463,9 @@ $L__BB0_22:
 	{ // callseq 3, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd70;
+	st.param.b64 	[param0&#43;0], %rd70;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -473,7 +473,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r82, [retval0+0];
+	ld.param.b32 	%r82, [retval0&#43;0];
 	} // callseq 3
 	ld.global.u32 	%r34, [%rd5];
 	cvta.to.global.u64 	%rd71, %rd13;
@@ -484,9 +484,9 @@ $L__BB0_22:
 	{ // callseq 4, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd73;
+	st.param.b64 	[param0&#43;0], %rd73;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -494,18 +494,18 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r83, [retval0+0];
+	ld.param.b32 	%r83, [retval0&#43;0];
 	} // callseq 4
-	ld.global.u32 	%r35, [%rd5+4];
+	ld.global.u32 	%r35, [%rd5&#43;4];
 	cvta.to.global.u64 	%rd74, %rd14;
 	st.global.u32 	[%rd74], %r35;
 	st.local.u32 	[%rd62], %r35;
 	{ // callseq 5, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd73;
+	st.param.b64 	[param0&#43;0], %rd73;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -513,18 +513,18 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r84, [retval0+0];
+	ld.param.b32 	%r84, [retval0&#43;0];
 	} // callseq 5
-	ld.global.u32 	%r36, [%rd5+8];
+	ld.global.u32 	%r36, [%rd5&#43;8];
 	cvta.to.global.u64 	%rd75, %rd15;
 	st.global.u32 	[%rd75], %r36;
 	st.local.u32 	[%rd62], %r36;
 	{ // callseq 6, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd73;
+	st.param.b64 	[param0&#43;0], %rd73;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -532,7 +532,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r85, [retval0+0];
+	ld.param.b32 	%r85, [retval0&#43;0];
 	} // callseq 6
 	cvta.to.global.u64 	%rd76, %rd18;
 	st.global.f32 	[%rd76], %f35;
@@ -554,7 +554,7 @@ $L__BB0_25:
 	setp.lt.s32 	%p22, %r34, -1;
 	@%p22 bra 	$L__BB0_27;
 
-	ld.global.nc.f32 	%f49, [%rd11+8];
+	ld.global.nc.f32 	%f49, [%rd11&#43;8];
 
 $L__BB0_27:
 	cvta.to.global.u64 	%rd79, %rd17;
@@ -636,11 +636,11 @@ $L__BB0_32:
 	.local .align 8 .b8 	__local_depot0[8];
 	.reg .b64 	%SP;
 	.reg .b64 	%SPL;
-	.reg .pred 	%p<26>;
-	.reg .f32 	%f<51>;
-	.reg .b32 	%r<111>;
-	.reg .f64 	%fd<2>;
-	.reg .b64 	%rd<85>;
+	.reg .pred 	%p&lt;26&gt;;
+	.reg .f32 	%f&lt;51&gt;;
+	.reg .b32 	%r&lt;111&gt;;
+	.reg .f64 	%fd&lt;2&gt;;
+	.reg .b64 	%rd&lt;85&gt;;
 
 
 	mov.u64 	%SPL, __local_depot0;
@@ -774,12 +774,12 @@ $L__BB0_9:
 	mul.wide.u32 	%rd42, %r58, 4;
 	add.s64 	%rd43, %rd3, %rd42;
 	st.global.u32 	[%rd43], %r57;
-	ld.global.u32 	%r59, [%rd5+4];
+	ld.global.u32 	%r59, [%rd5&#43;4];
 	add.s32 	%r60, %r58, 1;
 	mul.wide.u32 	%rd44, %r60, 4;
 	add.s64 	%rd45, %rd3, %rd44;
 	st.global.u32 	[%rd45], %r59;
-	ld.global.u32 	%r61, [%rd5+8];
+	ld.global.u32 	%r61, [%rd5&#43;8];
 	add.s32 	%r62, %r58, 2;
 	mul.wide.u32 	%rd46, %r62, 4;
 	add.s64 	%rd47, %rd3, %rd46;
@@ -818,8 +818,8 @@ $L__BB0_14:
 	mul.wide.s32 	%rd51, %r72, 4;
 	add.s64 	%rd52, %rd3, %rd51;
 	ld.global.u32 	%r104, [%rd52];
-	ld.global.u32 	%r105, [%rd52+4];
-	ld.global.u32 	%r106, [%rd52+8];
+	ld.global.u32 	%r105, [%rd52&#43;4];
+	ld.global.u32 	%r106, [%rd52&#43;8];
 	mov.f32 	%f44, %f8;
 
 $L__BB0_16:
@@ -884,9 +884,9 @@ $L__BB0_22:
 	{ // callseq 0, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd64;
+	st.param.b64 	[param0&#43;0], %rd64;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -894,7 +894,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r79, [retval0+0];
+	ld.param.b32 	%r79, [retval0&#43;0];
 	} // callseq 0
 	st.local.u32 	[%rd62], %r38;
 	mov.u64 	%rd65, $str$1;
@@ -902,9 +902,9 @@ $L__BB0_22:
 	{ // callseq 1, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd66;
+	st.param.b64 	[param0&#43;0], %rd66;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -912,7 +912,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r80, [retval0+0];
+	ld.param.b32 	%r80, [retval0&#43;0];
 	} // callseq 1
 	st.local.u32 	[%rd62], %r39;
 	mov.u64 	%rd67, $str$2;
@@ -920,9 +920,9 @@ $L__BB0_22:
 	{ // callseq 2, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd68;
+	st.param.b64 	[param0&#43;0], %rd68;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -930,7 +930,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r81, [retval0+0];
+	ld.param.b32 	%r81, [retval0&#43;0];
 	} // callseq 2
 	ld.global.f32 	%f35, [%rd6];
 	cvt.f64.f32 	%fd1, %f35;
@@ -940,9 +940,9 @@ $L__BB0_22:
 	{ // callseq 3, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd70;
+	st.param.b64 	[param0&#43;0], %rd70;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -950,7 +950,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r82, [retval0+0];
+	ld.param.b32 	%r82, [retval0&#43;0];
 	} // callseq 3
 	ld.global.u32 	%r34, [%rd5];
 	cvta.to.global.u64 	%rd71, %rd13;
@@ -961,9 +961,9 @@ $L__BB0_22:
 	{ // callseq 4, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd73;
+	st.param.b64 	[param0&#43;0], %rd73;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -971,18 +971,18 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r83, [retval0+0];
+	ld.param.b32 	%r83, [retval0&#43;0];
 	} // callseq 4
-	ld.global.u32 	%r35, [%rd5+4];
+	ld.global.u32 	%r35, [%rd5&#43;4];
 	cvta.to.global.u64 	%rd74, %rd14;
 	st.global.u32 	[%rd74], %r35;
 	st.local.u32 	[%rd62], %r35;
 	{ // callseq 5, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd73;
+	st.param.b64 	[param0&#43;0], %rd73;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -990,18 +990,18 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r84, [retval0+0];
+	ld.param.b32 	%r84, [retval0&#43;0];
 	} // callseq 5
-	ld.global.u32 	%r36, [%rd5+8];
+	ld.global.u32 	%r36, [%rd5&#43;8];
 	cvta.to.global.u64 	%rd75, %rd15;
 	st.global.u32 	[%rd75], %r36;
 	st.local.u32 	[%rd62], %r36;
 	{ // callseq 6, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd73;
+	st.param.b64 	[param0&#43;0], %rd73;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -1009,7 +1009,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r85, [retval0+0];
+	ld.param.b32 	%r85, [retval0&#43;0];
 	} // callseq 6
 	cvta.to.global.u64 	%rd76, %rd18;
 	st.global.f32 	[%rd76], %f35;
@@ -1031,7 +1031,7 @@ $L__BB0_25:
 	setp.lt.s32 	%p22, %r34, -1;
 	@%p22 bra 	$L__BB0_27;
 
-	ld.global.nc.f32 	%f49, [%rd11+8];
+	ld.global.nc.f32 	%f49, [%rd11&#43;8];
 
 $L__BB0_27:
 	cvta.to.global.u64 	%rd79, %rd17;
@@ -1113,11 +1113,11 @@ $L__BB0_32:
 	.local .align 8 .b8 	__local_depot0[8];
 	.reg .b64 	%SP;
 	.reg .b64 	%SPL;
-	.reg .pred 	%p<26>;
-	.reg .f32 	%f<51>;
-	.reg .b32 	%r<111>;
-	.reg .f64 	%fd<2>;
-	.reg .b64 	%rd<85>;
+	.reg .pred 	%p&lt;26&gt;;
+	.reg .f32 	%f&lt;51&gt;;
+	.reg .b32 	%r&lt;111&gt;;
+	.reg .f64 	%fd&lt;2&gt;;
+	.reg .b64 	%rd&lt;85&gt;;
 
 
 	mov.u64 	%SPL, __local_depot0;
@@ -1251,12 +1251,12 @@ $L__BB0_9:
 	mul.wide.u32 	%rd42, %r58, 4;
 	add.s64 	%rd43, %rd3, %rd42;
 	st.global.u32 	[%rd43], %r57;
-	ld.global.u32 	%r59, [%rd5+4];
+	ld.global.u32 	%r59, [%rd5&#43;4];
 	add.s32 	%r60, %r58, 1;
 	mul.wide.u32 	%rd44, %r60, 4;
 	add.s64 	%rd45, %rd3, %rd44;
 	st.global.u32 	[%rd45], %r59;
-	ld.global.u32 	%r61, [%rd5+8];
+	ld.global.u32 	%r61, [%rd5&#43;8];
 	add.s32 	%r62, %r58, 2;
 	mul.wide.u32 	%rd46, %r62, 4;
 	add.s64 	%rd47, %rd3, %rd46;
@@ -1295,8 +1295,8 @@ $L__BB0_14:
 	mul.wide.s32 	%rd51, %r72, 4;
 	add.s64 	%rd52, %rd3, %rd51;
 	ld.global.u32 	%r104, [%rd52];
-	ld.global.u32 	%r105, [%rd52+4];
-	ld.global.u32 	%r106, [%rd52+8];
+	ld.global.u32 	%r105, [%rd52&#43;4];
+	ld.global.u32 	%r106, [%rd52&#43;8];
 	mov.f32 	%f44, %f8;
 
 $L__BB0_16:
@@ -1361,9 +1361,9 @@ $L__BB0_22:
 	{ // callseq 0, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd64;
+	st.param.b64 	[param0&#43;0], %rd64;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -1371,7 +1371,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r79, [retval0+0];
+	ld.param.b32 	%r79, [retval0&#43;0];
 	} // callseq 0
 	st.local.u32 	[%rd62], %r38;
 	mov.u64 	%rd65, $str$1;
@@ -1379,9 +1379,9 @@ $L__BB0_22:
 	{ // callseq 1, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd66;
+	st.param.b64 	[param0&#43;0], %rd66;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -1389,7 +1389,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r80, [retval0+0];
+	ld.param.b32 	%r80, [retval0&#43;0];
 	} // callseq 1
 	st.local.u32 	[%rd62], %r39;
 	mov.u64 	%rd67, $str$2;
@@ -1397,9 +1397,9 @@ $L__BB0_22:
 	{ // callseq 2, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd68;
+	st.param.b64 	[param0&#43;0], %rd68;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -1407,7 +1407,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r81, [retval0+0];
+	ld.param.b32 	%r81, [retval0&#43;0];
 	} // callseq 2
 	ld.global.f32 	%f35, [%rd6];
 	cvt.f64.f32 	%fd1, %f35;
@@ -1417,9 +1417,9 @@ $L__BB0_22:
 	{ // callseq 3, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd70;
+	st.param.b64 	[param0&#43;0], %rd70;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -1427,7 +1427,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r82, [retval0+0];
+	ld.param.b32 	%r82, [retval0&#43;0];
 	} // callseq 3
 	ld.global.u32 	%r34, [%rd5];
 	cvta.to.global.u64 	%rd71, %rd13;
@@ -1438,9 +1438,9 @@ $L__BB0_22:
 	{ // callseq 4, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd73;
+	st.param.b64 	[param0&#43;0], %rd73;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -1448,18 +1448,18 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r83, [retval0+0];
+	ld.param.b32 	%r83, [retval0&#43;0];
 	} // callseq 4
-	ld.global.u32 	%r35, [%rd5+4];
+	ld.global.u32 	%r35, [%rd5&#43;4];
 	cvta.to.global.u64 	%rd74, %rd14;
 	st.global.u32 	[%rd74], %r35;
 	st.local.u32 	[%rd62], %r35;
 	{ // callseq 5, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd73;
+	st.param.b64 	[param0&#43;0], %rd73;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -1467,18 +1467,18 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r84, [retval0+0];
+	ld.param.b32 	%r84, [retval0&#43;0];
 	} // callseq 5
-	ld.global.u32 	%r36, [%rd5+8];
+	ld.global.u32 	%r36, [%rd5&#43;8];
 	cvta.to.global.u64 	%rd75, %rd15;
 	st.global.u32 	[%rd75], %r36;
 	st.local.u32 	[%rd62], %r36;
 	{ // callseq 6, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd73;
+	st.param.b64 	[param0&#43;0], %rd73;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -1486,7 +1486,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r85, [retval0+0];
+	ld.param.b32 	%r85, [retval0&#43;0];
 	} // callseq 6
 	cvta.to.global.u64 	%rd76, %rd18;
 	st.global.f32 	[%rd76], %f35;
@@ -1508,7 +1508,7 @@ $L__BB0_25:
 	setp.lt.s32 	%p22, %r34, -1;
 	@%p22 bra 	$L__BB0_27;
 
-	ld.global.nc.f32 	%f49, [%rd11+8];
+	ld.global.nc.f32 	%f49, [%rd11&#43;8];
 
 $L__BB0_27:
 	cvta.to.global.u64 	%rd79, %rd17;
@@ -1590,11 +1590,11 @@ $L__BB0_32:
 	.local .align 8 .b8 	__local_depot0[8];
 	.reg .b64 	%SP;
 	.reg .b64 	%SPL;
-	.reg .pred 	%p<26>;
-	.reg .f32 	%f<51>;
-	.reg .b32 	%r<111>;
-	.reg .f64 	%fd<2>;
-	.reg .b64 	%rd<85>;
+	.reg .pred 	%p&lt;26&gt;;
+	.reg .f32 	%f&lt;51&gt;;
+	.reg .b32 	%r&lt;111&gt;;
+	.reg .f64 	%fd&lt;2&gt;;
+	.reg .b64 	%rd&lt;85&gt;;
 
 
 	mov.u64 	%SPL, __local_depot0;
@@ -1728,12 +1728,12 @@ $L__BB0_9:
 	mul.wide.u32 	%rd42, %r58, 4;
 	add.s64 	%rd43, %rd3, %rd42;
 	st.global.u32 	[%rd43], %r57;
-	ld.global.u32 	%r59, [%rd5+4];
+	ld.global.u32 	%r59, [%rd5&#43;4];
 	add.s32 	%r60, %r58, 1;
 	mul.wide.u32 	%rd44, %r60, 4;
 	add.s64 	%rd45, %rd3, %rd44;
 	st.global.u32 	[%rd45], %r59;
-	ld.global.u32 	%r61, [%rd5+8];
+	ld.global.u32 	%r61, [%rd5&#43;8];
 	add.s32 	%r62, %r58, 2;
 	mul.wide.u32 	%rd46, %r62, 4;
 	add.s64 	%rd47, %rd3, %rd46;
@@ -1772,8 +1772,8 @@ $L__BB0_14:
 	mul.wide.s32 	%rd51, %r72, 4;
 	add.s64 	%rd52, %rd3, %rd51;
 	ld.global.u32 	%r104, [%rd52];
-	ld.global.u32 	%r105, [%rd52+4];
-	ld.global.u32 	%r106, [%rd52+8];
+	ld.global.u32 	%r105, [%rd52&#43;4];
+	ld.global.u32 	%r106, [%rd52&#43;8];
 	mov.f32 	%f44, %f8;
 
 $L__BB0_16:
@@ -1838,9 +1838,9 @@ $L__BB0_22:
 	{ // callseq 0, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd64;
+	st.param.b64 	[param0&#43;0], %rd64;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -1848,7 +1848,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r79, [retval0+0];
+	ld.param.b32 	%r79, [retval0&#43;0];
 	} // callseq 0
 	st.local.u32 	[%rd62], %r38;
 	mov.u64 	%rd65, $str$1;
@@ -1856,9 +1856,9 @@ $L__BB0_22:
 	{ // callseq 1, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd66;
+	st.param.b64 	[param0&#43;0], %rd66;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -1866,7 +1866,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r80, [retval0+0];
+	ld.param.b32 	%r80, [retval0&#43;0];
 	} // callseq 1
 	st.local.u32 	[%rd62], %r39;
 	mov.u64 	%rd67, $str$2;
@@ -1874,9 +1874,9 @@ $L__BB0_22:
 	{ // callseq 2, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd68;
+	st.param.b64 	[param0&#43;0], %rd68;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -1884,7 +1884,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r81, [retval0+0];
+	ld.param.b32 	%r81, [retval0&#43;0];
 	} // callseq 2
 	ld.global.f32 	%f35, [%rd6];
 	cvt.f64.f32 	%fd1, %f35;
@@ -1894,9 +1894,9 @@ $L__BB0_22:
 	{ // callseq 3, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd70;
+	st.param.b64 	[param0&#43;0], %rd70;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -1904,7 +1904,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r82, [retval0+0];
+	ld.param.b32 	%r82, [retval0&#43;0];
 	} // callseq 3
 	ld.global.u32 	%r34, [%rd5];
 	cvta.to.global.u64 	%rd71, %rd13;
@@ -1915,9 +1915,9 @@ $L__BB0_22:
 	{ // callseq 4, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd73;
+	st.param.b64 	[param0&#43;0], %rd73;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -1925,18 +1925,18 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r83, [retval0+0];
+	ld.param.b32 	%r83, [retval0&#43;0];
 	} // callseq 4
-	ld.global.u32 	%r35, [%rd5+4];
+	ld.global.u32 	%r35, [%rd5&#43;4];
 	cvta.to.global.u64 	%rd74, %rd14;
 	st.global.u32 	[%rd74], %r35;
 	st.local.u32 	[%rd62], %r35;
 	{ // callseq 5, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd73;
+	st.param.b64 	[param0&#43;0], %rd73;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -1944,18 +1944,18 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r84, [retval0+0];
+	ld.param.b32 	%r84, [retval0&#43;0];
 	} // callseq 5
-	ld.global.u32 	%r36, [%rd5+8];
+	ld.global.u32 	%r36, [%rd5&#43;8];
 	cvta.to.global.u64 	%rd75, %rd15;
 	st.global.u32 	[%rd75], %r36;
 	st.local.u32 	[%rd62], %r36;
 	{ // callseq 6, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd73;
+	st.param.b64 	[param0&#43;0], %rd73;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -1963,7 +1963,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r85, [retval0+0];
+	ld.param.b32 	%r85, [retval0&#43;0];
 	} // callseq 6
 	cvta.to.global.u64 	%rd76, %rd18;
 	st.global.f32 	[%rd76], %f35;
@@ -1985,7 +1985,7 @@ $L__BB0_25:
 	setp.lt.s32 	%p22, %r34, -1;
 	@%p22 bra 	$L__BB0_27;
 
-	ld.global.nc.f32 	%f49, [%rd11+8];
+	ld.global.nc.f32 	%f49, [%rd11&#43;8];
 
 $L__BB0_27:
 	cvta.to.global.u64 	%rd79, %rd17;
@@ -2067,11 +2067,11 @@ $L__BB0_32:
 	.local .align 8 .b8 	__local_depot0[8];
 	.reg .b64 	%SP;
 	.reg .b64 	%SPL;
-	.reg .pred 	%p<26>;
-	.reg .f32 	%f<51>;
-	.reg .b32 	%r<111>;
-	.reg .f64 	%fd<2>;
-	.reg .b64 	%rd<85>;
+	.reg .pred 	%p&lt;26&gt;;
+	.reg .f32 	%f&lt;51&gt;;
+	.reg .b32 	%r&lt;111&gt;;
+	.reg .f64 	%fd&lt;2&gt;;
+	.reg .b64 	%rd&lt;85&gt;;
 
 
 	mov.u64 	%SPL, __local_depot0;
@@ -2205,12 +2205,12 @@ $L__BB0_9:
 	mul.wide.u32 	%rd42, %r58, 4;
 	add.s64 	%rd43, %rd3, %rd42;
 	st.global.u32 	[%rd43], %r57;
-	ld.global.u32 	%r59, [%rd5+4];
+	ld.global.u32 	%r59, [%rd5&#43;4];
 	add.s32 	%r60, %r58, 1;
 	mul.wide.u32 	%rd44, %r60, 4;
 	add.s64 	%rd45, %rd3, %rd44;
 	st.global.u32 	[%rd45], %r59;
-	ld.global.u32 	%r61, [%rd5+8];
+	ld.global.u32 	%r61, [%rd5&#43;8];
 	add.s32 	%r62, %r58, 2;
 	mul.wide.u32 	%rd46, %r62, 4;
 	add.s64 	%rd47, %rd3, %rd46;
@@ -2249,8 +2249,8 @@ $L__BB0_14:
 	mul.wide.s32 	%rd51, %r72, 4;
 	add.s64 	%rd52, %rd3, %rd51;
 	ld.global.u32 	%r104, [%rd52];
-	ld.global.u32 	%r105, [%rd52+4];
-	ld.global.u32 	%r106, [%rd52+8];
+	ld.global.u32 	%r105, [%rd52&#43;4];
+	ld.global.u32 	%r106, [%rd52&#43;8];
 	mov.f32 	%f44, %f8;
 
 $L__BB0_16:
@@ -2315,9 +2315,9 @@ $L__BB0_22:
 	{ // callseq 0, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd64;
+	st.param.b64 	[param0&#43;0], %rd64;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -2325,7 +2325,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r79, [retval0+0];
+	ld.param.b32 	%r79, [retval0&#43;0];
 	} // callseq 0
 	st.local.u32 	[%rd62], %r38;
 	mov.u64 	%rd65, $str$1;
@@ -2333,9 +2333,9 @@ $L__BB0_22:
 	{ // callseq 1, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd66;
+	st.param.b64 	[param0&#43;0], %rd66;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -2343,7 +2343,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r80, [retval0+0];
+	ld.param.b32 	%r80, [retval0&#43;0];
 	} // callseq 1
 	st.local.u32 	[%rd62], %r39;
 	mov.u64 	%rd67, $str$2;
@@ -2351,9 +2351,9 @@ $L__BB0_22:
 	{ // callseq 2, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd68;
+	st.param.b64 	[param0&#43;0], %rd68;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -2361,7 +2361,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r81, [retval0+0];
+	ld.param.b32 	%r81, [retval0&#43;0];
 	} // callseq 2
 	ld.global.f32 	%f35, [%rd6];
 	cvt.f64.f32 	%fd1, %f35;
@@ -2371,9 +2371,9 @@ $L__BB0_22:
 	{ // callseq 3, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd70;
+	st.param.b64 	[param0&#43;0], %rd70;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -2381,7 +2381,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r82, [retval0+0];
+	ld.param.b32 	%r82, [retval0&#43;0];
 	} // callseq 3
 	ld.global.u32 	%r34, [%rd5];
 	cvta.to.global.u64 	%rd71, %rd13;
@@ -2392,9 +2392,9 @@ $L__BB0_22:
 	{ // callseq 4, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd73;
+	st.param.b64 	[param0&#43;0], %rd73;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -2402,18 +2402,18 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r83, [retval0+0];
+	ld.param.b32 	%r83, [retval0&#43;0];
 	} // callseq 4
-	ld.global.u32 	%r35, [%rd5+4];
+	ld.global.u32 	%r35, [%rd5&#43;4];
 	cvta.to.global.u64 	%rd74, %rd14;
 	st.global.u32 	[%rd74], %r35;
 	st.local.u32 	[%rd62], %r35;
 	{ // callseq 5, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd73;
+	st.param.b64 	[param0&#43;0], %rd73;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -2421,18 +2421,18 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r84, [retval0+0];
+	ld.param.b32 	%r84, [retval0&#43;0];
 	} // callseq 5
-	ld.global.u32 	%r36, [%rd5+8];
+	ld.global.u32 	%r36, [%rd5&#43;8];
 	cvta.to.global.u64 	%rd75, %rd15;
 	st.global.u32 	[%rd75], %r36;
 	st.local.u32 	[%rd62], %r36;
 	{ // callseq 6, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd73;
+	st.param.b64 	[param0&#43;0], %rd73;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -2440,7 +2440,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r85, [retval0+0];
+	ld.param.b32 	%r85, [retval0&#43;0];
 	} // callseq 6
 	cvta.to.global.u64 	%rd76, %rd18;
 	st.global.f32 	[%rd76], %f35;
@@ -2462,7 +2462,7 @@ $L__BB0_25:
 	setp.lt.s32 	%p22, %r34, -1;
 	@%p22 bra 	$L__BB0_27;
 
-	ld.global.nc.f32 	%f49, [%rd11+8];
+	ld.global.nc.f32 	%f49, [%rd11&#43;8];
 
 $L__BB0_27:
 	cvta.to.global.u64 	%rd79, %rd17;
@@ -2544,11 +2544,11 @@ $L__BB0_32:
 	.local .align 8 .b8 	__local_depot0[8];
 	.reg .b64 	%SP;
 	.reg .b64 	%SPL;
-	.reg .pred 	%p<26>;
-	.reg .f32 	%f<51>;
-	.reg .b32 	%r<111>;
-	.reg .f64 	%fd<2>;
-	.reg .b64 	%rd<85>;
+	.reg .pred 	%p&lt;26&gt;;
+	.reg .f32 	%f&lt;51&gt;;
+	.reg .b32 	%r&lt;111&gt;;
+	.reg .f64 	%fd&lt;2&gt;;
+	.reg .b64 	%rd&lt;85&gt;;
 
 
 	mov.u64 	%SPL, __local_depot0;
@@ -2682,12 +2682,12 @@ $L__BB0_9:
 	mul.wide.u32 	%rd42, %r58, 4;
 	add.s64 	%rd43, %rd3, %rd42;
 	st.global.u32 	[%rd43], %r57;
-	ld.global.u32 	%r59, [%rd5+4];
+	ld.global.u32 	%r59, [%rd5&#43;4];
 	add.s32 	%r60, %r58, 1;
 	mul.wide.u32 	%rd44, %r60, 4;
 	add.s64 	%rd45, %rd3, %rd44;
 	st.global.u32 	[%rd45], %r59;
-	ld.global.u32 	%r61, [%rd5+8];
+	ld.global.u32 	%r61, [%rd5&#43;8];
 	add.s32 	%r62, %r58, 2;
 	mul.wide.u32 	%rd46, %r62, 4;
 	add.s64 	%rd47, %rd3, %rd46;
@@ -2726,8 +2726,8 @@ $L__BB0_14:
 	mul.wide.s32 	%rd51, %r72, 4;
 	add.s64 	%rd52, %rd3, %rd51;
 	ld.global.u32 	%r104, [%rd52];
-	ld.global.u32 	%r105, [%rd52+4];
-	ld.global.u32 	%r106, [%rd52+8];
+	ld.global.u32 	%r105, [%rd52&#43;4];
+	ld.global.u32 	%r106, [%rd52&#43;8];
 	mov.f32 	%f44, %f8;
 
 $L__BB0_16:
@@ -2792,9 +2792,9 @@ $L__BB0_22:
 	{ // callseq 0, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd64;
+	st.param.b64 	[param0&#43;0], %rd64;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -2802,7 +2802,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r79, [retval0+0];
+	ld.param.b32 	%r79, [retval0&#43;0];
 	} // callseq 0
 	st.local.u32 	[%rd62], %r38;
 	mov.u64 	%rd65, $str$1;
@@ -2810,9 +2810,9 @@ $L__BB0_22:
 	{ // callseq 1, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd66;
+	st.param.b64 	[param0&#43;0], %rd66;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -2820,7 +2820,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r80, [retval0+0];
+	ld.param.b32 	%r80, [retval0&#43;0];
 	} // callseq 1
 	st.local.u32 	[%rd62], %r39;
 	mov.u64 	%rd67, $str$2;
@@ -2828,9 +2828,9 @@ $L__BB0_22:
 	{ // callseq 2, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd68;
+	st.param.b64 	[param0&#43;0], %rd68;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -2838,7 +2838,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r81, [retval0+0];
+	ld.param.b32 	%r81, [retval0&#43;0];
 	} // callseq 2
 	ld.global.f32 	%f35, [%rd6];
 	cvt.f64.f32 	%fd1, %f35;
@@ -2848,9 +2848,9 @@ $L__BB0_22:
 	{ // callseq 3, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd70;
+	st.param.b64 	[param0&#43;0], %rd70;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -2858,7 +2858,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r82, [retval0+0];
+	ld.param.b32 	%r82, [retval0&#43;0];
 	} // callseq 3
 	ld.global.u32 	%r34, [%rd5];
 	cvta.to.global.u64 	%rd71, %rd13;
@@ -2869,9 +2869,9 @@ $L__BB0_22:
 	{ // callseq 4, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd73;
+	st.param.b64 	[param0&#43;0], %rd73;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -2879,18 +2879,18 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r83, [retval0+0];
+	ld.param.b32 	%r83, [retval0&#43;0];
 	} // callseq 4
-	ld.global.u32 	%r35, [%rd5+4];
+	ld.global.u32 	%r35, [%rd5&#43;4];
 	cvta.to.global.u64 	%rd74, %rd14;
 	st.global.u32 	[%rd74], %r35;
 	st.local.u32 	[%rd62], %r35;
 	{ // callseq 5, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd73;
+	st.param.b64 	[param0&#43;0], %rd73;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -2898,18 +2898,18 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r84, [retval0+0];
+	ld.param.b32 	%r84, [retval0&#43;0];
 	} // callseq 5
-	ld.global.u32 	%r36, [%rd5+8];
+	ld.global.u32 	%r36, [%rd5&#43;8];
 	cvta.to.global.u64 	%rd75, %rd15;
 	st.global.u32 	[%rd75], %r36;
 	st.local.u32 	[%rd62], %r36;
 	{ // callseq 6, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd73;
+	st.param.b64 	[param0&#43;0], %rd73;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -2917,7 +2917,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r85, [retval0+0];
+	ld.param.b32 	%r85, [retval0&#43;0];
 	} // callseq 6
 	cvta.to.global.u64 	%rd76, %rd18;
 	st.global.f32 	[%rd76], %f35;
@@ -2939,7 +2939,7 @@ $L__BB0_25:
 	setp.lt.s32 	%p22, %r34, -1;
 	@%p22 bra 	$L__BB0_27;
 
-	ld.global.nc.f32 	%f49, [%rd11+8];
+	ld.global.nc.f32 	%f49, [%rd11&#43;8];
 
 $L__BB0_27:
 	cvta.to.global.u64 	%rd79, %rd17;
@@ -3021,11 +3021,11 @@ $L__BB0_32:
 	.local .align 8 .b8 	__local_depot0[8];
 	.reg .b64 	%SP;
 	.reg .b64 	%SPL;
-	.reg .pred 	%p<26>;
-	.reg .f32 	%f<51>;
-	.reg .b32 	%r<111>;
-	.reg .f64 	%fd<2>;
-	.reg .b64 	%rd<85>;
+	.reg .pred 	%p&lt;26&gt;;
+	.reg .f32 	%f&lt;51&gt;;
+	.reg .b32 	%r&lt;111&gt;;
+	.reg .f64 	%fd&lt;2&gt;;
+	.reg .b64 	%rd&lt;85&gt;;
 
 
 	mov.u64 	%SPL, __local_depot0;
@@ -3159,12 +3159,12 @@ $L__BB0_9:
 	mul.wide.u32 	%rd42, %r58, 4;
 	add.s64 	%rd43, %rd3, %rd42;
 	st.global.u32 	[%rd43], %r57;
-	ld.global.u32 	%r59, [%rd5+4];
+	ld.global.u32 	%r59, [%rd5&#43;4];
 	add.s32 	%r60, %r58, 1;
 	mul.wide.u32 	%rd44, %r60, 4;
 	add.s64 	%rd45, %rd3, %rd44;
 	st.global.u32 	[%rd45], %r59;
-	ld.global.u32 	%r61, [%rd5+8];
+	ld.global.u32 	%r61, [%rd5&#43;8];
 	add.s32 	%r62, %r58, 2;
 	mul.wide.u32 	%rd46, %r62, 4;
 	add.s64 	%rd47, %rd3, %rd46;
@@ -3203,8 +3203,8 @@ $L__BB0_14:
 	mul.wide.s32 	%rd51, %r72, 4;
 	add.s64 	%rd52, %rd3, %rd51;
 	ld.global.u32 	%r104, [%rd52];
-	ld.global.u32 	%r105, [%rd52+4];
-	ld.global.u32 	%r106, [%rd52+8];
+	ld.global.u32 	%r105, [%rd52&#43;4];
+	ld.global.u32 	%r106, [%rd52&#43;8];
 	mov.f32 	%f44, %f8;
 
 $L__BB0_16:
@@ -3269,9 +3269,9 @@ $L__BB0_22:
 	{ // callseq 0, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd64;
+	st.param.b64 	[param0&#43;0], %rd64;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -3279,7 +3279,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r79, [retval0+0];
+	ld.param.b32 	%r79, [retval0&#43;0];
 	} // callseq 0
 	st.local.u32 	[%rd62], %r38;
 	mov.u64 	%rd65, $str$1;
@@ -3287,9 +3287,9 @@ $L__BB0_22:
 	{ // callseq 1, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd66;
+	st.param.b64 	[param0&#43;0], %rd66;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -3297,7 +3297,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r80, [retval0+0];
+	ld.param.b32 	%r80, [retval0&#43;0];
 	} // callseq 1
 	st.local.u32 	[%rd62], %r39;
 	mov.u64 	%rd67, $str$2;
@@ -3305,9 +3305,9 @@ $L__BB0_22:
 	{ // callseq 2, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd68;
+	st.param.b64 	[param0&#43;0], %rd68;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -3315,7 +3315,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r81, [retval0+0];
+	ld.param.b32 	%r81, [retval0&#43;0];
 	} // callseq 2
 	ld.global.f32 	%f35, [%rd6];
 	cvt.f64.f32 	%fd1, %f35;
@@ -3325,9 +3325,9 @@ $L__BB0_22:
 	{ // callseq 3, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd70;
+	st.param.b64 	[param0&#43;0], %rd70;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -3335,7 +3335,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r82, [retval0+0];
+	ld.param.b32 	%r82, [retval0&#43;0];
 	} // callseq 3
 	ld.global.u32 	%r34, [%rd5];
 	cvta.to.global.u64 	%rd71, %rd13;
@@ -3346,9 +3346,9 @@ $L__BB0_22:
 	{ // callseq 4, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd73;
+	st.param.b64 	[param0&#43;0], %rd73;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -3356,18 +3356,18 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r83, [retval0+0];
+	ld.param.b32 	%r83, [retval0&#43;0];
 	} // callseq 4
-	ld.global.u32 	%r35, [%rd5+4];
+	ld.global.u32 	%r35, [%rd5&#43;4];
 	cvta.to.global.u64 	%rd74, %rd14;
 	st.global.u32 	[%rd74], %r35;
 	st.local.u32 	[%rd62], %r35;
 	{ // callseq 5, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd73;
+	st.param.b64 	[param0&#43;0], %rd73;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -3375,18 +3375,18 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r84, [retval0+0];
+	ld.param.b32 	%r84, [retval0&#43;0];
 	} // callseq 5
-	ld.global.u32 	%r36, [%rd5+8];
+	ld.global.u32 	%r36, [%rd5&#43;8];
 	cvta.to.global.u64 	%rd75, %rd15;
 	st.global.u32 	[%rd75], %r36;
 	st.local.u32 	[%rd62], %r36;
 	{ // callseq 6, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd73;
+	st.param.b64 	[param0&#43;0], %rd73;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -3394,7 +3394,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r85, [retval0+0];
+	ld.param.b32 	%r85, [retval0&#43;0];
 	} // callseq 6
 	cvta.to.global.u64 	%rd76, %rd18;
 	st.global.f32 	[%rd76], %f35;
@@ -3416,7 +3416,7 @@ $L__BB0_25:
 	setp.lt.s32 	%p22, %r34, -1;
 	@%p22 bra 	$L__BB0_27;
 
-	ld.global.nc.f32 	%f49, [%rd11+8];
+	ld.global.nc.f32 	%f49, [%rd11&#43;8];
 
 $L__BB0_27:
 	cvta.to.global.u64 	%rd79, %rd17;
@@ -3498,11 +3498,11 @@ $L__BB0_32:
 	.local .align 8 .b8 	__local_depot0[8];
 	.reg .b64 	%SP;
 	.reg .b64 	%SPL;
-	.reg .pred 	%p<26>;
-	.reg .f32 	%f<51>;
-	.reg .b32 	%r<111>;
-	.reg .f64 	%fd<2>;
-	.reg .b64 	%rd<85>;
+	.reg .pred 	%p&lt;26&gt;;
+	.reg .f32 	%f&lt;51&gt;;
+	.reg .b32 	%r&lt;111&gt;;
+	.reg .f64 	%fd&lt;2&gt;;
+	.reg .b64 	%rd&lt;85&gt;;
 
 
 	mov.u64 	%SPL, __local_depot0;
@@ -3636,12 +3636,12 @@ $L__BB0_9:
 	mul.wide.u32 	%rd42, %r58, 4;
 	add.s64 	%rd43, %rd3, %rd42;
 	st.global.u32 	[%rd43], %r57;
-	ld.global.u32 	%r59, [%rd5+4];
+	ld.global.u32 	%r59, [%rd5&#43;4];
 	add.s32 	%r60, %r58, 1;
 	mul.wide.u32 	%rd44, %r60, 4;
 	add.s64 	%rd45, %rd3, %rd44;
 	st.global.u32 	[%rd45], %r59;
-	ld.global.u32 	%r61, [%rd5+8];
+	ld.global.u32 	%r61, [%rd5&#43;8];
 	add.s32 	%r62, %r58, 2;
 	mul.wide.u32 	%rd46, %r62, 4;
 	add.s64 	%rd47, %rd3, %rd46;
@@ -3680,8 +3680,8 @@ $L__BB0_14:
 	mul.wide.s32 	%rd51, %r72, 4;
 	add.s64 	%rd52, %rd3, %rd51;
 	ld.global.u32 	%r104, [%rd52];
-	ld.global.u32 	%r105, [%rd52+4];
-	ld.global.u32 	%r106, [%rd52+8];
+	ld.global.u32 	%r105, [%rd52&#43;4];
+	ld.global.u32 	%r106, [%rd52&#43;8];
 	mov.f32 	%f44, %f8;
 
 $L__BB0_16:
@@ -3746,9 +3746,9 @@ $L__BB0_22:
 	{ // callseq 0, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd64;
+	st.param.b64 	[param0&#43;0], %rd64;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -3756,7 +3756,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r79, [retval0+0];
+	ld.param.b32 	%r79, [retval0&#43;0];
 	} // callseq 0
 	st.local.u32 	[%rd62], %r38;
 	mov.u64 	%rd65, $str$1;
@@ -3764,9 +3764,9 @@ $L__BB0_22:
 	{ // callseq 1, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd66;
+	st.param.b64 	[param0&#43;0], %rd66;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -3774,7 +3774,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r80, [retval0+0];
+	ld.param.b32 	%r80, [retval0&#43;0];
 	} // callseq 1
 	st.local.u32 	[%rd62], %r39;
 	mov.u64 	%rd67, $str$2;
@@ -3782,9 +3782,9 @@ $L__BB0_22:
 	{ // callseq 2, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd68;
+	st.param.b64 	[param0&#43;0], %rd68;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -3792,7 +3792,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r81, [retval0+0];
+	ld.param.b32 	%r81, [retval0&#43;0];
 	} // callseq 2
 	ld.global.f32 	%f35, [%rd6];
 	cvt.f64.f32 	%fd1, %f35;
@@ -3802,9 +3802,9 @@ $L__BB0_22:
 	{ // callseq 3, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd70;
+	st.param.b64 	[param0&#43;0], %rd70;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -3812,7 +3812,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r82, [retval0+0];
+	ld.param.b32 	%r82, [retval0&#43;0];
 	} // callseq 3
 	ld.global.u32 	%r34, [%rd5];
 	cvta.to.global.u64 	%rd71, %rd13;
@@ -3823,9 +3823,9 @@ $L__BB0_22:
 	{ // callseq 4, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd73;
+	st.param.b64 	[param0&#43;0], %rd73;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -3833,18 +3833,18 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r83, [retval0+0];
+	ld.param.b32 	%r83, [retval0&#43;0];
 	} // callseq 4
-	ld.global.u32 	%r35, [%rd5+4];
+	ld.global.u32 	%r35, [%rd5&#43;4];
 	cvta.to.global.u64 	%rd74, %rd14;
 	st.global.u32 	[%rd74], %r35;
 	st.local.u32 	[%rd62], %r35;
 	{ // callseq 5, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd73;
+	st.param.b64 	[param0&#43;0], %rd73;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -3852,18 +3852,18 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r84, [retval0+0];
+	ld.param.b32 	%r84, [retval0&#43;0];
 	} // callseq 5
-	ld.global.u32 	%r36, [%rd5+8];
+	ld.global.u32 	%r36, [%rd5&#43;8];
 	cvta.to.global.u64 	%rd75, %rd15;
 	st.global.u32 	[%rd75], %r36;
 	st.local.u32 	[%rd62], %r36;
 	{ // callseq 6, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd73;
+	st.param.b64 	[param0&#43;0], %rd73;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -3871,7 +3871,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r85, [retval0+0];
+	ld.param.b32 	%r85, [retval0&#43;0];
 	} // callseq 6
 	cvta.to.global.u64 	%rd76, %rd18;
 	st.global.f32 	[%rd76], %f35;
@@ -3893,7 +3893,7 @@ $L__BB0_25:
 	setp.lt.s32 	%p22, %r34, -1;
 	@%p22 bra 	$L__BB0_27;
 
-	ld.global.nc.f32 	%f49, [%rd11+8];
+	ld.global.nc.f32 	%f49, [%rd11&#43;8];
 
 $L__BB0_27:
 	cvta.to.global.u64 	%rd79, %rd17;
@@ -3975,11 +3975,11 @@ $L__BB0_32:
 	.local .align 8 .b8 	__local_depot0[8];
 	.reg .b64 	%SP;
 	.reg .b64 	%SPL;
-	.reg .pred 	%p<26>;
-	.reg .f32 	%f<51>;
-	.reg .b32 	%r<111>;
-	.reg .f64 	%fd<2>;
-	.reg .b64 	%rd<85>;
+	.reg .pred 	%p&lt;26&gt;;
+	.reg .f32 	%f&lt;51&gt;;
+	.reg .b32 	%r&lt;111&gt;;
+	.reg .f64 	%fd&lt;2&gt;;
+	.reg .b64 	%rd&lt;85&gt;;
 
 
 	mov.u64 	%SPL, __local_depot0;
@@ -4113,12 +4113,12 @@ $L__BB0_9:
 	mul.wide.u32 	%rd42, %r58, 4;
 	add.s64 	%rd43, %rd3, %rd42;
 	st.global.u32 	[%rd43], %r57;
-	ld.global.u32 	%r59, [%rd5+4];
+	ld.global.u32 	%r59, [%rd5&#43;4];
 	add.s32 	%r60, %r58, 1;
 	mul.wide.u32 	%rd44, %r60, 4;
 	add.s64 	%rd45, %rd3, %rd44;
 	st.global.u32 	[%rd45], %r59;
-	ld.global.u32 	%r61, [%rd5+8];
+	ld.global.u32 	%r61, [%rd5&#43;8];
 	add.s32 	%r62, %r58, 2;
 	mul.wide.u32 	%rd46, %r62, 4;
 	add.s64 	%rd47, %rd3, %rd46;
@@ -4157,8 +4157,8 @@ $L__BB0_14:
 	mul.wide.s32 	%rd51, %r72, 4;
 	add.s64 	%rd52, %rd3, %rd51;
 	ld.global.u32 	%r104, [%rd52];
-	ld.global.u32 	%r105, [%rd52+4];
-	ld.global.u32 	%r106, [%rd52+8];
+	ld.global.u32 	%r105, [%rd52&#43;4];
+	ld.global.u32 	%r106, [%rd52&#43;8];
 	mov.f32 	%f44, %f8;
 
 $L__BB0_16:
@@ -4223,9 +4223,9 @@ $L__BB0_22:
 	{ // callseq 0, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd64;
+	st.param.b64 	[param0&#43;0], %rd64;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -4233,7 +4233,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r79, [retval0+0];
+	ld.param.b32 	%r79, [retval0&#43;0];
 	} // callseq 0
 	st.local.u32 	[%rd62], %r38;
 	mov.u64 	%rd65, $str$1;
@@ -4241,9 +4241,9 @@ $L__BB0_22:
 	{ // callseq 1, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd66;
+	st.param.b64 	[param0&#43;0], %rd66;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -4251,7 +4251,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r80, [retval0+0];
+	ld.param.b32 	%r80, [retval0&#43;0];
 	} // callseq 1
 	st.local.u32 	[%rd62], %r39;
 	mov.u64 	%rd67, $str$2;
@@ -4259,9 +4259,9 @@ $L__BB0_22:
 	{ // callseq 2, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd68;
+	st.param.b64 	[param0&#43;0], %rd68;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -4269,7 +4269,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r81, [retval0+0];
+	ld.param.b32 	%r81, [retval0&#43;0];
 	} // callseq 2
 	ld.global.f32 	%f35, [%rd6];
 	cvt.f64.f32 	%fd1, %f35;
@@ -4279,9 +4279,9 @@ $L__BB0_22:
 	{ // callseq 3, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd70;
+	st.param.b64 	[param0&#43;0], %rd70;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -4289,7 +4289,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r82, [retval0+0];
+	ld.param.b32 	%r82, [retval0&#43;0];
 	} // callseq 3
 	ld.global.u32 	%r34, [%rd5];
 	cvta.to.global.u64 	%rd71, %rd13;
@@ -4300,9 +4300,9 @@ $L__BB0_22:
 	{ // callseq 4, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd73;
+	st.param.b64 	[param0&#43;0], %rd73;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -4310,18 +4310,18 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r83, [retval0+0];
+	ld.param.b32 	%r83, [retval0&#43;0];
 	} // callseq 4
-	ld.global.u32 	%r35, [%rd5+4];
+	ld.global.u32 	%r35, [%rd5&#43;4];
 	cvta.to.global.u64 	%rd74, %rd14;
 	st.global.u32 	[%rd74], %r35;
 	st.local.u32 	[%rd62], %r35;
 	{ // callseq 5, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd73;
+	st.param.b64 	[param0&#43;0], %rd73;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -4329,18 +4329,18 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r84, [retval0+0];
+	ld.param.b32 	%r84, [retval0&#43;0];
 	} // callseq 5
-	ld.global.u32 	%r36, [%rd5+8];
+	ld.global.u32 	%r36, [%rd5&#43;8];
 	cvta.to.global.u64 	%rd75, %rd15;
 	st.global.u32 	[%rd75], %r36;
 	st.local.u32 	[%rd62], %r36;
 	{ // callseq 6, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd73;
+	st.param.b64 	[param0&#43;0], %rd73;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -4348,7 +4348,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r85, [retval0+0];
+	ld.param.b32 	%r85, [retval0&#43;0];
 	} // callseq 6
 	cvta.to.global.u64 	%rd76, %rd18;
 	st.global.f32 	[%rd76], %f35;
@@ -4370,7 +4370,7 @@ $L__BB0_25:
 	setp.lt.s32 	%p22, %r34, -1;
 	@%p22 bra 	$L__BB0_27;
 
-	ld.global.nc.f32 	%f49, [%rd11+8];
+	ld.global.nc.f32 	%f49, [%rd11&#43;8];
 
 $L__BB0_27:
 	cvta.to.global.u64 	%rd79, %rd17;
@@ -4452,11 +4452,11 @@ $L__BB0_32:
 	.local .align 8 .b8 	__local_depot0[8];
 	.reg .b64 	%SP;
 	.reg .b64 	%SPL;
-	.reg .pred 	%p<26>;
-	.reg .f32 	%f<51>;
-	.reg .b32 	%r<111>;
-	.reg .f64 	%fd<2>;
-	.reg .b64 	%rd<85>;
+	.reg .pred 	%p&lt;26&gt;;
+	.reg .f32 	%f&lt;51&gt;;
+	.reg .b32 	%r&lt;111&gt;;
+	.reg .f64 	%fd&lt;2&gt;;
+	.reg .b64 	%rd&lt;85&gt;;
 
 
 	mov.u64 	%SPL, __local_depot0;
@@ -4590,12 +4590,12 @@ $L__BB0_9:
 	mul.wide.u32 	%rd42, %r58, 4;
 	add.s64 	%rd43, %rd3, %rd42;
 	st.global.u32 	[%rd43], %r57;
-	ld.global.u32 	%r59, [%rd5+4];
+	ld.global.u32 	%r59, [%rd5&#43;4];
 	add.s32 	%r60, %r58, 1;
 	mul.wide.u32 	%rd44, %r60, 4;
 	add.s64 	%rd45, %rd3, %rd44;
 	st.global.u32 	[%rd45], %r59;
-	ld.global.u32 	%r61, [%rd5+8];
+	ld.global.u32 	%r61, [%rd5&#43;8];
 	add.s32 	%r62, %r58, 2;
 	mul.wide.u32 	%rd46, %r62, 4;
 	add.s64 	%rd47, %rd3, %rd46;
@@ -4634,8 +4634,8 @@ $L__BB0_14:
 	mul.wide.s32 	%rd51, %r72, 4;
 	add.s64 	%rd52, %rd3, %rd51;
 	ld.global.u32 	%r104, [%rd52];
-	ld.global.u32 	%r105, [%rd52+4];
-	ld.global.u32 	%r106, [%rd52+8];
+	ld.global.u32 	%r105, [%rd52&#43;4];
+	ld.global.u32 	%r106, [%rd52&#43;8];
 	mov.f32 	%f44, %f8;
 
 $L__BB0_16:
@@ -4700,9 +4700,9 @@ $L__BB0_22:
 	{ // callseq 0, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd64;
+	st.param.b64 	[param0&#43;0], %rd64;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -4710,7 +4710,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r79, [retval0+0];
+	ld.param.b32 	%r79, [retval0&#43;0];
 	} // callseq 0
 	st.local.u32 	[%rd62], %r38;
 	mov.u64 	%rd65, $str$1;
@@ -4718,9 +4718,9 @@ $L__BB0_22:
 	{ // callseq 1, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd66;
+	st.param.b64 	[param0&#43;0], %rd66;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -4728,7 +4728,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r80, [retval0+0];
+	ld.param.b32 	%r80, [retval0&#43;0];
 	} // callseq 1
 	st.local.u32 	[%rd62], %r39;
 	mov.u64 	%rd67, $str$2;
@@ -4736,9 +4736,9 @@ $L__BB0_22:
 	{ // callseq 2, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd68;
+	st.param.b64 	[param0&#43;0], %rd68;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -4746,7 +4746,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r81, [retval0+0];
+	ld.param.b32 	%r81, [retval0&#43;0];
 	} // callseq 2
 	ld.global.f32 	%f35, [%rd6];
 	cvt.f64.f32 	%fd1, %f35;
@@ -4756,9 +4756,9 @@ $L__BB0_22:
 	{ // callseq 3, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd70;
+	st.param.b64 	[param0&#43;0], %rd70;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -4766,7 +4766,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r82, [retval0+0];
+	ld.param.b32 	%r82, [retval0&#43;0];
 	} // callseq 3
 	ld.global.u32 	%r34, [%rd5];
 	cvta.to.global.u64 	%rd71, %rd13;
@@ -4777,9 +4777,9 @@ $L__BB0_22:
 	{ // callseq 4, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd73;
+	st.param.b64 	[param0&#43;0], %rd73;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -4787,18 +4787,18 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r83, [retval0+0];
+	ld.param.b32 	%r83, [retval0&#43;0];
 	} // callseq 4
-	ld.global.u32 	%r35, [%rd5+4];
+	ld.global.u32 	%r35, [%rd5&#43;4];
 	cvta.to.global.u64 	%rd74, %rd14;
 	st.global.u32 	[%rd74], %r35;
 	st.local.u32 	[%rd62], %r35;
 	{ // callseq 5, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd73;
+	st.param.b64 	[param0&#43;0], %rd73;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -4806,18 +4806,18 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r84, [retval0+0];
+	ld.param.b32 	%r84, [retval0&#43;0];
 	} // callseq 5
-	ld.global.u32 	%r36, [%rd5+8];
+	ld.global.u32 	%r36, [%rd5&#43;8];
 	cvta.to.global.u64 	%rd75, %rd15;
 	st.global.u32 	[%rd75], %r36;
 	st.local.u32 	[%rd62], %r36;
 	{ // callseq 6, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd73;
+	st.param.b64 	[param0&#43;0], %rd73;
 	.param .b64 param1;
-	st.param.b64 	[param1+0], %rd61;
+	st.param.b64 	[param1&#43;0], %rd61;
 	.param .b32 retval0;
 	call.uni (retval0), 
 	vprintf, 
@@ -4825,7 +4825,7 @@ $L__BB0_22:
 	param0, 
 	param1
 	);
-	ld.param.b32 	%r85, [retval0+0];
+	ld.param.b32 	%r85, [retval0&#43;0];
 	} // callseq 6
 	cvta.to.global.u64 	%rd76, %rd18;
 	st.global.f32 	[%rd76], %f35;
@@ -4847,7 +4847,7 @@ $L__BB0_25:
 	setp.lt.s32 	%p22, %r34, -1;
 	@%p22 bra 	$L__BB0_27;
 
-	ld.global.nc.f32 	%f49, [%rd11+8];
+	ld.global.nc.f32 	%f49, [%rd11&#43;8];
 
 $L__BB0_27:
 	cvta.to.global.u64 	%rd79, %rd17;

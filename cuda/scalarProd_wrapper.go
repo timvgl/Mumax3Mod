@@ -117,10 +117,10 @@ const (
 	.param .u32 scalarProd_param_9
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<10>;
-	.reg .b32 	%r<18>;
-	.reg .b64 	%rd<23>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;10&gt;;
+	.reg .b32 	%r&lt;18&gt;;
+	.reg .b64 	%rd&lt;23&gt;;
 
 
 	ld.param.u64 	%rd1, [scalarProd_param_0];
@@ -206,10 +206,10 @@ $L__BB0_2:
 	.param .u32 scalarProd_param_9
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<10>;
-	.reg .b32 	%r<18>;
-	.reg .b64 	%rd<23>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;10&gt;;
+	.reg .b32 	%r&lt;18&gt;;
+	.reg .b64 	%rd&lt;23&gt;;
 
 
 	ld.param.u64 	%rd1, [scalarProd_param_0];
@@ -295,10 +295,10 @@ $L__BB0_2:
 	.param .u32 scalarProd_param_9
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<10>;
-	.reg .b32 	%r<18>;
-	.reg .b64 	%rd<23>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;10&gt;;
+	.reg .b32 	%r&lt;18&gt;;
+	.reg .b64 	%rd&lt;23&gt;;
 
 
 	ld.param.u64 	%rd1, [scalarProd_param_0];
@@ -384,10 +384,10 @@ $L__BB0_2:
 	.param .u32 scalarProd_param_9
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<10>;
-	.reg .b32 	%r<18>;
-	.reg .b64 	%rd<23>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;10&gt;;
+	.reg .b32 	%r&lt;18&gt;;
+	.reg .b64 	%rd&lt;23&gt;;
 
 
 	ld.param.u64 	%rd1, [scalarProd_param_0];
@@ -473,10 +473,10 @@ $L__BB0_2:
 	.param .u32 scalarProd_param_9
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<10>;
-	.reg .b32 	%r<18>;
-	.reg .b64 	%rd<23>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;10&gt;;
+	.reg .b32 	%r&lt;18&gt;;
+	.reg .b64 	%rd&lt;23&gt;;
 
 
 	ld.param.u64 	%rd1, [scalarProd_param_0];
@@ -562,10 +562,10 @@ $L__BB0_2:
 	.param .u32 scalarProd_param_9
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<10>;
-	.reg .b32 	%r<18>;
-	.reg .b64 	%rd<23>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;10&gt;;
+	.reg .b32 	%r&lt;18&gt;;
+	.reg .b64 	%rd&lt;23&gt;;
 
 
 	ld.param.u64 	%rd1, [scalarProd_param_0];
@@ -651,10 +651,10 @@ $L__BB0_2:
 	.param .u32 scalarProd_param_9
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<10>;
-	.reg .b32 	%r<18>;
-	.reg .b64 	%rd<23>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;10&gt;;
+	.reg .b32 	%r&lt;18&gt;;
+	.reg .b64 	%rd&lt;23&gt;;
 
 
 	ld.param.u64 	%rd1, [scalarProd_param_0];
@@ -740,10 +740,10 @@ $L__BB0_2:
 	.param .u32 scalarProd_param_9
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<10>;
-	.reg .b32 	%r<18>;
-	.reg .b64 	%rd<23>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;10&gt;;
+	.reg .b32 	%r&lt;18&gt;;
+	.reg .b64 	%rd&lt;23&gt;;
 
 
 	ld.param.u64 	%rd1, [scalarProd_param_0];
@@ -829,10 +829,10 @@ $L__BB0_2:
 	.param .u32 scalarProd_param_9
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<10>;
-	.reg .b32 	%r<18>;
-	.reg .b64 	%rd<23>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;10&gt;;
+	.reg .b32 	%r&lt;18&gt;;
+	.reg .b64 	%rd&lt;23&gt;;
 
 
 	ld.param.u64 	%rd1, [scalarProd_param_0];
@@ -918,10 +918,10 @@ $L__BB0_2:
 	.param .u32 scalarProd_param_9
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<10>;
-	.reg .b32 	%r<18>;
-	.reg .b64 	%rd<23>;
+	.reg .pred 	%p&lt;6&gt;;
+	.reg .f32 	%f&lt;10&gt;;
+	.reg .b32 	%r&lt;18&gt;;
+	.reg .b64 	%rd&lt;23&gt;;
 
 
 	ld.param.u64 	%rd1, [scalarProd_param_0];

@@ -137,12 +137,12 @@ const (
 	.param .u8 NormStrain_param_14
 )
 {
-	.reg .pred 	%p<21>;
-	.reg .b16 	%rs<6>;
-	.reg .f32 	%f<27>;
-	.reg .b32 	%r<93>;
-	.reg .f64 	%fd<17>;
-	.reg .b64 	%rd<35>;
+	.reg .pred 	%p&lt;21&gt;;
+	.reg .b16 	%rs&lt;6&gt;;
+	.reg .f32 	%f&lt;27&gt;;
+	.reg .b32 	%r&lt;93&gt;;
+	.reg .f64 	%fd&lt;17&gt;;
+	.reg .b64 	%rd&lt;35&gt;;
 
 
 	ld.param.u8 	%rs3, [NormStrain_param_14];
@@ -465,12 +465,12 @@ $L__BB0_35:
 	.param .u8 NormStrain_param_14
 )
 {
-	.reg .pred 	%p<21>;
-	.reg .b16 	%rs<6>;
-	.reg .f32 	%f<27>;
-	.reg .b32 	%r<93>;
-	.reg .f64 	%fd<17>;
-	.reg .b64 	%rd<35>;
+	.reg .pred 	%p&lt;21&gt;;
+	.reg .b16 	%rs&lt;6&gt;;
+	.reg .f32 	%f&lt;27&gt;;
+	.reg .b32 	%r&lt;93&gt;;
+	.reg .f64 	%fd&lt;17&gt;;
+	.reg .b64 	%rd&lt;35&gt;;
 
 
 	ld.param.u8 	%rs3, [NormStrain_param_14];
@@ -793,12 +793,12 @@ $L__BB0_35:
 	.param .u8 NormStrain_param_14
 )
 {
-	.reg .pred 	%p<21>;
-	.reg .b16 	%rs<6>;
-	.reg .f32 	%f<27>;
-	.reg .b32 	%r<93>;
-	.reg .f64 	%fd<17>;
-	.reg .b64 	%rd<35>;
+	.reg .pred 	%p&lt;21&gt;;
+	.reg .b16 	%rs&lt;6&gt;;
+	.reg .f32 	%f&lt;27&gt;;
+	.reg .b32 	%r&lt;93&gt;;
+	.reg .f64 	%fd&lt;17&gt;;
+	.reg .b64 	%rd&lt;35&gt;;
 
 
 	ld.param.u8 	%rs3, [NormStrain_param_14];
@@ -1121,12 +1121,12 @@ $L__BB0_35:
 	.param .u8 NormStrain_param_14
 )
 {
-	.reg .pred 	%p<21>;
-	.reg .b16 	%rs<6>;
-	.reg .f32 	%f<27>;
-	.reg .b32 	%r<93>;
-	.reg .f64 	%fd<17>;
-	.reg .b64 	%rd<35>;
+	.reg .pred 	%p&lt;21&gt;;
+	.reg .b16 	%rs&lt;6&gt;;
+	.reg .f32 	%f&lt;27&gt;;
+	.reg .b32 	%r&lt;93&gt;;
+	.reg .f64 	%fd&lt;17&gt;;
+	.reg .b64 	%rd&lt;35&gt;;
 
 
 	ld.param.u8 	%rs3, [NormStrain_param_14];
@@ -1449,12 +1449,12 @@ $L__BB0_35:
 	.param .u8 NormStrain_param_14
 )
 {
-	.reg .pred 	%p<21>;
-	.reg .b16 	%rs<6>;
-	.reg .f32 	%f<27>;
-	.reg .b32 	%r<93>;
-	.reg .f64 	%fd<17>;
-	.reg .b64 	%rd<35>;
+	.reg .pred 	%p&lt;21&gt;;
+	.reg .b16 	%rs&lt;6&gt;;
+	.reg .f32 	%f&lt;27&gt;;
+	.reg .b32 	%r&lt;93&gt;;
+	.reg .f64 	%fd&lt;17&gt;;
+	.reg .b64 	%rd&lt;35&gt;;
 
 
 	ld.param.u8 	%rs3, [NormStrain_param_14];
@@ -1777,12 +1777,12 @@ $L__BB0_35:
 	.param .u8 NormStrain_param_14
 )
 {
-	.reg .pred 	%p<21>;
-	.reg .b16 	%rs<6>;
-	.reg .f32 	%f<27>;
-	.reg .b32 	%r<93>;
-	.reg .f64 	%fd<17>;
-	.reg .b64 	%rd<35>;
+	.reg .pred 	%p&lt;21&gt;;
+	.reg .b16 	%rs&lt;6&gt;;
+	.reg .f32 	%f&lt;27&gt;;
+	.reg .b32 	%r&lt;93&gt;;
+	.reg .f64 	%fd&lt;17&gt;;
+	.reg .b64 	%rd&lt;35&gt;;
 
 
 	ld.param.u8 	%rs3, [NormStrain_param_14];
@@ -2105,12 +2105,12 @@ $L__BB0_35:
 	.param .u8 NormStrain_param_14
 )
 {
-	.reg .pred 	%p<21>;
-	.reg .b16 	%rs<6>;
-	.reg .f32 	%f<27>;
-	.reg .b32 	%r<93>;
-	.reg .f64 	%fd<17>;
-	.reg .b64 	%rd<35>;
+	.reg .pred 	%p&lt;21&gt;;
+	.reg .b16 	%rs&lt;6&gt;;
+	.reg .f32 	%f&lt;27&gt;;
+	.reg .b32 	%r&lt;93&gt;;
+	.reg .f64 	%fd&lt;17&gt;;
+	.reg .b64 	%rd&lt;35&gt;;
 
 
 	ld.param.u8 	%rs3, [NormStrain_param_14];
@@ -2433,12 +2433,12 @@ $L__BB0_35:
 	.param .u8 NormStrain_param_14
 )
 {
-	.reg .pred 	%p<21>;
-	.reg .b16 	%rs<6>;
-	.reg .f32 	%f<27>;
-	.reg .b32 	%r<93>;
-	.reg .f64 	%fd<17>;
-	.reg .b64 	%rd<35>;
+	.reg .pred 	%p&lt;21&gt;;
+	.reg .b16 	%rs&lt;6&gt;;
+	.reg .f32 	%f&lt;27&gt;;
+	.reg .b32 	%r&lt;93&gt;;
+	.reg .f64 	%fd&lt;17&gt;;
+	.reg .b64 	%rd&lt;35&gt;;
 
 
 	ld.param.u8 	%rs3, [NormStrain_param_14];
@@ -2761,12 +2761,12 @@ $L__BB0_35:
 	.param .u8 NormStrain_param_14
 )
 {
-	.reg .pred 	%p<21>;
-	.reg .b16 	%rs<6>;
-	.reg .f32 	%f<27>;
-	.reg .b32 	%r<93>;
-	.reg .f64 	%fd<17>;
-	.reg .b64 	%rd<35>;
+	.reg .pred 	%p&lt;21&gt;;
+	.reg .b16 	%rs&lt;6&gt;;
+	.reg .f32 	%f&lt;27&gt;;
+	.reg .b32 	%r&lt;93&gt;;
+	.reg .f64 	%fd&lt;17&gt;;
+	.reg .b64 	%rd&lt;35&gt;;
 
 
 	ld.param.u8 	%rs3, [NormStrain_param_14];
@@ -3089,12 +3089,12 @@ $L__BB0_35:
 	.param .u8 NormStrain_param_14
 )
 {
-	.reg .pred 	%p<21>;
-	.reg .b16 	%rs<6>;
-	.reg .f32 	%f<27>;
-	.reg .b32 	%r<93>;
-	.reg .f64 	%fd<17>;
-	.reg .b64 	%rd<35>;
+	.reg .pred 	%p&lt;21&gt;;
+	.reg .b16 	%rs&lt;6&gt;;
+	.reg .f32 	%f&lt;27&gt;;
+	.reg .b32 	%r&lt;93&gt;;
+	.reg .f64 	%fd&lt;17&gt;;
+	.reg .b64 	%rd&lt;35&gt;;
 
 
 	ld.param.u8 	%rs3, [NormStrain_param_14];
