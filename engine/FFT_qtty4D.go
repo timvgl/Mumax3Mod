@@ -144,7 +144,7 @@ func (s *fftOperation4D) Eval() {
 	bufsGPUOP := make([]*data.SliceBinary, 0)
 	bufInitalized := slices.Contains(slices.Collect(maps.Keys(bufsCPU_map)), s.q)
 	binarySize := dataT.Size()
-	binarySize[0] *= 4
+	binarySize[0] *= 5
 	if !bufInitalized {
 		cuda.IncreaseBufMax(cores * 3)
 		for core := range cores {
@@ -192,8 +192,9 @@ func (s *fftOperation4D) Eval() {
 					data.ZeroBinary(bufCPU)
 				}
 				data.CopyBinary(bufGPUIP, bufCPU)
-				angle := -2i * complex64(complex(math.Pi*float64(i)*Time*s.dF, 0))
-				cuda.FFT_T_Step(bufGPUOP, bufGPUIP, dataT, real(angle), imag(angle), int((s.maxF-s.minF)/s.dF))
+				//angle := -2i * complex64(complex(math.Pi*float64(i)*Time*s.dF, 0))
+				phase := -2 * math.Pi * float64(i) * Time * s.dF
+				cuda.FFT_T_Step(bufGPUOP, bufGPUIP, dataT, float32(phase), int((s.maxF-s.minF)/s.dF))
 				info := data.Meta{Freq: s.minF + float64(i)*s.dF, Name: "k_x_y_z_f_" + NameOf(s.q), Unit: UnitOf(FFTOP), CellSize: MeshOf(FFTOP).CellSize()}
 				saveAsFFTCompressed_sync(OD()+fmt.Sprintf(FilenameFormat, "k_x_y_z_f_"+NameOf(s.q), i)+".ovf", bufGPUOP.HostCopy(), info, outputFormat, NxNyNz, startK, endK, transformedAxis, true, false, compressedSize)
 			}

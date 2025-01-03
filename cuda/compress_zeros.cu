@@ -10,7 +10,7 @@ compressRLESingleKernel(uint8_t* __restrict__ d_output, float* __restrict__ d_in
     unsigned char runStart = 0;
     if (idx < numElements) {
         if (d_input[idx] == 0.0f) {
-            if (idx == 0 || d_input[idx - 1] != 0.0f) {
+            if (idx == 0 || idx > 0 && d_input[idx - 1] != 0.0f) {
                 runStart = 1; // Start of zero run
             }
         }
