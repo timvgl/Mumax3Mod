@@ -81,7 +81,7 @@ func NewSlice(nComp int, size [3]int) *Slice {
 }
 
 func NewSliceBinary(nComp int, size [3]int, length int) *SliceBinary {
-	return SliceBinaryFromPtrs(size, CPUMemory, unsafe.Pointer(&(make([]byte, length)[0])))
+	return SliceBinaryFromPtrs(size, prod(size), CPUMemory, unsafe.Pointer(&(make([]byte, length)[0])))
 }
 
 func SliceFromArray(data [][]float32, size [3]int) *Slice {
@@ -117,13 +117,13 @@ func SliceFromPtrs(size [3]int, memType int8, ptrs []unsafe.Pointer) *Slice {
 	return s
 }
 
-func SliceBinaryFromPtrs(size [3]int, memType int8, ptrs unsafe.Pointer) *SliceBinary {
-	length := prod(size)
+func SliceBinaryFromPtrs(size [3]int, length int, memType int8, ptrs unsafe.Pointer) *SliceBinary {
 	util.Argument(length > 0)
 	s := new(SliceBinary)
 	s.size = size
 	s.ptrs = ptrs
 	s.memType = memType
+	s.length = length
 	return s
 }
 
@@ -354,11 +354,11 @@ func Copy(dst, src *Slice) {
 }
 
 func CopyBinary(dst, src *SliceBinary) {
-	if dst.NComp() != src.NComp() || dst.Len() != src.Len() {
-		panic(fmt.Sprintf("slice copy: illegal sizes: dst: %vx%v, src: %vx%v", dst.NComp(), dst.Len(), src.NComp(), src.Len()))
+	if dst.NComp() != src.NComp() || dst.Length() != src.Length() {
+		panic(fmt.Sprintf("slice copy: illegal sizes: dst: %vx%v, src: %vx%v", dst.NComp(), dst.Length(), src.NComp(), src.Length()))
 	}
 	d, s := dst.GPUAccess(), src.GPUAccess()
-	bytes := SIZEOF_FLOAT32 * int64(dst.Len())
+	bytes := SIZEOF_FLOAT32 * int64(dst.Length())
 	switch {
 	default:
 		panic("bug")
