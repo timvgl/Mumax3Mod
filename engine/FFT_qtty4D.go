@@ -51,6 +51,7 @@ type fftOperation4D struct {
 	count    int
 	args     []float64
 	fDataSet bool
+	fft3D    *fftOperation3D
 }
 
 func FFT4D(q Quantity, period float64, args ...float64) {
@@ -60,7 +61,7 @@ func FFT4D(q Quantity, period float64, args ...float64) {
 	dF := 0.
 	maxF := 0.
 	minF := 0.
-	FFT_T_OP_Obj := fftOperation4D{fieldOp{q, q, q.NComp()}, "k_x_y_z_f_" + NameOf(q), q, dF, maxF, minF, Time, period, -1, args, false}
+	FFT_T_OP_Obj := fftOperation4D{fieldOp{q, q, q.NComp()}, "k_x_y_z_f_" + NameOf(q), q, dF, maxF, minF, Time, period, -1, args, false, FFT3D_FFT_T(q)}
 	FFT_T_OP = append(FFT_T_OP, &FFT_T_OP_Obj)
 	FFT_T_OPRunning[&FFT_T_OP_Obj] = false
 	FFT_T_OPDataCopied[&FFT_T_OP_Obj] = false
@@ -130,9 +131,10 @@ func (s *fftOperation4D) Eval() {
 		s.fDataSet = true
 	}
 	runtime.LockOSThread()
+	defer runtime.UnlockOSThread()
 	cuda.SetCurrent_Ctx()
 
-	FFTOP := FFT3D_FFT_T(s.q)
+	FFTOP := s.fft3D
 	FFTOP.evalIntern()
 
 	dataT := FFT3DData[s.q]
@@ -198,6 +200,7 @@ func (s *fftOperation4D) Eval() {
 		if !FFT_T_in_mem {
 			go func(core int, s *fftOperation4D, startIndex, endIndex int, bufCPU, bufGPUIP, bufGPUOP, dataT *data.Slice, FFTOP *fftOperation3D, NxNyNz [3]int, startK, endK [3]float64, transformedAxis []string) {
 				runtime.LockOSThread()
+				defer runtime.UnlockOSThread()
 				cuda.SetCurrent_Ctx()
 				cuda.Create_Stream(NameOf(s.q) + fmt.Sprintf("_%d", core))
 				for i := startIndex; i <= endIndex; i++ {
@@ -222,6 +225,7 @@ func (s *fftOperation4D) Eval() {
 		} else {
 			go func(core int, s *fftOperation4D, startIndex, endIndex int, FFT_T_data []*data.Slice, bufGPUIP, dataT *data.Slice, FFTOP *fftOperation3D, NxNyNz [3]int, startK, endK [3]float64, transformedAxis []string, amountFiles int) {
 				runtime.LockOSThread()
+				defer runtime.UnlockOSThread()
 				cuda.SetCurrent_Ctx()
 				cuda.Create_Stream(NameOf(s.q) + fmt.Sprintf("_%d", core))
 				for i := startIndex; i <= endIndex; i++ {
