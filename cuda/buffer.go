@@ -7,6 +7,7 @@ package cuda
 // effectively wait for the previous operation on the buffer.
 
 import (
+	"fmt"
 	"log"
 	"unsafe"
 
@@ -73,7 +74,7 @@ func BufferFFT_T(nComp int, size [3]int, key string) *data.Slice {
 	// allocate as much new memory as needed
 	for i := nFromPool; i < nComp; i++ {
 		if len(buf_check) >= buf_max {
-			log.Panic("too many buffers in use, possible memory leak")
+			log.Panic(fmt.Sprintf("too many buffers in use, possible memory leak: %v", buf_max))
 		}
 		ptrs[i] = MemAlloc(int64(cu.SIZEOF_FLOAT32 * N))
 		buf_check[ptrs[i]] = struct{}{} // mark this pointer as mine

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"runtime"
+	"sync"
 
 	"github.com/mumax/3/cuda/cu"
 	"github.com/mumax/3/util"
@@ -119,15 +120,41 @@ func tryCuInit() {
 // Global stream used for everything
 const stream0 = cu.Stream(0)
 
-var StreamMap = make(map[string]cu.Stream)
+var StreamMap sync.Map
 
-// Hhahaha not quiet - so we need a new stream for the async FFT in time - one Stream per FFT parallelization
+// Hahaha not quiet - so we need a new stream for the async FFT in time - one Stream per FFT parallelization
 func Create_Stream(key string) {
-	StreamMap[key] = cu.Stream(0)
+	StreamMap.Store(key, cu.StreamCreate())
+}
+
+func Destroy_Stream(key string) {
+	if len(key) > 0 {
+		val, ok := StreamMap.Load(key)
+		if ok {
+			streamTmp := (val.(cu.Stream))
+			streamTmp.Destroy()
+			StreamMap.Delete(key)
+		} else {
+			panic(fmt.Sprintf("Couldnot find stream for key %v.", key))
+		}
+	} else {
+		panic("Cannot destroy not found stream.")
+	}
 }
 
 func Get_Stream(key string) cu.Stream {
-	return StreamMap[key]
+	if len(key) > 0 && key != "nil" {
+		val, ok := StreamMap.Load(key)
+		if ok {
+			return val.(cu.Stream)
+		} else {
+			panic(fmt.Sprintf("Couldnot find stream for key %v.", key))
+		}
+	} else if key == "nil" {
+		panic("Nil is not valid for Get_Stream")
+	} else {
+		return stream0
+	}
 }
 
 // Synchronize the global stream
@@ -137,5 +164,15 @@ func Sync() {
 }
 
 func SyncFFT_T(key string) {
-	StreamMap[key].Synchronize()
+	if len(key) > 0 && key != "nil" {
+		val, ok := StreamMap.Load(key)
+		if ok {
+			val.(cu.Stream).Synchronize()
+		} else {
+			panic(fmt.Sprintf("Couldnot find stream for key %v.", key))
+		}
+	} else if key == "nil" {
+	} else {
+		stream0.Synchronize()
+	}
 }

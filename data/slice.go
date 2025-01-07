@@ -24,13 +24,14 @@ type Slice struct {
 // NOTE: cpyDtoH and cpuHtoD are only needed to support 32-bit builds,
 // otherwise, it could be removed in favor of memCpy only.
 var (
-	memFree, memFreeHost           func(unsafe.Pointer)
-	memCpy, memCpyDtoH, memCpyHtoD func(dst, src unsafe.Pointer, bytes int64)
+	memFree, memFreeHost   func(unsafe.Pointer)
+	memCpyDtoH, memCpyHtoD func(dst, src unsafe.Pointer, bytes int64)
+	memCpy                 func(dst, src unsafe.Pointer, bytes int64, args ...string)
 )
 
 // Internal: enables slices on GPU. Called upon cuda init.
 func EnableGPU(free, freeHost func(unsafe.Pointer),
-	cpy, cpyDtoH, cpyHtoD func(dst, src unsafe.Pointer, bytes int64)) {
+	cpyDtoH, cpyHtoD func(dst, src unsafe.Pointer, bytes int64), cpy func(dst, src unsafe.Pointer, bytes int64, args ...string)) {
 	memFree = free
 	memFreeHost = freeHost
 	memCpy = cpy
@@ -236,18 +237,21 @@ func (s *Slice) HostCopy() *Slice {
 	return cpy
 }
 
-func Copy(dst, src *Slice) {
+func Copy(dst, src *Slice, args ...string) {
 	if dst.NComp() != src.NComp() || dst.Len() != src.Len() {
 		panic(fmt.Sprintf("slice copy: illegal sizes: dst: %vx%v, src: %vx%v", dst.NComp(), dst.Len(), src.NComp(), src.Len()))
 	}
 	d, s := dst.GPUAccess(), src.GPUAccess()
 	bytes := SIZEOF_FLOAT32 * int64(dst.Len())
+	if len(args) > 1 {
+		panic("Only one string arg allowed in Copy.")
+	}
 	switch {
 	default:
 		panic("bug")
 	case d && s:
 		for c := 0; c < dst.NComp(); c++ {
-			memCpy(dst.DevPtr(c), src.DevPtr(c), bytes)
+			memCpy(dst.DevPtr(c), src.DevPtr(c), bytes, args...)
 		}
 	case s && !d:
 		for c := 0; c < dst.NComp(); c++ {

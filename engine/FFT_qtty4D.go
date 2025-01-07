@@ -29,10 +29,13 @@ var (
 	bufsCPU_map        = make(map[Quantity][]*data.Slice)
 	bufsGPUIP_map      = make(map[Quantity][]*data.Slice)
 	bufsGPUOP_map      = make(map[Quantity][]*data.Slice)
+	FFT_T_data_map     = make(map[Quantity][]*data.Slice)
+	FFT_T_in_mem       = true
 )
 
 func init() {
 	DeclFunc("FFT4D", FFT4D, "performs FFT in x, y z and t")
+	DeclVar("FFT_T_IN_MEM", &FFT_T_in_mem, "")
 	//DeclFunc("FFT2D", FFT2D, "performs FFT in x, y and z")
 }
 
@@ -134,7 +137,11 @@ func (s *fftOperation4D) Eval() {
 
 	dataT := FFT3DData[s.q]
 	cores := runtime.NumCPU()
-	filesPerCore := int(int((s.maxF-s.minF)/s.dF) / cores)
+	amountFiles := int((s.maxF - s.minF) / s.dF)
+	if int(s.maxF-s.minF)%int(s.dF) != 0 {
+		amountFiles += 1
+	}
+	filesPerCore := int(amountFiles / cores)
 	lowerEnd := 0
 	if int((s.maxF-s.minF)/s.dF)%cores != 0 {
 		cores += 1
@@ -142,13 +149,21 @@ func (s *fftOperation4D) Eval() {
 	bufsCPU := make([]*data.Slice, 0)
 	bufsGPUIP := make([]*data.Slice, 0)
 	bufsGPUOP := make([]*data.Slice, 0)
+	FFT_T_data := make([]*data.Slice, 0)
 	bufInitalized := slices.Contains(slices.Collect(maps.Keys(bufsCPU_map)), s.q)
 	if !bufInitalized {
 		cuda.IncreaseBufMax(cores * 3)
 		for core := range cores {
 			bufsCPU = append(bufsCPU, data.NewSlice(dataT.NComp(), dataT.Size()))
-			bufsGPUIP = append(bufsGPUIP, cuda.BufferFFT_T(dataT.NComp(), dataT.Size(), fmt.Sprint(NameOf(s.q)+"_%d", core)))
-			bufsGPUOP = append(bufsGPUOP, cuda.BufferFFT_T(dataT.NComp(), dataT.Size(), fmt.Sprint(NameOf(s.q)+"_%d", core)))
+			bufsGPUIP = append(bufsGPUIP, cuda.BufferFFT_T(dataT.NComp(), dataT.Size(), fmt.Sprintf(NameOf(s.q)+"_%d", core)))
+			bufsGPUOP = append(bufsGPUOP, cuda.BufferFFT_T(dataT.NComp(), dataT.Size(), fmt.Sprintf(NameOf(s.q)+"_%d", core)))
+		}
+		if FFT_T_in_mem {
+			cuda.IncreaseBufMax(3 * amountFiles)
+			for _ = range amountFiles {
+				FFT_T_data = append(FFT_T_data, cuda.BufferFFT_T(dataT.NComp(), dataT.Size(), NameOf(s.q)))
+			}
+			FFT_T_data_map[s.q] = FFT_T_data
 		}
 		bufsCPU_map[s.q] = bufsCPU
 		bufsGPUIP_map[s.q] = bufsGPUIP
@@ -162,6 +177,9 @@ func (s *fftOperation4D) Eval() {
 		bufsCPU = bufsCPU_map[s.q]
 		bufsGPUIP = bufsGPUIP_map[s.q]
 		bufsGPUOP = bufsGPUOP_map[s.q]
+		if FFT_T_in_mem {
+			FFT_T_data = FFT_T_data_map[s.q]
+		}
 	}
 	NxNyNz, startK, endK, transformedAxis := FFTOP.Axis()
 	wg := sync.WaitGroup{}
@@ -170,46 +188,68 @@ func (s *fftOperation4D) Eval() {
 		if lowerEnd+filesPerCore < int((s.maxF-s.minF)/s.dF) {
 			upperEnd = (core + 1) * filesPerCore
 		} else {
-			upperEnd = int((s.maxF - s.minF) / s.dF)
+			if FFT_T_in_mem {
+				upperEnd = amountFiles - 1
+			} else {
+				upperEnd = amountFiles
+			}
 		}
 		wg.Add(1)
-		go func(core int, s *fftOperation4D, startIndex, endIndex int, bufCPU, bufGPUIP, bufGPUOP, dataT *data.Slice, FFTOP *fftOperation3D, NxNyNz [3]int, startK, endK [3]float64, transformedAxis []string) {
-			runtime.LockOSThread()
-			cuda.SetCurrent_Ctx()
-			for i := startIndex; i <= endIndex; i++ {
-				in, err := httpfs.Open(OD() + fmt.Sprintf(FilenameFormat, "k_x_y_z_f_"+NameOf(s.q), i) + ".ovf")
-				if err == nil {
-					err := oommf.ReadOVF2DataBinary4Optimized(in, bufCPU)
-					if err != nil {
+		if !FFT_T_in_mem {
+			go func(core int, s *fftOperation4D, startIndex, endIndex int, bufCPU, bufGPUIP, bufGPUOP, dataT *data.Slice, FFTOP *fftOperation3D, NxNyNz [3]int, startK, endK [3]float64, transformedAxis []string) {
+				runtime.LockOSThread()
+				cuda.SetCurrent_Ctx()
+				cuda.Create_Stream(NameOf(s.q) + fmt.Sprintf("_%d", core))
+				for i := startIndex; i <= endIndex; i++ {
+					in, err := httpfs.Open(OD() + fmt.Sprintf(FilenameFormat, "k_x_y_z_f_"+NameOf(s.q), i) + ".ovf")
+					if err == nil {
+						err := oommf.ReadOVF2DataBinary4Optimized(in, bufCPU)
+						if err != nil {
+							data.Zero(bufCPU)
+						}
+						in.Close()
+					} else {
 						data.Zero(bufCPU)
 					}
-					in.Close()
-				} else {
-					data.Zero(bufCPU)
+					data.Copy(bufGPUIP, bufCPU)
+					phase := -2 * math.Pi * float64(i) * s.dF * Time * s.dF
+					cuda.FFT_T_Step(bufGPUOP, bufGPUIP, dataT, float32(phase), int((s.maxF-s.minF)/s.dF), fmt.Sprintf(NameOf(s.q)+"_%d", core))
+					info := data.Meta{Freq: s.minF + float64(i)*s.dF, Name: "k_x_y_z_f_" + NameOf(s.q), Unit: UnitOf(FFTOP), CellSize: MeshOf(FFTOP).CellSize()}
+					saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, "k_x_y_z_f_"+NameOf(s.q), i)+".ovf", bufGPUOP.HostCopy(), info, outputFormat, NxNyNz, startK, endK, transformedAxis, true, false)
 				}
-				data.Copy(bufGPUIP, bufCPU)
-				angle := -2i * complex64(complex(math.Pi*float64(i)*Time*s.dF, 0))
-				cuda.FFT_T_Step(bufGPUOP, bufGPUIP, dataT, real(angle), imag(angle), int((s.maxF-s.minF)/s.dF))
-				info := data.Meta{Freq: s.minF + float64(i)*s.dF, Name: "k_x_y_z_f_" + NameOf(s.q), Unit: UnitOf(FFTOP), CellSize: MeshOf(FFTOP).CellSize()}
-				saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, "k_x_y_z_f_"+NameOf(s.q), i)+".ovf", bufGPUOP.HostCopy(), info, outputFormat, NxNyNz, startK, endK, transformedAxis, true, false)
-			}
-			wg.Done()
-		}(core, s, lowerEnd, upperEnd, bufsCPU[core], bufsGPUIP[core], bufsGPUOP[core], dataT, FFTOP, NxNyNz, startK, endK, transformedAxis)
+				wg.Done()
+			}(core, s, lowerEnd, upperEnd, bufsCPU[core], bufsGPUIP[core], bufsGPUOP[core], dataT, FFTOP, NxNyNz, startK, endK, transformedAxis)
+		} else {
+			go func(core int, s *fftOperation4D, startIndex, endIndex int, FFT_T_data []*data.Slice, bufGPUIP, dataT *data.Slice, FFTOP *fftOperation3D, NxNyNz [3]int, startK, endK [3]float64, transformedAxis []string, amountFiles int) {
+				runtime.LockOSThread()
+				cuda.SetCurrent_Ctx()
+				cuda.Create_Stream(NameOf(s.q) + fmt.Sprintf("_%d", core))
+				for i := startIndex; i <= endIndex; i++ {
+					data.Copy(bufGPUIP, FFT_T_data[i], fmt.Sprintf(NameOf(s.q)+"_%d", core))
+					//angle := -2i * complex64(complex(math.Pi*float64(i)*Time*s.dF, 0))
+					phase := -2 * math.Pi * float64(i) * s.dF * Time * s.dF
+					cuda.FFT_T_Step(FFT_T_data[i], bufGPUIP, dataT, float32(phase), amountFiles, fmt.Sprintf(NameOf(s.q)+"_%d", core))
+				}
+				cuda.Destroy_Stream(fmt.Sprintf(NameOf(s.q)+"_%d", core))
+				wg.Done()
+			}(core, s, lowerEnd, upperEnd, FFT_T_data, bufsGPUIP[core], dataT, FFTOP, NxNyNz, startK, endK, transformedAxis, amountFiles)
+		}
 		lowerEnd += filesPerCore
 	}
 	wg.Wait()
-	/*
-		for core := range cores {
-			bufsCPU[core].Free()
-			cuda.Recycle(bufsGPUIP[core])
-			cuda.Recycle(bufsGPUOP[core])
-		}
-	*/
-	//fmt.Println(fmt.Sprintf(FilenameFormat, "k_x_y_z_f_"+NameOf(s.q), i) + ".ovf")
 	mu.Lock()
 	FFT_T_OPRunning[s] = false
 	condCalcComplete.Broadcast()
 	mu.Unlock()
+}
+
+func (s *fftOperation4D) SaveResults() {
+	FFTOP := FFT3D_FFT_T(s.q)
+	NxNyNz, startK, endK, transformedAxis := FFTOP.Axis()
+	for i := range len(FFT_T_data_map[s.q]) {
+		info := data.Meta{Freq: s.minF + float64(i)*s.dF, Name: "k_x_y_z_f_" + NameOf(s.q), Unit: UnitOf(FFTOP), CellSize: MeshOf(FFTOP).CellSize()}
+		saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, "k_x_y_z_f_"+NameOf(s.q), i)+".ovf", FFT_T_data_map[s.q][i].HostCopy(), info, outputFormat, NxNyNz, startK, endK, transformedAxis, true, false)
+	}
 }
 
 func (s *fftOperation4D) needUpdate() bool {
@@ -258,5 +298,12 @@ func DoFFT4D() {
 			tmpOp.count++
 			FFT_T_OP[i] = tmpOp
 		}
+	}
+}
+
+func WaitFFTs4DDone() {
+	for i, _ := range FFT_T_OP {
+		FFT_T_OP[i].waitUntilPreviousCalcDone()
+		FFT_T_OP[i].SaveResults()
 	}
 }
