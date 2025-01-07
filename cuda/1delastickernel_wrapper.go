@@ -153,11 +153,11 @@ const (
 	.param .u8 SecondDerivative_param_18
 )
 {
-	.reg .pred 	%p&lt;61&gt;;
-	.reg .f32 	%f&lt;506&gt;;
-	.reg .b32 	%r&lt;61&gt;;
-	.reg .f64 	%fd&lt;59&gt;;
-	.reg .b64 	%rd&lt;106&gt;;
+	.reg .pred 	%p<61>;
+	.reg .f32 	%f<506>;
+	.reg .b32 	%r<61>;
+	.reg .f64 	%fd<59>;
+	.reg .b64 	%rd<106>;
 
 
 	ld.param.u64 	%rd26, [SecondDerivative_param_0];
@@ -245,19 +245,19 @@ $L__BB0_5:
 	mov.f32 	%f452, %f451;
 	@%p8 bra 	$L__BB0_11;
 
-	ld.global.nc.f32 	%f8, [%rd8&#43;4];
-	ld.global.nc.f32 	%f9, [%rd9&#43;4];
+	ld.global.nc.f32 	%f8, [%rd8+4];
+	ld.global.nc.f32 	%f9, [%rd9+4];
 	mov.f32 	%f445, %f449;
 	@%p6 bra 	$L__BB0_8;
 
-	ld.global.nc.f32 	%f163, [%rd13&#43;4];
+	ld.global.nc.f32 	%f163, [%rd13+4];
 	mul.f32 	%f445, %f163, %f449;
 
 $L__BB0_8:
 	mov.f32 	%f446, %f501;
 	@%p7 bra 	$L__BB0_10;
 
-	ld.global.nc.f32 	%f164, [%rd14&#43;4];
+	ld.global.nc.f32 	%f164, [%rd14+4];
 	mul.f32 	%f446, %f164, %f501;
 
 $L__BB0_10:
@@ -279,18 +279,18 @@ $L__BB0_11:
 	setp.lt.s32 	%p11, %r1, 1;
 	@%p11 bra 	$L__BB0_17;
 
-	ld.global.nc.f32 	%f18, [%rd8&#43;-4];
-	ld.global.nc.f32 	%f19, [%rd9&#43;-4];
+	ld.global.nc.f32 	%f18, [%rd8+-4];
+	ld.global.nc.f32 	%f19, [%rd9+-4];
 	@%p6 bra 	$L__BB0_14;
 
-	ld.global.nc.f32 	%f172, [%rd13&#43;-4];
+	ld.global.nc.f32 	%f172, [%rd13+-4];
 	mul.f32 	%f449, %f172, %f449;
 
 $L__BB0_14:
 	mov.f32 	%f450, %f501;
 	@%p7 bra 	$L__BB0_16;
 
-	ld.global.nc.f32 	%f173, [%rd14&#43;-4];
+	ld.global.nc.f32 	%f173, [%rd14+-4];
 	mul.f32 	%f450, %f173, %f501;
 
 $L__BB0_16:
@@ -655,14 +655,14 @@ $L__BB0_59:
 	mov.f32 	%f480, %f501;
 	@%p7 bra 	$L__BB0_62;
 
-	ld.global.nc.f32 	%f239, [%rd14&#43;4];
+	ld.global.nc.f32 	%f239, [%rd14+4];
 	mul.f32 	%f480, %f239, %f501;
 
 $L__BB0_62:
 	mov.f32 	%f481, %f500;
 	@%p34 bra 	$L__BB0_64;
 
-	ld.global.nc.f32 	%f240, [%rd25&#43;4];
+	ld.global.nc.f32 	%f240, [%rd25+4];
 	mul.f32 	%f481, %f240, %f500;
 
 $L__BB0_64:
@@ -678,11 +678,11 @@ $L__BB0_64:
 	cvt.f64.f32 	%fd22, %f427;
 	mul.f64 	%fd23, %fd21, %fd22;
 	cvt.rn.f32.f64 	%f243, %fd23;
-	ld.global.nc.f32 	%f244, [%rd8&#43;4];
-	ld.global.nc.f32 	%f245, [%rd15&#43;4];
+	ld.global.nc.f32 	%f244, [%rd8+4];
+	ld.global.nc.f32 	%f245, [%rd15+4];
 	sub.f32 	%f246, %f245, %f244;
-	ld.global.nc.f32 	%f247, [%rd9&#43;4];
-	ld.global.nc.f32 	%f248, [%rd16&#43;4];
+	ld.global.nc.f32 	%f247, [%rd9+4];
+	ld.global.nc.f32 	%f248, [%rd16+4];
 	sub.f32 	%f249, %f248, %f247;
 	mul.f32 	%f250, %f480, %f246;
 	mul.f32 	%f251, %f481, %f249;
@@ -710,11 +710,11 @@ $L__BB0_66:
 	cvt.f64.f32 	%fd27, %f425;
 	mul.f64 	%fd28, %fd26, %fd27;
 	cvt.rn.f32.f64 	%f262, %fd28;
-	ld.global.nc.f32 	%f263, [%rd8&#43;4];
-	ld.global.nc.f32 	%f264, [%rd18&#43;4];
+	ld.global.nc.f32 	%f263, [%rd8+4];
+	ld.global.nc.f32 	%f264, [%rd18+4];
 	sub.f32 	%f265, %f263, %f264;
-	ld.global.nc.f32 	%f266, [%rd9&#43;4];
-	ld.global.nc.f32 	%f267, [%rd19&#43;4];
+	ld.global.nc.f32 	%f266, [%rd9+4];
+	ld.global.nc.f32 	%f267, [%rd19+4];
 	sub.f32 	%f268, %f266, %f267;
 	mul.f32 	%f269, %f480, %f265;
 	mul.f32 	%f270, %f481, %f268;
@@ -737,14 +737,14 @@ $L__BB0_68:
 	mov.f32 	%f486, %f501;
 	@%p7 bra 	$L__BB0_71;
 
-	ld.global.nc.f32 	%f281, [%rd14&#43;-4];
+	ld.global.nc.f32 	%f281, [%rd14+-4];
 	mul.f32 	%f486, %f281, %f501;
 
 $L__BB0_71:
 	mov.f32 	%f487, %f500;
 	@%p34 bra 	$L__BB0_73;
 
-	ld.global.nc.f32 	%f282, [%rd25&#43;-4];
+	ld.global.nc.f32 	%f282, [%rd25+-4];
 	mul.f32 	%f487, %f282, %f500;
 
 $L__BB0_73:
@@ -758,11 +758,11 @@ $L__BB0_73:
 	cvt.f64.f32 	%fd32, %f423;
 	mul.f64 	%fd33, %fd31, %fd32;
 	cvt.rn.f32.f64 	%f283, %fd33;
-	ld.global.nc.f32 	%f284, [%rd8&#43;-4];
-	ld.global.nc.f32 	%f285, [%rd15&#43;-4];
+	ld.global.nc.f32 	%f284, [%rd8+-4];
+	ld.global.nc.f32 	%f285, [%rd15+-4];
 	sub.f32 	%f286, %f285, %f284;
-	ld.global.nc.f32 	%f287, [%rd9&#43;-4];
-	ld.global.nc.f32 	%f288, [%rd16&#43;-4];
+	ld.global.nc.f32 	%f287, [%rd9+-4];
+	ld.global.nc.f32 	%f288, [%rd16+-4];
 	sub.f32 	%f289, %f288, %f287;
 	mul.f32 	%f290, %f486, %f286;
 	mul.f32 	%f291, %f487, %f289;
@@ -790,11 +790,11 @@ $L__BB0_75:
 	cvt.f64.f32 	%fd37, %f421;
 	mul.f64 	%fd38, %fd36, %fd37;
 	cvt.rn.f32.f64 	%f302, %fd38;
-	ld.global.nc.f32 	%f303, [%rd8&#43;-4];
-	ld.global.nc.f32 	%f304, [%rd18&#43;-4];
+	ld.global.nc.f32 	%f303, [%rd8+-4];
+	ld.global.nc.f32 	%f304, [%rd18+-4];
 	sub.f32 	%f305, %f303, %f304;
-	ld.global.nc.f32 	%f306, [%rd9&#43;-4];
-	ld.global.nc.f32 	%f307, [%rd19&#43;-4];
+	ld.global.nc.f32 	%f306, [%rd9+-4];
+	ld.global.nc.f32 	%f307, [%rd19+-4];
 	sub.f32 	%f308, %f306, %f307;
 	mul.f32 	%f309, %f486, %f305;
 	mul.f32 	%f310, %f487, %f308;
@@ -865,18 +865,18 @@ $L__BB0_86:
 	mul.f64 	%fd43, %fd41, %fd42;
 	cvt.rn.f32.f64 	%f329, %fd43;
 	ld.global.nc.f32 	%f330, [%rd15];
-	ld.global.nc.f32 	%f331, [%rd15&#43;4];
+	ld.global.nc.f32 	%f331, [%rd15+4];
 	sub.f32 	%f332, %f331, %f330;
 	ld.global.nc.f32 	%f333, [%rd16];
-	ld.global.nc.f32 	%f334, [%rd16&#43;4];
+	ld.global.nc.f32 	%f334, [%rd16+4];
 	sub.f32 	%f335, %f334, %f333;
 	mul.f32 	%f336, %f494, %f332;
 	mul.f32 	%f337, %f495, %f335;
 	fma.rn.f32 	%f338, %f336, %f329, 0f00000000;
 	fma.rn.f32 	%f339, %f337, %f329, 0f00000000;
-	ld.global.nc.f32 	%f340, [%rd8&#43;4];
+	ld.global.nc.f32 	%f340, [%rd8+4];
 	sub.f32 	%f341, %f340, %f1;
-	ld.global.nc.f32 	%f342, [%rd9&#43;4];
+	ld.global.nc.f32 	%f342, [%rd9+4];
 	sub.f32 	%f343, %f342, %f2;
 	mul.f32 	%f344, %f492, %f341;
 	mul.f32 	%f345, %f493, %f343;
@@ -897,18 +897,18 @@ $L__BB0_88:
 	mul.f64 	%fd48, %fd46, %fd47;
 	cvt.rn.f32.f64 	%f348, %fd48;
 	ld.global.nc.f32 	%f349, [%rd15];
-	ld.global.nc.f32 	%f350, [%rd15&#43;-4];
+	ld.global.nc.f32 	%f350, [%rd15+-4];
 	sub.f32 	%f351, %f349, %f350;
 	ld.global.nc.f32 	%f352, [%rd16];
-	ld.global.nc.f32 	%f353, [%rd16&#43;-4];
+	ld.global.nc.f32 	%f353, [%rd16+-4];
 	sub.f32 	%f354, %f352, %f353;
 	mul.f32 	%f355, %f494, %f351;
 	mul.f32 	%f356, %f495, %f354;
 	fma.rn.f32 	%f357, %f355, %f348, %f505;
 	fma.rn.f32 	%f358, %f356, %f348, %f504;
-	ld.global.nc.f32 	%f359, [%rd8&#43;-4];
+	ld.global.nc.f32 	%f359, [%rd8+-4];
 	sub.f32 	%f360, %f1, %f359;
-	ld.global.nc.f32 	%f361, [%rd9&#43;-4];
+	ld.global.nc.f32 	%f361, [%rd9+-4];
 	sub.f32 	%f362, %f2, %f361;
 	mul.f32 	%f363, %f492, %f360;
 	mul.f32 	%f364, %f493, %f362;
@@ -946,10 +946,10 @@ $L__BB0_95:
 	mul.f64 	%fd53, %fd51, %fd52;
 	cvt.rn.f32.f64 	%f369, %fd53;
 	ld.global.nc.f32 	%f370, [%rd18];
-	ld.global.nc.f32 	%f371, [%rd18&#43;4];
+	ld.global.nc.f32 	%f371, [%rd18+4];
 	sub.f32 	%f372, %f371, %f370;
 	ld.global.nc.f32 	%f373, [%rd19];
-	ld.global.nc.f32 	%f374, [%rd19&#43;4];
+	ld.global.nc.f32 	%f374, [%rd19+4];
 	sub.f32 	%f375, %f374, %f373;
 	mul.f32 	%f376, %f500, %f372;
 	mul.f32 	%f377, %f501, %f375;
@@ -957,9 +957,9 @@ $L__BB0_95:
 	mul.f32 	%f379, %f377, %f369;
 	sub.f32 	%f380, %f505, %f378;
 	sub.f32 	%f381, %f504, %f379;
-	ld.global.nc.f32 	%f382, [%rd8&#43;4];
+	ld.global.nc.f32 	%f382, [%rd8+4];
 	sub.f32 	%f383, %f382, %f1;
-	ld.global.nc.f32 	%f384, [%rd9&#43;4];
+	ld.global.nc.f32 	%f384, [%rd9+4];
 	sub.f32 	%f385, %f384, %f2;
 	mul.f32 	%f386, %f492, %f383;
 	mul.f32 	%f387, %f493, %f385;
@@ -978,10 +978,10 @@ $L__BB0_97:
 	mul.f64 	%fd58, %fd56, %fd57;
 	cvt.rn.f32.f64 	%f388, %fd58;
 	ld.global.nc.f32 	%f389, [%rd18];
-	ld.global.nc.f32 	%f390, [%rd18&#43;-4];
+	ld.global.nc.f32 	%f390, [%rd18+-4];
 	sub.f32 	%f391, %f389, %f390;
 	ld.global.nc.f32 	%f392, [%rd19];
-	ld.global.nc.f32 	%f393, [%rd19&#43;-4];
+	ld.global.nc.f32 	%f393, [%rd19+-4];
 	sub.f32 	%f394, %f392, %f393;
 	mul.f32 	%f395, %f500, %f391;
 	mul.f32 	%f396, %f501, %f394;
@@ -989,9 +989,9 @@ $L__BB0_97:
 	mul.f32 	%f398, %f396, %f388;
 	sub.f32 	%f399, %f505, %f397;
 	sub.f32 	%f400, %f504, %f398;
-	ld.global.nc.f32 	%f401, [%rd8&#43;-4];
+	ld.global.nc.f32 	%f401, [%rd8+-4];
 	sub.f32 	%f402, %f1, %f401;
-	ld.global.nc.f32 	%f403, [%rd9&#43;-4];
+	ld.global.nc.f32 	%f403, [%rd9+-4];
 	sub.f32 	%f404, %f2, %f403;
 	mul.f32 	%f405, %f492, %f402;
 	mul.f32 	%f406, %f493, %f404;
@@ -1040,11 +1040,11 @@ $L__BB0_100:
 	.param .u8 SecondDerivative_param_18
 )
 {
-	.reg .pred 	%p&lt;61&gt;;
-	.reg .f32 	%f&lt;506&gt;;
-	.reg .b32 	%r&lt;61&gt;;
-	.reg .f64 	%fd&lt;59&gt;;
-	.reg .b64 	%rd&lt;106&gt;;
+	.reg .pred 	%p<61>;
+	.reg .f32 	%f<506>;
+	.reg .b32 	%r<61>;
+	.reg .f64 	%fd<59>;
+	.reg .b64 	%rd<106>;
 
 
 	ld.param.u64 	%rd26, [SecondDerivative_param_0];
@@ -1132,19 +1132,19 @@ $L__BB0_5:
 	mov.f32 	%f452, %f451;
 	@%p8 bra 	$L__BB0_11;
 
-	ld.global.nc.f32 	%f8, [%rd8&#43;4];
-	ld.global.nc.f32 	%f9, [%rd9&#43;4];
+	ld.global.nc.f32 	%f8, [%rd8+4];
+	ld.global.nc.f32 	%f9, [%rd9+4];
 	mov.f32 	%f445, %f449;
 	@%p6 bra 	$L__BB0_8;
 
-	ld.global.nc.f32 	%f163, [%rd13&#43;4];
+	ld.global.nc.f32 	%f163, [%rd13+4];
 	mul.f32 	%f445, %f163, %f449;
 
 $L__BB0_8:
 	mov.f32 	%f446, %f501;
 	@%p7 bra 	$L__BB0_10;
 
-	ld.global.nc.f32 	%f164, [%rd14&#43;4];
+	ld.global.nc.f32 	%f164, [%rd14+4];
 	mul.f32 	%f446, %f164, %f501;
 
 $L__BB0_10:
@@ -1166,18 +1166,18 @@ $L__BB0_11:
 	setp.lt.s32 	%p11, %r1, 1;
 	@%p11 bra 	$L__BB0_17;
 
-	ld.global.nc.f32 	%f18, [%rd8&#43;-4];
-	ld.global.nc.f32 	%f19, [%rd9&#43;-4];
+	ld.global.nc.f32 	%f18, [%rd8+-4];
+	ld.global.nc.f32 	%f19, [%rd9+-4];
 	@%p6 bra 	$L__BB0_14;
 
-	ld.global.nc.f32 	%f172, [%rd13&#43;-4];
+	ld.global.nc.f32 	%f172, [%rd13+-4];
 	mul.f32 	%f449, %f172, %f449;
 
 $L__BB0_14:
 	mov.f32 	%f450, %f501;
 	@%p7 bra 	$L__BB0_16;
 
-	ld.global.nc.f32 	%f173, [%rd14&#43;-4];
+	ld.global.nc.f32 	%f173, [%rd14+-4];
 	mul.f32 	%f450, %f173, %f501;
 
 $L__BB0_16:
@@ -1542,14 +1542,14 @@ $L__BB0_59:
 	mov.f32 	%f480, %f501;
 	@%p7 bra 	$L__BB0_62;
 
-	ld.global.nc.f32 	%f239, [%rd14&#43;4];
+	ld.global.nc.f32 	%f239, [%rd14+4];
 	mul.f32 	%f480, %f239, %f501;
 
 $L__BB0_62:
 	mov.f32 	%f481, %f500;
 	@%p34 bra 	$L__BB0_64;
 
-	ld.global.nc.f32 	%f240, [%rd25&#43;4];
+	ld.global.nc.f32 	%f240, [%rd25+4];
 	mul.f32 	%f481, %f240, %f500;
 
 $L__BB0_64:
@@ -1565,11 +1565,11 @@ $L__BB0_64:
 	cvt.f64.f32 	%fd22, %f427;
 	mul.f64 	%fd23, %fd21, %fd22;
 	cvt.rn.f32.f64 	%f243, %fd23;
-	ld.global.nc.f32 	%f244, [%rd8&#43;4];
-	ld.global.nc.f32 	%f245, [%rd15&#43;4];
+	ld.global.nc.f32 	%f244, [%rd8+4];
+	ld.global.nc.f32 	%f245, [%rd15+4];
 	sub.f32 	%f246, %f245, %f244;
-	ld.global.nc.f32 	%f247, [%rd9&#43;4];
-	ld.global.nc.f32 	%f248, [%rd16&#43;4];
+	ld.global.nc.f32 	%f247, [%rd9+4];
+	ld.global.nc.f32 	%f248, [%rd16+4];
 	sub.f32 	%f249, %f248, %f247;
 	mul.f32 	%f250, %f480, %f246;
 	mul.f32 	%f251, %f481, %f249;
@@ -1597,11 +1597,11 @@ $L__BB0_66:
 	cvt.f64.f32 	%fd27, %f425;
 	mul.f64 	%fd28, %fd26, %fd27;
 	cvt.rn.f32.f64 	%f262, %fd28;
-	ld.global.nc.f32 	%f263, [%rd8&#43;4];
-	ld.global.nc.f32 	%f264, [%rd18&#43;4];
+	ld.global.nc.f32 	%f263, [%rd8+4];
+	ld.global.nc.f32 	%f264, [%rd18+4];
 	sub.f32 	%f265, %f263, %f264;
-	ld.global.nc.f32 	%f266, [%rd9&#43;4];
-	ld.global.nc.f32 	%f267, [%rd19&#43;4];
+	ld.global.nc.f32 	%f266, [%rd9+4];
+	ld.global.nc.f32 	%f267, [%rd19+4];
 	sub.f32 	%f268, %f266, %f267;
 	mul.f32 	%f269, %f480, %f265;
 	mul.f32 	%f270, %f481, %f268;
@@ -1624,14 +1624,14 @@ $L__BB0_68:
 	mov.f32 	%f486, %f501;
 	@%p7 bra 	$L__BB0_71;
 
-	ld.global.nc.f32 	%f281, [%rd14&#43;-4];
+	ld.global.nc.f32 	%f281, [%rd14+-4];
 	mul.f32 	%f486, %f281, %f501;
 
 $L__BB0_71:
 	mov.f32 	%f487, %f500;
 	@%p34 bra 	$L__BB0_73;
 
-	ld.global.nc.f32 	%f282, [%rd25&#43;-4];
+	ld.global.nc.f32 	%f282, [%rd25+-4];
 	mul.f32 	%f487, %f282, %f500;
 
 $L__BB0_73:
@@ -1645,11 +1645,11 @@ $L__BB0_73:
 	cvt.f64.f32 	%fd32, %f423;
 	mul.f64 	%fd33, %fd31, %fd32;
 	cvt.rn.f32.f64 	%f283, %fd33;
-	ld.global.nc.f32 	%f284, [%rd8&#43;-4];
-	ld.global.nc.f32 	%f285, [%rd15&#43;-4];
+	ld.global.nc.f32 	%f284, [%rd8+-4];
+	ld.global.nc.f32 	%f285, [%rd15+-4];
 	sub.f32 	%f286, %f285, %f284;
-	ld.global.nc.f32 	%f287, [%rd9&#43;-4];
-	ld.global.nc.f32 	%f288, [%rd16&#43;-4];
+	ld.global.nc.f32 	%f287, [%rd9+-4];
+	ld.global.nc.f32 	%f288, [%rd16+-4];
 	sub.f32 	%f289, %f288, %f287;
 	mul.f32 	%f290, %f486, %f286;
 	mul.f32 	%f291, %f487, %f289;
@@ -1677,11 +1677,11 @@ $L__BB0_75:
 	cvt.f64.f32 	%fd37, %f421;
 	mul.f64 	%fd38, %fd36, %fd37;
 	cvt.rn.f32.f64 	%f302, %fd38;
-	ld.global.nc.f32 	%f303, [%rd8&#43;-4];
-	ld.global.nc.f32 	%f304, [%rd18&#43;-4];
+	ld.global.nc.f32 	%f303, [%rd8+-4];
+	ld.global.nc.f32 	%f304, [%rd18+-4];
 	sub.f32 	%f305, %f303, %f304;
-	ld.global.nc.f32 	%f306, [%rd9&#43;-4];
-	ld.global.nc.f32 	%f307, [%rd19&#43;-4];
+	ld.global.nc.f32 	%f306, [%rd9+-4];
+	ld.global.nc.f32 	%f307, [%rd19+-4];
 	sub.f32 	%f308, %f306, %f307;
 	mul.f32 	%f309, %f486, %f305;
 	mul.f32 	%f310, %f487, %f308;
@@ -1752,18 +1752,18 @@ $L__BB0_86:
 	mul.f64 	%fd43, %fd41, %fd42;
 	cvt.rn.f32.f64 	%f329, %fd43;
 	ld.global.nc.f32 	%f330, [%rd15];
-	ld.global.nc.f32 	%f331, [%rd15&#43;4];
+	ld.global.nc.f32 	%f331, [%rd15+4];
 	sub.f32 	%f332, %f331, %f330;
 	ld.global.nc.f32 	%f333, [%rd16];
-	ld.global.nc.f32 	%f334, [%rd16&#43;4];
+	ld.global.nc.f32 	%f334, [%rd16+4];
 	sub.f32 	%f335, %f334, %f333;
 	mul.f32 	%f336, %f494, %f332;
 	mul.f32 	%f337, %f495, %f335;
 	fma.rn.f32 	%f338, %f336, %f329, 0f00000000;
 	fma.rn.f32 	%f339, %f337, %f329, 0f00000000;
-	ld.global.nc.f32 	%f340, [%rd8&#43;4];
+	ld.global.nc.f32 	%f340, [%rd8+4];
 	sub.f32 	%f341, %f340, %f1;
-	ld.global.nc.f32 	%f342, [%rd9&#43;4];
+	ld.global.nc.f32 	%f342, [%rd9+4];
 	sub.f32 	%f343, %f342, %f2;
 	mul.f32 	%f344, %f492, %f341;
 	mul.f32 	%f345, %f493, %f343;
@@ -1784,18 +1784,18 @@ $L__BB0_88:
 	mul.f64 	%fd48, %fd46, %fd47;
 	cvt.rn.f32.f64 	%f348, %fd48;
 	ld.global.nc.f32 	%f349, [%rd15];
-	ld.global.nc.f32 	%f350, [%rd15&#43;-4];
+	ld.global.nc.f32 	%f350, [%rd15+-4];
 	sub.f32 	%f351, %f349, %f350;
 	ld.global.nc.f32 	%f352, [%rd16];
-	ld.global.nc.f32 	%f353, [%rd16&#43;-4];
+	ld.global.nc.f32 	%f353, [%rd16+-4];
 	sub.f32 	%f354, %f352, %f353;
 	mul.f32 	%f355, %f494, %f351;
 	mul.f32 	%f356, %f495, %f354;
 	fma.rn.f32 	%f357, %f355, %f348, %f505;
 	fma.rn.f32 	%f358, %f356, %f348, %f504;
-	ld.global.nc.f32 	%f359, [%rd8&#43;-4];
+	ld.global.nc.f32 	%f359, [%rd8+-4];
 	sub.f32 	%f360, %f1, %f359;
-	ld.global.nc.f32 	%f361, [%rd9&#43;-4];
+	ld.global.nc.f32 	%f361, [%rd9+-4];
 	sub.f32 	%f362, %f2, %f361;
 	mul.f32 	%f363, %f492, %f360;
 	mul.f32 	%f364, %f493, %f362;
@@ -1833,10 +1833,10 @@ $L__BB0_95:
 	mul.f64 	%fd53, %fd51, %fd52;
 	cvt.rn.f32.f64 	%f369, %fd53;
 	ld.global.nc.f32 	%f370, [%rd18];
-	ld.global.nc.f32 	%f371, [%rd18&#43;4];
+	ld.global.nc.f32 	%f371, [%rd18+4];
 	sub.f32 	%f372, %f371, %f370;
 	ld.global.nc.f32 	%f373, [%rd19];
-	ld.global.nc.f32 	%f374, [%rd19&#43;4];
+	ld.global.nc.f32 	%f374, [%rd19+4];
 	sub.f32 	%f375, %f374, %f373;
 	mul.f32 	%f376, %f500, %f372;
 	mul.f32 	%f377, %f501, %f375;
@@ -1844,9 +1844,9 @@ $L__BB0_95:
 	mul.f32 	%f379, %f377, %f369;
 	sub.f32 	%f380, %f505, %f378;
 	sub.f32 	%f381, %f504, %f379;
-	ld.global.nc.f32 	%f382, [%rd8&#43;4];
+	ld.global.nc.f32 	%f382, [%rd8+4];
 	sub.f32 	%f383, %f382, %f1;
-	ld.global.nc.f32 	%f384, [%rd9&#43;4];
+	ld.global.nc.f32 	%f384, [%rd9+4];
 	sub.f32 	%f385, %f384, %f2;
 	mul.f32 	%f386, %f492, %f383;
 	mul.f32 	%f387, %f493, %f385;
@@ -1865,10 +1865,10 @@ $L__BB0_97:
 	mul.f64 	%fd58, %fd56, %fd57;
 	cvt.rn.f32.f64 	%f388, %fd58;
 	ld.global.nc.f32 	%f389, [%rd18];
-	ld.global.nc.f32 	%f390, [%rd18&#43;-4];
+	ld.global.nc.f32 	%f390, [%rd18+-4];
 	sub.f32 	%f391, %f389, %f390;
 	ld.global.nc.f32 	%f392, [%rd19];
-	ld.global.nc.f32 	%f393, [%rd19&#43;-4];
+	ld.global.nc.f32 	%f393, [%rd19+-4];
 	sub.f32 	%f394, %f392, %f393;
 	mul.f32 	%f395, %f500, %f391;
 	mul.f32 	%f396, %f501, %f394;
@@ -1876,9 +1876,9 @@ $L__BB0_97:
 	mul.f32 	%f398, %f396, %f388;
 	sub.f32 	%f399, %f505, %f397;
 	sub.f32 	%f400, %f504, %f398;
-	ld.global.nc.f32 	%f401, [%rd8&#43;-4];
+	ld.global.nc.f32 	%f401, [%rd8+-4];
 	sub.f32 	%f402, %f1, %f401;
-	ld.global.nc.f32 	%f403, [%rd9&#43;-4];
+	ld.global.nc.f32 	%f403, [%rd9+-4];
 	sub.f32 	%f404, %f2, %f403;
 	mul.f32 	%f405, %f492, %f402;
 	mul.f32 	%f406, %f493, %f404;
@@ -1927,11 +1927,11 @@ $L__BB0_100:
 	.param .u8 SecondDerivative_param_18
 )
 {
-	.reg .pred 	%p&lt;61&gt;;
-	.reg .f32 	%f&lt;506&gt;;
-	.reg .b32 	%r&lt;61&gt;;
-	.reg .f64 	%fd&lt;59&gt;;
-	.reg .b64 	%rd&lt;106&gt;;
+	.reg .pred 	%p<61>;
+	.reg .f32 	%f<506>;
+	.reg .b32 	%r<61>;
+	.reg .f64 	%fd<59>;
+	.reg .b64 	%rd<106>;
 
 
 	ld.param.u64 	%rd26, [SecondDerivative_param_0];
@@ -2019,19 +2019,19 @@ $L__BB0_5:
 	mov.f32 	%f452, %f451;
 	@%p8 bra 	$L__BB0_11;
 
-	ld.global.nc.f32 	%f8, [%rd8&#43;4];
-	ld.global.nc.f32 	%f9, [%rd9&#43;4];
+	ld.global.nc.f32 	%f8, [%rd8+4];
+	ld.global.nc.f32 	%f9, [%rd9+4];
 	mov.f32 	%f445, %f449;
 	@%p6 bra 	$L__BB0_8;
 
-	ld.global.nc.f32 	%f163, [%rd13&#43;4];
+	ld.global.nc.f32 	%f163, [%rd13+4];
 	mul.f32 	%f445, %f163, %f449;
 
 $L__BB0_8:
 	mov.f32 	%f446, %f501;
 	@%p7 bra 	$L__BB0_10;
 
-	ld.global.nc.f32 	%f164, [%rd14&#43;4];
+	ld.global.nc.f32 	%f164, [%rd14+4];
 	mul.f32 	%f446, %f164, %f501;
 
 $L__BB0_10:
@@ -2053,18 +2053,18 @@ $L__BB0_11:
 	setp.lt.s32 	%p11, %r1, 1;
 	@%p11 bra 	$L__BB0_17;
 
-	ld.global.nc.f32 	%f18, [%rd8&#43;-4];
-	ld.global.nc.f32 	%f19, [%rd9&#43;-4];
+	ld.global.nc.f32 	%f18, [%rd8+-4];
+	ld.global.nc.f32 	%f19, [%rd9+-4];
 	@%p6 bra 	$L__BB0_14;
 
-	ld.global.nc.f32 	%f172, [%rd13&#43;-4];
+	ld.global.nc.f32 	%f172, [%rd13+-4];
 	mul.f32 	%f449, %f172, %f449;
 
 $L__BB0_14:
 	mov.f32 	%f450, %f501;
 	@%p7 bra 	$L__BB0_16;
 
-	ld.global.nc.f32 	%f173, [%rd14&#43;-4];
+	ld.global.nc.f32 	%f173, [%rd14+-4];
 	mul.f32 	%f450, %f173, %f501;
 
 $L__BB0_16:
@@ -2429,14 +2429,14 @@ $L__BB0_59:
 	mov.f32 	%f480, %f501;
 	@%p7 bra 	$L__BB0_62;
 
-	ld.global.nc.f32 	%f239, [%rd14&#43;4];
+	ld.global.nc.f32 	%f239, [%rd14+4];
 	mul.f32 	%f480, %f239, %f501;
 
 $L__BB0_62:
 	mov.f32 	%f481, %f500;
 	@%p34 bra 	$L__BB0_64;
 
-	ld.global.nc.f32 	%f240, [%rd25&#43;4];
+	ld.global.nc.f32 	%f240, [%rd25+4];
 	mul.f32 	%f481, %f240, %f500;
 
 $L__BB0_64:
@@ -2452,11 +2452,11 @@ $L__BB0_64:
 	cvt.f64.f32 	%fd22, %f427;
 	mul.f64 	%fd23, %fd21, %fd22;
 	cvt.rn.f32.f64 	%f243, %fd23;
-	ld.global.nc.f32 	%f244, [%rd8&#43;4];
-	ld.global.nc.f32 	%f245, [%rd15&#43;4];
+	ld.global.nc.f32 	%f244, [%rd8+4];
+	ld.global.nc.f32 	%f245, [%rd15+4];
 	sub.f32 	%f246, %f245, %f244;
-	ld.global.nc.f32 	%f247, [%rd9&#43;4];
-	ld.global.nc.f32 	%f248, [%rd16&#43;4];
+	ld.global.nc.f32 	%f247, [%rd9+4];
+	ld.global.nc.f32 	%f248, [%rd16+4];
 	sub.f32 	%f249, %f248, %f247;
 	mul.f32 	%f250, %f480, %f246;
 	mul.f32 	%f251, %f481, %f249;
@@ -2484,11 +2484,11 @@ $L__BB0_66:
 	cvt.f64.f32 	%fd27, %f425;
 	mul.f64 	%fd28, %fd26, %fd27;
 	cvt.rn.f32.f64 	%f262, %fd28;
-	ld.global.nc.f32 	%f263, [%rd8&#43;4];
-	ld.global.nc.f32 	%f264, [%rd18&#43;4];
+	ld.global.nc.f32 	%f263, [%rd8+4];
+	ld.global.nc.f32 	%f264, [%rd18+4];
 	sub.f32 	%f265, %f263, %f264;
-	ld.global.nc.f32 	%f266, [%rd9&#43;4];
-	ld.global.nc.f32 	%f267, [%rd19&#43;4];
+	ld.global.nc.f32 	%f266, [%rd9+4];
+	ld.global.nc.f32 	%f267, [%rd19+4];
 	sub.f32 	%f268, %f266, %f267;
 	mul.f32 	%f269, %f480, %f265;
 	mul.f32 	%f270, %f481, %f268;
@@ -2511,14 +2511,14 @@ $L__BB0_68:
 	mov.f32 	%f486, %f501;
 	@%p7 bra 	$L__BB0_71;
 
-	ld.global.nc.f32 	%f281, [%rd14&#43;-4];
+	ld.global.nc.f32 	%f281, [%rd14+-4];
 	mul.f32 	%f486, %f281, %f501;
 
 $L__BB0_71:
 	mov.f32 	%f487, %f500;
 	@%p34 bra 	$L__BB0_73;
 
-	ld.global.nc.f32 	%f282, [%rd25&#43;-4];
+	ld.global.nc.f32 	%f282, [%rd25+-4];
 	mul.f32 	%f487, %f282, %f500;
 
 $L__BB0_73:
@@ -2532,11 +2532,11 @@ $L__BB0_73:
 	cvt.f64.f32 	%fd32, %f423;
 	mul.f64 	%fd33, %fd31, %fd32;
 	cvt.rn.f32.f64 	%f283, %fd33;
-	ld.global.nc.f32 	%f284, [%rd8&#43;-4];
-	ld.global.nc.f32 	%f285, [%rd15&#43;-4];
+	ld.global.nc.f32 	%f284, [%rd8+-4];
+	ld.global.nc.f32 	%f285, [%rd15+-4];
 	sub.f32 	%f286, %f285, %f284;
-	ld.global.nc.f32 	%f287, [%rd9&#43;-4];
-	ld.global.nc.f32 	%f288, [%rd16&#43;-4];
+	ld.global.nc.f32 	%f287, [%rd9+-4];
+	ld.global.nc.f32 	%f288, [%rd16+-4];
 	sub.f32 	%f289, %f288, %f287;
 	mul.f32 	%f290, %f486, %f286;
 	mul.f32 	%f291, %f487, %f289;
@@ -2564,11 +2564,11 @@ $L__BB0_75:
 	cvt.f64.f32 	%fd37, %f421;
 	mul.f64 	%fd38, %fd36, %fd37;
 	cvt.rn.f32.f64 	%f302, %fd38;
-	ld.global.nc.f32 	%f303, [%rd8&#43;-4];
-	ld.global.nc.f32 	%f304, [%rd18&#43;-4];
+	ld.global.nc.f32 	%f303, [%rd8+-4];
+	ld.global.nc.f32 	%f304, [%rd18+-4];
 	sub.f32 	%f305, %f303, %f304;
-	ld.global.nc.f32 	%f306, [%rd9&#43;-4];
-	ld.global.nc.f32 	%f307, [%rd19&#43;-4];
+	ld.global.nc.f32 	%f306, [%rd9+-4];
+	ld.global.nc.f32 	%f307, [%rd19+-4];
 	sub.f32 	%f308, %f306, %f307;
 	mul.f32 	%f309, %f486, %f305;
 	mul.f32 	%f310, %f487, %f308;
@@ -2639,18 +2639,18 @@ $L__BB0_86:
 	mul.f64 	%fd43, %fd41, %fd42;
 	cvt.rn.f32.f64 	%f329, %fd43;
 	ld.global.nc.f32 	%f330, [%rd15];
-	ld.global.nc.f32 	%f331, [%rd15&#43;4];
+	ld.global.nc.f32 	%f331, [%rd15+4];
 	sub.f32 	%f332, %f331, %f330;
 	ld.global.nc.f32 	%f333, [%rd16];
-	ld.global.nc.f32 	%f334, [%rd16&#43;4];
+	ld.global.nc.f32 	%f334, [%rd16+4];
 	sub.f32 	%f335, %f334, %f333;
 	mul.f32 	%f336, %f494, %f332;
 	mul.f32 	%f337, %f495, %f335;
 	fma.rn.f32 	%f338, %f336, %f329, 0f00000000;
 	fma.rn.f32 	%f339, %f337, %f329, 0f00000000;
-	ld.global.nc.f32 	%f340, [%rd8&#43;4];
+	ld.global.nc.f32 	%f340, [%rd8+4];
 	sub.f32 	%f341, %f340, %f1;
-	ld.global.nc.f32 	%f342, [%rd9&#43;4];
+	ld.global.nc.f32 	%f342, [%rd9+4];
 	sub.f32 	%f343, %f342, %f2;
 	mul.f32 	%f344, %f492, %f341;
 	mul.f32 	%f345, %f493, %f343;
@@ -2671,18 +2671,18 @@ $L__BB0_88:
 	mul.f64 	%fd48, %fd46, %fd47;
 	cvt.rn.f32.f64 	%f348, %fd48;
 	ld.global.nc.f32 	%f349, [%rd15];
-	ld.global.nc.f32 	%f350, [%rd15&#43;-4];
+	ld.global.nc.f32 	%f350, [%rd15+-4];
 	sub.f32 	%f351, %f349, %f350;
 	ld.global.nc.f32 	%f352, [%rd16];
-	ld.global.nc.f32 	%f353, [%rd16&#43;-4];
+	ld.global.nc.f32 	%f353, [%rd16+-4];
 	sub.f32 	%f354, %f352, %f353;
 	mul.f32 	%f355, %f494, %f351;
 	mul.f32 	%f356, %f495, %f354;
 	fma.rn.f32 	%f357, %f355, %f348, %f505;
 	fma.rn.f32 	%f358, %f356, %f348, %f504;
-	ld.global.nc.f32 	%f359, [%rd8&#43;-4];
+	ld.global.nc.f32 	%f359, [%rd8+-4];
 	sub.f32 	%f360, %f1, %f359;
-	ld.global.nc.f32 	%f361, [%rd9&#43;-4];
+	ld.global.nc.f32 	%f361, [%rd9+-4];
 	sub.f32 	%f362, %f2, %f361;
 	mul.f32 	%f363, %f492, %f360;
 	mul.f32 	%f364, %f493, %f362;
@@ -2720,10 +2720,10 @@ $L__BB0_95:
 	mul.f64 	%fd53, %fd51, %fd52;
 	cvt.rn.f32.f64 	%f369, %fd53;
 	ld.global.nc.f32 	%f370, [%rd18];
-	ld.global.nc.f32 	%f371, [%rd18&#43;4];
+	ld.global.nc.f32 	%f371, [%rd18+4];
 	sub.f32 	%f372, %f371, %f370;
 	ld.global.nc.f32 	%f373, [%rd19];
-	ld.global.nc.f32 	%f374, [%rd19&#43;4];
+	ld.global.nc.f32 	%f374, [%rd19+4];
 	sub.f32 	%f375, %f374, %f373;
 	mul.f32 	%f376, %f500, %f372;
 	mul.f32 	%f377, %f501, %f375;
@@ -2731,9 +2731,9 @@ $L__BB0_95:
 	mul.f32 	%f379, %f377, %f369;
 	sub.f32 	%f380, %f505, %f378;
 	sub.f32 	%f381, %f504, %f379;
-	ld.global.nc.f32 	%f382, [%rd8&#43;4];
+	ld.global.nc.f32 	%f382, [%rd8+4];
 	sub.f32 	%f383, %f382, %f1;
-	ld.global.nc.f32 	%f384, [%rd9&#43;4];
+	ld.global.nc.f32 	%f384, [%rd9+4];
 	sub.f32 	%f385, %f384, %f2;
 	mul.f32 	%f386, %f492, %f383;
 	mul.f32 	%f387, %f493, %f385;
@@ -2752,10 +2752,10 @@ $L__BB0_97:
 	mul.f64 	%fd58, %fd56, %fd57;
 	cvt.rn.f32.f64 	%f388, %fd58;
 	ld.global.nc.f32 	%f389, [%rd18];
-	ld.global.nc.f32 	%f390, [%rd18&#43;-4];
+	ld.global.nc.f32 	%f390, [%rd18+-4];
 	sub.f32 	%f391, %f389, %f390;
 	ld.global.nc.f32 	%f392, [%rd19];
-	ld.global.nc.f32 	%f393, [%rd19&#43;-4];
+	ld.global.nc.f32 	%f393, [%rd19+-4];
 	sub.f32 	%f394, %f392, %f393;
 	mul.f32 	%f395, %f500, %f391;
 	mul.f32 	%f396, %f501, %f394;
@@ -2763,9 +2763,9 @@ $L__BB0_97:
 	mul.f32 	%f398, %f396, %f388;
 	sub.f32 	%f399, %f505, %f397;
 	sub.f32 	%f400, %f504, %f398;
-	ld.global.nc.f32 	%f401, [%rd8&#43;-4];
+	ld.global.nc.f32 	%f401, [%rd8+-4];
 	sub.f32 	%f402, %f1, %f401;
-	ld.global.nc.f32 	%f403, [%rd9&#43;-4];
+	ld.global.nc.f32 	%f403, [%rd9+-4];
 	sub.f32 	%f404, %f2, %f403;
 	mul.f32 	%f405, %f492, %f402;
 	mul.f32 	%f406, %f493, %f404;
@@ -2814,11 +2814,11 @@ $L__BB0_100:
 	.param .u8 SecondDerivative_param_18
 )
 {
-	.reg .pred 	%p&lt;61&gt;;
-	.reg .f32 	%f&lt;506&gt;;
-	.reg .b32 	%r&lt;61&gt;;
-	.reg .f64 	%fd&lt;59&gt;;
-	.reg .b64 	%rd&lt;106&gt;;
+	.reg .pred 	%p<61>;
+	.reg .f32 	%f<506>;
+	.reg .b32 	%r<61>;
+	.reg .f64 	%fd<59>;
+	.reg .b64 	%rd<106>;
 
 
 	ld.param.u64 	%rd26, [SecondDerivative_param_0];
@@ -2906,19 +2906,19 @@ $L__BB0_5:
 	mov.f32 	%f452, %f451;
 	@%p8 bra 	$L__BB0_11;
 
-	ld.global.nc.f32 	%f8, [%rd8&#43;4];
-	ld.global.nc.f32 	%f9, [%rd9&#43;4];
+	ld.global.nc.f32 	%f8, [%rd8+4];
+	ld.global.nc.f32 	%f9, [%rd9+4];
 	mov.f32 	%f445, %f449;
 	@%p6 bra 	$L__BB0_8;
 
-	ld.global.nc.f32 	%f163, [%rd13&#43;4];
+	ld.global.nc.f32 	%f163, [%rd13+4];
 	mul.f32 	%f445, %f163, %f449;
 
 $L__BB0_8:
 	mov.f32 	%f446, %f501;
 	@%p7 bra 	$L__BB0_10;
 
-	ld.global.nc.f32 	%f164, [%rd14&#43;4];
+	ld.global.nc.f32 	%f164, [%rd14+4];
 	mul.f32 	%f446, %f164, %f501;
 
 $L__BB0_10:
@@ -2940,18 +2940,18 @@ $L__BB0_11:
 	setp.lt.s32 	%p11, %r1, 1;
 	@%p11 bra 	$L__BB0_17;
 
-	ld.global.nc.f32 	%f18, [%rd8&#43;-4];
-	ld.global.nc.f32 	%f19, [%rd9&#43;-4];
+	ld.global.nc.f32 	%f18, [%rd8+-4];
+	ld.global.nc.f32 	%f19, [%rd9+-4];
 	@%p6 bra 	$L__BB0_14;
 
-	ld.global.nc.f32 	%f172, [%rd13&#43;-4];
+	ld.global.nc.f32 	%f172, [%rd13+-4];
 	mul.f32 	%f449, %f172, %f449;
 
 $L__BB0_14:
 	mov.f32 	%f450, %f501;
 	@%p7 bra 	$L__BB0_16;
 
-	ld.global.nc.f32 	%f173, [%rd14&#43;-4];
+	ld.global.nc.f32 	%f173, [%rd14+-4];
 	mul.f32 	%f450, %f173, %f501;
 
 $L__BB0_16:
@@ -3316,14 +3316,14 @@ $L__BB0_59:
 	mov.f32 	%f480, %f501;
 	@%p7 bra 	$L__BB0_62;
 
-	ld.global.nc.f32 	%f239, [%rd14&#43;4];
+	ld.global.nc.f32 	%f239, [%rd14+4];
 	mul.f32 	%f480, %f239, %f501;
 
 $L__BB0_62:
 	mov.f32 	%f481, %f500;
 	@%p34 bra 	$L__BB0_64;
 
-	ld.global.nc.f32 	%f240, [%rd25&#43;4];
+	ld.global.nc.f32 	%f240, [%rd25+4];
 	mul.f32 	%f481, %f240, %f500;
 
 $L__BB0_64:
@@ -3339,11 +3339,11 @@ $L__BB0_64:
 	cvt.f64.f32 	%fd22, %f427;
 	mul.f64 	%fd23, %fd21, %fd22;
 	cvt.rn.f32.f64 	%f243, %fd23;
-	ld.global.nc.f32 	%f244, [%rd8&#43;4];
-	ld.global.nc.f32 	%f245, [%rd15&#43;4];
+	ld.global.nc.f32 	%f244, [%rd8+4];
+	ld.global.nc.f32 	%f245, [%rd15+4];
 	sub.f32 	%f246, %f245, %f244;
-	ld.global.nc.f32 	%f247, [%rd9&#43;4];
-	ld.global.nc.f32 	%f248, [%rd16&#43;4];
+	ld.global.nc.f32 	%f247, [%rd9+4];
+	ld.global.nc.f32 	%f248, [%rd16+4];
 	sub.f32 	%f249, %f248, %f247;
 	mul.f32 	%f250, %f480, %f246;
 	mul.f32 	%f251, %f481, %f249;
@@ -3371,11 +3371,11 @@ $L__BB0_66:
 	cvt.f64.f32 	%fd27, %f425;
 	mul.f64 	%fd28, %fd26, %fd27;
 	cvt.rn.f32.f64 	%f262, %fd28;
-	ld.global.nc.f32 	%f263, [%rd8&#43;4];
-	ld.global.nc.f32 	%f264, [%rd18&#43;4];
+	ld.global.nc.f32 	%f263, [%rd8+4];
+	ld.global.nc.f32 	%f264, [%rd18+4];
 	sub.f32 	%f265, %f263, %f264;
-	ld.global.nc.f32 	%f266, [%rd9&#43;4];
-	ld.global.nc.f32 	%f267, [%rd19&#43;4];
+	ld.global.nc.f32 	%f266, [%rd9+4];
+	ld.global.nc.f32 	%f267, [%rd19+4];
 	sub.f32 	%f268, %f266, %f267;
 	mul.f32 	%f269, %f480, %f265;
 	mul.f32 	%f270, %f481, %f268;
@@ -3398,14 +3398,14 @@ $L__BB0_68:
 	mov.f32 	%f486, %f501;
 	@%p7 bra 	$L__BB0_71;
 
-	ld.global.nc.f32 	%f281, [%rd14&#43;-4];
+	ld.global.nc.f32 	%f281, [%rd14+-4];
 	mul.f32 	%f486, %f281, %f501;
 
 $L__BB0_71:
 	mov.f32 	%f487, %f500;
 	@%p34 bra 	$L__BB0_73;
 
-	ld.global.nc.f32 	%f282, [%rd25&#43;-4];
+	ld.global.nc.f32 	%f282, [%rd25+-4];
 	mul.f32 	%f487, %f282, %f500;
 
 $L__BB0_73:
@@ -3419,11 +3419,11 @@ $L__BB0_73:
 	cvt.f64.f32 	%fd32, %f423;
 	mul.f64 	%fd33, %fd31, %fd32;
 	cvt.rn.f32.f64 	%f283, %fd33;
-	ld.global.nc.f32 	%f284, [%rd8&#43;-4];
-	ld.global.nc.f32 	%f285, [%rd15&#43;-4];
+	ld.global.nc.f32 	%f284, [%rd8+-4];
+	ld.global.nc.f32 	%f285, [%rd15+-4];
 	sub.f32 	%f286, %f285, %f284;
-	ld.global.nc.f32 	%f287, [%rd9&#43;-4];
-	ld.global.nc.f32 	%f288, [%rd16&#43;-4];
+	ld.global.nc.f32 	%f287, [%rd9+-4];
+	ld.global.nc.f32 	%f288, [%rd16+-4];
 	sub.f32 	%f289, %f288, %f287;
 	mul.f32 	%f290, %f486, %f286;
 	mul.f32 	%f291, %f487, %f289;
@@ -3451,11 +3451,11 @@ $L__BB0_75:
 	cvt.f64.f32 	%fd37, %f421;
 	mul.f64 	%fd38, %fd36, %fd37;
 	cvt.rn.f32.f64 	%f302, %fd38;
-	ld.global.nc.f32 	%f303, [%rd8&#43;-4];
-	ld.global.nc.f32 	%f304, [%rd18&#43;-4];
+	ld.global.nc.f32 	%f303, [%rd8+-4];
+	ld.global.nc.f32 	%f304, [%rd18+-4];
 	sub.f32 	%f305, %f303, %f304;
-	ld.global.nc.f32 	%f306, [%rd9&#43;-4];
-	ld.global.nc.f32 	%f307, [%rd19&#43;-4];
+	ld.global.nc.f32 	%f306, [%rd9+-4];
+	ld.global.nc.f32 	%f307, [%rd19+-4];
 	sub.f32 	%f308, %f306, %f307;
 	mul.f32 	%f309, %f486, %f305;
 	mul.f32 	%f310, %f487, %f308;
@@ -3526,18 +3526,18 @@ $L__BB0_86:
 	mul.f64 	%fd43, %fd41, %fd42;
 	cvt.rn.f32.f64 	%f329, %fd43;
 	ld.global.nc.f32 	%f330, [%rd15];
-	ld.global.nc.f32 	%f331, [%rd15&#43;4];
+	ld.global.nc.f32 	%f331, [%rd15+4];
 	sub.f32 	%f332, %f331, %f330;
 	ld.global.nc.f32 	%f333, [%rd16];
-	ld.global.nc.f32 	%f334, [%rd16&#43;4];
+	ld.global.nc.f32 	%f334, [%rd16+4];
 	sub.f32 	%f335, %f334, %f333;
 	mul.f32 	%f336, %f494, %f332;
 	mul.f32 	%f337, %f495, %f335;
 	fma.rn.f32 	%f338, %f336, %f329, 0f00000000;
 	fma.rn.f32 	%f339, %f337, %f329, 0f00000000;
-	ld.global.nc.f32 	%f340, [%rd8&#43;4];
+	ld.global.nc.f32 	%f340, [%rd8+4];
 	sub.f32 	%f341, %f340, %f1;
-	ld.global.nc.f32 	%f342, [%rd9&#43;4];
+	ld.global.nc.f32 	%f342, [%rd9+4];
 	sub.f32 	%f343, %f342, %f2;
 	mul.f32 	%f344, %f492, %f341;
 	mul.f32 	%f345, %f493, %f343;
@@ -3558,18 +3558,18 @@ $L__BB0_88:
 	mul.f64 	%fd48, %fd46, %fd47;
 	cvt.rn.f32.f64 	%f348, %fd48;
 	ld.global.nc.f32 	%f349, [%rd15];
-	ld.global.nc.f32 	%f350, [%rd15&#43;-4];
+	ld.global.nc.f32 	%f350, [%rd15+-4];
 	sub.f32 	%f351, %f349, %f350;
 	ld.global.nc.f32 	%f352, [%rd16];
-	ld.global.nc.f32 	%f353, [%rd16&#43;-4];
+	ld.global.nc.f32 	%f353, [%rd16+-4];
 	sub.f32 	%f354, %f352, %f353;
 	mul.f32 	%f355, %f494, %f351;
 	mul.f32 	%f356, %f495, %f354;
 	fma.rn.f32 	%f357, %f355, %f348, %f505;
 	fma.rn.f32 	%f358, %f356, %f348, %f504;
-	ld.global.nc.f32 	%f359, [%rd8&#43;-4];
+	ld.global.nc.f32 	%f359, [%rd8+-4];
 	sub.f32 	%f360, %f1, %f359;
-	ld.global.nc.f32 	%f361, [%rd9&#43;-4];
+	ld.global.nc.f32 	%f361, [%rd9+-4];
 	sub.f32 	%f362, %f2, %f361;
 	mul.f32 	%f363, %f492, %f360;
 	mul.f32 	%f364, %f493, %f362;
@@ -3607,10 +3607,10 @@ $L__BB0_95:
 	mul.f64 	%fd53, %fd51, %fd52;
 	cvt.rn.f32.f64 	%f369, %fd53;
 	ld.global.nc.f32 	%f370, [%rd18];
-	ld.global.nc.f32 	%f371, [%rd18&#43;4];
+	ld.global.nc.f32 	%f371, [%rd18+4];
 	sub.f32 	%f372, %f371, %f370;
 	ld.global.nc.f32 	%f373, [%rd19];
-	ld.global.nc.f32 	%f374, [%rd19&#43;4];
+	ld.global.nc.f32 	%f374, [%rd19+4];
 	sub.f32 	%f375, %f374, %f373;
 	mul.f32 	%f376, %f500, %f372;
 	mul.f32 	%f377, %f501, %f375;
@@ -3618,9 +3618,9 @@ $L__BB0_95:
 	mul.f32 	%f379, %f377, %f369;
 	sub.f32 	%f380, %f505, %f378;
 	sub.f32 	%f381, %f504, %f379;
-	ld.global.nc.f32 	%f382, [%rd8&#43;4];
+	ld.global.nc.f32 	%f382, [%rd8+4];
 	sub.f32 	%f383, %f382, %f1;
-	ld.global.nc.f32 	%f384, [%rd9&#43;4];
+	ld.global.nc.f32 	%f384, [%rd9+4];
 	sub.f32 	%f385, %f384, %f2;
 	mul.f32 	%f386, %f492, %f383;
 	mul.f32 	%f387, %f493, %f385;
@@ -3639,10 +3639,10 @@ $L__BB0_97:
 	mul.f64 	%fd58, %fd56, %fd57;
 	cvt.rn.f32.f64 	%f388, %fd58;
 	ld.global.nc.f32 	%f389, [%rd18];
-	ld.global.nc.f32 	%f390, [%rd18&#43;-4];
+	ld.global.nc.f32 	%f390, [%rd18+-4];
 	sub.f32 	%f391, %f389, %f390;
 	ld.global.nc.f32 	%f392, [%rd19];
-	ld.global.nc.f32 	%f393, [%rd19&#43;-4];
+	ld.global.nc.f32 	%f393, [%rd19+-4];
 	sub.f32 	%f394, %f392, %f393;
 	mul.f32 	%f395, %f500, %f391;
 	mul.f32 	%f396, %f501, %f394;
@@ -3650,9 +3650,9 @@ $L__BB0_97:
 	mul.f32 	%f398, %f396, %f388;
 	sub.f32 	%f399, %f505, %f397;
 	sub.f32 	%f400, %f504, %f398;
-	ld.global.nc.f32 	%f401, [%rd8&#43;-4];
+	ld.global.nc.f32 	%f401, [%rd8+-4];
 	sub.f32 	%f402, %f1, %f401;
-	ld.global.nc.f32 	%f403, [%rd9&#43;-4];
+	ld.global.nc.f32 	%f403, [%rd9+-4];
 	sub.f32 	%f404, %f2, %f403;
 	mul.f32 	%f405, %f492, %f402;
 	mul.f32 	%f406, %f493, %f404;
@@ -3701,11 +3701,11 @@ $L__BB0_100:
 	.param .u8 SecondDerivative_param_18
 )
 {
-	.reg .pred 	%p&lt;61&gt;;
-	.reg .f32 	%f&lt;506&gt;;
-	.reg .b32 	%r&lt;61&gt;;
-	.reg .f64 	%fd&lt;59&gt;;
-	.reg .b64 	%rd&lt;106&gt;;
+	.reg .pred 	%p<61>;
+	.reg .f32 	%f<506>;
+	.reg .b32 	%r<61>;
+	.reg .f64 	%fd<59>;
+	.reg .b64 	%rd<106>;
 
 
 	ld.param.u64 	%rd26, [SecondDerivative_param_0];
@@ -3793,19 +3793,19 @@ $L__BB0_5:
 	mov.f32 	%f452, %f451;
 	@%p8 bra 	$L__BB0_11;
 
-	ld.global.nc.f32 	%f8, [%rd8&#43;4];
-	ld.global.nc.f32 	%f9, [%rd9&#43;4];
+	ld.global.nc.f32 	%f8, [%rd8+4];
+	ld.global.nc.f32 	%f9, [%rd9+4];
 	mov.f32 	%f445, %f449;
 	@%p6 bra 	$L__BB0_8;
 
-	ld.global.nc.f32 	%f163, [%rd13&#43;4];
+	ld.global.nc.f32 	%f163, [%rd13+4];
 	mul.f32 	%f445, %f163, %f449;
 
 $L__BB0_8:
 	mov.f32 	%f446, %f501;
 	@%p7 bra 	$L__BB0_10;
 
-	ld.global.nc.f32 	%f164, [%rd14&#43;4];
+	ld.global.nc.f32 	%f164, [%rd14+4];
 	mul.f32 	%f446, %f164, %f501;
 
 $L__BB0_10:
@@ -3827,18 +3827,18 @@ $L__BB0_11:
 	setp.lt.s32 	%p11, %r1, 1;
 	@%p11 bra 	$L__BB0_17;
 
-	ld.global.nc.f32 	%f18, [%rd8&#43;-4];
-	ld.global.nc.f32 	%f19, [%rd9&#43;-4];
+	ld.global.nc.f32 	%f18, [%rd8+-4];
+	ld.global.nc.f32 	%f19, [%rd9+-4];
 	@%p6 bra 	$L__BB0_14;
 
-	ld.global.nc.f32 	%f172, [%rd13&#43;-4];
+	ld.global.nc.f32 	%f172, [%rd13+-4];
 	mul.f32 	%f449, %f172, %f449;
 
 $L__BB0_14:
 	mov.f32 	%f450, %f501;
 	@%p7 bra 	$L__BB0_16;
 
-	ld.global.nc.f32 	%f173, [%rd14&#43;-4];
+	ld.global.nc.f32 	%f173, [%rd14+-4];
 	mul.f32 	%f450, %f173, %f501;
 
 $L__BB0_16:
@@ -4203,14 +4203,14 @@ $L__BB0_59:
 	mov.f32 	%f480, %f501;
 	@%p7 bra 	$L__BB0_62;
 
-	ld.global.nc.f32 	%f239, [%rd14&#43;4];
+	ld.global.nc.f32 	%f239, [%rd14+4];
 	mul.f32 	%f480, %f239, %f501;
 
 $L__BB0_62:
 	mov.f32 	%f481, %f500;
 	@%p34 bra 	$L__BB0_64;
 
-	ld.global.nc.f32 	%f240, [%rd25&#43;4];
+	ld.global.nc.f32 	%f240, [%rd25+4];
 	mul.f32 	%f481, %f240, %f500;
 
 $L__BB0_64:
@@ -4226,11 +4226,11 @@ $L__BB0_64:
 	cvt.f64.f32 	%fd22, %f427;
 	mul.f64 	%fd23, %fd21, %fd22;
 	cvt.rn.f32.f64 	%f243, %fd23;
-	ld.global.nc.f32 	%f244, [%rd8&#43;4];
-	ld.global.nc.f32 	%f245, [%rd15&#43;4];
+	ld.global.nc.f32 	%f244, [%rd8+4];
+	ld.global.nc.f32 	%f245, [%rd15+4];
 	sub.f32 	%f246, %f245, %f244;
-	ld.global.nc.f32 	%f247, [%rd9&#43;4];
-	ld.global.nc.f32 	%f248, [%rd16&#43;4];
+	ld.global.nc.f32 	%f247, [%rd9+4];
+	ld.global.nc.f32 	%f248, [%rd16+4];
 	sub.f32 	%f249, %f248, %f247;
 	mul.f32 	%f250, %f480, %f246;
 	mul.f32 	%f251, %f481, %f249;
@@ -4258,11 +4258,11 @@ $L__BB0_66:
 	cvt.f64.f32 	%fd27, %f425;
 	mul.f64 	%fd28, %fd26, %fd27;
 	cvt.rn.f32.f64 	%f262, %fd28;
-	ld.global.nc.f32 	%f263, [%rd8&#43;4];
-	ld.global.nc.f32 	%f264, [%rd18&#43;4];
+	ld.global.nc.f32 	%f263, [%rd8+4];
+	ld.global.nc.f32 	%f264, [%rd18+4];
 	sub.f32 	%f265, %f263, %f264;
-	ld.global.nc.f32 	%f266, [%rd9&#43;4];
-	ld.global.nc.f32 	%f267, [%rd19&#43;4];
+	ld.global.nc.f32 	%f266, [%rd9+4];
+	ld.global.nc.f32 	%f267, [%rd19+4];
 	sub.f32 	%f268, %f266, %f267;
 	mul.f32 	%f269, %f480, %f265;
 	mul.f32 	%f270, %f481, %f268;
@@ -4285,14 +4285,14 @@ $L__BB0_68:
 	mov.f32 	%f486, %f501;
 	@%p7 bra 	$L__BB0_71;
 
-	ld.global.nc.f32 	%f281, [%rd14&#43;-4];
+	ld.global.nc.f32 	%f281, [%rd14+-4];
 	mul.f32 	%f486, %f281, %f501;
 
 $L__BB0_71:
 	mov.f32 	%f487, %f500;
 	@%p34 bra 	$L__BB0_73;
 
-	ld.global.nc.f32 	%f282, [%rd25&#43;-4];
+	ld.global.nc.f32 	%f282, [%rd25+-4];
 	mul.f32 	%f487, %f282, %f500;
 
 $L__BB0_73:
@@ -4306,11 +4306,11 @@ $L__BB0_73:
 	cvt.f64.f32 	%fd32, %f423;
 	mul.f64 	%fd33, %fd31, %fd32;
 	cvt.rn.f32.f64 	%f283, %fd33;
-	ld.global.nc.f32 	%f284, [%rd8&#43;-4];
-	ld.global.nc.f32 	%f285, [%rd15&#43;-4];
+	ld.global.nc.f32 	%f284, [%rd8+-4];
+	ld.global.nc.f32 	%f285, [%rd15+-4];
 	sub.f32 	%f286, %f285, %f284;
-	ld.global.nc.f32 	%f287, [%rd9&#43;-4];
-	ld.global.nc.f32 	%f288, [%rd16&#43;-4];
+	ld.global.nc.f32 	%f287, [%rd9+-4];
+	ld.global.nc.f32 	%f288, [%rd16+-4];
 	sub.f32 	%f289, %f288, %f287;
 	mul.f32 	%f290, %f486, %f286;
 	mul.f32 	%f291, %f487, %f289;
@@ -4338,11 +4338,11 @@ $L__BB0_75:
 	cvt.f64.f32 	%fd37, %f421;
 	mul.f64 	%fd38, %fd36, %fd37;
 	cvt.rn.f32.f64 	%f302, %fd38;
-	ld.global.nc.f32 	%f303, [%rd8&#43;-4];
-	ld.global.nc.f32 	%f304, [%rd18&#43;-4];
+	ld.global.nc.f32 	%f303, [%rd8+-4];
+	ld.global.nc.f32 	%f304, [%rd18+-4];
 	sub.f32 	%f305, %f303, %f304;
-	ld.global.nc.f32 	%f306, [%rd9&#43;-4];
-	ld.global.nc.f32 	%f307, [%rd19&#43;-4];
+	ld.global.nc.f32 	%f306, [%rd9+-4];
+	ld.global.nc.f32 	%f307, [%rd19+-4];
 	sub.f32 	%f308, %f306, %f307;
 	mul.f32 	%f309, %f486, %f305;
 	mul.f32 	%f310, %f487, %f308;
@@ -4413,18 +4413,18 @@ $L__BB0_86:
 	mul.f64 	%fd43, %fd41, %fd42;
 	cvt.rn.f32.f64 	%f329, %fd43;
 	ld.global.nc.f32 	%f330, [%rd15];
-	ld.global.nc.f32 	%f331, [%rd15&#43;4];
+	ld.global.nc.f32 	%f331, [%rd15+4];
 	sub.f32 	%f332, %f331, %f330;
 	ld.global.nc.f32 	%f333, [%rd16];
-	ld.global.nc.f32 	%f334, [%rd16&#43;4];
+	ld.global.nc.f32 	%f334, [%rd16+4];
 	sub.f32 	%f335, %f334, %f333;
 	mul.f32 	%f336, %f494, %f332;
 	mul.f32 	%f337, %f495, %f335;
 	fma.rn.f32 	%f338, %f336, %f329, 0f00000000;
 	fma.rn.f32 	%f339, %f337, %f329, 0f00000000;
-	ld.global.nc.f32 	%f340, [%rd8&#43;4];
+	ld.global.nc.f32 	%f340, [%rd8+4];
 	sub.f32 	%f341, %f340, %f1;
-	ld.global.nc.f32 	%f342, [%rd9&#43;4];
+	ld.global.nc.f32 	%f342, [%rd9+4];
 	sub.f32 	%f343, %f342, %f2;
 	mul.f32 	%f344, %f492, %f341;
 	mul.f32 	%f345, %f493, %f343;
@@ -4445,18 +4445,18 @@ $L__BB0_88:
 	mul.f64 	%fd48, %fd46, %fd47;
 	cvt.rn.f32.f64 	%f348, %fd48;
 	ld.global.nc.f32 	%f349, [%rd15];
-	ld.global.nc.f32 	%f350, [%rd15&#43;-4];
+	ld.global.nc.f32 	%f350, [%rd15+-4];
 	sub.f32 	%f351, %f349, %f350;
 	ld.global.nc.f32 	%f352, [%rd16];
-	ld.global.nc.f32 	%f353, [%rd16&#43;-4];
+	ld.global.nc.f32 	%f353, [%rd16+-4];
 	sub.f32 	%f354, %f352, %f353;
 	mul.f32 	%f355, %f494, %f351;
 	mul.f32 	%f356, %f495, %f354;
 	fma.rn.f32 	%f357, %f355, %f348, %f505;
 	fma.rn.f32 	%f358, %f356, %f348, %f504;
-	ld.global.nc.f32 	%f359, [%rd8&#43;-4];
+	ld.global.nc.f32 	%f359, [%rd8+-4];
 	sub.f32 	%f360, %f1, %f359;
-	ld.global.nc.f32 	%f361, [%rd9&#43;-4];
+	ld.global.nc.f32 	%f361, [%rd9+-4];
 	sub.f32 	%f362, %f2, %f361;
 	mul.f32 	%f363, %f492, %f360;
 	mul.f32 	%f364, %f493, %f362;
@@ -4494,10 +4494,10 @@ $L__BB0_95:
 	mul.f64 	%fd53, %fd51, %fd52;
 	cvt.rn.f32.f64 	%f369, %fd53;
 	ld.global.nc.f32 	%f370, [%rd18];
-	ld.global.nc.f32 	%f371, [%rd18&#43;4];
+	ld.global.nc.f32 	%f371, [%rd18+4];
 	sub.f32 	%f372, %f371, %f370;
 	ld.global.nc.f32 	%f373, [%rd19];
-	ld.global.nc.f32 	%f374, [%rd19&#43;4];
+	ld.global.nc.f32 	%f374, [%rd19+4];
 	sub.f32 	%f375, %f374, %f373;
 	mul.f32 	%f376, %f500, %f372;
 	mul.f32 	%f377, %f501, %f375;
@@ -4505,9 +4505,9 @@ $L__BB0_95:
 	mul.f32 	%f379, %f377, %f369;
 	sub.f32 	%f380, %f505, %f378;
 	sub.f32 	%f381, %f504, %f379;
-	ld.global.nc.f32 	%f382, [%rd8&#43;4];
+	ld.global.nc.f32 	%f382, [%rd8+4];
 	sub.f32 	%f383, %f382, %f1;
-	ld.global.nc.f32 	%f384, [%rd9&#43;4];
+	ld.global.nc.f32 	%f384, [%rd9+4];
 	sub.f32 	%f385, %f384, %f2;
 	mul.f32 	%f386, %f492, %f383;
 	mul.f32 	%f387, %f493, %f385;
@@ -4526,10 +4526,10 @@ $L__BB0_97:
 	mul.f64 	%fd58, %fd56, %fd57;
 	cvt.rn.f32.f64 	%f388, %fd58;
 	ld.global.nc.f32 	%f389, [%rd18];
-	ld.global.nc.f32 	%f390, [%rd18&#43;-4];
+	ld.global.nc.f32 	%f390, [%rd18+-4];
 	sub.f32 	%f391, %f389, %f390;
 	ld.global.nc.f32 	%f392, [%rd19];
-	ld.global.nc.f32 	%f393, [%rd19&#43;-4];
+	ld.global.nc.f32 	%f393, [%rd19+-4];
 	sub.f32 	%f394, %f392, %f393;
 	mul.f32 	%f395, %f500, %f391;
 	mul.f32 	%f396, %f501, %f394;
@@ -4537,9 +4537,9 @@ $L__BB0_97:
 	mul.f32 	%f398, %f396, %f388;
 	sub.f32 	%f399, %f505, %f397;
 	sub.f32 	%f400, %f504, %f398;
-	ld.global.nc.f32 	%f401, [%rd8&#43;-4];
+	ld.global.nc.f32 	%f401, [%rd8+-4];
 	sub.f32 	%f402, %f1, %f401;
-	ld.global.nc.f32 	%f403, [%rd9&#43;-4];
+	ld.global.nc.f32 	%f403, [%rd9+-4];
 	sub.f32 	%f404, %f2, %f403;
 	mul.f32 	%f405, %f492, %f402;
 	mul.f32 	%f406, %f493, %f404;
@@ -4588,11 +4588,11 @@ $L__BB0_100:
 	.param .u8 SecondDerivative_param_18
 )
 {
-	.reg .pred 	%p&lt;61&gt;;
-	.reg .f32 	%f&lt;506&gt;;
-	.reg .b32 	%r&lt;61&gt;;
-	.reg .f64 	%fd&lt;59&gt;;
-	.reg .b64 	%rd&lt;106&gt;;
+	.reg .pred 	%p<61>;
+	.reg .f32 	%f<506>;
+	.reg .b32 	%r<61>;
+	.reg .f64 	%fd<59>;
+	.reg .b64 	%rd<106>;
 
 
 	ld.param.u64 	%rd26, [SecondDerivative_param_0];
@@ -4680,19 +4680,19 @@ $L__BB0_5:
 	mov.f32 	%f452, %f451;
 	@%p8 bra 	$L__BB0_11;
 
-	ld.global.nc.f32 	%f8, [%rd8&#43;4];
-	ld.global.nc.f32 	%f9, [%rd9&#43;4];
+	ld.global.nc.f32 	%f8, [%rd8+4];
+	ld.global.nc.f32 	%f9, [%rd9+4];
 	mov.f32 	%f445, %f449;
 	@%p6 bra 	$L__BB0_8;
 
-	ld.global.nc.f32 	%f163, [%rd13&#43;4];
+	ld.global.nc.f32 	%f163, [%rd13+4];
 	mul.f32 	%f445, %f163, %f449;
 
 $L__BB0_8:
 	mov.f32 	%f446, %f501;
 	@%p7 bra 	$L__BB0_10;
 
-	ld.global.nc.f32 	%f164, [%rd14&#43;4];
+	ld.global.nc.f32 	%f164, [%rd14+4];
 	mul.f32 	%f446, %f164, %f501;
 
 $L__BB0_10:
@@ -4714,18 +4714,18 @@ $L__BB0_11:
 	setp.lt.s32 	%p11, %r1, 1;
 	@%p11 bra 	$L__BB0_17;
 
-	ld.global.nc.f32 	%f18, [%rd8&#43;-4];
-	ld.global.nc.f32 	%f19, [%rd9&#43;-4];
+	ld.global.nc.f32 	%f18, [%rd8+-4];
+	ld.global.nc.f32 	%f19, [%rd9+-4];
 	@%p6 bra 	$L__BB0_14;
 
-	ld.global.nc.f32 	%f172, [%rd13&#43;-4];
+	ld.global.nc.f32 	%f172, [%rd13+-4];
 	mul.f32 	%f449, %f172, %f449;
 
 $L__BB0_14:
 	mov.f32 	%f450, %f501;
 	@%p7 bra 	$L__BB0_16;
 
-	ld.global.nc.f32 	%f173, [%rd14&#43;-4];
+	ld.global.nc.f32 	%f173, [%rd14+-4];
 	mul.f32 	%f450, %f173, %f501;
 
 $L__BB0_16:
@@ -5090,14 +5090,14 @@ $L__BB0_59:
 	mov.f32 	%f480, %f501;
 	@%p7 bra 	$L__BB0_62;
 
-	ld.global.nc.f32 	%f239, [%rd14&#43;4];
+	ld.global.nc.f32 	%f239, [%rd14+4];
 	mul.f32 	%f480, %f239, %f501;
 
 $L__BB0_62:
 	mov.f32 	%f481, %f500;
 	@%p34 bra 	$L__BB0_64;
 
-	ld.global.nc.f32 	%f240, [%rd25&#43;4];
+	ld.global.nc.f32 	%f240, [%rd25+4];
 	mul.f32 	%f481, %f240, %f500;
 
 $L__BB0_64:
@@ -5113,11 +5113,11 @@ $L__BB0_64:
 	cvt.f64.f32 	%fd22, %f427;
 	mul.f64 	%fd23, %fd21, %fd22;
 	cvt.rn.f32.f64 	%f243, %fd23;
-	ld.global.nc.f32 	%f244, [%rd8&#43;4];
-	ld.global.nc.f32 	%f245, [%rd15&#43;4];
+	ld.global.nc.f32 	%f244, [%rd8+4];
+	ld.global.nc.f32 	%f245, [%rd15+4];
 	sub.f32 	%f246, %f245, %f244;
-	ld.global.nc.f32 	%f247, [%rd9&#43;4];
-	ld.global.nc.f32 	%f248, [%rd16&#43;4];
+	ld.global.nc.f32 	%f247, [%rd9+4];
+	ld.global.nc.f32 	%f248, [%rd16+4];
 	sub.f32 	%f249, %f248, %f247;
 	mul.f32 	%f250, %f480, %f246;
 	mul.f32 	%f251, %f481, %f249;
@@ -5145,11 +5145,11 @@ $L__BB0_66:
 	cvt.f64.f32 	%fd27, %f425;
 	mul.f64 	%fd28, %fd26, %fd27;
 	cvt.rn.f32.f64 	%f262, %fd28;
-	ld.global.nc.f32 	%f263, [%rd8&#43;4];
-	ld.global.nc.f32 	%f264, [%rd18&#43;4];
+	ld.global.nc.f32 	%f263, [%rd8+4];
+	ld.global.nc.f32 	%f264, [%rd18+4];
 	sub.f32 	%f265, %f263, %f264;
-	ld.global.nc.f32 	%f266, [%rd9&#43;4];
-	ld.global.nc.f32 	%f267, [%rd19&#43;4];
+	ld.global.nc.f32 	%f266, [%rd9+4];
+	ld.global.nc.f32 	%f267, [%rd19+4];
 	sub.f32 	%f268, %f266, %f267;
 	mul.f32 	%f269, %f480, %f265;
 	mul.f32 	%f270, %f481, %f268;
@@ -5172,14 +5172,14 @@ $L__BB0_68:
 	mov.f32 	%f486, %f501;
 	@%p7 bra 	$L__BB0_71;
 
-	ld.global.nc.f32 	%f281, [%rd14&#43;-4];
+	ld.global.nc.f32 	%f281, [%rd14+-4];
 	mul.f32 	%f486, %f281, %f501;
 
 $L__BB0_71:
 	mov.f32 	%f487, %f500;
 	@%p34 bra 	$L__BB0_73;
 
-	ld.global.nc.f32 	%f282, [%rd25&#43;-4];
+	ld.global.nc.f32 	%f282, [%rd25+-4];
 	mul.f32 	%f487, %f282, %f500;
 
 $L__BB0_73:
@@ -5193,11 +5193,11 @@ $L__BB0_73:
 	cvt.f64.f32 	%fd32, %f423;
 	mul.f64 	%fd33, %fd31, %fd32;
 	cvt.rn.f32.f64 	%f283, %fd33;
-	ld.global.nc.f32 	%f284, [%rd8&#43;-4];
-	ld.global.nc.f32 	%f285, [%rd15&#43;-4];
+	ld.global.nc.f32 	%f284, [%rd8+-4];
+	ld.global.nc.f32 	%f285, [%rd15+-4];
 	sub.f32 	%f286, %f285, %f284;
-	ld.global.nc.f32 	%f287, [%rd9&#43;-4];
-	ld.global.nc.f32 	%f288, [%rd16&#43;-4];
+	ld.global.nc.f32 	%f287, [%rd9+-4];
+	ld.global.nc.f32 	%f288, [%rd16+-4];
 	sub.f32 	%f289, %f288, %f287;
 	mul.f32 	%f290, %f486, %f286;
 	mul.f32 	%f291, %f487, %f289;
@@ -5225,11 +5225,11 @@ $L__BB0_75:
 	cvt.f64.f32 	%fd37, %f421;
 	mul.f64 	%fd38, %fd36, %fd37;
 	cvt.rn.f32.f64 	%f302, %fd38;
-	ld.global.nc.f32 	%f303, [%rd8&#43;-4];
-	ld.global.nc.f32 	%f304, [%rd18&#43;-4];
+	ld.global.nc.f32 	%f303, [%rd8+-4];
+	ld.global.nc.f32 	%f304, [%rd18+-4];
 	sub.f32 	%f305, %f303, %f304;
-	ld.global.nc.f32 	%f306, [%rd9&#43;-4];
-	ld.global.nc.f32 	%f307, [%rd19&#43;-4];
+	ld.global.nc.f32 	%f306, [%rd9+-4];
+	ld.global.nc.f32 	%f307, [%rd19+-4];
 	sub.f32 	%f308, %f306, %f307;
 	mul.f32 	%f309, %f486, %f305;
 	mul.f32 	%f310, %f487, %f308;
@@ -5300,18 +5300,18 @@ $L__BB0_86:
 	mul.f64 	%fd43, %fd41, %fd42;
 	cvt.rn.f32.f64 	%f329, %fd43;
 	ld.global.nc.f32 	%f330, [%rd15];
-	ld.global.nc.f32 	%f331, [%rd15&#43;4];
+	ld.global.nc.f32 	%f331, [%rd15+4];
 	sub.f32 	%f332, %f331, %f330;
 	ld.global.nc.f32 	%f333, [%rd16];
-	ld.global.nc.f32 	%f334, [%rd16&#43;4];
+	ld.global.nc.f32 	%f334, [%rd16+4];
 	sub.f32 	%f335, %f334, %f333;
 	mul.f32 	%f336, %f494, %f332;
 	mul.f32 	%f337, %f495, %f335;
 	fma.rn.f32 	%f338, %f336, %f329, 0f00000000;
 	fma.rn.f32 	%f339, %f337, %f329, 0f00000000;
-	ld.global.nc.f32 	%f340, [%rd8&#43;4];
+	ld.global.nc.f32 	%f340, [%rd8+4];
 	sub.f32 	%f341, %f340, %f1;
-	ld.global.nc.f32 	%f342, [%rd9&#43;4];
+	ld.global.nc.f32 	%f342, [%rd9+4];
 	sub.f32 	%f343, %f342, %f2;
 	mul.f32 	%f344, %f492, %f341;
 	mul.f32 	%f345, %f493, %f343;
@@ -5332,18 +5332,18 @@ $L__BB0_88:
 	mul.f64 	%fd48, %fd46, %fd47;
 	cvt.rn.f32.f64 	%f348, %fd48;
 	ld.global.nc.f32 	%f349, [%rd15];
-	ld.global.nc.f32 	%f350, [%rd15&#43;-4];
+	ld.global.nc.f32 	%f350, [%rd15+-4];
 	sub.f32 	%f351, %f349, %f350;
 	ld.global.nc.f32 	%f352, [%rd16];
-	ld.global.nc.f32 	%f353, [%rd16&#43;-4];
+	ld.global.nc.f32 	%f353, [%rd16+-4];
 	sub.f32 	%f354, %f352, %f353;
 	mul.f32 	%f355, %f494, %f351;
 	mul.f32 	%f356, %f495, %f354;
 	fma.rn.f32 	%f357, %f355, %f348, %f505;
 	fma.rn.f32 	%f358, %f356, %f348, %f504;
-	ld.global.nc.f32 	%f359, [%rd8&#43;-4];
+	ld.global.nc.f32 	%f359, [%rd8+-4];
 	sub.f32 	%f360, %f1, %f359;
-	ld.global.nc.f32 	%f361, [%rd9&#43;-4];
+	ld.global.nc.f32 	%f361, [%rd9+-4];
 	sub.f32 	%f362, %f2, %f361;
 	mul.f32 	%f363, %f492, %f360;
 	mul.f32 	%f364, %f493, %f362;
@@ -5381,10 +5381,10 @@ $L__BB0_95:
 	mul.f64 	%fd53, %fd51, %fd52;
 	cvt.rn.f32.f64 	%f369, %fd53;
 	ld.global.nc.f32 	%f370, [%rd18];
-	ld.global.nc.f32 	%f371, [%rd18&#43;4];
+	ld.global.nc.f32 	%f371, [%rd18+4];
 	sub.f32 	%f372, %f371, %f370;
 	ld.global.nc.f32 	%f373, [%rd19];
-	ld.global.nc.f32 	%f374, [%rd19&#43;4];
+	ld.global.nc.f32 	%f374, [%rd19+4];
 	sub.f32 	%f375, %f374, %f373;
 	mul.f32 	%f376, %f500, %f372;
 	mul.f32 	%f377, %f501, %f375;
@@ -5392,9 +5392,9 @@ $L__BB0_95:
 	mul.f32 	%f379, %f377, %f369;
 	sub.f32 	%f380, %f505, %f378;
 	sub.f32 	%f381, %f504, %f379;
-	ld.global.nc.f32 	%f382, [%rd8&#43;4];
+	ld.global.nc.f32 	%f382, [%rd8+4];
 	sub.f32 	%f383, %f382, %f1;
-	ld.global.nc.f32 	%f384, [%rd9&#43;4];
+	ld.global.nc.f32 	%f384, [%rd9+4];
 	sub.f32 	%f385, %f384, %f2;
 	mul.f32 	%f386, %f492, %f383;
 	mul.f32 	%f387, %f493, %f385;
@@ -5413,10 +5413,10 @@ $L__BB0_97:
 	mul.f64 	%fd58, %fd56, %fd57;
 	cvt.rn.f32.f64 	%f388, %fd58;
 	ld.global.nc.f32 	%f389, [%rd18];
-	ld.global.nc.f32 	%f390, [%rd18&#43;-4];
+	ld.global.nc.f32 	%f390, [%rd18+-4];
 	sub.f32 	%f391, %f389, %f390;
 	ld.global.nc.f32 	%f392, [%rd19];
-	ld.global.nc.f32 	%f393, [%rd19&#43;-4];
+	ld.global.nc.f32 	%f393, [%rd19+-4];
 	sub.f32 	%f394, %f392, %f393;
 	mul.f32 	%f395, %f500, %f391;
 	mul.f32 	%f396, %f501, %f394;
@@ -5424,9 +5424,9 @@ $L__BB0_97:
 	mul.f32 	%f398, %f396, %f388;
 	sub.f32 	%f399, %f505, %f397;
 	sub.f32 	%f400, %f504, %f398;
-	ld.global.nc.f32 	%f401, [%rd8&#43;-4];
+	ld.global.nc.f32 	%f401, [%rd8+-4];
 	sub.f32 	%f402, %f1, %f401;
-	ld.global.nc.f32 	%f403, [%rd9&#43;-4];
+	ld.global.nc.f32 	%f403, [%rd9+-4];
 	sub.f32 	%f404, %f2, %f403;
 	mul.f32 	%f405, %f492, %f402;
 	mul.f32 	%f406, %f493, %f404;
@@ -5475,11 +5475,11 @@ $L__BB0_100:
 	.param .u8 SecondDerivative_param_18
 )
 {
-	.reg .pred 	%p&lt;61&gt;;
-	.reg .f32 	%f&lt;506&gt;;
-	.reg .b32 	%r&lt;61&gt;;
-	.reg .f64 	%fd&lt;59&gt;;
-	.reg .b64 	%rd&lt;106&gt;;
+	.reg .pred 	%p<61>;
+	.reg .f32 	%f<506>;
+	.reg .b32 	%r<61>;
+	.reg .f64 	%fd<59>;
+	.reg .b64 	%rd<106>;
 
 
 	ld.param.u64 	%rd26, [SecondDerivative_param_0];
@@ -5567,19 +5567,19 @@ $L__BB0_5:
 	mov.f32 	%f452, %f451;
 	@%p8 bra 	$L__BB0_11;
 
-	ld.global.nc.f32 	%f8, [%rd8&#43;4];
-	ld.global.nc.f32 	%f9, [%rd9&#43;4];
+	ld.global.nc.f32 	%f8, [%rd8+4];
+	ld.global.nc.f32 	%f9, [%rd9+4];
 	mov.f32 	%f445, %f449;
 	@%p6 bra 	$L__BB0_8;
 
-	ld.global.nc.f32 	%f163, [%rd13&#43;4];
+	ld.global.nc.f32 	%f163, [%rd13+4];
 	mul.f32 	%f445, %f163, %f449;
 
 $L__BB0_8:
 	mov.f32 	%f446, %f501;
 	@%p7 bra 	$L__BB0_10;
 
-	ld.global.nc.f32 	%f164, [%rd14&#43;4];
+	ld.global.nc.f32 	%f164, [%rd14+4];
 	mul.f32 	%f446, %f164, %f501;
 
 $L__BB0_10:
@@ -5601,18 +5601,18 @@ $L__BB0_11:
 	setp.lt.s32 	%p11, %r1, 1;
 	@%p11 bra 	$L__BB0_17;
 
-	ld.global.nc.f32 	%f18, [%rd8&#43;-4];
-	ld.global.nc.f32 	%f19, [%rd9&#43;-4];
+	ld.global.nc.f32 	%f18, [%rd8+-4];
+	ld.global.nc.f32 	%f19, [%rd9+-4];
 	@%p6 bra 	$L__BB0_14;
 
-	ld.global.nc.f32 	%f172, [%rd13&#43;-4];
+	ld.global.nc.f32 	%f172, [%rd13+-4];
 	mul.f32 	%f449, %f172, %f449;
 
 $L__BB0_14:
 	mov.f32 	%f450, %f501;
 	@%p7 bra 	$L__BB0_16;
 
-	ld.global.nc.f32 	%f173, [%rd14&#43;-4];
+	ld.global.nc.f32 	%f173, [%rd14+-4];
 	mul.f32 	%f450, %f173, %f501;
 
 $L__BB0_16:
@@ -5977,14 +5977,14 @@ $L__BB0_59:
 	mov.f32 	%f480, %f501;
 	@%p7 bra 	$L__BB0_62;
 
-	ld.global.nc.f32 	%f239, [%rd14&#43;4];
+	ld.global.nc.f32 	%f239, [%rd14+4];
 	mul.f32 	%f480, %f239, %f501;
 
 $L__BB0_62:
 	mov.f32 	%f481, %f500;
 	@%p34 bra 	$L__BB0_64;
 
-	ld.global.nc.f32 	%f240, [%rd25&#43;4];
+	ld.global.nc.f32 	%f240, [%rd25+4];
 	mul.f32 	%f481, %f240, %f500;
 
 $L__BB0_64:
@@ -6000,11 +6000,11 @@ $L__BB0_64:
 	cvt.f64.f32 	%fd22, %f427;
 	mul.f64 	%fd23, %fd21, %fd22;
 	cvt.rn.f32.f64 	%f243, %fd23;
-	ld.global.nc.f32 	%f244, [%rd8&#43;4];
-	ld.global.nc.f32 	%f245, [%rd15&#43;4];
+	ld.global.nc.f32 	%f244, [%rd8+4];
+	ld.global.nc.f32 	%f245, [%rd15+4];
 	sub.f32 	%f246, %f245, %f244;
-	ld.global.nc.f32 	%f247, [%rd9&#43;4];
-	ld.global.nc.f32 	%f248, [%rd16&#43;4];
+	ld.global.nc.f32 	%f247, [%rd9+4];
+	ld.global.nc.f32 	%f248, [%rd16+4];
 	sub.f32 	%f249, %f248, %f247;
 	mul.f32 	%f250, %f480, %f246;
 	mul.f32 	%f251, %f481, %f249;
@@ -6032,11 +6032,11 @@ $L__BB0_66:
 	cvt.f64.f32 	%fd27, %f425;
 	mul.f64 	%fd28, %fd26, %fd27;
 	cvt.rn.f32.f64 	%f262, %fd28;
-	ld.global.nc.f32 	%f263, [%rd8&#43;4];
-	ld.global.nc.f32 	%f264, [%rd18&#43;4];
+	ld.global.nc.f32 	%f263, [%rd8+4];
+	ld.global.nc.f32 	%f264, [%rd18+4];
 	sub.f32 	%f265, %f263, %f264;
-	ld.global.nc.f32 	%f266, [%rd9&#43;4];
-	ld.global.nc.f32 	%f267, [%rd19&#43;4];
+	ld.global.nc.f32 	%f266, [%rd9+4];
+	ld.global.nc.f32 	%f267, [%rd19+4];
 	sub.f32 	%f268, %f266, %f267;
 	mul.f32 	%f269, %f480, %f265;
 	mul.f32 	%f270, %f481, %f268;
@@ -6059,14 +6059,14 @@ $L__BB0_68:
 	mov.f32 	%f486, %f501;
 	@%p7 bra 	$L__BB0_71;
 
-	ld.global.nc.f32 	%f281, [%rd14&#43;-4];
+	ld.global.nc.f32 	%f281, [%rd14+-4];
 	mul.f32 	%f486, %f281, %f501;
 
 $L__BB0_71:
 	mov.f32 	%f487, %f500;
 	@%p34 bra 	$L__BB0_73;
 
-	ld.global.nc.f32 	%f282, [%rd25&#43;-4];
+	ld.global.nc.f32 	%f282, [%rd25+-4];
 	mul.f32 	%f487, %f282, %f500;
 
 $L__BB0_73:
@@ -6080,11 +6080,11 @@ $L__BB0_73:
 	cvt.f64.f32 	%fd32, %f423;
 	mul.f64 	%fd33, %fd31, %fd32;
 	cvt.rn.f32.f64 	%f283, %fd33;
-	ld.global.nc.f32 	%f284, [%rd8&#43;-4];
-	ld.global.nc.f32 	%f285, [%rd15&#43;-4];
+	ld.global.nc.f32 	%f284, [%rd8+-4];
+	ld.global.nc.f32 	%f285, [%rd15+-4];
 	sub.f32 	%f286, %f285, %f284;
-	ld.global.nc.f32 	%f287, [%rd9&#43;-4];
-	ld.global.nc.f32 	%f288, [%rd16&#43;-4];
+	ld.global.nc.f32 	%f287, [%rd9+-4];
+	ld.global.nc.f32 	%f288, [%rd16+-4];
 	sub.f32 	%f289, %f288, %f287;
 	mul.f32 	%f290, %f486, %f286;
 	mul.f32 	%f291, %f487, %f289;
@@ -6112,11 +6112,11 @@ $L__BB0_75:
 	cvt.f64.f32 	%fd37, %f421;
 	mul.f64 	%fd38, %fd36, %fd37;
 	cvt.rn.f32.f64 	%f302, %fd38;
-	ld.global.nc.f32 	%f303, [%rd8&#43;-4];
-	ld.global.nc.f32 	%f304, [%rd18&#43;-4];
+	ld.global.nc.f32 	%f303, [%rd8+-4];
+	ld.global.nc.f32 	%f304, [%rd18+-4];
 	sub.f32 	%f305, %f303, %f304;
-	ld.global.nc.f32 	%f306, [%rd9&#43;-4];
-	ld.global.nc.f32 	%f307, [%rd19&#43;-4];
+	ld.global.nc.f32 	%f306, [%rd9+-4];
+	ld.global.nc.f32 	%f307, [%rd19+-4];
 	sub.f32 	%f308, %f306, %f307;
 	mul.f32 	%f309, %f486, %f305;
 	mul.f32 	%f310, %f487, %f308;
@@ -6187,18 +6187,18 @@ $L__BB0_86:
 	mul.f64 	%fd43, %fd41, %fd42;
 	cvt.rn.f32.f64 	%f329, %fd43;
 	ld.global.nc.f32 	%f330, [%rd15];
-	ld.global.nc.f32 	%f331, [%rd15&#43;4];
+	ld.global.nc.f32 	%f331, [%rd15+4];
 	sub.f32 	%f332, %f331, %f330;
 	ld.global.nc.f32 	%f333, [%rd16];
-	ld.global.nc.f32 	%f334, [%rd16&#43;4];
+	ld.global.nc.f32 	%f334, [%rd16+4];
 	sub.f32 	%f335, %f334, %f333;
 	mul.f32 	%f336, %f494, %f332;
 	mul.f32 	%f337, %f495, %f335;
 	fma.rn.f32 	%f338, %f336, %f329, 0f00000000;
 	fma.rn.f32 	%f339, %f337, %f329, 0f00000000;
-	ld.global.nc.f32 	%f340, [%rd8&#43;4];
+	ld.global.nc.f32 	%f340, [%rd8+4];
 	sub.f32 	%f341, %f340, %f1;
-	ld.global.nc.f32 	%f342, [%rd9&#43;4];
+	ld.global.nc.f32 	%f342, [%rd9+4];
 	sub.f32 	%f343, %f342, %f2;
 	mul.f32 	%f344, %f492, %f341;
 	mul.f32 	%f345, %f493, %f343;
@@ -6219,18 +6219,18 @@ $L__BB0_88:
 	mul.f64 	%fd48, %fd46, %fd47;
 	cvt.rn.f32.f64 	%f348, %fd48;
 	ld.global.nc.f32 	%f349, [%rd15];
-	ld.global.nc.f32 	%f350, [%rd15&#43;-4];
+	ld.global.nc.f32 	%f350, [%rd15+-4];
 	sub.f32 	%f351, %f349, %f350;
 	ld.global.nc.f32 	%f352, [%rd16];
-	ld.global.nc.f32 	%f353, [%rd16&#43;-4];
+	ld.global.nc.f32 	%f353, [%rd16+-4];
 	sub.f32 	%f354, %f352, %f353;
 	mul.f32 	%f355, %f494, %f351;
 	mul.f32 	%f356, %f495, %f354;
 	fma.rn.f32 	%f357, %f355, %f348, %f505;
 	fma.rn.f32 	%f358, %f356, %f348, %f504;
-	ld.global.nc.f32 	%f359, [%rd8&#43;-4];
+	ld.global.nc.f32 	%f359, [%rd8+-4];
 	sub.f32 	%f360, %f1, %f359;
-	ld.global.nc.f32 	%f361, [%rd9&#43;-4];
+	ld.global.nc.f32 	%f361, [%rd9+-4];
 	sub.f32 	%f362, %f2, %f361;
 	mul.f32 	%f363, %f492, %f360;
 	mul.f32 	%f364, %f493, %f362;
@@ -6268,10 +6268,10 @@ $L__BB0_95:
 	mul.f64 	%fd53, %fd51, %fd52;
 	cvt.rn.f32.f64 	%f369, %fd53;
 	ld.global.nc.f32 	%f370, [%rd18];
-	ld.global.nc.f32 	%f371, [%rd18&#43;4];
+	ld.global.nc.f32 	%f371, [%rd18+4];
 	sub.f32 	%f372, %f371, %f370;
 	ld.global.nc.f32 	%f373, [%rd19];
-	ld.global.nc.f32 	%f374, [%rd19&#43;4];
+	ld.global.nc.f32 	%f374, [%rd19+4];
 	sub.f32 	%f375, %f374, %f373;
 	mul.f32 	%f376, %f500, %f372;
 	mul.f32 	%f377, %f501, %f375;
@@ -6279,9 +6279,9 @@ $L__BB0_95:
 	mul.f32 	%f379, %f377, %f369;
 	sub.f32 	%f380, %f505, %f378;
 	sub.f32 	%f381, %f504, %f379;
-	ld.global.nc.f32 	%f382, [%rd8&#43;4];
+	ld.global.nc.f32 	%f382, [%rd8+4];
 	sub.f32 	%f383, %f382, %f1;
-	ld.global.nc.f32 	%f384, [%rd9&#43;4];
+	ld.global.nc.f32 	%f384, [%rd9+4];
 	sub.f32 	%f385, %f384, %f2;
 	mul.f32 	%f386, %f492, %f383;
 	mul.f32 	%f387, %f493, %f385;
@@ -6300,10 +6300,10 @@ $L__BB0_97:
 	mul.f64 	%fd58, %fd56, %fd57;
 	cvt.rn.f32.f64 	%f388, %fd58;
 	ld.global.nc.f32 	%f389, [%rd18];
-	ld.global.nc.f32 	%f390, [%rd18&#43;-4];
+	ld.global.nc.f32 	%f390, [%rd18+-4];
 	sub.f32 	%f391, %f389, %f390;
 	ld.global.nc.f32 	%f392, [%rd19];
-	ld.global.nc.f32 	%f393, [%rd19&#43;-4];
+	ld.global.nc.f32 	%f393, [%rd19+-4];
 	sub.f32 	%f394, %f392, %f393;
 	mul.f32 	%f395, %f500, %f391;
 	mul.f32 	%f396, %f501, %f394;
@@ -6311,9 +6311,9 @@ $L__BB0_97:
 	mul.f32 	%f398, %f396, %f388;
 	sub.f32 	%f399, %f505, %f397;
 	sub.f32 	%f400, %f504, %f398;
-	ld.global.nc.f32 	%f401, [%rd8&#43;-4];
+	ld.global.nc.f32 	%f401, [%rd8+-4];
 	sub.f32 	%f402, %f1, %f401;
-	ld.global.nc.f32 	%f403, [%rd9&#43;-4];
+	ld.global.nc.f32 	%f403, [%rd9+-4];
 	sub.f32 	%f404, %f2, %f403;
 	mul.f32 	%f405, %f492, %f402;
 	mul.f32 	%f406, %f493, %f404;
@@ -6362,11 +6362,11 @@ $L__BB0_100:
 	.param .u8 SecondDerivative_param_18
 )
 {
-	.reg .pred 	%p&lt;61&gt;;
-	.reg .f32 	%f&lt;506&gt;;
-	.reg .b32 	%r&lt;61&gt;;
-	.reg .f64 	%fd&lt;59&gt;;
-	.reg .b64 	%rd&lt;106&gt;;
+	.reg .pred 	%p<61>;
+	.reg .f32 	%f<506>;
+	.reg .b32 	%r<61>;
+	.reg .f64 	%fd<59>;
+	.reg .b64 	%rd<106>;
 
 
 	ld.param.u64 	%rd26, [SecondDerivative_param_0];
@@ -6454,19 +6454,19 @@ $L__BB0_5:
 	mov.f32 	%f452, %f451;
 	@%p8 bra 	$L__BB0_11;
 
-	ld.global.nc.f32 	%f8, [%rd8&#43;4];
-	ld.global.nc.f32 	%f9, [%rd9&#43;4];
+	ld.global.nc.f32 	%f8, [%rd8+4];
+	ld.global.nc.f32 	%f9, [%rd9+4];
 	mov.f32 	%f445, %f449;
 	@%p6 bra 	$L__BB0_8;
 
-	ld.global.nc.f32 	%f163, [%rd13&#43;4];
+	ld.global.nc.f32 	%f163, [%rd13+4];
 	mul.f32 	%f445, %f163, %f449;
 
 $L__BB0_8:
 	mov.f32 	%f446, %f501;
 	@%p7 bra 	$L__BB0_10;
 
-	ld.global.nc.f32 	%f164, [%rd14&#43;4];
+	ld.global.nc.f32 	%f164, [%rd14+4];
 	mul.f32 	%f446, %f164, %f501;
 
 $L__BB0_10:
@@ -6488,18 +6488,18 @@ $L__BB0_11:
 	setp.lt.s32 	%p11, %r1, 1;
 	@%p11 bra 	$L__BB0_17;
 
-	ld.global.nc.f32 	%f18, [%rd8&#43;-4];
-	ld.global.nc.f32 	%f19, [%rd9&#43;-4];
+	ld.global.nc.f32 	%f18, [%rd8+-4];
+	ld.global.nc.f32 	%f19, [%rd9+-4];
 	@%p6 bra 	$L__BB0_14;
 
-	ld.global.nc.f32 	%f172, [%rd13&#43;-4];
+	ld.global.nc.f32 	%f172, [%rd13+-4];
 	mul.f32 	%f449, %f172, %f449;
 
 $L__BB0_14:
 	mov.f32 	%f450, %f501;
 	@%p7 bra 	$L__BB0_16;
 
-	ld.global.nc.f32 	%f173, [%rd14&#43;-4];
+	ld.global.nc.f32 	%f173, [%rd14+-4];
 	mul.f32 	%f450, %f173, %f501;
 
 $L__BB0_16:
@@ -6864,14 +6864,14 @@ $L__BB0_59:
 	mov.f32 	%f480, %f501;
 	@%p7 bra 	$L__BB0_62;
 
-	ld.global.nc.f32 	%f239, [%rd14&#43;4];
+	ld.global.nc.f32 	%f239, [%rd14+4];
 	mul.f32 	%f480, %f239, %f501;
 
 $L__BB0_62:
 	mov.f32 	%f481, %f500;
 	@%p34 bra 	$L__BB0_64;
 
-	ld.global.nc.f32 	%f240, [%rd25&#43;4];
+	ld.global.nc.f32 	%f240, [%rd25+4];
 	mul.f32 	%f481, %f240, %f500;
 
 $L__BB0_64:
@@ -6887,11 +6887,11 @@ $L__BB0_64:
 	cvt.f64.f32 	%fd22, %f427;
 	mul.f64 	%fd23, %fd21, %fd22;
 	cvt.rn.f32.f64 	%f243, %fd23;
-	ld.global.nc.f32 	%f244, [%rd8&#43;4];
-	ld.global.nc.f32 	%f245, [%rd15&#43;4];
+	ld.global.nc.f32 	%f244, [%rd8+4];
+	ld.global.nc.f32 	%f245, [%rd15+4];
 	sub.f32 	%f246, %f245, %f244;
-	ld.global.nc.f32 	%f247, [%rd9&#43;4];
-	ld.global.nc.f32 	%f248, [%rd16&#43;4];
+	ld.global.nc.f32 	%f247, [%rd9+4];
+	ld.global.nc.f32 	%f248, [%rd16+4];
 	sub.f32 	%f249, %f248, %f247;
 	mul.f32 	%f250, %f480, %f246;
 	mul.f32 	%f251, %f481, %f249;
@@ -6919,11 +6919,11 @@ $L__BB0_66:
 	cvt.f64.f32 	%fd27, %f425;
 	mul.f64 	%fd28, %fd26, %fd27;
 	cvt.rn.f32.f64 	%f262, %fd28;
-	ld.global.nc.f32 	%f263, [%rd8&#43;4];
-	ld.global.nc.f32 	%f264, [%rd18&#43;4];
+	ld.global.nc.f32 	%f263, [%rd8+4];
+	ld.global.nc.f32 	%f264, [%rd18+4];
 	sub.f32 	%f265, %f263, %f264;
-	ld.global.nc.f32 	%f266, [%rd9&#43;4];
-	ld.global.nc.f32 	%f267, [%rd19&#43;4];
+	ld.global.nc.f32 	%f266, [%rd9+4];
+	ld.global.nc.f32 	%f267, [%rd19+4];
 	sub.f32 	%f268, %f266, %f267;
 	mul.f32 	%f269, %f480, %f265;
 	mul.f32 	%f270, %f481, %f268;
@@ -6946,14 +6946,14 @@ $L__BB0_68:
 	mov.f32 	%f486, %f501;
 	@%p7 bra 	$L__BB0_71;
 
-	ld.global.nc.f32 	%f281, [%rd14&#43;-4];
+	ld.global.nc.f32 	%f281, [%rd14+-4];
 	mul.f32 	%f486, %f281, %f501;
 
 $L__BB0_71:
 	mov.f32 	%f487, %f500;
 	@%p34 bra 	$L__BB0_73;
 
-	ld.global.nc.f32 	%f282, [%rd25&#43;-4];
+	ld.global.nc.f32 	%f282, [%rd25+-4];
 	mul.f32 	%f487, %f282, %f500;
 
 $L__BB0_73:
@@ -6967,11 +6967,11 @@ $L__BB0_73:
 	cvt.f64.f32 	%fd32, %f423;
 	mul.f64 	%fd33, %fd31, %fd32;
 	cvt.rn.f32.f64 	%f283, %fd33;
-	ld.global.nc.f32 	%f284, [%rd8&#43;-4];
-	ld.global.nc.f32 	%f285, [%rd15&#43;-4];
+	ld.global.nc.f32 	%f284, [%rd8+-4];
+	ld.global.nc.f32 	%f285, [%rd15+-4];
 	sub.f32 	%f286, %f285, %f284;
-	ld.global.nc.f32 	%f287, [%rd9&#43;-4];
-	ld.global.nc.f32 	%f288, [%rd16&#43;-4];
+	ld.global.nc.f32 	%f287, [%rd9+-4];
+	ld.global.nc.f32 	%f288, [%rd16+-4];
 	sub.f32 	%f289, %f288, %f287;
 	mul.f32 	%f290, %f486, %f286;
 	mul.f32 	%f291, %f487, %f289;
@@ -6999,11 +6999,11 @@ $L__BB0_75:
 	cvt.f64.f32 	%fd37, %f421;
 	mul.f64 	%fd38, %fd36, %fd37;
 	cvt.rn.f32.f64 	%f302, %fd38;
-	ld.global.nc.f32 	%f303, [%rd8&#43;-4];
-	ld.global.nc.f32 	%f304, [%rd18&#43;-4];
+	ld.global.nc.f32 	%f303, [%rd8+-4];
+	ld.global.nc.f32 	%f304, [%rd18+-4];
 	sub.f32 	%f305, %f303, %f304;
-	ld.global.nc.f32 	%f306, [%rd9&#43;-4];
-	ld.global.nc.f32 	%f307, [%rd19&#43;-4];
+	ld.global.nc.f32 	%f306, [%rd9+-4];
+	ld.global.nc.f32 	%f307, [%rd19+-4];
 	sub.f32 	%f308, %f306, %f307;
 	mul.f32 	%f309, %f486, %f305;
 	mul.f32 	%f310, %f487, %f308;
@@ -7074,18 +7074,18 @@ $L__BB0_86:
 	mul.f64 	%fd43, %fd41, %fd42;
 	cvt.rn.f32.f64 	%f329, %fd43;
 	ld.global.nc.f32 	%f330, [%rd15];
-	ld.global.nc.f32 	%f331, [%rd15&#43;4];
+	ld.global.nc.f32 	%f331, [%rd15+4];
 	sub.f32 	%f332, %f331, %f330;
 	ld.global.nc.f32 	%f333, [%rd16];
-	ld.global.nc.f32 	%f334, [%rd16&#43;4];
+	ld.global.nc.f32 	%f334, [%rd16+4];
 	sub.f32 	%f335, %f334, %f333;
 	mul.f32 	%f336, %f494, %f332;
 	mul.f32 	%f337, %f495, %f335;
 	fma.rn.f32 	%f338, %f336, %f329, 0f00000000;
 	fma.rn.f32 	%f339, %f337, %f329, 0f00000000;
-	ld.global.nc.f32 	%f340, [%rd8&#43;4];
+	ld.global.nc.f32 	%f340, [%rd8+4];
 	sub.f32 	%f341, %f340, %f1;
-	ld.global.nc.f32 	%f342, [%rd9&#43;4];
+	ld.global.nc.f32 	%f342, [%rd9+4];
 	sub.f32 	%f343, %f342, %f2;
 	mul.f32 	%f344, %f492, %f341;
 	mul.f32 	%f345, %f493, %f343;
@@ -7106,18 +7106,18 @@ $L__BB0_88:
 	mul.f64 	%fd48, %fd46, %fd47;
 	cvt.rn.f32.f64 	%f348, %fd48;
 	ld.global.nc.f32 	%f349, [%rd15];
-	ld.global.nc.f32 	%f350, [%rd15&#43;-4];
+	ld.global.nc.f32 	%f350, [%rd15+-4];
 	sub.f32 	%f351, %f349, %f350;
 	ld.global.nc.f32 	%f352, [%rd16];
-	ld.global.nc.f32 	%f353, [%rd16&#43;-4];
+	ld.global.nc.f32 	%f353, [%rd16+-4];
 	sub.f32 	%f354, %f352, %f353;
 	mul.f32 	%f355, %f494, %f351;
 	mul.f32 	%f356, %f495, %f354;
 	fma.rn.f32 	%f357, %f355, %f348, %f505;
 	fma.rn.f32 	%f358, %f356, %f348, %f504;
-	ld.global.nc.f32 	%f359, [%rd8&#43;-4];
+	ld.global.nc.f32 	%f359, [%rd8+-4];
 	sub.f32 	%f360, %f1, %f359;
-	ld.global.nc.f32 	%f361, [%rd9&#43;-4];
+	ld.global.nc.f32 	%f361, [%rd9+-4];
 	sub.f32 	%f362, %f2, %f361;
 	mul.f32 	%f363, %f492, %f360;
 	mul.f32 	%f364, %f493, %f362;
@@ -7155,10 +7155,10 @@ $L__BB0_95:
 	mul.f64 	%fd53, %fd51, %fd52;
 	cvt.rn.f32.f64 	%f369, %fd53;
 	ld.global.nc.f32 	%f370, [%rd18];
-	ld.global.nc.f32 	%f371, [%rd18&#43;4];
+	ld.global.nc.f32 	%f371, [%rd18+4];
 	sub.f32 	%f372, %f371, %f370;
 	ld.global.nc.f32 	%f373, [%rd19];
-	ld.global.nc.f32 	%f374, [%rd19&#43;4];
+	ld.global.nc.f32 	%f374, [%rd19+4];
 	sub.f32 	%f375, %f374, %f373;
 	mul.f32 	%f376, %f500, %f372;
 	mul.f32 	%f377, %f501, %f375;
@@ -7166,9 +7166,9 @@ $L__BB0_95:
 	mul.f32 	%f379, %f377, %f369;
 	sub.f32 	%f380, %f505, %f378;
 	sub.f32 	%f381, %f504, %f379;
-	ld.global.nc.f32 	%f382, [%rd8&#43;4];
+	ld.global.nc.f32 	%f382, [%rd8+4];
 	sub.f32 	%f383, %f382, %f1;
-	ld.global.nc.f32 	%f384, [%rd9&#43;4];
+	ld.global.nc.f32 	%f384, [%rd9+4];
 	sub.f32 	%f385, %f384, %f2;
 	mul.f32 	%f386, %f492, %f383;
 	mul.f32 	%f387, %f493, %f385;
@@ -7187,10 +7187,10 @@ $L__BB0_97:
 	mul.f64 	%fd58, %fd56, %fd57;
 	cvt.rn.f32.f64 	%f388, %fd58;
 	ld.global.nc.f32 	%f389, [%rd18];
-	ld.global.nc.f32 	%f390, [%rd18&#43;-4];
+	ld.global.nc.f32 	%f390, [%rd18+-4];
 	sub.f32 	%f391, %f389, %f390;
 	ld.global.nc.f32 	%f392, [%rd19];
-	ld.global.nc.f32 	%f393, [%rd19&#43;-4];
+	ld.global.nc.f32 	%f393, [%rd19+-4];
 	sub.f32 	%f394, %f392, %f393;
 	mul.f32 	%f395, %f500, %f391;
 	mul.f32 	%f396, %f501, %f394;
@@ -7198,9 +7198,9 @@ $L__BB0_97:
 	mul.f32 	%f398, %f396, %f388;
 	sub.f32 	%f399, %f505, %f397;
 	sub.f32 	%f400, %f504, %f398;
-	ld.global.nc.f32 	%f401, [%rd8&#43;-4];
+	ld.global.nc.f32 	%f401, [%rd8+-4];
 	sub.f32 	%f402, %f1, %f401;
-	ld.global.nc.f32 	%f403, [%rd9&#43;-4];
+	ld.global.nc.f32 	%f403, [%rd9+-4];
 	sub.f32 	%f404, %f2, %f403;
 	mul.f32 	%f405, %f492, %f402;
 	mul.f32 	%f406, %f493, %f404;
@@ -7249,11 +7249,11 @@ $L__BB0_100:
 	.param .u8 SecondDerivative_param_18
 )
 {
-	.reg .pred 	%p&lt;61&gt;;
-	.reg .f32 	%f&lt;506&gt;;
-	.reg .b32 	%r&lt;61&gt;;
-	.reg .f64 	%fd&lt;59&gt;;
-	.reg .b64 	%rd&lt;106&gt;;
+	.reg .pred 	%p<61>;
+	.reg .f32 	%f<506>;
+	.reg .b32 	%r<61>;
+	.reg .f64 	%fd<59>;
+	.reg .b64 	%rd<106>;
 
 
 	ld.param.u64 	%rd26, [SecondDerivative_param_0];
@@ -7341,19 +7341,19 @@ $L__BB0_5:
 	mov.f32 	%f452, %f451;
 	@%p8 bra 	$L__BB0_11;
 
-	ld.global.nc.f32 	%f8, [%rd8&#43;4];
-	ld.global.nc.f32 	%f9, [%rd9&#43;4];
+	ld.global.nc.f32 	%f8, [%rd8+4];
+	ld.global.nc.f32 	%f9, [%rd9+4];
 	mov.f32 	%f445, %f449;
 	@%p6 bra 	$L__BB0_8;
 
-	ld.global.nc.f32 	%f163, [%rd13&#43;4];
+	ld.global.nc.f32 	%f163, [%rd13+4];
 	mul.f32 	%f445, %f163, %f449;
 
 $L__BB0_8:
 	mov.f32 	%f446, %f501;
 	@%p7 bra 	$L__BB0_10;
 
-	ld.global.nc.f32 	%f164, [%rd14&#43;4];
+	ld.global.nc.f32 	%f164, [%rd14+4];
 	mul.f32 	%f446, %f164, %f501;
 
 $L__BB0_10:
@@ -7375,18 +7375,18 @@ $L__BB0_11:
 	setp.lt.s32 	%p11, %r1, 1;
 	@%p11 bra 	$L__BB0_17;
 
-	ld.global.nc.f32 	%f18, [%rd8&#43;-4];
-	ld.global.nc.f32 	%f19, [%rd9&#43;-4];
+	ld.global.nc.f32 	%f18, [%rd8+-4];
+	ld.global.nc.f32 	%f19, [%rd9+-4];
 	@%p6 bra 	$L__BB0_14;
 
-	ld.global.nc.f32 	%f172, [%rd13&#43;-4];
+	ld.global.nc.f32 	%f172, [%rd13+-4];
 	mul.f32 	%f449, %f172, %f449;
 
 $L__BB0_14:
 	mov.f32 	%f450, %f501;
 	@%p7 bra 	$L__BB0_16;
 
-	ld.global.nc.f32 	%f173, [%rd14&#43;-4];
+	ld.global.nc.f32 	%f173, [%rd14+-4];
 	mul.f32 	%f450, %f173, %f501;
 
 $L__BB0_16:
@@ -7751,14 +7751,14 @@ $L__BB0_59:
 	mov.f32 	%f480, %f501;
 	@%p7 bra 	$L__BB0_62;
 
-	ld.global.nc.f32 	%f239, [%rd14&#43;4];
+	ld.global.nc.f32 	%f239, [%rd14+4];
 	mul.f32 	%f480, %f239, %f501;
 
 $L__BB0_62:
 	mov.f32 	%f481, %f500;
 	@%p34 bra 	$L__BB0_64;
 
-	ld.global.nc.f32 	%f240, [%rd25&#43;4];
+	ld.global.nc.f32 	%f240, [%rd25+4];
 	mul.f32 	%f481, %f240, %f500;
 
 $L__BB0_64:
@@ -7774,11 +7774,11 @@ $L__BB0_64:
 	cvt.f64.f32 	%fd22, %f427;
 	mul.f64 	%fd23, %fd21, %fd22;
 	cvt.rn.f32.f64 	%f243, %fd23;
-	ld.global.nc.f32 	%f244, [%rd8&#43;4];
-	ld.global.nc.f32 	%f245, [%rd15&#43;4];
+	ld.global.nc.f32 	%f244, [%rd8+4];
+	ld.global.nc.f32 	%f245, [%rd15+4];
 	sub.f32 	%f246, %f245, %f244;
-	ld.global.nc.f32 	%f247, [%rd9&#43;4];
-	ld.global.nc.f32 	%f248, [%rd16&#43;4];
+	ld.global.nc.f32 	%f247, [%rd9+4];
+	ld.global.nc.f32 	%f248, [%rd16+4];
 	sub.f32 	%f249, %f248, %f247;
 	mul.f32 	%f250, %f480, %f246;
 	mul.f32 	%f251, %f481, %f249;
@@ -7806,11 +7806,11 @@ $L__BB0_66:
 	cvt.f64.f32 	%fd27, %f425;
 	mul.f64 	%fd28, %fd26, %fd27;
 	cvt.rn.f32.f64 	%f262, %fd28;
-	ld.global.nc.f32 	%f263, [%rd8&#43;4];
-	ld.global.nc.f32 	%f264, [%rd18&#43;4];
+	ld.global.nc.f32 	%f263, [%rd8+4];
+	ld.global.nc.f32 	%f264, [%rd18+4];
 	sub.f32 	%f265, %f263, %f264;
-	ld.global.nc.f32 	%f266, [%rd9&#43;4];
-	ld.global.nc.f32 	%f267, [%rd19&#43;4];
+	ld.global.nc.f32 	%f266, [%rd9+4];
+	ld.global.nc.f32 	%f267, [%rd19+4];
 	sub.f32 	%f268, %f266, %f267;
 	mul.f32 	%f269, %f480, %f265;
 	mul.f32 	%f270, %f481, %f268;
@@ -7833,14 +7833,14 @@ $L__BB0_68:
 	mov.f32 	%f486, %f501;
 	@%p7 bra 	$L__BB0_71;
 
-	ld.global.nc.f32 	%f281, [%rd14&#43;-4];
+	ld.global.nc.f32 	%f281, [%rd14+-4];
 	mul.f32 	%f486, %f281, %f501;
 
 $L__BB0_71:
 	mov.f32 	%f487, %f500;
 	@%p34 bra 	$L__BB0_73;
 
-	ld.global.nc.f32 	%f282, [%rd25&#43;-4];
+	ld.global.nc.f32 	%f282, [%rd25+-4];
 	mul.f32 	%f487, %f282, %f500;
 
 $L__BB0_73:
@@ -7854,11 +7854,11 @@ $L__BB0_73:
 	cvt.f64.f32 	%fd32, %f423;
 	mul.f64 	%fd33, %fd31, %fd32;
 	cvt.rn.f32.f64 	%f283, %fd33;
-	ld.global.nc.f32 	%f284, [%rd8&#43;-4];
-	ld.global.nc.f32 	%f285, [%rd15&#43;-4];
+	ld.global.nc.f32 	%f284, [%rd8+-4];
+	ld.global.nc.f32 	%f285, [%rd15+-4];
 	sub.f32 	%f286, %f285, %f284;
-	ld.global.nc.f32 	%f287, [%rd9&#43;-4];
-	ld.global.nc.f32 	%f288, [%rd16&#43;-4];
+	ld.global.nc.f32 	%f287, [%rd9+-4];
+	ld.global.nc.f32 	%f288, [%rd16+-4];
 	sub.f32 	%f289, %f288, %f287;
 	mul.f32 	%f290, %f486, %f286;
 	mul.f32 	%f291, %f487, %f289;
@@ -7886,11 +7886,11 @@ $L__BB0_75:
 	cvt.f64.f32 	%fd37, %f421;
 	mul.f64 	%fd38, %fd36, %fd37;
 	cvt.rn.f32.f64 	%f302, %fd38;
-	ld.global.nc.f32 	%f303, [%rd8&#43;-4];
-	ld.global.nc.f32 	%f304, [%rd18&#43;-4];
+	ld.global.nc.f32 	%f303, [%rd8+-4];
+	ld.global.nc.f32 	%f304, [%rd18+-4];
 	sub.f32 	%f305, %f303, %f304;
-	ld.global.nc.f32 	%f306, [%rd9&#43;-4];
-	ld.global.nc.f32 	%f307, [%rd19&#43;-4];
+	ld.global.nc.f32 	%f306, [%rd9+-4];
+	ld.global.nc.f32 	%f307, [%rd19+-4];
 	sub.f32 	%f308, %f306, %f307;
 	mul.f32 	%f309, %f486, %f305;
 	mul.f32 	%f310, %f487, %f308;
@@ -7961,18 +7961,18 @@ $L__BB0_86:
 	mul.f64 	%fd43, %fd41, %fd42;
 	cvt.rn.f32.f64 	%f329, %fd43;
 	ld.global.nc.f32 	%f330, [%rd15];
-	ld.global.nc.f32 	%f331, [%rd15&#43;4];
+	ld.global.nc.f32 	%f331, [%rd15+4];
 	sub.f32 	%f332, %f331, %f330;
 	ld.global.nc.f32 	%f333, [%rd16];
-	ld.global.nc.f32 	%f334, [%rd16&#43;4];
+	ld.global.nc.f32 	%f334, [%rd16+4];
 	sub.f32 	%f335, %f334, %f333;
 	mul.f32 	%f336, %f494, %f332;
 	mul.f32 	%f337, %f495, %f335;
 	fma.rn.f32 	%f338, %f336, %f329, 0f00000000;
 	fma.rn.f32 	%f339, %f337, %f329, 0f00000000;
-	ld.global.nc.f32 	%f340, [%rd8&#43;4];
+	ld.global.nc.f32 	%f340, [%rd8+4];
 	sub.f32 	%f341, %f340, %f1;
-	ld.global.nc.f32 	%f342, [%rd9&#43;4];
+	ld.global.nc.f32 	%f342, [%rd9+4];
 	sub.f32 	%f343, %f342, %f2;
 	mul.f32 	%f344, %f492, %f341;
 	mul.f32 	%f345, %f493, %f343;
@@ -7993,18 +7993,18 @@ $L__BB0_88:
 	mul.f64 	%fd48, %fd46, %fd47;
 	cvt.rn.f32.f64 	%f348, %fd48;
 	ld.global.nc.f32 	%f349, [%rd15];
-	ld.global.nc.f32 	%f350, [%rd15&#43;-4];
+	ld.global.nc.f32 	%f350, [%rd15+-4];
 	sub.f32 	%f351, %f349, %f350;
 	ld.global.nc.f32 	%f352, [%rd16];
-	ld.global.nc.f32 	%f353, [%rd16&#43;-4];
+	ld.global.nc.f32 	%f353, [%rd16+-4];
 	sub.f32 	%f354, %f352, %f353;
 	mul.f32 	%f355, %f494, %f351;
 	mul.f32 	%f356, %f495, %f354;
 	fma.rn.f32 	%f357, %f355, %f348, %f505;
 	fma.rn.f32 	%f358, %f356, %f348, %f504;
-	ld.global.nc.f32 	%f359, [%rd8&#43;-4];
+	ld.global.nc.f32 	%f359, [%rd8+-4];
 	sub.f32 	%f360, %f1, %f359;
-	ld.global.nc.f32 	%f361, [%rd9&#43;-4];
+	ld.global.nc.f32 	%f361, [%rd9+-4];
 	sub.f32 	%f362, %f2, %f361;
 	mul.f32 	%f363, %f492, %f360;
 	mul.f32 	%f364, %f493, %f362;
@@ -8042,10 +8042,10 @@ $L__BB0_95:
 	mul.f64 	%fd53, %fd51, %fd52;
 	cvt.rn.f32.f64 	%f369, %fd53;
 	ld.global.nc.f32 	%f370, [%rd18];
-	ld.global.nc.f32 	%f371, [%rd18&#43;4];
+	ld.global.nc.f32 	%f371, [%rd18+4];
 	sub.f32 	%f372, %f371, %f370;
 	ld.global.nc.f32 	%f373, [%rd19];
-	ld.global.nc.f32 	%f374, [%rd19&#43;4];
+	ld.global.nc.f32 	%f374, [%rd19+4];
 	sub.f32 	%f375, %f374, %f373;
 	mul.f32 	%f376, %f500, %f372;
 	mul.f32 	%f377, %f501, %f375;
@@ -8053,9 +8053,9 @@ $L__BB0_95:
 	mul.f32 	%f379, %f377, %f369;
 	sub.f32 	%f380, %f505, %f378;
 	sub.f32 	%f381, %f504, %f379;
-	ld.global.nc.f32 	%f382, [%rd8&#43;4];
+	ld.global.nc.f32 	%f382, [%rd8+4];
 	sub.f32 	%f383, %f382, %f1;
-	ld.global.nc.f32 	%f384, [%rd9&#43;4];
+	ld.global.nc.f32 	%f384, [%rd9+4];
 	sub.f32 	%f385, %f384, %f2;
 	mul.f32 	%f386, %f492, %f383;
 	mul.f32 	%f387, %f493, %f385;
@@ -8074,10 +8074,10 @@ $L__BB0_97:
 	mul.f64 	%fd58, %fd56, %fd57;
 	cvt.rn.f32.f64 	%f388, %fd58;
 	ld.global.nc.f32 	%f389, [%rd18];
-	ld.global.nc.f32 	%f390, [%rd18&#43;-4];
+	ld.global.nc.f32 	%f390, [%rd18+-4];
 	sub.f32 	%f391, %f389, %f390;
 	ld.global.nc.f32 	%f392, [%rd19];
-	ld.global.nc.f32 	%f393, [%rd19&#43;-4];
+	ld.global.nc.f32 	%f393, [%rd19+-4];
 	sub.f32 	%f394, %f392, %f393;
 	mul.f32 	%f395, %f500, %f391;
 	mul.f32 	%f396, %f501, %f394;
@@ -8085,9 +8085,9 @@ $L__BB0_97:
 	mul.f32 	%f398, %f396, %f388;
 	sub.f32 	%f399, %f505, %f397;
 	sub.f32 	%f400, %f504, %f398;
-	ld.global.nc.f32 	%f401, [%rd8&#43;-4];
+	ld.global.nc.f32 	%f401, [%rd8+-4];
 	sub.f32 	%f402, %f1, %f401;
-	ld.global.nc.f32 	%f403, [%rd9&#43;-4];
+	ld.global.nc.f32 	%f403, [%rd9+-4];
 	sub.f32 	%f404, %f2, %f403;
 	mul.f32 	%f405, %f492, %f402;
 	mul.f32 	%f406, %f493, %f404;
@@ -8136,11 +8136,11 @@ $L__BB0_100:
 	.param .u8 SecondDerivative_param_18
 )
 {
-	.reg .pred 	%p&lt;61&gt;;
-	.reg .f32 	%f&lt;506&gt;;
-	.reg .b32 	%r&lt;61&gt;;
-	.reg .f64 	%fd&lt;59&gt;;
-	.reg .b64 	%rd&lt;106&gt;;
+	.reg .pred 	%p<61>;
+	.reg .f32 	%f<506>;
+	.reg .b32 	%r<61>;
+	.reg .f64 	%fd<59>;
+	.reg .b64 	%rd<106>;
 
 
 	ld.param.u64 	%rd26, [SecondDerivative_param_0];
@@ -8228,19 +8228,19 @@ $L__BB0_5:
 	mov.f32 	%f452, %f451;
 	@%p8 bra 	$L__BB0_11;
 
-	ld.global.nc.f32 	%f8, [%rd8&#43;4];
-	ld.global.nc.f32 	%f9, [%rd9&#43;4];
+	ld.global.nc.f32 	%f8, [%rd8+4];
+	ld.global.nc.f32 	%f9, [%rd9+4];
 	mov.f32 	%f445, %f449;
 	@%p6 bra 	$L__BB0_8;
 
-	ld.global.nc.f32 	%f163, [%rd13&#43;4];
+	ld.global.nc.f32 	%f163, [%rd13+4];
 	mul.f32 	%f445, %f163, %f449;
 
 $L__BB0_8:
 	mov.f32 	%f446, %f501;
 	@%p7 bra 	$L__BB0_10;
 
-	ld.global.nc.f32 	%f164, [%rd14&#43;4];
+	ld.global.nc.f32 	%f164, [%rd14+4];
 	mul.f32 	%f446, %f164, %f501;
 
 $L__BB0_10:
@@ -8262,18 +8262,18 @@ $L__BB0_11:
 	setp.lt.s32 	%p11, %r1, 1;
 	@%p11 bra 	$L__BB0_17;
 
-	ld.global.nc.f32 	%f18, [%rd8&#43;-4];
-	ld.global.nc.f32 	%f19, [%rd9&#43;-4];
+	ld.global.nc.f32 	%f18, [%rd8+-4];
+	ld.global.nc.f32 	%f19, [%rd9+-4];
 	@%p6 bra 	$L__BB0_14;
 
-	ld.global.nc.f32 	%f172, [%rd13&#43;-4];
+	ld.global.nc.f32 	%f172, [%rd13+-4];
 	mul.f32 	%f449, %f172, %f449;
 
 $L__BB0_14:
 	mov.f32 	%f450, %f501;
 	@%p7 bra 	$L__BB0_16;
 
-	ld.global.nc.f32 	%f173, [%rd14&#43;-4];
+	ld.global.nc.f32 	%f173, [%rd14+-4];
 	mul.f32 	%f450, %f173, %f501;
 
 $L__BB0_16:
@@ -8638,14 +8638,14 @@ $L__BB0_59:
 	mov.f32 	%f480, %f501;
 	@%p7 bra 	$L__BB0_62;
 
-	ld.global.nc.f32 	%f239, [%rd14&#43;4];
+	ld.global.nc.f32 	%f239, [%rd14+4];
 	mul.f32 	%f480, %f239, %f501;
 
 $L__BB0_62:
 	mov.f32 	%f481, %f500;
 	@%p34 bra 	$L__BB0_64;
 
-	ld.global.nc.f32 	%f240, [%rd25&#43;4];
+	ld.global.nc.f32 	%f240, [%rd25+4];
 	mul.f32 	%f481, %f240, %f500;
 
 $L__BB0_64:
@@ -8661,11 +8661,11 @@ $L__BB0_64:
 	cvt.f64.f32 	%fd22, %f427;
 	mul.f64 	%fd23, %fd21, %fd22;
 	cvt.rn.f32.f64 	%f243, %fd23;
-	ld.global.nc.f32 	%f244, [%rd8&#43;4];
-	ld.global.nc.f32 	%f245, [%rd15&#43;4];
+	ld.global.nc.f32 	%f244, [%rd8+4];
+	ld.global.nc.f32 	%f245, [%rd15+4];
 	sub.f32 	%f246, %f245, %f244;
-	ld.global.nc.f32 	%f247, [%rd9&#43;4];
-	ld.global.nc.f32 	%f248, [%rd16&#43;4];
+	ld.global.nc.f32 	%f247, [%rd9+4];
+	ld.global.nc.f32 	%f248, [%rd16+4];
 	sub.f32 	%f249, %f248, %f247;
 	mul.f32 	%f250, %f480, %f246;
 	mul.f32 	%f251, %f481, %f249;
@@ -8693,11 +8693,11 @@ $L__BB0_66:
 	cvt.f64.f32 	%fd27, %f425;
 	mul.f64 	%fd28, %fd26, %fd27;
 	cvt.rn.f32.f64 	%f262, %fd28;
-	ld.global.nc.f32 	%f263, [%rd8&#43;4];
-	ld.global.nc.f32 	%f264, [%rd18&#43;4];
+	ld.global.nc.f32 	%f263, [%rd8+4];
+	ld.global.nc.f32 	%f264, [%rd18+4];
 	sub.f32 	%f265, %f263, %f264;
-	ld.global.nc.f32 	%f266, [%rd9&#43;4];
-	ld.global.nc.f32 	%f267, [%rd19&#43;4];
+	ld.global.nc.f32 	%f266, [%rd9+4];
+	ld.global.nc.f32 	%f267, [%rd19+4];
 	sub.f32 	%f268, %f266, %f267;
 	mul.f32 	%f269, %f480, %f265;
 	mul.f32 	%f270, %f481, %f268;
@@ -8720,14 +8720,14 @@ $L__BB0_68:
 	mov.f32 	%f486, %f501;
 	@%p7 bra 	$L__BB0_71;
 
-	ld.global.nc.f32 	%f281, [%rd14&#43;-4];
+	ld.global.nc.f32 	%f281, [%rd14+-4];
 	mul.f32 	%f486, %f281, %f501;
 
 $L__BB0_71:
 	mov.f32 	%f487, %f500;
 	@%p34 bra 	$L__BB0_73;
 
-	ld.global.nc.f32 	%f282, [%rd25&#43;-4];
+	ld.global.nc.f32 	%f282, [%rd25+-4];
 	mul.f32 	%f487, %f282, %f500;
 
 $L__BB0_73:
@@ -8741,11 +8741,11 @@ $L__BB0_73:
 	cvt.f64.f32 	%fd32, %f423;
 	mul.f64 	%fd33, %fd31, %fd32;
 	cvt.rn.f32.f64 	%f283, %fd33;
-	ld.global.nc.f32 	%f284, [%rd8&#43;-4];
-	ld.global.nc.f32 	%f285, [%rd15&#43;-4];
+	ld.global.nc.f32 	%f284, [%rd8+-4];
+	ld.global.nc.f32 	%f285, [%rd15+-4];
 	sub.f32 	%f286, %f285, %f284;
-	ld.global.nc.f32 	%f287, [%rd9&#43;-4];
-	ld.global.nc.f32 	%f288, [%rd16&#43;-4];
+	ld.global.nc.f32 	%f287, [%rd9+-4];
+	ld.global.nc.f32 	%f288, [%rd16+-4];
 	sub.f32 	%f289, %f288, %f287;
 	mul.f32 	%f290, %f486, %f286;
 	mul.f32 	%f291, %f487, %f289;
@@ -8773,11 +8773,11 @@ $L__BB0_75:
 	cvt.f64.f32 	%fd37, %f421;
 	mul.f64 	%fd38, %fd36, %fd37;
 	cvt.rn.f32.f64 	%f302, %fd38;
-	ld.global.nc.f32 	%f303, [%rd8&#43;-4];
-	ld.global.nc.f32 	%f304, [%rd18&#43;-4];
+	ld.global.nc.f32 	%f303, [%rd8+-4];
+	ld.global.nc.f32 	%f304, [%rd18+-4];
 	sub.f32 	%f305, %f303, %f304;
-	ld.global.nc.f32 	%f306, [%rd9&#43;-4];
-	ld.global.nc.f32 	%f307, [%rd19&#43;-4];
+	ld.global.nc.f32 	%f306, [%rd9+-4];
+	ld.global.nc.f32 	%f307, [%rd19+-4];
 	sub.f32 	%f308, %f306, %f307;
 	mul.f32 	%f309, %f486, %f305;
 	mul.f32 	%f310, %f487, %f308;
@@ -8848,18 +8848,18 @@ $L__BB0_86:
 	mul.f64 	%fd43, %fd41, %fd42;
 	cvt.rn.f32.f64 	%f329, %fd43;
 	ld.global.nc.f32 	%f330, [%rd15];
-	ld.global.nc.f32 	%f331, [%rd15&#43;4];
+	ld.global.nc.f32 	%f331, [%rd15+4];
 	sub.f32 	%f332, %f331, %f330;
 	ld.global.nc.f32 	%f333, [%rd16];
-	ld.global.nc.f32 	%f334, [%rd16&#43;4];
+	ld.global.nc.f32 	%f334, [%rd16+4];
 	sub.f32 	%f335, %f334, %f333;
 	mul.f32 	%f336, %f494, %f332;
 	mul.f32 	%f337, %f495, %f335;
 	fma.rn.f32 	%f338, %f336, %f329, 0f00000000;
 	fma.rn.f32 	%f339, %f337, %f329, 0f00000000;
-	ld.global.nc.f32 	%f340, [%rd8&#43;4];
+	ld.global.nc.f32 	%f340, [%rd8+4];
 	sub.f32 	%f341, %f340, %f1;
-	ld.global.nc.f32 	%f342, [%rd9&#43;4];
+	ld.global.nc.f32 	%f342, [%rd9+4];
 	sub.f32 	%f343, %f342, %f2;
 	mul.f32 	%f344, %f492, %f341;
 	mul.f32 	%f345, %f493, %f343;
@@ -8880,18 +8880,18 @@ $L__BB0_88:
 	mul.f64 	%fd48, %fd46, %fd47;
 	cvt.rn.f32.f64 	%f348, %fd48;
 	ld.global.nc.f32 	%f349, [%rd15];
-	ld.global.nc.f32 	%f350, [%rd15&#43;-4];
+	ld.global.nc.f32 	%f350, [%rd15+-4];
 	sub.f32 	%f351, %f349, %f350;
 	ld.global.nc.f32 	%f352, [%rd16];
-	ld.global.nc.f32 	%f353, [%rd16&#43;-4];
+	ld.global.nc.f32 	%f353, [%rd16+-4];
 	sub.f32 	%f354, %f352, %f353;
 	mul.f32 	%f355, %f494, %f351;
 	mul.f32 	%f356, %f495, %f354;
 	fma.rn.f32 	%f357, %f355, %f348, %f505;
 	fma.rn.f32 	%f358, %f356, %f348, %f504;
-	ld.global.nc.f32 	%f359, [%rd8&#43;-4];
+	ld.global.nc.f32 	%f359, [%rd8+-4];
 	sub.f32 	%f360, %f1, %f359;
-	ld.global.nc.f32 	%f361, [%rd9&#43;-4];
+	ld.global.nc.f32 	%f361, [%rd9+-4];
 	sub.f32 	%f362, %f2, %f361;
 	mul.f32 	%f363, %f492, %f360;
 	mul.f32 	%f364, %f493, %f362;
@@ -8929,10 +8929,10 @@ $L__BB0_95:
 	mul.f64 	%fd53, %fd51, %fd52;
 	cvt.rn.f32.f64 	%f369, %fd53;
 	ld.global.nc.f32 	%f370, [%rd18];
-	ld.global.nc.f32 	%f371, [%rd18&#43;4];
+	ld.global.nc.f32 	%f371, [%rd18+4];
 	sub.f32 	%f372, %f371, %f370;
 	ld.global.nc.f32 	%f373, [%rd19];
-	ld.global.nc.f32 	%f374, [%rd19&#43;4];
+	ld.global.nc.f32 	%f374, [%rd19+4];
 	sub.f32 	%f375, %f374, %f373;
 	mul.f32 	%f376, %f500, %f372;
 	mul.f32 	%f377, %f501, %f375;
@@ -8940,9 +8940,9 @@ $L__BB0_95:
 	mul.f32 	%f379, %f377, %f369;
 	sub.f32 	%f380, %f505, %f378;
 	sub.f32 	%f381, %f504, %f379;
-	ld.global.nc.f32 	%f382, [%rd8&#43;4];
+	ld.global.nc.f32 	%f382, [%rd8+4];
 	sub.f32 	%f383, %f382, %f1;
-	ld.global.nc.f32 	%f384, [%rd9&#43;4];
+	ld.global.nc.f32 	%f384, [%rd9+4];
 	sub.f32 	%f385, %f384, %f2;
 	mul.f32 	%f386, %f492, %f383;
 	mul.f32 	%f387, %f493, %f385;
@@ -8961,10 +8961,10 @@ $L__BB0_97:
 	mul.f64 	%fd58, %fd56, %fd57;
 	cvt.rn.f32.f64 	%f388, %fd58;
 	ld.global.nc.f32 	%f389, [%rd18];
-	ld.global.nc.f32 	%f390, [%rd18&#43;-4];
+	ld.global.nc.f32 	%f390, [%rd18+-4];
 	sub.f32 	%f391, %f389, %f390;
 	ld.global.nc.f32 	%f392, [%rd19];
-	ld.global.nc.f32 	%f393, [%rd19&#43;-4];
+	ld.global.nc.f32 	%f393, [%rd19+-4];
 	sub.f32 	%f394, %f392, %f393;
 	mul.f32 	%f395, %f500, %f391;
 	mul.f32 	%f396, %f501, %f394;
@@ -8972,9 +8972,9 @@ $L__BB0_97:
 	mul.f32 	%f398, %f396, %f388;
 	sub.f32 	%f399, %f505, %f397;
 	sub.f32 	%f400, %f504, %f398;
-	ld.global.nc.f32 	%f401, [%rd8&#43;-4];
+	ld.global.nc.f32 	%f401, [%rd8+-4];
 	sub.f32 	%f402, %f1, %f401;
-	ld.global.nc.f32 	%f403, [%rd9&#43;-4];
+	ld.global.nc.f32 	%f403, [%rd9+-4];
 	sub.f32 	%f404, %f2, %f403;
 	mul.f32 	%f405, %f492, %f402;
 	mul.f32 	%f406, %f493, %f404;

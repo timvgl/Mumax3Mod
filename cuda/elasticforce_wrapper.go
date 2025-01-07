@@ -141,11 +141,11 @@ const (
 	.param .u8 getelasticforce_param_15
 )
 {
-	.reg .pred 	%p&lt;102&gt;;
-	.reg .b16 	%rs&lt;9&gt;;
-	.reg .f32 	%f&lt;204&gt;;
-	.reg .b32 	%r&lt;166&gt;;
-	.reg .b64 	%rd&lt;79&gt;;
+	.reg .pred 	%p<102>;
+	.reg .b16 	%rs<9>;
+	.reg .f32 	%f<204>;
+	.reg .b32 	%r<166>;
+	.reg .b64 	%rd<79>;
 
 
 	ld.param.u8 	%rs4, [getelasticforce_param_15];
@@ -835,11 +835,11 @@ $L__BB0_98:
 	.param .u8 getelasticforce_param_15
 )
 {
-	.reg .pred 	%p&lt;102&gt;;
-	.reg .b16 	%rs&lt;9&gt;;
-	.reg .f32 	%f&lt;204&gt;;
-	.reg .b32 	%r&lt;166&gt;;
-	.reg .b64 	%rd&lt;79&gt;;
+	.reg .pred 	%p<102>;
+	.reg .b16 	%rs<9>;
+	.reg .f32 	%f<204>;
+	.reg .b32 	%r<166>;
+	.reg .b64 	%rd<79>;
 
 
 	ld.param.u8 	%rs4, [getelasticforce_param_15];
@@ -1529,11 +1529,11 @@ $L__BB0_98:
 	.param .u8 getelasticforce_param_15
 )
 {
-	.reg .pred 	%p&lt;102&gt;;
-	.reg .b16 	%rs&lt;9&gt;;
-	.reg .f32 	%f&lt;204&gt;;
-	.reg .b32 	%r&lt;166&gt;;
-	.reg .b64 	%rd&lt;79&gt;;
+	.reg .pred 	%p<102>;
+	.reg .b16 	%rs<9>;
+	.reg .f32 	%f<204>;
+	.reg .b32 	%r<166>;
+	.reg .b64 	%rd<79>;
 
 
 	ld.param.u8 	%rs4, [getelasticforce_param_15];
@@ -2223,11 +2223,11 @@ $L__BB0_98:
 	.param .u8 getelasticforce_param_15
 )
 {
-	.reg .pred 	%p&lt;102&gt;;
-	.reg .b16 	%rs&lt;9&gt;;
-	.reg .f32 	%f&lt;204&gt;;
-	.reg .b32 	%r&lt;166&gt;;
-	.reg .b64 	%rd&lt;79&gt;;
+	.reg .pred 	%p<102>;
+	.reg .b16 	%rs<9>;
+	.reg .f32 	%f<204>;
+	.reg .b32 	%r<166>;
+	.reg .b64 	%rd<79>;
 
 
 	ld.param.u8 	%rs4, [getelasticforce_param_15];
@@ -2917,11 +2917,11 @@ $L__BB0_98:
 	.param .u8 getelasticforce_param_15
 )
 {
-	.reg .pred 	%p&lt;102&gt;;
-	.reg .b16 	%rs&lt;9&gt;;
-	.reg .f32 	%f&lt;204&gt;;
-	.reg .b32 	%r&lt;166&gt;;
-	.reg .b64 	%rd&lt;79&gt;;
+	.reg .pred 	%p<102>;
+	.reg .b16 	%rs<9>;
+	.reg .f32 	%f<204>;
+	.reg .b32 	%r<166>;
+	.reg .b64 	%rd<79>;
 
 
 	ld.param.u8 	%rs4, [getelasticforce_param_15];
@@ -3611,11 +3611,11 @@ $L__BB0_98:
 	.param .u8 getelasticforce_param_15
 )
 {
-	.reg .pred 	%p&lt;102&gt;;
-	.reg .b16 	%rs&lt;9&gt;;
-	.reg .f32 	%f&lt;204&gt;;
-	.reg .b32 	%r&lt;166&gt;;
-	.reg .b64 	%rd&lt;79&gt;;
+	.reg .pred 	%p<102>;
+	.reg .b16 	%rs<9>;
+	.reg .f32 	%f<204>;
+	.reg .b32 	%r<166>;
+	.reg .b64 	%rd<79>;
 
 
 	ld.param.u8 	%rs4, [getelasticforce_param_15];
@@ -4305,11 +4305,11 @@ $L__BB0_98:
 	.param .u8 getelasticforce_param_15
 )
 {
-	.reg .pred 	%p&lt;102&gt;;
-	.reg .b16 	%rs&lt;9&gt;;
-	.reg .f32 	%f&lt;204&gt;;
-	.reg .b32 	%r&lt;166&gt;;
-	.reg .b64 	%rd&lt;79&gt;;
+	.reg .pred 	%p<102>;
+	.reg .b16 	%rs<9>;
+	.reg .f32 	%f<204>;
+	.reg .b32 	%r<166>;
+	.reg .b64 	%rd<79>;
 
 
 	ld.param.u8 	%rs4, [getelasticforce_param_15];
@@ -4999,11 +4999,11 @@ $L__BB0_98:
 	.param .u8 getelasticforce_param_15
 )
 {
-	.reg .pred 	%p&lt;102&gt;;
-	.reg .b16 	%rs&lt;9&gt;;
-	.reg .f32 	%f&lt;204&gt;;
-	.reg .b32 	%r&lt;166&gt;;
-	.reg .b64 	%rd&lt;79&gt;;
+	.reg .pred 	%p<102>;
+	.reg .b16 	%rs<9>;
+	.reg .f32 	%f<204>;
+	.reg .b32 	%r<166>;
+	.reg .b64 	%rd<79>;
 
 
 	ld.param.u8 	%rs4, [getelasticforce_param_15];
@@ -5693,11 +5693,11 @@ $L__BB0_98:
 	.param .u8 getelasticforce_param_15
 )
 {
-	.reg .pred 	%p&lt;102&gt;;
-	.reg .b16 	%rs&lt;9&gt;;
-	.reg .f32 	%f&lt;204&gt;;
-	.reg .b32 	%r&lt;166&gt;;
-	.reg .b64 	%rd&lt;79&gt;;
+	.reg .pred 	%p<102>;
+	.reg .b16 	%rs<9>;
+	.reg .f32 	%f<204>;
+	.reg .b32 	%r<166>;
+	.reg .b64 	%rd<79>;
 
 
 	ld.param.u8 	%rs4, [getelasticforce_param_15];
@@ -6387,11 +6387,11 @@ $L__BB0_98:
 	.param .u8 getelasticforce_param_15
 )
 {
-	.reg .pred 	%p&lt;102&gt;;
-	.reg .b16 	%rs&lt;9&gt;;
-	.reg .f32 	%f&lt;204&gt;;
-	.reg .b32 	%r&lt;166&gt;;
-	.reg .b64 	%rd&lt;79&gt;;
+	.reg .pred 	%p<102>;
+	.reg .b16 	%rs<9>;
+	.reg .f32 	%f<204>;
+	.reg .b32 	%r<166>;
+	.reg .b64 	%rd<79>;
 
 
 	ld.param.u8 	%rs4, [getelasticforce_param_15];

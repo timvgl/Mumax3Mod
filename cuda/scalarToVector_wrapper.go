@@ -129,10 +129,10 @@ const (
 	.param .u8 scalarToVector_param_12
 )
 {
-	.reg .pred 	%p&lt;9&gt;;
-	.reg .f32 	%f&lt;16&gt;;
-	.reg .b32 	%r&lt;18&gt;;
-	.reg .b64 	%rd&lt;26&gt;;
+	.reg .pred 	%p<9>;
+	.reg .f32 	%f<16>;
+	.reg .b32 	%r<18>;
+	.reg .b64 	%rd<26>;
 
 
 	ld.param.u64 	%rd2, [scalarToVector_param_0];
@@ -239,10 +239,10 @@ $L__BB0_8:
 	.param .u8 scalarToVector_param_12
 )
 {
-	.reg .pred 	%p&lt;9&gt;;
-	.reg .f32 	%f&lt;16&gt;;
-	.reg .b32 	%r&lt;18&gt;;
-	.reg .b64 	%rd&lt;26&gt;;
+	.reg .pred 	%p<9>;
+	.reg .f32 	%f<16>;
+	.reg .b32 	%r<18>;
+	.reg .b64 	%rd<26>;
 
 
 	ld.param.u64 	%rd2, [scalarToVector_param_0];
@@ -349,10 +349,10 @@ $L__BB0_8:
 	.param .u8 scalarToVector_param_12
 )
 {
-	.reg .pred 	%p&lt;9&gt;;
-	.reg .f32 	%f&lt;16&gt;;
-	.reg .b32 	%r&lt;18&gt;;
-	.reg .b64 	%rd&lt;26&gt;;
+	.reg .pred 	%p<9>;
+	.reg .f32 	%f<16>;
+	.reg .b32 	%r<18>;
+	.reg .b64 	%rd<26>;
 
 
 	ld.param.u64 	%rd2, [scalarToVector_param_0];
@@ -459,10 +459,10 @@ $L__BB0_8:
 	.param .u8 scalarToVector_param_12
 )
 {
-	.reg .pred 	%p&lt;9&gt;;
-	.reg .f32 	%f&lt;16&gt;;
-	.reg .b32 	%r&lt;18&gt;;
-	.reg .b64 	%rd&lt;26&gt;;
+	.reg .pred 	%p<9>;
+	.reg .f32 	%f<16>;
+	.reg .b32 	%r<18>;
+	.reg .b64 	%rd<26>;
 
 
 	ld.param.u64 	%rd2, [scalarToVector_param_0];
@@ -569,10 +569,10 @@ $L__BB0_8:
 	.param .u8 scalarToVector_param_12
 )
 {
-	.reg .pred 	%p&lt;9&gt;;
-	.reg .f32 	%f&lt;16&gt;;
-	.reg .b32 	%r&lt;18&gt;;
-	.reg .b64 	%rd&lt;26&gt;;
+	.reg .pred 	%p<9>;
+	.reg .f32 	%f<16>;
+	.reg .b32 	%r<18>;
+	.reg .b64 	%rd<26>;
 
 
 	ld.param.u64 	%rd2, [scalarToVector_param_0];
@@ -679,10 +679,10 @@ $L__BB0_8:
 	.param .u8 scalarToVector_param_12
 )
 {
-	.reg .pred 	%p&lt;9&gt;;
-	.reg .f32 	%f&lt;16&gt;;
-	.reg .b32 	%r&lt;18&gt;;
-	.reg .b64 	%rd&lt;26&gt;;
+	.reg .pred 	%p<9>;
+	.reg .f32 	%f<16>;
+	.reg .b32 	%r<18>;
+	.reg .b64 	%rd<26>;
 
 
 	ld.param.u64 	%rd2, [scalarToVector_param_0];
@@ -789,10 +789,10 @@ $L__BB0_8:
 	.param .u8 scalarToVector_param_12
 )
 {
-	.reg .pred 	%p&lt;9&gt;;
-	.reg .f32 	%f&lt;16&gt;;
-	.reg .b32 	%r&lt;18&gt;;
-	.reg .b64 	%rd&lt;26&gt;;
+	.reg .pred 	%p<9>;
+	.reg .f32 	%f<16>;
+	.reg .b32 	%r<18>;
+	.reg .b64 	%rd<26>;
 
 
 	ld.param.u64 	%rd2, [scalarToVector_param_0];
@@ -899,10 +899,10 @@ $L__BB0_8:
 	.param .u8 scalarToVector_param_12
 )
 {
-	.reg .pred 	%p&lt;9&gt;;
-	.reg .f32 	%f&lt;16&gt;;
-	.reg .b32 	%r&lt;18&gt;;
-	.reg .b64 	%rd&lt;26&gt;;
+	.reg .pred 	%p<9>;
+	.reg .f32 	%f<16>;
+	.reg .b32 	%r<18>;
+	.reg .b64 	%rd<26>;
 
 
 	ld.param.u64 	%rd2, [scalarToVector_param_0];
@@ -1009,10 +1009,10 @@ $L__BB0_8:
 	.param .u8 scalarToVector_param_12
 )
 {
-	.reg .pred 	%p&lt;9&gt;;
-	.reg .f32 	%f&lt;16&gt;;
-	.reg .b32 	%r&lt;18&gt;;
-	.reg .b64 	%rd&lt;26&gt;;
+	.reg .pred 	%p<9>;
+	.reg .f32 	%f<16>;
+	.reg .b32 	%r<18>;
+	.reg .b64 	%rd<26>;
 
 
 	ld.param.u64 	%rd2, [scalarToVector_param_0];
@@ -1119,10 +1119,10 @@ $L__BB0_8:
 	.param .u8 scalarToVector_param_12
 )
 {
-	.reg .pred 	%p&lt;9&gt;;
-	.reg .f32 	%f&lt;16&gt;;
-	.reg .b32 	%r&lt;18&gt;;
-	.reg .b64 	%rd&lt;26&gt;;
+	.reg .pred 	%p<9>;
+	.reg .f32 	%f<16>;
+	.reg .b32 	%r<18>;
+	.reg .b64 	%rd<26>;
 
 
 	ld.param.u64 	%rd2, [scalarToVector_param_0];

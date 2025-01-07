@@ -34,16 +34,18 @@ type SliceBinary struct {
 var (
 	memFree, memFreeHost           func(unsafe.Pointer)
 	memCpy, memCpyDtoH, memCpyHtoD func(dst, src unsafe.Pointer, bytes int64)
+	memCpyBinary                   func(dst, src unsafe.Pointer, bytes int64, key string)
 )
 
 // Internal: enables slices on GPU. Called upon cuda init.
 func EnableGPU(free, freeHost func(unsafe.Pointer),
-	cpy, cpyDtoH, cpyHtoD func(dst, src unsafe.Pointer, bytes int64)) {
+	cpy, cpyDtoH, cpyHtoD func(dst, src unsafe.Pointer, bytes int64), cpyBinary func(dst, src unsafe.Pointer, bytes int64, key string)) {
 	memFree = free
 	memFreeHost = freeHost
 	memCpy = cpy
 	memCpyDtoH = cpyDtoH
 	memCpyHtoD = cpyHtoD
+	memCpyBinary = cpyBinary
 }
 
 func Zero(data *Slice) {
@@ -81,7 +83,7 @@ func NewSlice(nComp int, size [3]int) *Slice {
 }
 
 func NewSliceBinary(nComp int, size [3]int, length int) *SliceBinary {
-	return SliceBinaryFromPtrs(size, prod(size), CPUMemory, unsafe.Pointer(&(make([]byte, length)[0])))
+	return SliceBinaryFromPtrs(size, prod(size), CPUMemory, unsafe.Pointer(&(make([]byte, length)[0])), nComp)
 }
 
 func SliceFromArray(data [][]float32, size [3]int) *Slice {
@@ -117,13 +119,14 @@ func SliceFromPtrs(size [3]int, memType int8, ptrs []unsafe.Pointer) *Slice {
 	return s
 }
 
-func SliceBinaryFromPtrs(size [3]int, length int, memType int8, ptrs unsafe.Pointer) *SliceBinary {
+func SliceBinaryFromPtrs(size [3]int, length int, memType int8, ptrs unsafe.Pointer, nComp int) *SliceBinary {
 	util.Argument(length > 0)
 	s := new(SliceBinary)
 	s.size = size
 	s.ptrs = ptrs
 	s.memType = memType
 	s.length = length
+	s.comp = nComp
 	return s
 }
 
@@ -316,7 +319,7 @@ func (s *Slice) HostCopy() *Slice {
 
 func (s *SliceBinary) HostCopy() *SliceBinary {
 	cpy := NewSliceBinary(s.NComp(), s.Size(), s.Length())
-	CopyBinary(cpy, s)
+	CopyBinary(cpy, s, "")
 	return cpy
 }
 
@@ -353,7 +356,7 @@ func Copy(dst, src *Slice) {
 	}
 }
 
-func CopyBinary(dst, src *SliceBinary) {
+func CopyBinary(dst, src *SliceBinary, key string) {
 	if dst.NComp() != src.NComp() || dst.Length() != src.Length() {
 		panic(fmt.Sprintf("slice copy: illegal sizes: dst: %vx%v, src: %vx%v", dst.NComp(), dst.Length(), src.NComp(), src.Length()))
 	}
@@ -363,7 +366,7 @@ func CopyBinary(dst, src *SliceBinary) {
 	default:
 		panic("bug")
 	case d && s:
-		memCpy(dst.DevPtr(), src.DevPtr(), bytes)
+		memCpyBinary(dst.DevPtr(), src.DevPtr(), bytes, key)
 	case s && !d:
 		memCpyDtoH(dst.ptrs, src.DevPtr(), bytes)
 	case !s && d:

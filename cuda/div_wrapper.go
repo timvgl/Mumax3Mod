@@ -93,10 +93,10 @@ const (
 	.param .u32 pointwise_div_param_3
 )
 {
-	.reg .pred 	%p&lt;3&gt;;
-	.reg .f32 	%f&lt;4&gt;;
-	.reg .b32 	%r&lt;10&gt;;
-	.reg .b64 	%rd&lt;13&gt;;
+	.reg .pred 	%p<3>;
+	.reg .f32 	%f<4>;
+	.reg .b32 	%r<10>;
+	.reg .b64 	%rd<13>;
 
 
 	ld.param.u64 	%rd3, [pointwise_div_param_0];
@@ -157,10 +157,10 @@ $L__BB0_4:
 	.param .u32 pointwise_div_param_3
 )
 {
-	.reg .pred 	%p&lt;3&gt;;
-	.reg .f32 	%f&lt;4&gt;;
-	.reg .b32 	%r&lt;10&gt;;
-	.reg .b64 	%rd&lt;13&gt;;
+	.reg .pred 	%p<3>;
+	.reg .f32 	%f<4>;
+	.reg .b32 	%r<10>;
+	.reg .b64 	%rd<13>;
 
 
 	ld.param.u64 	%rd3, [pointwise_div_param_0];
@@ -221,10 +221,10 @@ $L__BB0_4:
 	.param .u32 pointwise_div_param_3
 )
 {
-	.reg .pred 	%p&lt;3&gt;;
-	.reg .f32 	%f&lt;4&gt;;
-	.reg .b32 	%r&lt;10&gt;;
-	.reg .b64 	%rd&lt;13&gt;;
+	.reg .pred 	%p<3>;
+	.reg .f32 	%f<4>;
+	.reg .b32 	%r<10>;
+	.reg .b64 	%rd<13>;
 
 
 	ld.param.u64 	%rd3, [pointwise_div_param_0];
@@ -285,10 +285,10 @@ $L__BB0_4:
 	.param .u32 pointwise_div_param_3
 )
 {
-	.reg .pred 	%p&lt;3&gt;;
-	.reg .f32 	%f&lt;4&gt;;
-	.reg .b32 	%r&lt;10&gt;;
-	.reg .b64 	%rd&lt;13&gt;;
+	.reg .pred 	%p<3>;
+	.reg .f32 	%f<4>;
+	.reg .b32 	%r<10>;
+	.reg .b64 	%rd<13>;
 
 
 	ld.param.u64 	%rd3, [pointwise_div_param_0];
@@ -349,10 +349,10 @@ $L__BB0_4:
 	.param .u32 pointwise_div_param_3
 )
 {
-	.reg .pred 	%p&lt;3&gt;;
-	.reg .f32 	%f&lt;4&gt;;
-	.reg .b32 	%r&lt;10&gt;;
-	.reg .b64 	%rd&lt;13&gt;;
+	.reg .pred 	%p<3>;
+	.reg .f32 	%f<4>;
+	.reg .b32 	%r<10>;
+	.reg .b64 	%rd<13>;
 
 
 	ld.param.u64 	%rd3, [pointwise_div_param_0];
@@ -413,10 +413,10 @@ $L__BB0_4:
 	.param .u32 pointwise_div_param_3
 )
 {
-	.reg .pred 	%p&lt;3&gt;;
-	.reg .f32 	%f&lt;4&gt;;
-	.reg .b32 	%r&lt;10&gt;;
-	.reg .b64 	%rd&lt;13&gt;;
+	.reg .pred 	%p<3>;
+	.reg .f32 	%f<4>;
+	.reg .b32 	%r<10>;
+	.reg .b64 	%rd<13>;
 
 
 	ld.param.u64 	%rd3, [pointwise_div_param_0];
@@ -477,10 +477,10 @@ $L__BB0_4:
 	.param .u32 pointwise_div_param_3
 )
 {
-	.reg .pred 	%p&lt;3&gt;;
-	.reg .f32 	%f&lt;4&gt;;
-	.reg .b32 	%r&lt;10&gt;;
-	.reg .b64 	%rd&lt;13&gt;;
+	.reg .pred 	%p<3>;
+	.reg .f32 	%f<4>;
+	.reg .b32 	%r<10>;
+	.reg .b64 	%rd<13>;
 
 
 	ld.param.u64 	%rd3, [pointwise_div_param_0];
@@ -541,10 +541,10 @@ $L__BB0_4:
 	.param .u32 pointwise_div_param_3
 )
 {
-	.reg .pred 	%p&lt;3&gt;;
-	.reg .f32 	%f&lt;4&gt;;
-	.reg .b32 	%r&lt;10&gt;;
-	.reg .b64 	%rd&lt;13&gt;;
+	.reg .pred 	%p<3>;
+	.reg .f32 	%f<4>;
+	.reg .b32 	%r<10>;
+	.reg .b64 	%rd<13>;
 
 
 	ld.param.u64 	%rd3, [pointwise_div_param_0];
@@ -605,10 +605,10 @@ $L__BB0_4:
 	.param .u32 pointwise_div_param_3
 )
 {
-	.reg .pred 	%p&lt;3&gt;;
-	.reg .f32 	%f&lt;4&gt;;
-	.reg .b32 	%r&lt;10&gt;;
-	.reg .b64 	%rd&lt;13&gt;;
+	.reg .pred 	%p<3>;
+	.reg .f32 	%f<4>;
+	.reg .b32 	%r<10>;
+	.reg .b64 	%rd<13>;
 
 
 	ld.param.u64 	%rd3, [pointwise_div_param_0];
@@ -669,10 +669,10 @@ $L__BB0_4:
 	.param .u32 pointwise_div_param_3
 )
 {
-	.reg .pred 	%p&lt;3&gt;;
-	.reg .f32 	%f&lt;4&gt;;
-	.reg .b32 	%r&lt;10&gt;;
-	.reg .b64 	%rd&lt;13&gt;;
+	.reg .pred 	%p<3>;
+	.reg .f32 	%f<4>;
+	.reg .b32 	%r<10>;
+	.reg .b64 	%rd<13>;
 
 
 	ld.param.u64 	%rd3, [pointwise_div_param_0];

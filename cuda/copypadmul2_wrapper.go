@@ -121,11 +121,11 @@ const (
 	.param .u64 copypadmul2_param_10
 )
 {
-	.reg .pred 	%p&lt;8&gt;;
-	.reg .f32 	%f&lt;14&gt;;
-	.reg .b32 	%r&lt;22&gt;;
-	.reg .f64 	%fd&lt;3&gt;;
-	.reg .b64 	%rd&lt;17&gt;;
+	.reg .pred 	%p<8>;
+	.reg .f32 	%f<14>;
+	.reg .b32 	%r<22>;
+	.reg .f64 	%fd<3>;
+	.reg .b64 	%rd<17>;
 
 
 	ld.param.u64 	%rd1, [copypadmul2_param_0];
@@ -225,11 +225,11 @@ $L__BB0_7:
 	.param .u64 copypadmul2_param_10
 )
 {
-	.reg .pred 	%p&lt;8&gt;;
-	.reg .f32 	%f&lt;14&gt;;
-	.reg .b32 	%r&lt;22&gt;;
-	.reg .f64 	%fd&lt;3&gt;;
-	.reg .b64 	%rd&lt;17&gt;;
+	.reg .pred 	%p<8>;
+	.reg .f32 	%f<14>;
+	.reg .b32 	%r<22>;
+	.reg .f64 	%fd<3>;
+	.reg .b64 	%rd<17>;
 
 
 	ld.param.u64 	%rd1, [copypadmul2_param_0];
@@ -329,11 +329,11 @@ $L__BB0_7:
 	.param .u64 copypadmul2_param_10
 )
 {
-	.reg .pred 	%p&lt;8&gt;;
-	.reg .f32 	%f&lt;14&gt;;
-	.reg .b32 	%r&lt;22&gt;;
-	.reg .f64 	%fd&lt;3&gt;;
-	.reg .b64 	%rd&lt;17&gt;;
+	.reg .pred 	%p<8>;
+	.reg .f32 	%f<14>;
+	.reg .b32 	%r<22>;
+	.reg .f64 	%fd<3>;
+	.reg .b64 	%rd<17>;
 
 
 	ld.param.u64 	%rd1, [copypadmul2_param_0];
@@ -433,11 +433,11 @@ $L__BB0_7:
 	.param .u64 copypadmul2_param_10
 )
 {
-	.reg .pred 	%p&lt;8&gt;;
-	.reg .f32 	%f&lt;14&gt;;
-	.reg .b32 	%r&lt;22&gt;;
-	.reg .f64 	%fd&lt;3&gt;;
-	.reg .b64 	%rd&lt;17&gt;;
+	.reg .pred 	%p<8>;
+	.reg .f32 	%f<14>;
+	.reg .b32 	%r<22>;
+	.reg .f64 	%fd<3>;
+	.reg .b64 	%rd<17>;
 
 
 	ld.param.u64 	%rd1, [copypadmul2_param_0];
@@ -537,11 +537,11 @@ $L__BB0_7:
 	.param .u64 copypadmul2_param_10
 )
 {
-	.reg .pred 	%p&lt;8&gt;;
-	.reg .f32 	%f&lt;14&gt;;
-	.reg .b32 	%r&lt;22&gt;;
-	.reg .f64 	%fd&lt;3&gt;;
-	.reg .b64 	%rd&lt;17&gt;;
+	.reg .pred 	%p<8>;
+	.reg .f32 	%f<14>;
+	.reg .b32 	%r<22>;
+	.reg .f64 	%fd<3>;
+	.reg .b64 	%rd<17>;
 
 
 	ld.param.u64 	%rd1, [copypadmul2_param_0];
@@ -641,11 +641,11 @@ $L__BB0_7:
 	.param .u64 copypadmul2_param_10
 )
 {
-	.reg .pred 	%p&lt;8&gt;;
-	.reg .f32 	%f&lt;14&gt;;
-	.reg .b32 	%r&lt;22&gt;;
-	.reg .f64 	%fd&lt;3&gt;;
-	.reg .b64 	%rd&lt;17&gt;;
+	.reg .pred 	%p<8>;
+	.reg .f32 	%f<14>;
+	.reg .b32 	%r<22>;
+	.reg .f64 	%fd<3>;
+	.reg .b64 	%rd<17>;
 
 
 	ld.param.u64 	%rd1, [copypadmul2_param_0];
@@ -745,11 +745,11 @@ $L__BB0_7:
 	.param .u64 copypadmul2_param_10
 )
 {
-	.reg .pred 	%p&lt;8&gt;;
-	.reg .f32 	%f&lt;14&gt;;
-	.reg .b32 	%r&lt;22&gt;;
-	.reg .f64 	%fd&lt;3&gt;;
-	.reg .b64 	%rd&lt;17&gt;;
+	.reg .pred 	%p<8>;
+	.reg .f32 	%f<14>;
+	.reg .b32 	%r<22>;
+	.reg .f64 	%fd<3>;
+	.reg .b64 	%rd<17>;
 
 
 	ld.param.u64 	%rd1, [copypadmul2_param_0];
@@ -849,11 +849,11 @@ $L__BB0_7:
 	.param .u64 copypadmul2_param_10
 )
 {
-	.reg .pred 	%p&lt;8&gt;;
-	.reg .f32 	%f&lt;14&gt;;
-	.reg .b32 	%r&lt;22&gt;;
-	.reg .f64 	%fd&lt;3&gt;;
-	.reg .b64 	%rd&lt;17&gt;;
+	.reg .pred 	%p<8>;
+	.reg .f32 	%f<14>;
+	.reg .b32 	%r<22>;
+	.reg .f64 	%fd<3>;
+	.reg .b64 	%rd<17>;
 
 
 	ld.param.u64 	%rd1, [copypadmul2_param_0];
@@ -953,11 +953,11 @@ $L__BB0_7:
 	.param .u64 copypadmul2_param_10
 )
 {
-	.reg .pred 	%p&lt;8&gt;;
-	.reg .f32 	%f&lt;14&gt;;
-	.reg .b32 	%r&lt;22&gt;;
-	.reg .f64 	%fd&lt;3&gt;;
-	.reg .b64 	%rd&lt;17&gt;;
+	.reg .pred 	%p<8>;
+	.reg .f32 	%f<14>;
+	.reg .b32 	%r<22>;
+	.reg .f64 	%fd<3>;
+	.reg .b64 	%rd<17>;
 
 
 	ld.param.u64 	%rd1, [copypadmul2_param_0];
@@ -1057,11 +1057,11 @@ $L__BB0_7:
 	.param .u64 copypadmul2_param_10
 )
 {
-	.reg .pred 	%p&lt;8&gt;;
-	.reg .f32 	%f&lt;14&gt;;
-	.reg .b32 	%r&lt;22&gt;;
-	.reg .f64 	%fd&lt;3&gt;;
-	.reg .b64 	%rd&lt;17&gt;;
+	.reg .pred 	%p<8>;
+	.reg .f32 	%f<14>;
+	.reg .b32 	%r<22>;
+	.reg .f64 	%fd<3>;
+	.reg .b64 	%rd<17>;
 
 
 	ld.param.u64 	%rd1, [copypadmul2_param_0];

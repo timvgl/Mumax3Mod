@@ -153,11 +153,11 @@ const (
 	.param .u8 adddmibulk_param_18
 )
 {
-	.reg .pred 	%p&lt;64&gt;;
-	.reg .b16 	%rs&lt;49&gt;;
-	.reg .f32 	%f&lt;363&gt;;
-	.reg .b32 	%r&lt;111&gt;;
-	.reg .b64 	%rd&lt;87&gt;;
+	.reg .pred 	%p<64>;
+	.reg .b16 	%rs<49>;
+	.reg .f32 	%f<363>;
+	.reg .b32 	%r<111>;
+	.reg .b64 	%rd<87>;
 
 
 	ld.param.u8 	%rs18, [adddmibulk_param_18];
@@ -823,11 +823,11 @@ $L__BB0_74:
 	.param .u8 adddmibulk_param_18
 )
 {
-	.reg .pred 	%p&lt;64&gt;;
-	.reg .b16 	%rs&lt;49&gt;;
-	.reg .f32 	%f&lt;363&gt;;
-	.reg .b32 	%r&lt;111&gt;;
-	.reg .b64 	%rd&lt;87&gt;;
+	.reg .pred 	%p<64>;
+	.reg .b16 	%rs<49>;
+	.reg .f32 	%f<363>;
+	.reg .b32 	%r<111>;
+	.reg .b64 	%rd<87>;
 
 
 	ld.param.u8 	%rs18, [adddmibulk_param_18];
@@ -1493,11 +1493,11 @@ $L__BB0_74:
 	.param .u8 adddmibulk_param_18
 )
 {
-	.reg .pred 	%p&lt;64&gt;;
-	.reg .b16 	%rs&lt;49&gt;;
-	.reg .f32 	%f&lt;363&gt;;
-	.reg .b32 	%r&lt;111&gt;;
-	.reg .b64 	%rd&lt;87&gt;;
+	.reg .pred 	%p<64>;
+	.reg .b16 	%rs<49>;
+	.reg .f32 	%f<363>;
+	.reg .b32 	%r<111>;
+	.reg .b64 	%rd<87>;
 
 
 	ld.param.u8 	%rs18, [adddmibulk_param_18];
@@ -2163,11 +2163,11 @@ $L__BB0_74:
 	.param .u8 adddmibulk_param_18
 )
 {
-	.reg .pred 	%p&lt;64&gt;;
-	.reg .b16 	%rs&lt;49&gt;;
-	.reg .f32 	%f&lt;363&gt;;
-	.reg .b32 	%r&lt;111&gt;;
-	.reg .b64 	%rd&lt;87&gt;;
+	.reg .pred 	%p<64>;
+	.reg .b16 	%rs<49>;
+	.reg .f32 	%f<363>;
+	.reg .b32 	%r<111>;
+	.reg .b64 	%rd<87>;
 
 
 	ld.param.u8 	%rs18, [adddmibulk_param_18];
@@ -2833,11 +2833,11 @@ $L__BB0_74:
 	.param .u8 adddmibulk_param_18
 )
 {
-	.reg .pred 	%p&lt;64&gt;;
-	.reg .b16 	%rs&lt;49&gt;;
-	.reg .f32 	%f&lt;363&gt;;
-	.reg .b32 	%r&lt;111&gt;;
-	.reg .b64 	%rd&lt;87&gt;;
+	.reg .pred 	%p<64>;
+	.reg .b16 	%rs<49>;
+	.reg .f32 	%f<363>;
+	.reg .b32 	%r<111>;
+	.reg .b64 	%rd<87>;
 
 
 	ld.param.u8 	%rs18, [adddmibulk_param_18];
@@ -3503,11 +3503,11 @@ $L__BB0_74:
 	.param .u8 adddmibulk_param_18
 )
 {
-	.reg .pred 	%p&lt;64&gt;;
-	.reg .b16 	%rs&lt;49&gt;;
-	.reg .f32 	%f&lt;363&gt;;
-	.reg .b32 	%r&lt;111&gt;;
-	.reg .b64 	%rd&lt;87&gt;;
+	.reg .pred 	%p<64>;
+	.reg .b16 	%rs<49>;
+	.reg .f32 	%f<363>;
+	.reg .b32 	%r<111>;
+	.reg .b64 	%rd<87>;
 
 
 	ld.param.u8 	%rs18, [adddmibulk_param_18];
@@ -4173,11 +4173,11 @@ $L__BB0_74:
 	.param .u8 adddmibulk_param_18
 )
 {
-	.reg .pred 	%p&lt;64&gt;;
-	.reg .b16 	%rs&lt;49&gt;;
-	.reg .f32 	%f&lt;363&gt;;
-	.reg .b32 	%r&lt;111&gt;;
-	.reg .b64 	%rd&lt;87&gt;;
+	.reg .pred 	%p<64>;
+	.reg .b16 	%rs<49>;
+	.reg .f32 	%f<363>;
+	.reg .b32 	%r<111>;
+	.reg .b64 	%rd<87>;
 
 
 	ld.param.u8 	%rs18, [adddmibulk_param_18];
@@ -4843,11 +4843,11 @@ $L__BB0_74:
 	.param .u8 adddmibulk_param_18
 )
 {
-	.reg .pred 	%p&lt;64&gt;;
-	.reg .b16 	%rs&lt;49&gt;;
-	.reg .f32 	%f&lt;363&gt;;
-	.reg .b32 	%r&lt;111&gt;;
-	.reg .b64 	%rd&lt;87&gt;;
+	.reg .pred 	%p<64>;
+	.reg .b16 	%rs<49>;
+	.reg .f32 	%f<363>;
+	.reg .b32 	%r<111>;
+	.reg .b64 	%rd<87>;
 
 
 	ld.param.u8 	%rs18, [adddmibulk_param_18];
@@ -5513,11 +5513,11 @@ $L__BB0_74:
 	.param .u8 adddmibulk_param_18
 )
 {
-	.reg .pred 	%p&lt;64&gt;;
-	.reg .b16 	%rs&lt;49&gt;;
-	.reg .f32 	%f&lt;363&gt;;
-	.reg .b32 	%r&lt;111&gt;;
-	.reg .b64 	%rd&lt;87&gt;;
+	.reg .pred 	%p<64>;
+	.reg .b16 	%rs<49>;
+	.reg .f32 	%f<363>;
+	.reg .b32 	%r<111>;
+	.reg .b64 	%rd<87>;
 
 
 	ld.param.u8 	%rs18, [adddmibulk_param_18];
@@ -6183,11 +6183,11 @@ $L__BB0_74:
 	.param .u8 adddmibulk_param_18
 )
 {
-	.reg .pred 	%p&lt;64&gt;;
-	.reg .b16 	%rs&lt;49&gt;;
-	.reg .f32 	%f&lt;363&gt;;
-	.reg .b32 	%r&lt;111&gt;;
-	.reg .b64 	%rd&lt;87&gt;;
+	.reg .pred 	%p<64>;
+	.reg .b16 	%rs<49>;
+	.reg .f32 	%f<363>;
+	.reg .b32 	%r<111>;
+	.reg .b64 	%rd<87>;
 
 
 	ld.param.u8 	%rs18, [adddmibulk_param_18];

@@ -121,10 +121,10 @@ const (
 	.param .u32 crop_param_10
 )
 {
-	.reg .pred 	%p&lt;6&gt;;
-	.reg .f32 	%f&lt;2&gt;;
-	.reg .b32 	%r&lt;28&gt;;
-	.reg .b64 	%rd&lt;9&gt;;
+	.reg .pred 	%p<6>;
+	.reg .f32 	%f<2>;
+	.reg .b32 	%r<28>;
+	.reg .b64 	%rd<9>;
 
 
 	ld.param.u64 	%rd1, [crop_param_0];
@@ -199,10 +199,10 @@ $L__BB0_2:
 	.param .u32 crop_param_10
 )
 {
-	.reg .pred 	%p&lt;6&gt;;
-	.reg .f32 	%f&lt;2&gt;;
-	.reg .b32 	%r&lt;28&gt;;
-	.reg .b64 	%rd&lt;9&gt;;
+	.reg .pred 	%p<6>;
+	.reg .f32 	%f<2>;
+	.reg .b32 	%r<28>;
+	.reg .b64 	%rd<9>;
 
 
 	ld.param.u64 	%rd1, [crop_param_0];
@@ -277,10 +277,10 @@ $L__BB0_2:
 	.param .u32 crop_param_10
 )
 {
-	.reg .pred 	%p&lt;6&gt;;
-	.reg .f32 	%f&lt;2&gt;;
-	.reg .b32 	%r&lt;28&gt;;
-	.reg .b64 	%rd&lt;9&gt;;
+	.reg .pred 	%p<6>;
+	.reg .f32 	%f<2>;
+	.reg .b32 	%r<28>;
+	.reg .b64 	%rd<9>;
 
 
 	ld.param.u64 	%rd1, [crop_param_0];
@@ -355,10 +355,10 @@ $L__BB0_2:
 	.param .u32 crop_param_10
 )
 {
-	.reg .pred 	%p&lt;6&gt;;
-	.reg .f32 	%f&lt;2&gt;;
-	.reg .b32 	%r&lt;28&gt;;
-	.reg .b64 	%rd&lt;9&gt;;
+	.reg .pred 	%p<6>;
+	.reg .f32 	%f<2>;
+	.reg .b32 	%r<28>;
+	.reg .b64 	%rd<9>;
 
 
 	ld.param.u64 	%rd1, [crop_param_0];
@@ -433,10 +433,10 @@ $L__BB0_2:
 	.param .u32 crop_param_10
 )
 {
-	.reg .pred 	%p&lt;6&gt;;
-	.reg .f32 	%f&lt;2&gt;;
-	.reg .b32 	%r&lt;28&gt;;
-	.reg .b64 	%rd&lt;9&gt;;
+	.reg .pred 	%p<6>;
+	.reg .f32 	%f<2>;
+	.reg .b32 	%r<28>;
+	.reg .b64 	%rd<9>;
 
 
 	ld.param.u64 	%rd1, [crop_param_0];
@@ -511,10 +511,10 @@ $L__BB0_2:
 	.param .u32 crop_param_10
 )
 {
-	.reg .pred 	%p&lt;6&gt;;
-	.reg .f32 	%f&lt;2&gt;;
-	.reg .b32 	%r&lt;28&gt;;
-	.reg .b64 	%rd&lt;9&gt;;
+	.reg .pred 	%p<6>;
+	.reg .f32 	%f<2>;
+	.reg .b32 	%r<28>;
+	.reg .b64 	%rd<9>;
 
 
 	ld.param.u64 	%rd1, [crop_param_0];
@@ -589,10 +589,10 @@ $L__BB0_2:
 	.param .u32 crop_param_10
 )
 {
-	.reg .pred 	%p&lt;6&gt;;
-	.reg .f32 	%f&lt;2&gt;;
-	.reg .b32 	%r&lt;28&gt;;
-	.reg .b64 	%rd&lt;9&gt;;
+	.reg .pred 	%p<6>;
+	.reg .f32 	%f<2>;
+	.reg .b32 	%r<28>;
+	.reg .b64 	%rd<9>;
 
 
 	ld.param.u64 	%rd1, [crop_param_0];
@@ -667,10 +667,10 @@ $L__BB0_2:
 	.param .u32 crop_param_10
 )
 {
-	.reg .pred 	%p&lt;6&gt;;
-	.reg .f32 	%f&lt;2&gt;;
-	.reg .b32 	%r&lt;28&gt;;
-	.reg .b64 	%rd&lt;9&gt;;
+	.reg .pred 	%p<6>;
+	.reg .f32 	%f<2>;
+	.reg .b32 	%r<28>;
+	.reg .b64 	%rd<9>;
 
 
 	ld.param.u64 	%rd1, [crop_param_0];
@@ -745,10 +745,10 @@ $L__BB0_2:
 	.param .u32 crop_param_10
 )
 {
-	.reg .pred 	%p&lt;6&gt;;
-	.reg .f32 	%f&lt;2&gt;;
-	.reg .b32 	%r&lt;28&gt;;
-	.reg .b64 	%rd&lt;9&gt;;
+	.reg .pred 	%p<6>;
+	.reg .f32 	%f<2>;
+	.reg .b32 	%r<28>;
+	.reg .b64 	%rd<9>;
 
 
 	ld.param.u64 	%rd1, [crop_param_0];
@@ -823,10 +823,10 @@ $L__BB0_2:
 	.param .u32 crop_param_10
 )
 {
-	.reg .pred 	%p&lt;6&gt;;
-	.reg .f32 	%f&lt;2&gt;;
-	.reg .b32 	%r&lt;28&gt;;
-	.reg .b64 	%rd&lt;9&gt;;
+	.reg .pred 	%p<6>;
+	.reg .f32 	%f<2>;
+	.reg .b32 	%r<28>;
+	.reg .b64 	%rd<9>;
 
 
 	ld.param.u64 	%rd1, [crop_param_0];

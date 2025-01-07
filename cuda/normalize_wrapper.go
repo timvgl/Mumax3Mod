@@ -97,10 +97,10 @@ const (
 	.param .u32 normalize_param_4
 )
 {
-	.reg .pred 	%p&lt;4&gt;;
-	.reg .f32 	%f&lt;22&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;15&gt;;
+	.reg .pred 	%p<4>;
+	.reg .f32 	%f<22>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<15>;
 
 
 	ld.param.u64 	%rd4, [normalize_param_0];
@@ -183,10 +183,10 @@ $L__BB0_7:
 	.param .u32 normalize_param_4
 )
 {
-	.reg .pred 	%p&lt;4&gt;;
-	.reg .f32 	%f&lt;22&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;15&gt;;
+	.reg .pred 	%p<4>;
+	.reg .f32 	%f<22>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<15>;
 
 
 	ld.param.u64 	%rd4, [normalize_param_0];
@@ -269,10 +269,10 @@ $L__BB0_7:
 	.param .u32 normalize_param_4
 )
 {
-	.reg .pred 	%p&lt;4&gt;;
-	.reg .f32 	%f&lt;22&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;15&gt;;
+	.reg .pred 	%p<4>;
+	.reg .f32 	%f<22>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<15>;
 
 
 	ld.param.u64 	%rd4, [normalize_param_0];
@@ -355,10 +355,10 @@ $L__BB0_7:
 	.param .u32 normalize_param_4
 )
 {
-	.reg .pred 	%p&lt;4&gt;;
-	.reg .f32 	%f&lt;22&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;15&gt;;
+	.reg .pred 	%p<4>;
+	.reg .f32 	%f<22>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<15>;
 
 
 	ld.param.u64 	%rd4, [normalize_param_0];
@@ -441,10 +441,10 @@ $L__BB0_7:
 	.param .u32 normalize_param_4
 )
 {
-	.reg .pred 	%p&lt;4&gt;;
-	.reg .f32 	%f&lt;22&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;15&gt;;
+	.reg .pred 	%p<4>;
+	.reg .f32 	%f<22>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<15>;
 
 
 	ld.param.u64 	%rd4, [normalize_param_0];
@@ -527,10 +527,10 @@ $L__BB0_7:
 	.param .u32 normalize_param_4
 )
 {
-	.reg .pred 	%p&lt;4&gt;;
-	.reg .f32 	%f&lt;22&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;15&gt;;
+	.reg .pred 	%p<4>;
+	.reg .f32 	%f<22>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<15>;
 
 
 	ld.param.u64 	%rd4, [normalize_param_0];
@@ -613,10 +613,10 @@ $L__BB0_7:
 	.param .u32 normalize_param_4
 )
 {
-	.reg .pred 	%p&lt;4&gt;;
-	.reg .f32 	%f&lt;22&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;15&gt;;
+	.reg .pred 	%p<4>;
+	.reg .f32 	%f<22>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<15>;
 
 
 	ld.param.u64 	%rd4, [normalize_param_0];
@@ -699,10 +699,10 @@ $L__BB0_7:
 	.param .u32 normalize_param_4
 )
 {
-	.reg .pred 	%p&lt;4&gt;;
-	.reg .f32 	%f&lt;22&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;15&gt;;
+	.reg .pred 	%p<4>;
+	.reg .f32 	%f<22>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<15>;
 
 
 	ld.param.u64 	%rd4, [normalize_param_0];
@@ -785,10 +785,10 @@ $L__BB0_7:
 	.param .u32 normalize_param_4
 )
 {
-	.reg .pred 	%p&lt;4&gt;;
-	.reg .f32 	%f&lt;22&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;15&gt;;
+	.reg .pred 	%p<4>;
+	.reg .f32 	%f<22>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<15>;
 
 
 	ld.param.u64 	%rd4, [normalize_param_0];
@@ -871,10 +871,10 @@ $L__BB0_7:
 	.param .u32 normalize_param_4
 )
 {
-	.reg .pred 	%p&lt;4&gt;;
-	.reg .f32 	%f&lt;22&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;15&gt;;
+	.reg .pred 	%p<4>;
+	.reg .f32 	%f<22>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<15>;
 
 
 	ld.param.u64 	%rd4, [normalize_param_0];

@@ -16,7 +16,7 @@ func NewSlice(nComp int, size [3]int) *data.Slice {
 }
 
 func newSlice(nComp int, size [3]int, alloc func(int64) unsafe.Pointer, memType int8) *data.Slice {
-	data.EnableGPU(memFree, cu.MemFreeHost, MemCpy, MemCpyDtoH, MemCpyHtoD)
+	data.EnableGPU(memFree, cu.MemFreeHost, MemCpy, MemCpyDtoH, MemCpyHtoD, MemCpyFFT_T)
 	length := prod(size)
 	bytes := int64(length) * cu.SIZEOF_FLOAT32
 	ptrs := make([]unsafe.Pointer, nComp)
@@ -27,12 +27,25 @@ func newSlice(nComp int, size [3]int, alloc func(int64) unsafe.Pointer, memType 
 	return data.SliceFromPtrs(size, memType, ptrs)
 }
 
+func NewSliceBinary(nComp int, size [3]int) *data.SliceBinary {
+	return newSliceBinary(nComp, size, MemAlloc, data.GPUMemory)
+}
+
+func newSliceBinary(nComp int, size [3]int, alloc func(int64) unsafe.Pointer, memType int8) *data.SliceBinary {
+	data.EnableGPU(memFree, cu.MemFreeHost, MemCpy, MemCpyDtoH, MemCpyHtoD, MemCpyFFT_T)
+	length := prod(size)
+	bytes := int64(length) * cu.SIZEOF_FLOAT32
+	ptrs := unsafe.Pointer(alloc(bytes))
+	cu.MemsetD32(cu.DevicePtr(uintptr(ptrs)), 0, int64(length))
+	return data.SliceBinaryFromPtrs(size, length, memType, ptrs, nComp)
+}
+
 func NewSliceInt(nComp int, size [3]int) *data.Slice {
 	return newSliceInt(nComp, size, MemAlloc, data.GPUMemory)
 }
 
 func newSliceInt(nComp int, size [3]int, alloc func(int64) unsafe.Pointer, memType int8) *data.Slice {
-	data.EnableGPU(memFree, cu.MemFreeHost, MemCpy, MemCpyDtoH, MemCpyHtoD)
+	data.EnableGPU(memFree, cu.MemFreeHost, MemCpy, MemCpyDtoH, MemCpyHtoD, MemCpyFFT_T)
 	length := prod(size)
 	bytes := int64(length) * cu.SIZEOF_INT
 	ptrs := make([]unsafe.Pointer, nComp)
@@ -78,10 +91,10 @@ func MemCpy(dst, src unsafe.Pointer, bytes int64) {
 
 func MemCpyFFT_T(dst, src unsafe.Pointer, bytes int64, key string) {
 	SyncFFT_T(key)
-	timer.Start("memcpy")
+	timer.Start("memcpyBinary")
 	cu.MemcpyAsync(cu.DevicePtr(uintptr(dst)), cu.DevicePtr(uintptr(src)), bytes, Get_Stream(key))
 	SyncFFT_T(key)
-	timer.Stop("memcpy")
+	timer.Stop("memcpyBinary")
 }
 
 // Memset sets the Slice's components to the specified values.

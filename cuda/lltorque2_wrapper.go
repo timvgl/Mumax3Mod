@@ -125,10 +125,10 @@ const (
 	.param .u32 lltorque2_param_11
 )
 {
-	.reg .pred 	%p&lt;3&gt;;
-	.reg .f32 	%f&lt;39&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;35&gt;;
+	.reg .pred 	%p<3>;
+	.reg .f32 	%f<39>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<35>;
 
 
 	ld.param.u64 	%rd2, [lltorque2_param_0];
@@ -249,10 +249,10 @@ $L__BB0_4:
 	.param .u32 lltorque2_param_11
 )
 {
-	.reg .pred 	%p&lt;3&gt;;
-	.reg .f32 	%f&lt;39&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;35&gt;;
+	.reg .pred 	%p<3>;
+	.reg .f32 	%f<39>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<35>;
 
 
 	ld.param.u64 	%rd2, [lltorque2_param_0];
@@ -373,10 +373,10 @@ $L__BB0_4:
 	.param .u32 lltorque2_param_11
 )
 {
-	.reg .pred 	%p&lt;3&gt;;
-	.reg .f32 	%f&lt;39&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;35&gt;;
+	.reg .pred 	%p<3>;
+	.reg .f32 	%f<39>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<35>;
 
 
 	ld.param.u64 	%rd2, [lltorque2_param_0];
@@ -497,10 +497,10 @@ $L__BB0_4:
 	.param .u32 lltorque2_param_11
 )
 {
-	.reg .pred 	%p&lt;3&gt;;
-	.reg .f32 	%f&lt;39&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;35&gt;;
+	.reg .pred 	%p<3>;
+	.reg .f32 	%f<39>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<35>;
 
 
 	ld.param.u64 	%rd2, [lltorque2_param_0];
@@ -621,10 +621,10 @@ $L__BB0_4:
 	.param .u32 lltorque2_param_11
 )
 {
-	.reg .pred 	%p&lt;3&gt;;
-	.reg .f32 	%f&lt;39&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;35&gt;;
+	.reg .pred 	%p<3>;
+	.reg .f32 	%f<39>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<35>;
 
 
 	ld.param.u64 	%rd2, [lltorque2_param_0];
@@ -745,10 +745,10 @@ $L__BB0_4:
 	.param .u32 lltorque2_param_11
 )
 {
-	.reg .pred 	%p&lt;3&gt;;
-	.reg .f32 	%f&lt;39&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;35&gt;;
+	.reg .pred 	%p<3>;
+	.reg .f32 	%f<39>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<35>;
 
 
 	ld.param.u64 	%rd2, [lltorque2_param_0];
@@ -869,10 +869,10 @@ $L__BB0_4:
 	.param .u32 lltorque2_param_11
 )
 {
-	.reg .pred 	%p&lt;3&gt;;
-	.reg .f32 	%f&lt;39&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;35&gt;;
+	.reg .pred 	%p<3>;
+	.reg .f32 	%f<39>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<35>;
 
 
 	ld.param.u64 	%rd2, [lltorque2_param_0];
@@ -993,10 +993,10 @@ $L__BB0_4:
 	.param .u32 lltorque2_param_11
 )
 {
-	.reg .pred 	%p&lt;3&gt;;
-	.reg .f32 	%f&lt;39&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;35&gt;;
+	.reg .pred 	%p<3>;
+	.reg .f32 	%f<39>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<35>;
 
 
 	ld.param.u64 	%rd2, [lltorque2_param_0];
@@ -1117,10 +1117,10 @@ $L__BB0_4:
 	.param .u32 lltorque2_param_11
 )
 {
-	.reg .pred 	%p&lt;3&gt;;
-	.reg .f32 	%f&lt;39&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;35&gt;;
+	.reg .pred 	%p<3>;
+	.reg .f32 	%f<39>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<35>;
 
 
 	ld.param.u64 	%rd2, [lltorque2_param_0];
@@ -1241,10 +1241,10 @@ $L__BB0_4:
 	.param .u32 lltorque2_param_11
 )
 {
-	.reg .pred 	%p&lt;3&gt;;
-	.reg .f32 	%f&lt;39&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;35&gt;;
+	.reg .pred 	%p<3>;
+	.reg .f32 	%f<39>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<35>;
 
 
 	ld.param.u64 	%rd2, [lltorque2_param_0];

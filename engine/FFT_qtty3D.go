@@ -1,8 +1,6 @@
 package engine
 
 import (
-	"fmt"
-	"runtime"
 	"slices"
 
 	"github.com/mumax/3/cuda"
@@ -103,9 +101,6 @@ func FFT3D_FFT_T(q Quantity) *fftOperation3D {
 	s := MeshOf(q).Size()
 	cuda.Create_Stream(NameOf(q))
 	//fmt.Println(fmt.Sprintf("Initializing with %d, %d and %d", s[X], s[Y], s[Z]))
-	for i := range runtime.NumCPU() {
-		cuda.Create_Stream(NameOf(q) + fmt.Sprintf("_%d", i))
-	}
 	FFT3DR2CPlans[q] = cuda.Initialize3DR2CFFT_FFT_T(s[X], s[Y], s[Z], cuda.Get_Stream(NameOf(q)))
 	fftOP3D := &fftOperation3D{fieldOp{q, q, q.NComp()}, "k_x_y_z_" + NameOf(q), q, true}
 	FFTEvaluated[q] = false

@@ -117,9 +117,9 @@ const (
 	.param .u32 RelMaxVecDiff_param_9
 )
 {
-	.reg .pred 	%p&lt;6&gt;;
-	.reg .b32 	%r&lt;19&gt;;
-	.reg .b64 	%rd&lt;5&gt;;
+	.reg .pred 	%p<6>;
+	.reg .b32 	%r<19>;
+	.reg .b64 	%rd<5>;
 
 
 	ld.param.u64 	%rd1, [RelMaxVecDiff_param_0];
@@ -179,9 +179,9 @@ $L__BB0_2:
 	.param .u32 RelMaxVecDiff_param_9
 )
 {
-	.reg .pred 	%p&lt;6&gt;;
-	.reg .b32 	%r&lt;19&gt;;
-	.reg .b64 	%rd&lt;5&gt;;
+	.reg .pred 	%p<6>;
+	.reg .b32 	%r<19>;
+	.reg .b64 	%rd<5>;
 
 
 	ld.param.u64 	%rd1, [RelMaxVecDiff_param_0];
@@ -241,9 +241,9 @@ $L__BB0_2:
 	.param .u32 RelMaxVecDiff_param_9
 )
 {
-	.reg .pred 	%p&lt;6&gt;;
-	.reg .b32 	%r&lt;19&gt;;
-	.reg .b64 	%rd&lt;5&gt;;
+	.reg .pred 	%p<6>;
+	.reg .b32 	%r<19>;
+	.reg .b64 	%rd<5>;
 
 
 	ld.param.u64 	%rd1, [RelMaxVecDiff_param_0];
@@ -303,9 +303,9 @@ $L__BB0_2:
 	.param .u32 RelMaxVecDiff_param_9
 )
 {
-	.reg .pred 	%p&lt;6&gt;;
-	.reg .b32 	%r&lt;19&gt;;
-	.reg .b64 	%rd&lt;5&gt;;
+	.reg .pred 	%p<6>;
+	.reg .b32 	%r<19>;
+	.reg .b64 	%rd<5>;
 
 
 	ld.param.u64 	%rd1, [RelMaxVecDiff_param_0];
@@ -365,9 +365,9 @@ $L__BB0_2:
 	.param .u32 RelMaxVecDiff_param_9
 )
 {
-	.reg .pred 	%p&lt;6&gt;;
-	.reg .b32 	%r&lt;19&gt;;
-	.reg .b64 	%rd&lt;5&gt;;
+	.reg .pred 	%p<6>;
+	.reg .b32 	%r<19>;
+	.reg .b64 	%rd<5>;
 
 
 	ld.param.u64 	%rd1, [RelMaxVecDiff_param_0];
@@ -427,9 +427,9 @@ $L__BB0_2:
 	.param .u32 RelMaxVecDiff_param_9
 )
 {
-	.reg .pred 	%p&lt;6&gt;;
-	.reg .b32 	%r&lt;19&gt;;
-	.reg .b64 	%rd&lt;5&gt;;
+	.reg .pred 	%p<6>;
+	.reg .b32 	%r<19>;
+	.reg .b64 	%rd<5>;
 
 
 	ld.param.u64 	%rd1, [RelMaxVecDiff_param_0];
@@ -489,9 +489,9 @@ $L__BB0_2:
 	.param .u32 RelMaxVecDiff_param_9
 )
 {
-	.reg .pred 	%p&lt;6&gt;;
-	.reg .b32 	%r&lt;19&gt;;
-	.reg .b64 	%rd&lt;5&gt;;
+	.reg .pred 	%p<6>;
+	.reg .b32 	%r<19>;
+	.reg .b64 	%rd<5>;
 
 
 	ld.param.u64 	%rd1, [RelMaxVecDiff_param_0];
@@ -551,9 +551,9 @@ $L__BB0_2:
 	.param .u32 RelMaxVecDiff_param_9
 )
 {
-	.reg .pred 	%p&lt;6&gt;;
-	.reg .b32 	%r&lt;19&gt;;
-	.reg .b64 	%rd&lt;5&gt;;
+	.reg .pred 	%p<6>;
+	.reg .b32 	%r<19>;
+	.reg .b64 	%rd<5>;
 
 
 	ld.param.u64 	%rd1, [RelMaxVecDiff_param_0];
@@ -613,9 +613,9 @@ $L__BB0_2:
 	.param .u32 RelMaxVecDiff_param_9
 )
 {
-	.reg .pred 	%p&lt;6&gt;;
-	.reg .b32 	%r&lt;19&gt;;
-	.reg .b64 	%rd&lt;5&gt;;
+	.reg .pred 	%p<6>;
+	.reg .b32 	%r<19>;
+	.reg .b64 	%rd<5>;
 
 
 	ld.param.u64 	%rd1, [RelMaxVecDiff_param_0];
@@ -675,9 +675,9 @@ $L__BB0_2:
 	.param .u32 RelMaxVecDiff_param_9
 )
 {
-	.reg .pred 	%p&lt;6&gt;;
-	.reg .b32 	%r&lt;19&gt;;
-	.reg .b64 	%rd&lt;5&gt;;
+	.reg .pred 	%p<6>;
+	.reg .b32 	%r<19>;
+	.reg .b64 	%rd<5>;
 
 
 	ld.param.u64 	%rd1, [RelMaxVecDiff_param_0];

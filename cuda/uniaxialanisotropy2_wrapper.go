@@ -153,10 +153,10 @@ const (
 	.param .u32 adduniaxialanisotropy2_param_18
 )
 {
-	.reg .pred 	%p&lt;10&gt;;
-	.reg .f32 	%f&lt;72&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;44&gt;;
+	.reg .pred 	%p<10>;
+	.reg .f32 	%f<72>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<44>;
 
 
 	ld.param.u64 	%rd1, [adduniaxialanisotropy2_param_0];
@@ -347,10 +347,10 @@ $L__BB0_18:
 	.param .u32 adduniaxialanisotropy2_param_18
 )
 {
-	.reg .pred 	%p&lt;10&gt;;
-	.reg .f32 	%f&lt;72&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;44&gt;;
+	.reg .pred 	%p<10>;
+	.reg .f32 	%f<72>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<44>;
 
 
 	ld.param.u64 	%rd1, [adduniaxialanisotropy2_param_0];
@@ -541,10 +541,10 @@ $L__BB0_18:
 	.param .u32 adduniaxialanisotropy2_param_18
 )
 {
-	.reg .pred 	%p&lt;10&gt;;
-	.reg .f32 	%f&lt;72&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;44&gt;;
+	.reg .pred 	%p<10>;
+	.reg .f32 	%f<72>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<44>;
 
 
 	ld.param.u64 	%rd1, [adduniaxialanisotropy2_param_0];
@@ -735,10 +735,10 @@ $L__BB0_18:
 	.param .u32 adduniaxialanisotropy2_param_18
 )
 {
-	.reg .pred 	%p&lt;10&gt;;
-	.reg .f32 	%f&lt;72&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;44&gt;;
+	.reg .pred 	%p<10>;
+	.reg .f32 	%f<72>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<44>;
 
 
 	ld.param.u64 	%rd1, [adduniaxialanisotropy2_param_0];
@@ -929,10 +929,10 @@ $L__BB0_18:
 	.param .u32 adduniaxialanisotropy2_param_18
 )
 {
-	.reg .pred 	%p&lt;10&gt;;
-	.reg .f32 	%f&lt;72&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;44&gt;;
+	.reg .pred 	%p<10>;
+	.reg .f32 	%f<72>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<44>;
 
 
 	ld.param.u64 	%rd1, [adduniaxialanisotropy2_param_0];
@@ -1123,10 +1123,10 @@ $L__BB0_18:
 	.param .u32 adduniaxialanisotropy2_param_18
 )
 {
-	.reg .pred 	%p&lt;10&gt;;
-	.reg .f32 	%f&lt;72&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;44&gt;;
+	.reg .pred 	%p<10>;
+	.reg .f32 	%f<72>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<44>;
 
 
 	ld.param.u64 	%rd1, [adduniaxialanisotropy2_param_0];
@@ -1317,10 +1317,10 @@ $L__BB0_18:
 	.param .u32 adduniaxialanisotropy2_param_18
 )
 {
-	.reg .pred 	%p&lt;10&gt;;
-	.reg .f32 	%f&lt;72&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;44&gt;;
+	.reg .pred 	%p<10>;
+	.reg .f32 	%f<72>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<44>;
 
 
 	ld.param.u64 	%rd1, [adduniaxialanisotropy2_param_0];
@@ -1511,10 +1511,10 @@ $L__BB0_18:
 	.param .u32 adduniaxialanisotropy2_param_18
 )
 {
-	.reg .pred 	%p&lt;10&gt;;
-	.reg .f32 	%f&lt;72&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;44&gt;;
+	.reg .pred 	%p<10>;
+	.reg .f32 	%f<72>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<44>;
 
 
 	ld.param.u64 	%rd1, [adduniaxialanisotropy2_param_0];
@@ -1705,10 +1705,10 @@ $L__BB0_18:
 	.param .u32 adduniaxialanisotropy2_param_18
 )
 {
-	.reg .pred 	%p&lt;10&gt;;
-	.reg .f32 	%f&lt;72&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;44&gt;;
+	.reg .pred 	%p<10>;
+	.reg .f32 	%f<72>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<44>;
 
 
 	ld.param.u64 	%rd1, [adduniaxialanisotropy2_param_0];
@@ -1899,10 +1899,10 @@ $L__BB0_18:
 	.param .u32 adduniaxialanisotropy2_param_18
 )
 {
-	.reg .pred 	%p&lt;10&gt;;
-	.reg .f32 	%f&lt;72&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;44&gt;;
+	.reg .pred 	%p<10>;
+	.reg .f32 	%f<72>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<44>;
 
 
 	ld.param.u64 	%rd1, [adduniaxialanisotropy2_param_0];

@@ -117,10 +117,10 @@ const (
 	.param .u32 llnoprecess_param_9
 )
 {
-	.reg .pred 	%p&lt;2&gt;;
-	.reg .f32 	%f&lt;28&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;29&gt;;
+	.reg .pred 	%p<2>;
+	.reg .f32 	%f<28>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<29>;
 
 
 	ld.param.u64 	%rd1, [llnoprecess_param_0];
@@ -219,10 +219,10 @@ $L__BB0_2:
 	.param .u32 llnoprecess_param_9
 )
 {
-	.reg .pred 	%p&lt;2&gt;;
-	.reg .f32 	%f&lt;28&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;29&gt;;
+	.reg .pred 	%p<2>;
+	.reg .f32 	%f<28>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<29>;
 
 
 	ld.param.u64 	%rd1, [llnoprecess_param_0];
@@ -321,10 +321,10 @@ $L__BB0_2:
 	.param .u32 llnoprecess_param_9
 )
 {
-	.reg .pred 	%p&lt;2&gt;;
-	.reg .f32 	%f&lt;28&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;29&gt;;
+	.reg .pred 	%p<2>;
+	.reg .f32 	%f<28>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<29>;
 
 
 	ld.param.u64 	%rd1, [llnoprecess_param_0];
@@ -423,10 +423,10 @@ $L__BB0_2:
 	.param .u32 llnoprecess_param_9
 )
 {
-	.reg .pred 	%p&lt;2&gt;;
-	.reg .f32 	%f&lt;28&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;29&gt;;
+	.reg .pred 	%p<2>;
+	.reg .f32 	%f<28>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<29>;
 
 
 	ld.param.u64 	%rd1, [llnoprecess_param_0];
@@ -525,10 +525,10 @@ $L__BB0_2:
 	.param .u32 llnoprecess_param_9
 )
 {
-	.reg .pred 	%p&lt;2&gt;;
-	.reg .f32 	%f&lt;28&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;29&gt;;
+	.reg .pred 	%p<2>;
+	.reg .f32 	%f<28>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<29>;
 
 
 	ld.param.u64 	%rd1, [llnoprecess_param_0];
@@ -627,10 +627,10 @@ $L__BB0_2:
 	.param .u32 llnoprecess_param_9
 )
 {
-	.reg .pred 	%p&lt;2&gt;;
-	.reg .f32 	%f&lt;28&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;29&gt;;
+	.reg .pred 	%p<2>;
+	.reg .f32 	%f<28>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<29>;
 
 
 	ld.param.u64 	%rd1, [llnoprecess_param_0];
@@ -729,10 +729,10 @@ $L__BB0_2:
 	.param .u32 llnoprecess_param_9
 )
 {
-	.reg .pred 	%p&lt;2&gt;;
-	.reg .f32 	%f&lt;28&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;29&gt;;
+	.reg .pred 	%p<2>;
+	.reg .f32 	%f<28>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<29>;
 
 
 	ld.param.u64 	%rd1, [llnoprecess_param_0];
@@ -831,10 +831,10 @@ $L__BB0_2:
 	.param .u32 llnoprecess_param_9
 )
 {
-	.reg .pred 	%p&lt;2&gt;;
-	.reg .f32 	%f&lt;28&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;29&gt;;
+	.reg .pred 	%p<2>;
+	.reg .f32 	%f<28>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<29>;
 
 
 	ld.param.u64 	%rd1, [llnoprecess_param_0];
@@ -933,10 +933,10 @@ $L__BB0_2:
 	.param .u32 llnoprecess_param_9
 )
 {
-	.reg .pred 	%p&lt;2&gt;;
-	.reg .f32 	%f&lt;28&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;29&gt;;
+	.reg .pred 	%p<2>;
+	.reg .f32 	%f<28>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<29>;
 
 
 	ld.param.u64 	%rd1, [llnoprecess_param_0];
@@ -1035,10 +1035,10 @@ $L__BB0_2:
 	.param .u32 llnoprecess_param_9
 )
 {
-	.reg .pred 	%p&lt;2&gt;;
-	.reg .f32 	%f&lt;28&gt;;
-	.reg .b32 	%r&lt;9&gt;;
-	.reg .b64 	%rd&lt;29&gt;;
+	.reg .pred 	%p<2>;
+	.reg .f32 	%f<28>;
+	.reg .b32 	%r<9>;
+	.reg .b64 	%rd<29>;
 
 
 	ld.param.u64 	%rd1, [llnoprecess_param_0];

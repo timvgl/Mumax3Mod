@@ -97,11 +97,11 @@ const (
 	.param .u32 copymask_param_4
 )
 {
-	.reg .pred 	%p&lt;3&gt;;
-	.reg .b16 	%rs&lt;2&gt;;
-	.reg .f32 	%f&lt;3&gt;;
-	.reg .b32 	%r&lt;11&gt;;
-	.reg .b64 	%rd&lt;19&gt;;
+	.reg .pred 	%p<3>;
+	.reg .b16 	%rs<2>;
+	.reg .f32 	%f<3>;
+	.reg .b32 	%r<11>;
+	.reg .b64 	%rd<19>;
 
 
 	ld.param.u64 	%rd3, [copymask_param_0];
@@ -164,11 +164,11 @@ $L__BB0_3:
 	.param .u32 copymask_param_4
 )
 {
-	.reg .pred 	%p&lt;3&gt;;
-	.reg .b16 	%rs&lt;2&gt;;
-	.reg .f32 	%f&lt;3&gt;;
-	.reg .b32 	%r&lt;11&gt;;
-	.reg .b64 	%rd&lt;19&gt;;
+	.reg .pred 	%p<3>;
+	.reg .b16 	%rs<2>;
+	.reg .f32 	%f<3>;
+	.reg .b32 	%r<11>;
+	.reg .b64 	%rd<19>;
 
 
 	ld.param.u64 	%rd3, [copymask_param_0];
@@ -231,11 +231,11 @@ $L__BB0_3:
 	.param .u32 copymask_param_4
 )
 {
-	.reg .pred 	%p&lt;3&gt;;
-	.reg .b16 	%rs&lt;2&gt;;
-	.reg .f32 	%f&lt;3&gt;;
-	.reg .b32 	%r&lt;11&gt;;
-	.reg .b64 	%rd&lt;19&gt;;
+	.reg .pred 	%p<3>;
+	.reg .b16 	%rs<2>;
+	.reg .f32 	%f<3>;
+	.reg .b32 	%r<11>;
+	.reg .b64 	%rd<19>;
 
 
 	ld.param.u64 	%rd3, [copymask_param_0];
@@ -298,11 +298,11 @@ $L__BB0_3:
 	.param .u32 copymask_param_4
 )
 {
-	.reg .pred 	%p&lt;3&gt;;
-	.reg .b16 	%rs&lt;2&gt;;
-	.reg .f32 	%f&lt;3&gt;;
-	.reg .b32 	%r&lt;11&gt;;
-	.reg .b64 	%rd&lt;19&gt;;
+	.reg .pred 	%p<3>;
+	.reg .b16 	%rs<2>;
+	.reg .f32 	%f<3>;
+	.reg .b32 	%r<11>;
+	.reg .b64 	%rd<19>;
 
 
 	ld.param.u64 	%rd3, [copymask_param_0];
@@ -365,11 +365,11 @@ $L__BB0_3:
 	.param .u32 copymask_param_4
 )
 {
-	.reg .pred 	%p&lt;3&gt;;
-	.reg .b16 	%rs&lt;2&gt;;
-	.reg .f32 	%f&lt;3&gt;;
-	.reg .b32 	%r&lt;11&gt;;
-	.reg .b64 	%rd&lt;19&gt;;
+	.reg .pred 	%p<3>;
+	.reg .b16 	%rs<2>;
+	.reg .f32 	%f<3>;
+	.reg .b32 	%r<11>;
+	.reg .b64 	%rd<19>;
 
 
 	ld.param.u64 	%rd3, [copymask_param_0];
@@ -432,11 +432,11 @@ $L__BB0_3:
 	.param .u32 copymask_param_4
 )
 {
-	.reg .pred 	%p&lt;3&gt;;
-	.reg .b16 	%rs&lt;2&gt;;
-	.reg .f32 	%f&lt;3&gt;;
-	.reg .b32 	%r&lt;11&gt;;
-	.reg .b64 	%rd&lt;19&gt;;
+	.reg .pred 	%p<3>;
+	.reg .b16 	%rs<2>;
+	.reg .f32 	%f<3>;
+	.reg .b32 	%r<11>;
+	.reg .b64 	%rd<19>;
 
 
 	ld.param.u64 	%rd3, [copymask_param_0];
@@ -499,11 +499,11 @@ $L__BB0_3:
 	.param .u32 copymask_param_4
 )
 {
-	.reg .pred 	%p&lt;3&gt;;
-	.reg .b16 	%rs&lt;2&gt;;
-	.reg .f32 	%f&lt;3&gt;;
-	.reg .b32 	%r&lt;11&gt;;
-	.reg .b64 	%rd&lt;19&gt;;
+	.reg .pred 	%p<3>;
+	.reg .b16 	%rs<2>;
+	.reg .f32 	%f<3>;
+	.reg .b32 	%r<11>;
+	.reg .b64 	%rd<19>;
 
 
 	ld.param.u64 	%rd3, [copymask_param_0];
@@ -566,11 +566,11 @@ $L__BB0_3:
 	.param .u32 copymask_param_4
 )
 {
-	.reg .pred 	%p&lt;3&gt;;
-	.reg .b16 	%rs&lt;2&gt;;
-	.reg .f32 	%f&lt;3&gt;;
-	.reg .b32 	%r&lt;11&gt;;
-	.reg .b64 	%rd&lt;19&gt;;
+	.reg .pred 	%p<3>;
+	.reg .b16 	%rs<2>;
+	.reg .f32 	%f<3>;
+	.reg .b32 	%r<11>;
+	.reg .b64 	%rd<19>;
 
 
 	ld.param.u64 	%rd3, [copymask_param_0];
@@ -633,11 +633,11 @@ $L__BB0_3:
 	.param .u32 copymask_param_4
 )
 {
-	.reg .pred 	%p&lt;3&gt;;
-	.reg .b16 	%rs&lt;2&gt;;
-	.reg .f32 	%f&lt;3&gt;;
-	.reg .b32 	%r&lt;11&gt;;
-	.reg .b64 	%rd&lt;19&gt;;
+	.reg .pred 	%p<3>;
+	.reg .b16 	%rs<2>;
+	.reg .f32 	%f<3>;
+	.reg .b32 	%r<11>;
+	.reg .b64 	%rd<19>;
 
 
 	ld.param.u64 	%rd3, [copymask_param_0];
@@ -700,11 +700,11 @@ $L__BB0_3:
 	.param .u32 copymask_param_4
 )
 {
-	.reg .pred 	%p&lt;3&gt;;
-	.reg .b16 	%rs&lt;2&gt;;
-	.reg .f32 	%f&lt;3&gt;;
-	.reg .b32 	%r&lt;11&gt;;
-	.reg .b64 	%rd&lt;19&gt;;
+	.reg .pred 	%p<3>;
+	.reg .b16 	%rs<2>;
+	.reg .f32 	%f<3>;
+	.reg .b32 	%r<11>;
+	.reg .b64 	%rd<19>;
 
 
 	ld.param.u64 	%rd3, [copymask_param_0];

@@ -141,11 +141,11 @@ const (
 	.param .f32 ElsticEnergy_param_15
 )
 {
-	.reg .pred 	%p&lt;9&gt;;
-	.reg .f32 	%f&lt;35&gt;;
-	.reg .b32 	%r&lt;18&gt;;
-	.reg .f64 	%fd&lt;5&gt;;
-	.reg .b64 	%rd&lt;35&gt;;
+	.reg .pred 	%p<9>;
+	.reg .f32 	%f<35>;
+	.reg .b32 	%r<18>;
+	.reg .f64 	%fd<5>;
+	.reg .b64 	%rd<35>;
 
 
 	ld.param.u64 	%rd1, [ElsticEnergy_param_0];
@@ -287,11 +287,11 @@ $L__BB0_8:
 	.param .f32 ElsticEnergy_param_15
 )
 {
-	.reg .pred 	%p&lt;9&gt;;
-	.reg .f32 	%f&lt;35&gt;;
-	.reg .b32 	%r&lt;18&gt;;
-	.reg .f64 	%fd&lt;5&gt;;
-	.reg .b64 	%rd&lt;35&gt;;
+	.reg .pred 	%p<9>;
+	.reg .f32 	%f<35>;
+	.reg .b32 	%r<18>;
+	.reg .f64 	%fd<5>;
+	.reg .b64 	%rd<35>;
 
 
 	ld.param.u64 	%rd1, [ElsticEnergy_param_0];
@@ -433,11 +433,11 @@ $L__BB0_8:
 	.param .f32 ElsticEnergy_param_15
 )
 {
-	.reg .pred 	%p&lt;9&gt;;
-	.reg .f32 	%f&lt;35&gt;;
-	.reg .b32 	%r&lt;18&gt;;
-	.reg .f64 	%fd&lt;5&gt;;
-	.reg .b64 	%rd&lt;35&gt;;
+	.reg .pred 	%p<9>;
+	.reg .f32 	%f<35>;
+	.reg .b32 	%r<18>;
+	.reg .f64 	%fd<5>;
+	.reg .b64 	%rd<35>;
 
 
 	ld.param.u64 	%rd1, [ElsticEnergy_param_0];
@@ -579,11 +579,11 @@ $L__BB0_8:
 	.param .f32 ElsticEnergy_param_15
 )
 {
-	.reg .pred 	%p&lt;9&gt;;
-	.reg .f32 	%f&lt;35&gt;;
-	.reg .b32 	%r&lt;18&gt;;
-	.reg .f64 	%fd&lt;5&gt;;
-	.reg .b64 	%rd&lt;35&gt;;
+	.reg .pred 	%p<9>;
+	.reg .f32 	%f<35>;
+	.reg .b32 	%r<18>;
+	.reg .f64 	%fd<5>;
+	.reg .b64 	%rd<35>;
 
 
 	ld.param.u64 	%rd1, [ElsticEnergy_param_0];
@@ -725,11 +725,11 @@ $L__BB0_8:
 	.param .f32 ElsticEnergy_param_15
 )
 {
-	.reg .pred 	%p&lt;9&gt;;
-	.reg .f32 	%f&lt;35&gt;;
-	.reg .b32 	%r&lt;18&gt;;
-	.reg .f64 	%fd&lt;5&gt;;
-	.reg .b64 	%rd&lt;35&gt;;
+	.reg .pred 	%p<9>;
+	.reg .f32 	%f<35>;
+	.reg .b32 	%r<18>;
+	.reg .f64 	%fd<5>;
+	.reg .b64 	%rd<35>;
 
 
 	ld.param.u64 	%rd1, [ElsticEnergy_param_0];
@@ -871,11 +871,11 @@ $L__BB0_8:
 	.param .f32 ElsticEnergy_param_15
 )
 {
-	.reg .pred 	%p&lt;9&gt;;
-	.reg .f32 	%f&lt;35&gt;;
-	.reg .b32 	%r&lt;18&gt;;
-	.reg .f64 	%fd&lt;5&gt;;
-	.reg .b64 	%rd&lt;35&gt;;
+	.reg .pred 	%p<9>;
+	.reg .f32 	%f<35>;
+	.reg .b32 	%r<18>;
+	.reg .f64 	%fd<5>;
+	.reg .b64 	%rd<35>;
 
 
 	ld.param.u64 	%rd1, [ElsticEnergy_param_0];
@@ -1017,11 +1017,11 @@ $L__BB0_8:
 	.param .f32 ElsticEnergy_param_15
 )
 {
-	.reg .pred 	%p&lt;9&gt;;
-	.reg .f32 	%f&lt;35&gt;;
-	.reg .b32 	%r&lt;18&gt;;
-	.reg .f64 	%fd&lt;5&gt;;
-	.reg .b64 	%rd&lt;35&gt;;
+	.reg .pred 	%p<9>;
+	.reg .f32 	%f<35>;
+	.reg .b32 	%r<18>;
+	.reg .f64 	%fd<5>;
+	.reg .b64 	%rd<35>;
 
 
 	ld.param.u64 	%rd1, [ElsticEnergy_param_0];
@@ -1163,11 +1163,11 @@ $L__BB0_8:
 	.param .f32 ElsticEnergy_param_15
 )
 {
-	.reg .pred 	%p&lt;9&gt;;
-	.reg .f32 	%f&lt;35&gt;;
-	.reg .b32 	%r&lt;18&gt;;
-	.reg .f64 	%fd&lt;5&gt;;
-	.reg .b64 	%rd&lt;35&gt;;
+	.reg .pred 	%p<9>;
+	.reg .f32 	%f<35>;
+	.reg .b32 	%r<18>;
+	.reg .f64 	%fd<5>;
+	.reg .b64 	%rd<35>;
 
 
 	ld.param.u64 	%rd1, [ElsticEnergy_param_0];
@@ -1309,11 +1309,11 @@ $L__BB0_8:
 	.param .f32 ElsticEnergy_param_15
 )
 {
-	.reg .pred 	%p&lt;9&gt;;
-	.reg .f32 	%f&lt;35&gt;;
-	.reg .b32 	%r&lt;18&gt;;
-	.reg .f64 	%fd&lt;5&gt;;
-	.reg .b64 	%rd&lt;35&gt;;
+	.reg .pred 	%p<9>;
+	.reg .f32 	%f<35>;
+	.reg .b32 	%r<18>;
+	.reg .f64 	%fd<5>;
+	.reg .b64 	%rd<35>;
 
 
 	ld.param.u64 	%rd1, [ElsticEnergy_param_0];
@@ -1455,11 +1455,11 @@ $L__BB0_8:
 	.param .f32 ElsticEnergy_param_15
 )
 {
-	.reg .pred 	%p&lt;9&gt;;
-	.reg .f32 	%f&lt;35&gt;;
-	.reg .b32 	%r&lt;18&gt;;
-	.reg .f64 	%fd&lt;5&gt;;
-	.reg .b64 	%rd&lt;35&gt;;
+	.reg .pred 	%p<9>;
+	.reg .f32 	%f<35>;
+	.reg .b32 	%r<18>;
+	.reg .f64 	%fd<5>;
+	.reg .b64 	%rd<35>;
 
 
 	ld.param.u64 	%rd1, [ElsticEnergy_param_0];

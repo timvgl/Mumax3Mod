@@ -129,10 +129,10 @@ const (
 	.param .f32 Normstress_param_12
 )
 {
-	.reg .pred 	%p&lt;8&gt;;
-	.reg .f32 	%f&lt;23&gt;;
-	.reg .b32 	%r&lt;18&gt;;
-	.reg .b64 	%rd&lt;28&gt;;
+	.reg .pred 	%p<8>;
+	.reg .f32 	%f<23>;
+	.reg .b32 	%r<18>;
+	.reg .b64 	%rd<28>;
 
 
 	ld.param.u64 	%rd1, [Normstress_param_0];
@@ -247,10 +247,10 @@ $L__BB0_6:
 	.param .f32 Normstress_param_12
 )
 {
-	.reg .pred 	%p&lt;8&gt;;
-	.reg .f32 	%f&lt;23&gt;;
-	.reg .b32 	%r&lt;18&gt;;
-	.reg .b64 	%rd&lt;28&gt;;
+	.reg .pred 	%p<8>;
+	.reg .f32 	%f<23>;
+	.reg .b32 	%r<18>;
+	.reg .b64 	%rd<28>;
 
 
 	ld.param.u64 	%rd1, [Normstress_param_0];
@@ -365,10 +365,10 @@ $L__BB0_6:
 	.param .f32 Normstress_param_12
 )
 {
-	.reg .pred 	%p&lt;8&gt;;
-	.reg .f32 	%f&lt;23&gt;;
-	.reg .b32 	%r&lt;18&gt;;
-	.reg .b64 	%rd&lt;28&gt;;
+	.reg .pred 	%p<8>;
+	.reg .f32 	%f<23>;
+	.reg .b32 	%r<18>;
+	.reg .b64 	%rd<28>;
 
 
 	ld.param.u64 	%rd1, [Normstress_param_0];
@@ -483,10 +483,10 @@ $L__BB0_6:
 	.param .f32 Normstress_param_12
 )
 {
-	.reg .pred 	%p&lt;8&gt;;
-	.reg .f32 	%f&lt;23&gt;;
-	.reg .b32 	%r&lt;18&gt;;
-	.reg .b64 	%rd&lt;28&gt;;
+	.reg .pred 	%p<8>;
+	.reg .f32 	%f<23>;
+	.reg .b32 	%r<18>;
+	.reg .b64 	%rd<28>;
 
 
 	ld.param.u64 	%rd1, [Normstress_param_0];
@@ -601,10 +601,10 @@ $L__BB0_6:
 	.param .f32 Normstress_param_12
 )
 {
-	.reg .pred 	%p&lt;8&gt;;
-	.reg .f32 	%f&lt;23&gt;;
-	.reg .b32 	%r&lt;18&gt;;
-	.reg .b64 	%rd&lt;28&gt;;
+	.reg .pred 	%p<8>;
+	.reg .f32 	%f<23>;
+	.reg .b32 	%r<18>;
+	.reg .b64 	%rd<28>;
 
 
 	ld.param.u64 	%rd1, [Normstress_param_0];
@@ -719,10 +719,10 @@ $L__BB0_6:
 	.param .f32 Normstress_param_12
 )
 {
-	.reg .pred 	%p&lt;8&gt;;
-	.reg .f32 	%f&lt;23&gt;;
-	.reg .b32 	%r&lt;18&gt;;
-	.reg .b64 	%rd&lt;28&gt;;
+	.reg .pred 	%p<8>;
+	.reg .f32 	%f<23>;
+	.reg .b32 	%r<18>;
+	.reg .b64 	%rd<28>;
 
 
 	ld.param.u64 	%rd1, [Normstress_param_0];
@@ -837,10 +837,10 @@ $L__BB0_6:
 	.param .f32 Normstress_param_12
 )
 {
-	.reg .pred 	%p&lt;8&gt;;
-	.reg .f32 	%f&lt;23&gt;;
-	.reg .b32 	%r&lt;18&gt;;
-	.reg .b64 	%rd&lt;28&gt;;
+	.reg .pred 	%p<8>;
+	.reg .f32 	%f<23>;
+	.reg .b32 	%r<18>;
+	.reg .b64 	%rd<28>;
 
 
 	ld.param.u64 	%rd1, [Normstress_param_0];
@@ -955,10 +955,10 @@ $L__BB0_6:
 	.param .f32 Normstress_param_12
 )
 {
-	.reg .pred 	%p&lt;8&gt;;
-	.reg .f32 	%f&lt;23&gt;;
-	.reg .b32 	%r&lt;18&gt;;
-	.reg .b64 	%rd&lt;28&gt;;
+	.reg .pred 	%p<8>;
+	.reg .f32 	%f<23>;
+	.reg .b32 	%r<18>;
+	.reg .b64 	%rd<28>;
 
 
 	ld.param.u64 	%rd1, [Normstress_param_0];
@@ -1073,10 +1073,10 @@ $L__BB0_6:
 	.param .f32 Normstress_param_12
 )
 {
-	.reg .pred 	%p&lt;8&gt;;
-	.reg .f32 	%f&lt;23&gt;;
-	.reg .b32 	%r&lt;18&gt;;
-	.reg .b64 	%rd&lt;28&gt;;
+	.reg .pred 	%p<8>;
+	.reg .f32 	%f<23>;
+	.reg .b32 	%r<18>;
+	.reg .b64 	%rd<28>;
 
 
 	ld.param.u64 	%rd1, [Normstress_param_0];
@@ -1191,10 +1191,10 @@ $L__BB0_6:
 	.param .f32 Normstress_param_12
 )
 {
-	.reg .pred 	%p&lt;8&gt;;
-	.reg .f32 	%f&lt;23&gt;;
-	.reg .b32 	%r&lt;18&gt;;
-	.reg .b64 	%rd&lt;28&gt;;
+	.reg .pred 	%p<8>;
+	.reg .f32 	%f<23>;
+	.reg .b32 	%r<18>;
+	.reg .b64 	%rd<28>;
 
 
 	ld.param.u64 	%rd1, [Normstress_param_0];

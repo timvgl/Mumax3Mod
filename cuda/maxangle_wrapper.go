@@ -117,11 +117,11 @@ const (
 	.param .u8 setmaxangle_param_9
 )
 {
-	.reg .pred 	%p&lt;44&gt;;
-	.reg .b16 	%rs&lt;36&gt;;
-	.reg .f32 	%f&lt;318&gt;;
-	.reg .b32 	%r&lt;135&gt;;
-	.reg .b64 	%rd&lt;69&gt;;
+	.reg .pred 	%p<44>;
+	.reg .b16 	%rs<36>;
+	.reg .f32 	%f<318>;
+	.reg .b32 	%r<135>;
+	.reg .b64 	%rd<69>;
 
 
 	ld.param.u8 	%rs5, [setmaxangle_param_9];
@@ -791,11 +791,11 @@ $L__BB0_34:
 	.param .u8 setmaxangle_param_9
 )
 {
-	.reg .pred 	%p&lt;44&gt;;
-	.reg .b16 	%rs&lt;36&gt;;
-	.reg .f32 	%f&lt;318&gt;;
-	.reg .b32 	%r&lt;135&gt;;
-	.reg .b64 	%rd&lt;69&gt;;
+	.reg .pred 	%p<44>;
+	.reg .b16 	%rs<36>;
+	.reg .f32 	%f<318>;
+	.reg .b32 	%r<135>;
+	.reg .b64 	%rd<69>;
 
 
 	ld.param.u8 	%rs5, [setmaxangle_param_9];
@@ -1465,11 +1465,11 @@ $L__BB0_34:
 	.param .u8 setmaxangle_param_9
 )
 {
-	.reg .pred 	%p&lt;44&gt;;
-	.reg .b16 	%rs&lt;36&gt;;
-	.reg .f32 	%f&lt;318&gt;;
-	.reg .b32 	%r&lt;135&gt;;
-	.reg .b64 	%rd&lt;69&gt;;
+	.reg .pred 	%p<44>;
+	.reg .b16 	%rs<36>;
+	.reg .f32 	%f<318>;
+	.reg .b32 	%r<135>;
+	.reg .b64 	%rd<69>;
 
 
 	ld.param.u8 	%rs5, [setmaxangle_param_9];
@@ -2139,11 +2139,11 @@ $L__BB0_34:
 	.param .u8 setmaxangle_param_9
 )
 {
-	.reg .pred 	%p&lt;44&gt;;
-	.reg .b16 	%rs&lt;36&gt;;
-	.reg .f32 	%f&lt;318&gt;;
-	.reg .b32 	%r&lt;135&gt;;
-	.reg .b64 	%rd&lt;69&gt;;
+	.reg .pred 	%p<44>;
+	.reg .b16 	%rs<36>;
+	.reg .f32 	%f<318>;
+	.reg .b32 	%r<135>;
+	.reg .b64 	%rd<69>;
 
 
 	ld.param.u8 	%rs5, [setmaxangle_param_9];
@@ -2813,11 +2813,11 @@ $L__BB0_34:
 	.param .u8 setmaxangle_param_9
 )
 {
-	.reg .pred 	%p&lt;44&gt;;
-	.reg .b16 	%rs&lt;36&gt;;
-	.reg .f32 	%f&lt;318&gt;;
-	.reg .b32 	%r&lt;135&gt;;
-	.reg .b64 	%rd&lt;69&gt;;
+	.reg .pred 	%p<44>;
+	.reg .b16 	%rs<36>;
+	.reg .f32 	%f<318>;
+	.reg .b32 	%r<135>;
+	.reg .b64 	%rd<69>;
 
 
 	ld.param.u8 	%rs5, [setmaxangle_param_9];
@@ -3487,11 +3487,11 @@ $L__BB0_34:
 	.param .u8 setmaxangle_param_9
 )
 {
-	.reg .pred 	%p&lt;44&gt;;
-	.reg .b16 	%rs&lt;36&gt;;
-	.reg .f32 	%f&lt;318&gt;;
-	.reg .b32 	%r&lt;135&gt;;
-	.reg .b64 	%rd&lt;69&gt;;
+	.reg .pred 	%p<44>;
+	.reg .b16 	%rs<36>;
+	.reg .f32 	%f<318>;
+	.reg .b32 	%r<135>;
+	.reg .b64 	%rd<69>;
 
 
 	ld.param.u8 	%rs5, [setmaxangle_param_9];
@@ -4161,11 +4161,11 @@ $L__BB0_34:
 	.param .u8 setmaxangle_param_9
 )
 {
-	.reg .pred 	%p&lt;44&gt;;
-	.reg .b16 	%rs&lt;36&gt;;
-	.reg .f32 	%f&lt;318&gt;;
-	.reg .b32 	%r&lt;135&gt;;
-	.reg .b64 	%rd&lt;69&gt;;
+	.reg .pred 	%p<44>;
+	.reg .b16 	%rs<36>;
+	.reg .f32 	%f<318>;
+	.reg .b32 	%r<135>;
+	.reg .b64 	%rd<69>;
 
 
 	ld.param.u8 	%rs5, [setmaxangle_param_9];
@@ -4835,11 +4835,11 @@ $L__BB0_34:
 	.param .u8 setmaxangle_param_9
 )
 {
-	.reg .pred 	%p&lt;44&gt;;
-	.reg .b16 	%rs&lt;36&gt;;
-	.reg .f32 	%f&lt;318&gt;;
-	.reg .b32 	%r&lt;135&gt;;
-	.reg .b64 	%rd&lt;69&gt;;
+	.reg .pred 	%p<44>;
+	.reg .b16 	%rs<36>;
+	.reg .f32 	%f<318>;
+	.reg .b32 	%r<135>;
+	.reg .b64 	%rd<69>;
 
 
 	ld.param.u8 	%rs5, [setmaxangle_param_9];
@@ -5509,11 +5509,11 @@ $L__BB0_34:
 	.param .u8 setmaxangle_param_9
 )
 {
-	.reg .pred 	%p&lt;44&gt;;
-	.reg .b16 	%rs&lt;36&gt;;
-	.reg .f32 	%f&lt;318&gt;;
-	.reg .b32 	%r&lt;135&gt;;
-	.reg .b64 	%rd&lt;69&gt;;
+	.reg .pred 	%p<44>;
+	.reg .b16 	%rs<36>;
+	.reg .f32 	%f<318>;
+	.reg .b32 	%r<135>;
+	.reg .b64 	%rd<69>;
 
 
 	ld.param.u8 	%rs5, [setmaxangle_param_9];
@@ -6183,11 +6183,11 @@ $L__BB0_34:
 	.param .u8 setmaxangle_param_9
 )
 {
-	.reg .pred 	%p&lt;44&gt;;
-	.reg .b16 	%rs&lt;36&gt;;
-	.reg .f32 	%f&lt;318&gt;;
-	.reg .b32 	%r&lt;135&gt;;
-	.reg .b64 	%rd&lt;69&gt;;
+	.reg .pred 	%p<44>;
+	.reg .b16 	%rs<36>;
+	.reg .f32 	%f<318>;
+	.reg .b32 	%r<135>;
+	.reg .b64 	%rd<69>;
 
 
 	ld.param.u8 	%rs5, [setmaxangle_param_9];

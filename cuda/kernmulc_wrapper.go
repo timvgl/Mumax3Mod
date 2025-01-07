@@ -93,10 +93,10 @@ const (
 	.param .u32 kernmulC_param_3
 )
 {
-	.reg .pred 	%p&lt;4&gt;;
-	.reg .f32 	%f&lt;10&gt;;
-	.reg .b32 	%r&lt;13&gt;;
-	.reg .b64 	%rd&lt;8&gt;;
+	.reg .pred 	%p<4>;
+	.reg .f32 	%f<10>;
+	.reg .b32 	%r<13>;
+	.reg .b64 	%rd<8>;
 
 
 	ld.param.u64 	%rd1, [kernmulC_param_0];
@@ -126,14 +126,14 @@ const (
 	ld.global.nc.f32 	%f1, [%rd7];
 	ld.global.f32 	%f2, [%rd5];
 	mul.f32 	%f3, %f2, %f1;
-	ld.global.nc.f32 	%f4, [%rd7&#43;4];
-	ld.global.f32 	%f5, [%rd5&#43;4];
+	ld.global.nc.f32 	%f4, [%rd7+4];
+	ld.global.f32 	%f5, [%rd5+4];
 	mul.f32 	%f6, %f5, %f4;
 	sub.f32 	%f7, %f3, %f6;
 	st.global.f32 	[%rd5], %f7;
 	mul.f32 	%f8, %f2, %f4;
 	fma.rn.f32 	%f9, %f5, %f1, %f8;
-	st.global.f32 	[%rd5&#43;4], %f9;
+	st.global.f32 	[%rd5+4], %f9;
 
 $L__BB0_2:
 	ret;
@@ -155,10 +155,10 @@ $L__BB0_2:
 	.param .u32 kernmulC_param_3
 )
 {
-	.reg .pred 	%p&lt;4&gt;;
-	.reg .f32 	%f&lt;10&gt;;
-	.reg .b32 	%r&lt;13&gt;;
-	.reg .b64 	%rd&lt;8&gt;;
+	.reg .pred 	%p<4>;
+	.reg .f32 	%f<10>;
+	.reg .b32 	%r<13>;
+	.reg .b64 	%rd<8>;
 
 
 	ld.param.u64 	%rd1, [kernmulC_param_0];
@@ -188,14 +188,14 @@ $L__BB0_2:
 	ld.global.nc.f32 	%f1, [%rd7];
 	ld.global.f32 	%f2, [%rd5];
 	mul.f32 	%f3, %f2, %f1;
-	ld.global.nc.f32 	%f4, [%rd7&#43;4];
-	ld.global.f32 	%f5, [%rd5&#43;4];
+	ld.global.nc.f32 	%f4, [%rd7+4];
+	ld.global.f32 	%f5, [%rd5+4];
 	mul.f32 	%f6, %f5, %f4;
 	sub.f32 	%f7, %f3, %f6;
 	st.global.f32 	[%rd5], %f7;
 	mul.f32 	%f8, %f2, %f4;
 	fma.rn.f32 	%f9, %f5, %f1, %f8;
-	st.global.f32 	[%rd5&#43;4], %f9;
+	st.global.f32 	[%rd5+4], %f9;
 
 $L__BB0_2:
 	ret;
@@ -217,10 +217,10 @@ $L__BB0_2:
 	.param .u32 kernmulC_param_3
 )
 {
-	.reg .pred 	%p&lt;4&gt;;
-	.reg .f32 	%f&lt;10&gt;;
-	.reg .b32 	%r&lt;13&gt;;
-	.reg .b64 	%rd&lt;8&gt;;
+	.reg .pred 	%p<4>;
+	.reg .f32 	%f<10>;
+	.reg .b32 	%r<13>;
+	.reg .b64 	%rd<8>;
 
 
 	ld.param.u64 	%rd1, [kernmulC_param_0];
@@ -250,14 +250,14 @@ $L__BB0_2:
 	ld.global.nc.f32 	%f1, [%rd7];
 	ld.global.f32 	%f2, [%rd5];
 	mul.f32 	%f3, %f2, %f1;
-	ld.global.nc.f32 	%f4, [%rd7&#43;4];
-	ld.global.f32 	%f5, [%rd5&#43;4];
+	ld.global.nc.f32 	%f4, [%rd7+4];
+	ld.global.f32 	%f5, [%rd5+4];
 	mul.f32 	%f6, %f5, %f4;
 	sub.f32 	%f7, %f3, %f6;
 	st.global.f32 	[%rd5], %f7;
 	mul.f32 	%f8, %f2, %f4;
 	fma.rn.f32 	%f9, %f5, %f1, %f8;
-	st.global.f32 	[%rd5&#43;4], %f9;
+	st.global.f32 	[%rd5+4], %f9;
 
 $L__BB0_2:
 	ret;
@@ -279,10 +279,10 @@ $L__BB0_2:
 	.param .u32 kernmulC_param_3
 )
 {
-	.reg .pred 	%p&lt;4&gt;;
-	.reg .f32 	%f&lt;10&gt;;
-	.reg .b32 	%r&lt;13&gt;;
-	.reg .b64 	%rd&lt;8&gt;;
+	.reg .pred 	%p<4>;
+	.reg .f32 	%f<10>;
+	.reg .b32 	%r<13>;
+	.reg .b64 	%rd<8>;
 
 
 	ld.param.u64 	%rd1, [kernmulC_param_0];
@@ -312,14 +312,14 @@ $L__BB0_2:
 	ld.global.nc.f32 	%f1, [%rd7];
 	ld.global.f32 	%f2, [%rd5];
 	mul.f32 	%f3, %f2, %f1;
-	ld.global.nc.f32 	%f4, [%rd7&#43;4];
-	ld.global.f32 	%f5, [%rd5&#43;4];
+	ld.global.nc.f32 	%f4, [%rd7+4];
+	ld.global.f32 	%f5, [%rd5+4];
 	mul.f32 	%f6, %f5, %f4;
 	sub.f32 	%f7, %f3, %f6;
 	st.global.f32 	[%rd5], %f7;
 	mul.f32 	%f8, %f2, %f4;
 	fma.rn.f32 	%f9, %f5, %f1, %f8;
-	st.global.f32 	[%rd5&#43;4], %f9;
+	st.global.f32 	[%rd5+4], %f9;
 
 $L__BB0_2:
 	ret;
@@ -341,10 +341,10 @@ $L__BB0_2:
 	.param .u32 kernmulC_param_3
 )
 {
-	.reg .pred 	%p&lt;4&gt;;
-	.reg .f32 	%f&lt;10&gt;;
-	.reg .b32 	%r&lt;13&gt;;
-	.reg .b64 	%rd&lt;8&gt;;
+	.reg .pred 	%p<4>;
+	.reg .f32 	%f<10>;
+	.reg .b32 	%r<13>;
+	.reg .b64 	%rd<8>;
 
 
 	ld.param.u64 	%rd1, [kernmulC_param_0];
@@ -374,14 +374,14 @@ $L__BB0_2:
 	ld.global.nc.f32 	%f1, [%rd7];
 	ld.global.f32 	%f2, [%rd5];
 	mul.f32 	%f3, %f2, %f1;
-	ld.global.nc.f32 	%f4, [%rd7&#43;4];
-	ld.global.f32 	%f5, [%rd5&#43;4];
+	ld.global.nc.f32 	%f4, [%rd7+4];
+	ld.global.f32 	%f5, [%rd5+4];
 	mul.f32 	%f6, %f5, %f4;
 	sub.f32 	%f7, %f3, %f6;
 	st.global.f32 	[%rd5], %f7;
 	mul.f32 	%f8, %f2, %f4;
 	fma.rn.f32 	%f9, %f5, %f1, %f8;
-	st.global.f32 	[%rd5&#43;4], %f9;
+	st.global.f32 	[%rd5+4], %f9;
 
 $L__BB0_2:
 	ret;
@@ -403,10 +403,10 @@ $L__BB0_2:
 	.param .u32 kernmulC_param_3
 )
 {
-	.reg .pred 	%p&lt;4&gt;;
-	.reg .f32 	%f&lt;10&gt;;
-	.reg .b32 	%r&lt;13&gt;;
-	.reg .b64 	%rd&lt;8&gt;;
+	.reg .pred 	%p<4>;
+	.reg .f32 	%f<10>;
+	.reg .b32 	%r<13>;
+	.reg .b64 	%rd<8>;
 
 
 	ld.param.u64 	%rd1, [kernmulC_param_0];
@@ -436,14 +436,14 @@ $L__BB0_2:
 	ld.global.nc.f32 	%f1, [%rd7];
 	ld.global.f32 	%f2, [%rd5];
 	mul.f32 	%f3, %f2, %f1;
-	ld.global.nc.f32 	%f4, [%rd7&#43;4];
-	ld.global.f32 	%f5, [%rd5&#43;4];
+	ld.global.nc.f32 	%f4, [%rd7+4];
+	ld.global.f32 	%f5, [%rd5+4];
 	mul.f32 	%f6, %f5, %f4;
 	sub.f32 	%f7, %f3, %f6;
 	st.global.f32 	[%rd5], %f7;
 	mul.f32 	%f8, %f2, %f4;
 	fma.rn.f32 	%f9, %f5, %f1, %f8;
-	st.global.f32 	[%rd5&#43;4], %f9;
+	st.global.f32 	[%rd5+4], %f9;
 
 $L__BB0_2:
 	ret;
@@ -465,10 +465,10 @@ $L__BB0_2:
 	.param .u32 kernmulC_param_3
 )
 {
-	.reg .pred 	%p&lt;4&gt;;
-	.reg .f32 	%f&lt;10&gt;;
-	.reg .b32 	%r&lt;13&gt;;
-	.reg .b64 	%rd&lt;8&gt;;
+	.reg .pred 	%p<4>;
+	.reg .f32 	%f<10>;
+	.reg .b32 	%r<13>;
+	.reg .b64 	%rd<8>;
 
 
 	ld.param.u64 	%rd1, [kernmulC_param_0];
@@ -498,14 +498,14 @@ $L__BB0_2:
 	ld.global.nc.f32 	%f1, [%rd7];
 	ld.global.f32 	%f2, [%rd5];
 	mul.f32 	%f3, %f2, %f1;
-	ld.global.nc.f32 	%f4, [%rd7&#43;4];
-	ld.global.f32 	%f5, [%rd5&#43;4];
+	ld.global.nc.f32 	%f4, [%rd7+4];
+	ld.global.f32 	%f5, [%rd5+4];
 	mul.f32 	%f6, %f5, %f4;
 	sub.f32 	%f7, %f3, %f6;
 	st.global.f32 	[%rd5], %f7;
 	mul.f32 	%f8, %f2, %f4;
 	fma.rn.f32 	%f9, %f5, %f1, %f8;
-	st.global.f32 	[%rd5&#43;4], %f9;
+	st.global.f32 	[%rd5+4], %f9;
 
 $L__BB0_2:
 	ret;
@@ -527,10 +527,10 @@ $L__BB0_2:
 	.param .u32 kernmulC_param_3
 )
 {
-	.reg .pred 	%p&lt;4&gt;;
-	.reg .f32 	%f&lt;10&gt;;
-	.reg .b32 	%r&lt;13&gt;;
-	.reg .b64 	%rd&lt;8&gt;;
+	.reg .pred 	%p<4>;
+	.reg .f32 	%f<10>;
+	.reg .b32 	%r<13>;
+	.reg .b64 	%rd<8>;
 
 
 	ld.param.u64 	%rd1, [kernmulC_param_0];
@@ -560,14 +560,14 @@ $L__BB0_2:
 	ld.global.nc.f32 	%f1, [%rd7];
 	ld.global.f32 	%f2, [%rd5];
 	mul.f32 	%f3, %f2, %f1;
-	ld.global.nc.f32 	%f4, [%rd7&#43;4];
-	ld.global.f32 	%f5, [%rd5&#43;4];
+	ld.global.nc.f32 	%f4, [%rd7+4];
+	ld.global.f32 	%f5, [%rd5+4];
 	mul.f32 	%f6, %f5, %f4;
 	sub.f32 	%f7, %f3, %f6;
 	st.global.f32 	[%rd5], %f7;
 	mul.f32 	%f8, %f2, %f4;
 	fma.rn.f32 	%f9, %f5, %f1, %f8;
-	st.global.f32 	[%rd5&#43;4], %f9;
+	st.global.f32 	[%rd5+4], %f9;
 
 $L__BB0_2:
 	ret;
@@ -589,10 +589,10 @@ $L__BB0_2:
 	.param .u32 kernmulC_param_3
 )
 {
-	.reg .pred 	%p&lt;4&gt;;
-	.reg .f32 	%f&lt;10&gt;;
-	.reg .b32 	%r&lt;13&gt;;
-	.reg .b64 	%rd&lt;8&gt;;
+	.reg .pred 	%p<4>;
+	.reg .f32 	%f<10>;
+	.reg .b32 	%r<13>;
+	.reg .b64 	%rd<8>;
 
 
 	ld.param.u64 	%rd1, [kernmulC_param_0];
@@ -622,14 +622,14 @@ $L__BB0_2:
 	ld.global.nc.f32 	%f1, [%rd7];
 	ld.global.f32 	%f2, [%rd5];
 	mul.f32 	%f3, %f2, %f1;
-	ld.global.nc.f32 	%f4, [%rd7&#43;4];
-	ld.global.f32 	%f5, [%rd5&#43;4];
+	ld.global.nc.f32 	%f4, [%rd7+4];
+	ld.global.f32 	%f5, [%rd5+4];
 	mul.f32 	%f6, %f5, %f4;
 	sub.f32 	%f7, %f3, %f6;
 	st.global.f32 	[%rd5], %f7;
 	mul.f32 	%f8, %f2, %f4;
 	fma.rn.f32 	%f9, %f5, %f1, %f8;
-	st.global.f32 	[%rd5&#43;4], %f9;
+	st.global.f32 	[%rd5+4], %f9;
 
 $L__BB0_2:
 	ret;
@@ -651,10 +651,10 @@ $L__BB0_2:
 	.param .u32 kernmulC_param_3
 )
 {
-	.reg .pred 	%p&lt;4&gt;;
-	.reg .f32 	%f&lt;10&gt;;
-	.reg .b32 	%r&lt;13&gt;;
-	.reg .b64 	%rd&lt;8&gt;;
+	.reg .pred 	%p<4>;
+	.reg .f32 	%f<10>;
+	.reg .b32 	%r<13>;
+	.reg .b64 	%rd<8>;
 
 
 	ld.param.u64 	%rd1, [kernmulC_param_0];
@@ -684,14 +684,14 @@ $L__BB0_2:
 	ld.global.nc.f32 	%f1, [%rd7];
 	ld.global.f32 	%f2, [%rd5];
 	mul.f32 	%f3, %f2, %f1;
-	ld.global.nc.f32 	%f4, [%rd7&#43;4];
-	ld.global.f32 	%f5, [%rd5&#43;4];
+	ld.global.nc.f32 	%f4, [%rd7+4];
+	ld.global.f32 	%f5, [%rd5+4];
 	mul.f32 	%f6, %f5, %f4;
 	sub.f32 	%f7, %f3, %f6;
 	st.global.f32 	[%rd5], %f7;
 	mul.f32 	%f8, %f2, %f4;
 	fma.rn.f32 	%f9, %f5, %f1, %f8;
-	st.global.f32 	[%rd5&#43;4], %f9;
+	st.global.f32 	[%rd5+4], %f9;
 
 $L__BB0_2:
 	ret;

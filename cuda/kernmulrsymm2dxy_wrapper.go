@@ -105,10 +105,10 @@ const (
 	.param .u32 kernmulRSymm2Dxy_param_6
 )
 {
-	.reg .pred 	%p&lt;5&gt;;
-	.reg .f32 	%f&lt;18&gt;;
-	.reg .b32 	%r&lt;19&gt;;
-	.reg .b64 	%rd&lt;18&gt;;
+	.reg .pred 	%p<5>;
+	.reg .f32 	%f<18>;
+	.reg .b32 	%r<19>;
+	.reg .b64 	%rd<18>;
 
 
 	ld.param.u64 	%rd1, [kernmulRSymm2Dxy_param_0];
@@ -137,10 +137,10 @@ const (
 	cvta.to.global.u64 	%rd7, %rd1;
 	mul.wide.s32 	%rd8, %r12, 4;
 	add.s64 	%rd9, %rd7, %rd8;
-	ld.global.f32 	%f1, [%rd9&#43;4];
+	ld.global.f32 	%f1, [%rd9+4];
 	cvta.to.global.u64 	%rd10, %rd2;
 	add.s64 	%rd11, %rd10, %rd8;
-	ld.global.f32 	%f2, [%rd11&#43;4];
+	ld.global.f32 	%f2, [%rd11+4];
 	shr.u32 	%r13, %r4, 31;
 	add.s32 	%r14, %r4, %r13;
 	shr.s32 	%r15, %r14, 1;
@@ -166,13 +166,13 @@ const (
 	st.global.f32 	[%rd9], %f11;
 	mul.f32 	%f12, %f2, %f6;
 	fma.rn.f32 	%f13, %f1, %f7, %f12;
-	st.global.f32 	[%rd9&#43;4], %f13;
+	st.global.f32 	[%rd9+4], %f13;
 	mul.f32 	%f14, %f8, %f6;
 	fma.rn.f32 	%f15, %f9, %f4, %f14;
 	st.global.f32 	[%rd11], %f15;
 	mul.f32 	%f16, %f1, %f6;
 	fma.rn.f32 	%f17, %f2, %f4, %f16;
-	st.global.f32 	[%rd11&#43;4], %f17;
+	st.global.f32 	[%rd11+4], %f17;
 
 $L__BB0_2:
 	ret;
@@ -197,10 +197,10 @@ $L__BB0_2:
 	.param .u32 kernmulRSymm2Dxy_param_6
 )
 {
-	.reg .pred 	%p&lt;5&gt;;
-	.reg .f32 	%f&lt;18&gt;;
-	.reg .b32 	%r&lt;19&gt;;
-	.reg .b64 	%rd&lt;18&gt;;
+	.reg .pred 	%p<5>;
+	.reg .f32 	%f<18>;
+	.reg .b32 	%r<19>;
+	.reg .b64 	%rd<18>;
 
 
 	ld.param.u64 	%rd1, [kernmulRSymm2Dxy_param_0];
@@ -229,10 +229,10 @@ $L__BB0_2:
 	cvta.to.global.u64 	%rd7, %rd1;
 	mul.wide.s32 	%rd8, %r12, 4;
 	add.s64 	%rd9, %rd7, %rd8;
-	ld.global.f32 	%f1, [%rd9&#43;4];
+	ld.global.f32 	%f1, [%rd9+4];
 	cvta.to.global.u64 	%rd10, %rd2;
 	add.s64 	%rd11, %rd10, %rd8;
-	ld.global.f32 	%f2, [%rd11&#43;4];
+	ld.global.f32 	%f2, [%rd11+4];
 	shr.u32 	%r13, %r4, 31;
 	add.s32 	%r14, %r4, %r13;
 	shr.s32 	%r15, %r14, 1;
@@ -258,13 +258,13 @@ $L__BB0_2:
 	st.global.f32 	[%rd9], %f11;
 	mul.f32 	%f12, %f2, %f6;
 	fma.rn.f32 	%f13, %f1, %f7, %f12;
-	st.global.f32 	[%rd9&#43;4], %f13;
+	st.global.f32 	[%rd9+4], %f13;
 	mul.f32 	%f14, %f8, %f6;
 	fma.rn.f32 	%f15, %f9, %f4, %f14;
 	st.global.f32 	[%rd11], %f15;
 	mul.f32 	%f16, %f1, %f6;
 	fma.rn.f32 	%f17, %f2, %f4, %f16;
-	st.global.f32 	[%rd11&#43;4], %f17;
+	st.global.f32 	[%rd11+4], %f17;
 
 $L__BB0_2:
 	ret;
@@ -289,10 +289,10 @@ $L__BB0_2:
 	.param .u32 kernmulRSymm2Dxy_param_6
 )
 {
-	.reg .pred 	%p&lt;5&gt;;
-	.reg .f32 	%f&lt;18&gt;;
-	.reg .b32 	%r&lt;19&gt;;
-	.reg .b64 	%rd&lt;18&gt;;
+	.reg .pred 	%p<5>;
+	.reg .f32 	%f<18>;
+	.reg .b32 	%r<19>;
+	.reg .b64 	%rd<18>;
 
 
 	ld.param.u64 	%rd1, [kernmulRSymm2Dxy_param_0];
@@ -321,10 +321,10 @@ $L__BB0_2:
 	cvta.to.global.u64 	%rd7, %rd1;
 	mul.wide.s32 	%rd8, %r12, 4;
 	add.s64 	%rd9, %rd7, %rd8;
-	ld.global.f32 	%f1, [%rd9&#43;4];
+	ld.global.f32 	%f1, [%rd9+4];
 	cvta.to.global.u64 	%rd10, %rd2;
 	add.s64 	%rd11, %rd10, %rd8;
-	ld.global.f32 	%f2, [%rd11&#43;4];
+	ld.global.f32 	%f2, [%rd11+4];
 	shr.u32 	%r13, %r4, 31;
 	add.s32 	%r14, %r4, %r13;
 	shr.s32 	%r15, %r14, 1;
@@ -350,13 +350,13 @@ $L__BB0_2:
 	st.global.f32 	[%rd9], %f11;
 	mul.f32 	%f12, %f2, %f6;
 	fma.rn.f32 	%f13, %f1, %f7, %f12;
-	st.global.f32 	[%rd9&#43;4], %f13;
+	st.global.f32 	[%rd9+4], %f13;
 	mul.f32 	%f14, %f8, %f6;
 	fma.rn.f32 	%f15, %f9, %f4, %f14;
 	st.global.f32 	[%rd11], %f15;
 	mul.f32 	%f16, %f1, %f6;
 	fma.rn.f32 	%f17, %f2, %f4, %f16;
-	st.global.f32 	[%rd11&#43;4], %f17;
+	st.global.f32 	[%rd11+4], %f17;
 
 $L__BB0_2:
 	ret;
@@ -381,10 +381,10 @@ $L__BB0_2:
 	.param .u32 kernmulRSymm2Dxy_param_6
 )
 {
-	.reg .pred 	%p&lt;5&gt;;
-	.reg .f32 	%f&lt;18&gt;;
-	.reg .b32 	%r&lt;19&gt;;
-	.reg .b64 	%rd&lt;18&gt;;
+	.reg .pred 	%p<5>;
+	.reg .f32 	%f<18>;
+	.reg .b32 	%r<19>;
+	.reg .b64 	%rd<18>;
 
 
 	ld.param.u64 	%rd1, [kernmulRSymm2Dxy_param_0];
@@ -413,10 +413,10 @@ $L__BB0_2:
 	cvta.to.global.u64 	%rd7, %rd1;
 	mul.wide.s32 	%rd8, %r12, 4;
 	add.s64 	%rd9, %rd7, %rd8;
-	ld.global.f32 	%f1, [%rd9&#43;4];
+	ld.global.f32 	%f1, [%rd9+4];
 	cvta.to.global.u64 	%rd10, %rd2;
 	add.s64 	%rd11, %rd10, %rd8;
-	ld.global.f32 	%f2, [%rd11&#43;4];
+	ld.global.f32 	%f2, [%rd11+4];
 	shr.u32 	%r13, %r4, 31;
 	add.s32 	%r14, %r4, %r13;
 	shr.s32 	%r15, %r14, 1;
@@ -442,13 +442,13 @@ $L__BB0_2:
 	st.global.f32 	[%rd9], %f11;
 	mul.f32 	%f12, %f2, %f6;
 	fma.rn.f32 	%f13, %f1, %f7, %f12;
-	st.global.f32 	[%rd9&#43;4], %f13;
+	st.global.f32 	[%rd9+4], %f13;
 	mul.f32 	%f14, %f8, %f6;
 	fma.rn.f32 	%f15, %f9, %f4, %f14;
 	st.global.f32 	[%rd11], %f15;
 	mul.f32 	%f16, %f1, %f6;
 	fma.rn.f32 	%f17, %f2, %f4, %f16;
-	st.global.f32 	[%rd11&#43;4], %f17;
+	st.global.f32 	[%rd11+4], %f17;
 
 $L__BB0_2:
 	ret;
@@ -473,10 +473,10 @@ $L__BB0_2:
 	.param .u32 kernmulRSymm2Dxy_param_6
 )
 {
-	.reg .pred 	%p&lt;5&gt;;
-	.reg .f32 	%f&lt;18&gt;;
-	.reg .b32 	%r&lt;19&gt;;
-	.reg .b64 	%rd&lt;18&gt;;
+	.reg .pred 	%p<5>;
+	.reg .f32 	%f<18>;
+	.reg .b32 	%r<19>;
+	.reg .b64 	%rd<18>;
 
 
 	ld.param.u64 	%rd1, [kernmulRSymm2Dxy_param_0];
@@ -505,10 +505,10 @@ $L__BB0_2:
 	cvta.to.global.u64 	%rd7, %rd1;
 	mul.wide.s32 	%rd8, %r12, 4;
 	add.s64 	%rd9, %rd7, %rd8;
-	ld.global.f32 	%f1, [%rd9&#43;4];
+	ld.global.f32 	%f1, [%rd9+4];
 	cvta.to.global.u64 	%rd10, %rd2;
 	add.s64 	%rd11, %rd10, %rd8;
-	ld.global.f32 	%f2, [%rd11&#43;4];
+	ld.global.f32 	%f2, [%rd11+4];
 	shr.u32 	%r13, %r4, 31;
 	add.s32 	%r14, %r4, %r13;
 	shr.s32 	%r15, %r14, 1;
@@ -534,13 +534,13 @@ $L__BB0_2:
 	st.global.f32 	[%rd9], %f11;
 	mul.f32 	%f12, %f2, %f6;
 	fma.rn.f32 	%f13, %f1, %f7, %f12;
-	st.global.f32 	[%rd9&#43;4], %f13;
+	st.global.f32 	[%rd9+4], %f13;
 	mul.f32 	%f14, %f8, %f6;
 	fma.rn.f32 	%f15, %f9, %f4, %f14;
 	st.global.f32 	[%rd11], %f15;
 	mul.f32 	%f16, %f1, %f6;
 	fma.rn.f32 	%f17, %f2, %f4, %f16;
-	st.global.f32 	[%rd11&#43;4], %f17;
+	st.global.f32 	[%rd11+4], %f17;
 
 $L__BB0_2:
 	ret;
@@ -565,10 +565,10 @@ $L__BB0_2:
 	.param .u32 kernmulRSymm2Dxy_param_6
 )
 {
-	.reg .pred 	%p&lt;5&gt;;
-	.reg .f32 	%f&lt;18&gt;;
-	.reg .b32 	%r&lt;19&gt;;
-	.reg .b64 	%rd&lt;18&gt;;
+	.reg .pred 	%p<5>;
+	.reg .f32 	%f<18>;
+	.reg .b32 	%r<19>;
+	.reg .b64 	%rd<18>;
 
 
 	ld.param.u64 	%rd1, [kernmulRSymm2Dxy_param_0];
@@ -597,10 +597,10 @@ $L__BB0_2:
 	cvta.to.global.u64 	%rd7, %rd1;
 	mul.wide.s32 	%rd8, %r12, 4;
 	add.s64 	%rd9, %rd7, %rd8;
-	ld.global.f32 	%f1, [%rd9&#43;4];
+	ld.global.f32 	%f1, [%rd9+4];
 	cvta.to.global.u64 	%rd10, %rd2;
 	add.s64 	%rd11, %rd10, %rd8;
-	ld.global.f32 	%f2, [%rd11&#43;4];
+	ld.global.f32 	%f2, [%rd11+4];
 	shr.u32 	%r13, %r4, 31;
 	add.s32 	%r14, %r4, %r13;
 	shr.s32 	%r15, %r14, 1;
@@ -626,13 +626,13 @@ $L__BB0_2:
 	st.global.f32 	[%rd9], %f11;
 	mul.f32 	%f12, %f2, %f6;
 	fma.rn.f32 	%f13, %f1, %f7, %f12;
-	st.global.f32 	[%rd9&#43;4], %f13;
+	st.global.f32 	[%rd9+4], %f13;
 	mul.f32 	%f14, %f8, %f6;
 	fma.rn.f32 	%f15, %f9, %f4, %f14;
 	st.global.f32 	[%rd11], %f15;
 	mul.f32 	%f16, %f1, %f6;
 	fma.rn.f32 	%f17, %f2, %f4, %f16;
-	st.global.f32 	[%rd11&#43;4], %f17;
+	st.global.f32 	[%rd11+4], %f17;
 
 $L__BB0_2:
 	ret;
@@ -657,10 +657,10 @@ $L__BB0_2:
 	.param .u32 kernmulRSymm2Dxy_param_6
 )
 {
-	.reg .pred 	%p&lt;5&gt;;
-	.reg .f32 	%f&lt;18&gt;;
-	.reg .b32 	%r&lt;19&gt;;
-	.reg .b64 	%rd&lt;18&gt;;
+	.reg .pred 	%p<5>;
+	.reg .f32 	%f<18>;
+	.reg .b32 	%r<19>;
+	.reg .b64 	%rd<18>;
 
 
 	ld.param.u64 	%rd1, [kernmulRSymm2Dxy_param_0];
@@ -689,10 +689,10 @@ $L__BB0_2:
 	cvta.to.global.u64 	%rd7, %rd1;
 	mul.wide.s32 	%rd8, %r12, 4;
 	add.s64 	%rd9, %rd7, %rd8;
-	ld.global.f32 	%f1, [%rd9&#43;4];
+	ld.global.f32 	%f1, [%rd9+4];
 	cvta.to.global.u64 	%rd10, %rd2;
 	add.s64 	%rd11, %rd10, %rd8;
-	ld.global.f32 	%f2, [%rd11&#43;4];
+	ld.global.f32 	%f2, [%rd11+4];
 	shr.u32 	%r13, %r4, 31;
 	add.s32 	%r14, %r4, %r13;
 	shr.s32 	%r15, %r14, 1;
@@ -718,13 +718,13 @@ $L__BB0_2:
 	st.global.f32 	[%rd9], %f11;
 	mul.f32 	%f12, %f2, %f6;
 	fma.rn.f32 	%f13, %f1, %f7, %f12;
-	st.global.f32 	[%rd9&#43;4], %f13;
+	st.global.f32 	[%rd9+4], %f13;
 	mul.f32 	%f14, %f8, %f6;
 	fma.rn.f32 	%f15, %f9, %f4, %f14;
 	st.global.f32 	[%rd11], %f15;
 	mul.f32 	%f16, %f1, %f6;
 	fma.rn.f32 	%f17, %f2, %f4, %f16;
-	st.global.f32 	[%rd11&#43;4], %f17;
+	st.global.f32 	[%rd11+4], %f17;
 
 $L__BB0_2:
 	ret;
@@ -749,10 +749,10 @@ $L__BB0_2:
 	.param .u32 kernmulRSymm2Dxy_param_6
 )
 {
-	.reg .pred 	%p&lt;5&gt;;
-	.reg .f32 	%f&lt;18&gt;;
-	.reg .b32 	%r&lt;19&gt;;
-	.reg .b64 	%rd&lt;18&gt;;
+	.reg .pred 	%p<5>;
+	.reg .f32 	%f<18>;
+	.reg .b32 	%r<19>;
+	.reg .b64 	%rd<18>;
 
 
 	ld.param.u64 	%rd1, [kernmulRSymm2Dxy_param_0];
@@ -781,10 +781,10 @@ $L__BB0_2:
 	cvta.to.global.u64 	%rd7, %rd1;
 	mul.wide.s32 	%rd8, %r12, 4;
 	add.s64 	%rd9, %rd7, %rd8;
-	ld.global.f32 	%f1, [%rd9&#43;4];
+	ld.global.f32 	%f1, [%rd9+4];
 	cvta.to.global.u64 	%rd10, %rd2;
 	add.s64 	%rd11, %rd10, %rd8;
-	ld.global.f32 	%f2, [%rd11&#43;4];
+	ld.global.f32 	%f2, [%rd11+4];
 	shr.u32 	%r13, %r4, 31;
 	add.s32 	%r14, %r4, %r13;
 	shr.s32 	%r15, %r14, 1;
@@ -810,13 +810,13 @@ $L__BB0_2:
 	st.global.f32 	[%rd9], %f11;
 	mul.f32 	%f12, %f2, %f6;
 	fma.rn.f32 	%f13, %f1, %f7, %f12;
-	st.global.f32 	[%rd9&#43;4], %f13;
+	st.global.f32 	[%rd9+4], %f13;
 	mul.f32 	%f14, %f8, %f6;
 	fma.rn.f32 	%f15, %f9, %f4, %f14;
 	st.global.f32 	[%rd11], %f15;
 	mul.f32 	%f16, %f1, %f6;
 	fma.rn.f32 	%f17, %f2, %f4, %f16;
-	st.global.f32 	[%rd11&#43;4], %f17;
+	st.global.f32 	[%rd11+4], %f17;
 
 $L__BB0_2:
 	ret;
@@ -841,10 +841,10 @@ $L__BB0_2:
 	.param .u32 kernmulRSymm2Dxy_param_6
 )
 {
-	.reg .pred 	%p&lt;5&gt;;
-	.reg .f32 	%f&lt;18&gt;;
-	.reg .b32 	%r&lt;19&gt;;
-	.reg .b64 	%rd&lt;18&gt;;
+	.reg .pred 	%p<5>;
+	.reg .f32 	%f<18>;
+	.reg .b32 	%r<19>;
+	.reg .b64 	%rd<18>;
 
 
 	ld.param.u64 	%rd1, [kernmulRSymm2Dxy_param_0];
@@ -873,10 +873,10 @@ $L__BB0_2:
 	cvta.to.global.u64 	%rd7, %rd1;
 	mul.wide.s32 	%rd8, %r12, 4;
 	add.s64 	%rd9, %rd7, %rd8;
-	ld.global.f32 	%f1, [%rd9&#43;4];
+	ld.global.f32 	%f1, [%rd9+4];
 	cvta.to.global.u64 	%rd10, %rd2;
 	add.s64 	%rd11, %rd10, %rd8;
-	ld.global.f32 	%f2, [%rd11&#43;4];
+	ld.global.f32 	%f2, [%rd11+4];
 	shr.u32 	%r13, %r4, 31;
 	add.s32 	%r14, %r4, %r13;
 	shr.s32 	%r15, %r14, 1;
@@ -902,13 +902,13 @@ $L__BB0_2:
 	st.global.f32 	[%rd9], %f11;
 	mul.f32 	%f12, %f2, %f6;
 	fma.rn.f32 	%f13, %f1, %f7, %f12;
-	st.global.f32 	[%rd9&#43;4], %f13;
+	st.global.f32 	[%rd9+4], %f13;
 	mul.f32 	%f14, %f8, %f6;
 	fma.rn.f32 	%f15, %f9, %f4, %f14;
 	st.global.f32 	[%rd11], %f15;
 	mul.f32 	%f16, %f1, %f6;
 	fma.rn.f32 	%f17, %f2, %f4, %f16;
-	st.global.f32 	[%rd11&#43;4], %f17;
+	st.global.f32 	[%rd11+4], %f17;
 
 $L__BB0_2:
 	ret;
@@ -933,10 +933,10 @@ $L__BB0_2:
 	.param .u32 kernmulRSymm2Dxy_param_6
 )
 {
-	.reg .pred 	%p&lt;5&gt;;
-	.reg .f32 	%f&lt;18&gt;;
-	.reg .b32 	%r&lt;19&gt;;
-	.reg .b64 	%rd&lt;18&gt;;
+	.reg .pred 	%p<5>;
+	.reg .f32 	%f<18>;
+	.reg .b32 	%r<19>;
+	.reg .b64 	%rd<18>;
 
 
 	ld.param.u64 	%rd1, [kernmulRSymm2Dxy_param_0];
@@ -965,10 +965,10 @@ $L__BB0_2:
 	cvta.to.global.u64 	%rd7, %rd1;
 	mul.wide.s32 	%rd8, %r12, 4;
 	add.s64 	%rd9, %rd7, %rd8;
-	ld.global.f32 	%f1, [%rd9&#43;4];
+	ld.global.f32 	%f1, [%rd9+4];
 	cvta.to.global.u64 	%rd10, %rd2;
 	add.s64 	%rd11, %rd10, %rd8;
-	ld.global.f32 	%f2, [%rd11&#43;4];
+	ld.global.f32 	%f2, [%rd11+4];
 	shr.u32 	%r13, %r4, 31;
 	add.s32 	%r14, %r4, %r13;
 	shr.s32 	%r15, %r14, 1;
@@ -994,13 +994,13 @@ $L__BB0_2:
 	st.global.f32 	[%rd9], %f11;
 	mul.f32 	%f12, %f2, %f6;
 	fma.rn.f32 	%f13, %f1, %f7, %f12;
-	st.global.f32 	[%rd9&#43;4], %f13;
+	st.global.f32 	[%rd9+4], %f13;
 	mul.f32 	%f14, %f8, %f6;
 	fma.rn.f32 	%f15, %f9, %f4, %f14;
 	st.global.f32 	[%rd11], %f15;
 	mul.f32 	%f16, %f1, %f6;
 	fma.rn.f32 	%f17, %f2, %f4, %f16;
-	st.global.f32 	[%rd11&#43;4], %f17;
+	st.global.f32 	[%rd11+4], %f17;
 
 $L__BB0_2:
 	ret;

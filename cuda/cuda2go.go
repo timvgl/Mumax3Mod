@@ -11,13 +11,13 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
-	"html/template"
 	"io"
 	"log"
 	"os"
 	"regexp"
 	"strconv"
 	"text/scanner"
+	"text/template"
 
 	"github.com/mumax/3/util"
 )
@@ -144,7 +144,6 @@ func wrapgen(filename, funcname string, argt, argn []string, importC bool) {
 	if len(kernel.PTX) == 0 {
 		log.Fatal("no PTX files for ", filename)
 	}
-
 	wrapfname := basename + "_wrapper.go"
 	wrapout, err := os.OpenFile(wrapfname, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
 	util.PanicErr(err)

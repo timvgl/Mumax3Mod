@@ -58,12 +58,15 @@ func BufferBinary(nComp int, size [3]int, key string) *data.SliceBinary {
 	if Synchronous {
 		SyncFFT_T(key)
 	}
+	var ptrs unsafe.Pointer
 
 	// re-use as many buffers as possible form our stack
 	N := prod(size)
 	pool := buf_pool[N]
-	nFromPool := iMin(nComp, len(pool))
-	ptrs := pool[len(pool)-1]
+	nFromPool := iMin(1, len(pool))
+	for i := 0; i < nFromPool; i++ {
+		ptrs = pool[len(pool)-i-1]
+	}
 	buf_pool[N] = pool[:len(pool)-nFromPool]
 
 	// allocate as much new memory as needed
@@ -73,7 +76,7 @@ func BufferBinary(nComp int, size [3]int, key string) *data.SliceBinary {
 	ptrs = MemAlloc(int64(cu.SIZEOF_BYTE * N))
 	buf_check[ptrs] = struct{}{} // mark this pointer as mine
 
-	return data.SliceBinaryFromPtrs(size, prod(size), data.GPUMemory, ptrs)
+	return data.SliceBinaryFromPtrs(size, prod(size), data.GPUMemory, ptrs, nComp)
 }
 
 func ShrinkSizeBufferBinary(input *data.SliceBinary, key string) {
@@ -93,8 +96,8 @@ func ShrinkSizeBufferBinary(input *data.SliceBinary, key string) {
 	}
 	ptrs = MemAlloc(int64(cu.SIZEOF_BYTE * input.Length()))
 	buf_check[ptrs] = struct{}{} // mark this pointer as mine
-	NewBinarySlice := data.SliceBinaryFromPtrs(input.Size(), input.Length(), data.GPUMemory, ptrs)
-	data.CopyBinary(NewBinarySlice, input)
+	NewBinarySlice := data.SliceBinaryFromPtrs(input.Size(), input.Length(), data.GPUMemory, ptrs, input.NComp())
+	data.CopyBinary(NewBinarySlice, input, key)
 
 }
 

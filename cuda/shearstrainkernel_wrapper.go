@@ -137,12 +137,12 @@ const (
 	.param .u8 ShearStrain_param_14
 )
 {
-	.reg .pred 	%p&lt;21&gt;;
-	.reg .b16 	%rs&lt;6&gt;;
-	.reg .f32 	%f&lt;53&gt;;
-	.reg .b32 	%r&lt;93&gt;;
-	.reg .f64 	%fd&lt;56&gt;;
-	.reg .b64 	%rd&lt;51&gt;;
+	.reg .pred 	%p<21>;
+	.reg .b16 	%rs<6>;
+	.reg .f32 	%f<53>;
+	.reg .b32 	%r<93>;
+	.reg .f64 	%fd<56>;
+	.reg .b64 	%rd<51>;
 
 
 	ld.param.u8 	%rs3, [ShearStrain_param_14];
@@ -547,12 +547,12 @@ $L__BB0_35:
 	.param .u8 ShearStrain_param_14
 )
 {
-	.reg .pred 	%p&lt;21&gt;;
-	.reg .b16 	%rs&lt;6&gt;;
-	.reg .f32 	%f&lt;53&gt;;
-	.reg .b32 	%r&lt;93&gt;;
-	.reg .f64 	%fd&lt;56&gt;;
-	.reg .b64 	%rd&lt;51&gt;;
+	.reg .pred 	%p<21>;
+	.reg .b16 	%rs<6>;
+	.reg .f32 	%f<53>;
+	.reg .b32 	%r<93>;
+	.reg .f64 	%fd<56>;
+	.reg .b64 	%rd<51>;
 
 
 	ld.param.u8 	%rs3, [ShearStrain_param_14];
@@ -957,12 +957,12 @@ $L__BB0_35:
 	.param .u8 ShearStrain_param_14
 )
 {
-	.reg .pred 	%p&lt;21&gt;;
-	.reg .b16 	%rs&lt;6&gt;;
-	.reg .f32 	%f&lt;53&gt;;
-	.reg .b32 	%r&lt;93&gt;;
-	.reg .f64 	%fd&lt;56&gt;;
-	.reg .b64 	%rd&lt;51&gt;;
+	.reg .pred 	%p<21>;
+	.reg .b16 	%rs<6>;
+	.reg .f32 	%f<53>;
+	.reg .b32 	%r<93>;
+	.reg .f64 	%fd<56>;
+	.reg .b64 	%rd<51>;
 
 
 	ld.param.u8 	%rs3, [ShearStrain_param_14];
@@ -1367,12 +1367,12 @@ $L__BB0_35:
 	.param .u8 ShearStrain_param_14
 )
 {
-	.reg .pred 	%p&lt;21&gt;;
-	.reg .b16 	%rs&lt;6&gt;;
-	.reg .f32 	%f&lt;53&gt;;
-	.reg .b32 	%r&lt;93&gt;;
-	.reg .f64 	%fd&lt;56&gt;;
-	.reg .b64 	%rd&lt;51&gt;;
+	.reg .pred 	%p<21>;
+	.reg .b16 	%rs<6>;
+	.reg .f32 	%f<53>;
+	.reg .b32 	%r<93>;
+	.reg .f64 	%fd<56>;
+	.reg .b64 	%rd<51>;
 
 
 	ld.param.u8 	%rs3, [ShearStrain_param_14];
@@ -1777,12 +1777,12 @@ $L__BB0_35:
 	.param .u8 ShearStrain_param_14
 )
 {
-	.reg .pred 	%p&lt;21&gt;;
-	.reg .b16 	%rs&lt;6&gt;;
-	.reg .f32 	%f&lt;53&gt;;
-	.reg .b32 	%r&lt;93&gt;;
-	.reg .f64 	%fd&lt;56&gt;;
-	.reg .b64 	%rd&lt;51&gt;;
+	.reg .pred 	%p<21>;
+	.reg .b16 	%rs<6>;
+	.reg .f32 	%f<53>;
+	.reg .b32 	%r<93>;
+	.reg .f64 	%fd<56>;
+	.reg .b64 	%rd<51>;
 
 
 	ld.param.u8 	%rs3, [ShearStrain_param_14];
@@ -2187,12 +2187,12 @@ $L__BB0_35:
 	.param .u8 ShearStrain_param_14
 )
 {
-	.reg .pred 	%p&lt;21&gt;;
-	.reg .b16 	%rs&lt;6&gt;;
-	.reg .f32 	%f&lt;53&gt;;
-	.reg .b32 	%r&lt;93&gt;;
-	.reg .f64 	%fd&lt;56&gt;;
-	.reg .b64 	%rd&lt;51&gt;;
+	.reg .pred 	%p<21>;
+	.reg .b16 	%rs<6>;
+	.reg .f32 	%f<53>;
+	.reg .b32 	%r<93>;
+	.reg .f64 	%fd<56>;
+	.reg .b64 	%rd<51>;
 
 
 	ld.param.u8 	%rs3, [ShearStrain_param_14];
@@ -2597,12 +2597,12 @@ $L__BB0_35:
 	.param .u8 ShearStrain_param_14
 )
 {
-	.reg .pred 	%p&lt;21&gt;;
-	.reg .b16 	%rs&lt;6&gt;;
-	.reg .f32 	%f&lt;53&gt;;
-	.reg .b32 	%r&lt;93&gt;;
-	.reg .f64 	%fd&lt;56&gt;;
-	.reg .b64 	%rd&lt;51&gt;;
+	.reg .pred 	%p<21>;
+	.reg .b16 	%rs<6>;
+	.reg .f32 	%f<53>;
+	.reg .b32 	%r<93>;
+	.reg .f64 	%fd<56>;
+	.reg .b64 	%rd<51>;
 
 
 	ld.param.u8 	%rs3, [ShearStrain_param_14];
@@ -3007,12 +3007,12 @@ $L__BB0_35:
 	.param .u8 ShearStrain_param_14
 )
 {
-	.reg .pred 	%p&lt;21&gt;;
-	.reg .b16 	%rs&lt;6&gt;;
-	.reg .f32 	%f&lt;53&gt;;
-	.reg .b32 	%r&lt;93&gt;;
-	.reg .f64 	%fd&lt;56&gt;;
-	.reg .b64 	%rd&lt;51&gt;;
+	.reg .pred 	%p<21>;
+	.reg .b16 	%rs<6>;
+	.reg .f32 	%f<53>;
+	.reg .b32 	%r<93>;
+	.reg .f64 	%fd<56>;
+	.reg .b64 	%rd<51>;
 
 
 	ld.param.u8 	%rs3, [ShearStrain_param_14];
@@ -3417,12 +3417,12 @@ $L__BB0_35:
 	.param .u8 ShearStrain_param_14
 )
 {
-	.reg .pred 	%p&lt;21&gt;;
-	.reg .b16 	%rs&lt;6&gt;;
-	.reg .f32 	%f&lt;53&gt;;
-	.reg .b32 	%r&lt;93&gt;;
-	.reg .f64 	%fd&lt;56&gt;;
-	.reg .b64 	%rd&lt;51&gt;;
+	.reg .pred 	%p<21>;
+	.reg .b16 	%rs<6>;
+	.reg .f32 	%f<53>;
+	.reg .b32 	%r<93>;
+	.reg .f64 	%fd<56>;
+	.reg .b64 	%rd<51>;
 
 
 	ld.param.u8 	%rs3, [ShearStrain_param_14];
@@ -3827,12 +3827,12 @@ $L__BB0_35:
 	.param .u8 ShearStrain_param_14
 )
 {
-	.reg .pred 	%p&lt;21&gt;;
-	.reg .b16 	%rs&lt;6&gt;;
-	.reg .f32 	%f&lt;53&gt;;
-	.reg .b32 	%r&lt;93&gt;;
-	.reg .f64 	%fd&lt;56&gt;;
-	.reg .b64 	%rd&lt;51&gt;;
+	.reg .pred 	%p<21>;
+	.reg .b16 	%rs<6>;
+	.reg .f32 	%f<53>;
+	.reg .b32 	%r<93>;
+	.reg .f64 	%fd<56>;
+	.reg .b64 	%rd<51>;
 
 
 	ld.param.u8 	%rs3, [ShearStrain_param_14];

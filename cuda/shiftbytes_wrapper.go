@@ -105,10 +105,10 @@ const (
 	.param .u8 shiftbytes_param_6
 )
 {
-	.reg .pred 	%p&lt;9&gt;;
-	.reg .b16 	%rs&lt;5&gt;;
-	.reg .b32 	%r&lt;22&gt;;
-	.reg .b64 	%rd&lt;9&gt;;
+	.reg .pred 	%p<9>;
+	.reg .b16 	%rs<5>;
+	.reg .b32 	%r<22>;
+	.reg .b64 	%rd<9>;
 
 
 	ld.param.u8 	%rs4, [shiftbytes_param_6];
@@ -181,10 +181,10 @@ $L__BB0_4:
 	.param .u8 shiftbytes_param_6
 )
 {
-	.reg .pred 	%p&lt;9&gt;;
-	.reg .b16 	%rs&lt;5&gt;;
-	.reg .b32 	%r&lt;22&gt;;
-	.reg .b64 	%rd&lt;9&gt;;
+	.reg .pred 	%p<9>;
+	.reg .b16 	%rs<5>;
+	.reg .b32 	%r<22>;
+	.reg .b64 	%rd<9>;
 
 
 	ld.param.u8 	%rs4, [shiftbytes_param_6];
@@ -257,10 +257,10 @@ $L__BB0_4:
 	.param .u8 shiftbytes_param_6
 )
 {
-	.reg .pred 	%p&lt;9&gt;;
-	.reg .b16 	%rs&lt;5&gt;;
-	.reg .b32 	%r&lt;22&gt;;
-	.reg .b64 	%rd&lt;9&gt;;
+	.reg .pred 	%p<9>;
+	.reg .b16 	%rs<5>;
+	.reg .b32 	%r<22>;
+	.reg .b64 	%rd<9>;
 
 
 	ld.param.u8 	%rs4, [shiftbytes_param_6];
@@ -333,10 +333,10 @@ $L__BB0_4:
 	.param .u8 shiftbytes_param_6
 )
 {
-	.reg .pred 	%p&lt;9&gt;;
-	.reg .b16 	%rs&lt;5&gt;;
-	.reg .b32 	%r&lt;22&gt;;
-	.reg .b64 	%rd&lt;9&gt;;
+	.reg .pred 	%p<9>;
+	.reg .b16 	%rs<5>;
+	.reg .b32 	%r<22>;
+	.reg .b64 	%rd<9>;
 
 
 	ld.param.u8 	%rs4, [shiftbytes_param_6];
@@ -409,10 +409,10 @@ $L__BB0_4:
 	.param .u8 shiftbytes_param_6
 )
 {
-	.reg .pred 	%p&lt;9&gt;;
-	.reg .b16 	%rs&lt;5&gt;;
-	.reg .b32 	%r&lt;22&gt;;
-	.reg .b64 	%rd&lt;9&gt;;
+	.reg .pred 	%p<9>;
+	.reg .b16 	%rs<5>;
+	.reg .b32 	%r<22>;
+	.reg .b64 	%rd<9>;
 
 
 	ld.param.u8 	%rs4, [shiftbytes_param_6];
@@ -485,10 +485,10 @@ $L__BB0_4:
 	.param .u8 shiftbytes_param_6
 )
 {
-	.reg .pred 	%p&lt;9&gt;;
-	.reg .b16 	%rs&lt;5&gt;;
-	.reg .b32 	%r&lt;22&gt;;
-	.reg .b64 	%rd&lt;9&gt;;
+	.reg .pred 	%p<9>;
+	.reg .b16 	%rs<5>;
+	.reg .b32 	%r<22>;
+	.reg .b64 	%rd<9>;
 
 
 	ld.param.u8 	%rs4, [shiftbytes_param_6];
@@ -561,10 +561,10 @@ $L__BB0_4:
 	.param .u8 shiftbytes_param_6
 )
 {
-	.reg .pred 	%p&lt;9&gt;;
-	.reg .b16 	%rs&lt;5&gt;;
-	.reg .b32 	%r&lt;22&gt;;
-	.reg .b64 	%rd&lt;9&gt;;
+	.reg .pred 	%p<9>;
+	.reg .b16 	%rs<5>;
+	.reg .b32 	%r<22>;
+	.reg .b64 	%rd<9>;
 
 
 	ld.param.u8 	%rs4, [shiftbytes_param_6];
@@ -637,10 +637,10 @@ $L__BB0_4:
 	.param .u8 shiftbytes_param_6
 )
 {
-	.reg .pred 	%p&lt;9&gt;;
-	.reg .b16 	%rs&lt;5&gt;;
-	.reg .b32 	%r&lt;22&gt;;
-	.reg .b64 	%rd&lt;9&gt;;
+	.reg .pred 	%p<9>;
+	.reg .b16 	%rs<5>;
+	.reg .b32 	%r<22>;
+	.reg .b64 	%rd<9>;
 
 
 	ld.param.u8 	%rs4, [shiftbytes_param_6];
@@ -713,10 +713,10 @@ $L__BB0_4:
 	.param .u8 shiftbytes_param_6
 )
 {
-	.reg .pred 	%p&lt;9&gt;;
-	.reg .b16 	%rs&lt;5&gt;;
-	.reg .b32 	%r&lt;22&gt;;
-	.reg .b64 	%rd&lt;9&gt;;
+	.reg .pred 	%p<9>;
+	.reg .b16 	%rs<5>;
+	.reg .b32 	%r<22>;
+	.reg .b64 	%rd<9>;
 
 
 	ld.param.u8 	%rs4, [shiftbytes_param_6];
@@ -789,10 +789,10 @@ $L__BB0_4:
 	.param .u8 shiftbytes_param_6
 )
 {
-	.reg .pred 	%p&lt;9&gt;;
-	.reg .b16 	%rs&lt;5&gt;;
-	.reg .b32 	%r&lt;22&gt;;
-	.reg .b64 	%rd&lt;9&gt;;
+	.reg .pred 	%p<9>;
+	.reg .b16 	%rs<5>;
+	.reg .b32 	%r<22>;
+	.reg .b64 	%rd<9>;
 
 
 	ld.param.u8 	%rs4, [shiftbytes_param_6];

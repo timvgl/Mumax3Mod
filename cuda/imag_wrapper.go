@@ -89,10 +89,10 @@ const (
 	.param .u32 imag_param_2
 )
 {
-	.reg .pred 	%p&lt;2&gt;;
-	.reg .f32 	%f&lt;2&gt;;
-	.reg .b32 	%r&lt;10&gt;;
-	.reg .b64 	%rd&lt;9&gt;;
+	.reg .pred 	%p<2>;
+	.reg .f32 	%f<2>;
+	.reg .b32 	%r<10>;
+	.reg .b64 	%rd<9>;
 
 
 	ld.param.u64 	%rd1, [imag_param_0];
@@ -112,7 +112,7 @@ const (
 	shl.b32 	%r9, %r1, 1;
 	mul.wide.s32 	%rd4, %r9, 4;
 	add.s64 	%rd5, %rd3, %rd4;
-	ld.global.nc.f32 	%f1, [%rd5&#43;4];
+	ld.global.nc.f32 	%f1, [%rd5+4];
 	cvta.to.global.u64 	%rd6, %rd1;
 	mul.wide.s32 	%rd7, %r1, 4;
 	add.s64 	%rd8, %rd6, %rd7;
@@ -137,10 +137,10 @@ $L__BB0_2:
 	.param .u32 imag_param_2
 )
 {
-	.reg .pred 	%p&lt;2&gt;;
-	.reg .f32 	%f&lt;2&gt;;
-	.reg .b32 	%r&lt;10&gt;;
-	.reg .b64 	%rd&lt;9&gt;;
+	.reg .pred 	%p<2>;
+	.reg .f32 	%f<2>;
+	.reg .b32 	%r<10>;
+	.reg .b64 	%rd<9>;
 
 
 	ld.param.u64 	%rd1, [imag_param_0];
@@ -160,7 +160,7 @@ $L__BB0_2:
 	shl.b32 	%r9, %r1, 1;
 	mul.wide.s32 	%rd4, %r9, 4;
 	add.s64 	%rd5, %rd3, %rd4;
-	ld.global.nc.f32 	%f1, [%rd5&#43;4];
+	ld.global.nc.f32 	%f1, [%rd5+4];
 	cvta.to.global.u64 	%rd6, %rd1;
 	mul.wide.s32 	%rd7, %r1, 4;
 	add.s64 	%rd8, %rd6, %rd7;
@@ -185,10 +185,10 @@ $L__BB0_2:
 	.param .u32 imag_param_2
 )
 {
-	.reg .pred 	%p&lt;2&gt;;
-	.reg .f32 	%f&lt;2&gt;;
-	.reg .b32 	%r&lt;10&gt;;
-	.reg .b64 	%rd&lt;9&gt;;
+	.reg .pred 	%p<2>;
+	.reg .f32 	%f<2>;
+	.reg .b32 	%r<10>;
+	.reg .b64 	%rd<9>;
 
 
 	ld.param.u64 	%rd1, [imag_param_0];
@@ -208,7 +208,7 @@ $L__BB0_2:
 	shl.b32 	%r9, %r1, 1;
 	mul.wide.s32 	%rd4, %r9, 4;
 	add.s64 	%rd5, %rd3, %rd4;
-	ld.global.nc.f32 	%f1, [%rd5&#43;4];
+	ld.global.nc.f32 	%f1, [%rd5+4];
 	cvta.to.global.u64 	%rd6, %rd1;
 	mul.wide.s32 	%rd7, %r1, 4;
 	add.s64 	%rd8, %rd6, %rd7;
@@ -233,10 +233,10 @@ $L__BB0_2:
 	.param .u32 imag_param_2
 )
 {
-	.reg .pred 	%p&lt;2&gt;;
-	.reg .f32 	%f&lt;2&gt;;
-	.reg .b32 	%r&lt;10&gt;;
-	.reg .b64 	%rd&lt;9&gt;;
+	.reg .pred 	%p<2>;
+	.reg .f32 	%f<2>;
+	.reg .b32 	%r<10>;
+	.reg .b64 	%rd<9>;
 
 
 	ld.param.u64 	%rd1, [imag_param_0];
@@ -256,7 +256,7 @@ $L__BB0_2:
 	shl.b32 	%r9, %r1, 1;
 	mul.wide.s32 	%rd4, %r9, 4;
 	add.s64 	%rd5, %rd3, %rd4;
-	ld.global.nc.f32 	%f1, [%rd5&#43;4];
+	ld.global.nc.f32 	%f1, [%rd5+4];
 	cvta.to.global.u64 	%rd6, %rd1;
 	mul.wide.s32 	%rd7, %r1, 4;
 	add.s64 	%rd8, %rd6, %rd7;
@@ -281,10 +281,10 @@ $L__BB0_2:
 	.param .u32 imag_param_2
 )
 {
-	.reg .pred 	%p&lt;2&gt;;
-	.reg .f32 	%f&lt;2&gt;;
-	.reg .b32 	%r&lt;10&gt;;
-	.reg .b64 	%rd&lt;9&gt;;
+	.reg .pred 	%p<2>;
+	.reg .f32 	%f<2>;
+	.reg .b32 	%r<10>;
+	.reg .b64 	%rd<9>;
 
 
 	ld.param.u64 	%rd1, [imag_param_0];
@@ -304,7 +304,7 @@ $L__BB0_2:
 	shl.b32 	%r9, %r1, 1;
 	mul.wide.s32 	%rd4, %r9, 4;
 	add.s64 	%rd5, %rd3, %rd4;
-	ld.global.nc.f32 	%f1, [%rd5&#43;4];
+	ld.global.nc.f32 	%f1, [%rd5+4];
 	cvta.to.global.u64 	%rd6, %rd1;
 	mul.wide.s32 	%rd7, %r1, 4;
 	add.s64 	%rd8, %rd6, %rd7;
@@ -329,10 +329,10 @@ $L__BB0_2:
 	.param .u32 imag_param_2
 )
 {
-	.reg .pred 	%p&lt;2&gt;;
-	.reg .f32 	%f&lt;2&gt;;
-	.reg .b32 	%r&lt;10&gt;;
-	.reg .b64 	%rd&lt;9&gt;;
+	.reg .pred 	%p<2>;
+	.reg .f32 	%f<2>;
+	.reg .b32 	%r<10>;
+	.reg .b64 	%rd<9>;
 
 
 	ld.param.u64 	%rd1, [imag_param_0];
@@ -352,7 +352,7 @@ $L__BB0_2:
 	shl.b32 	%r9, %r1, 1;
 	mul.wide.s32 	%rd4, %r9, 4;
 	add.s64 	%rd5, %rd3, %rd4;
-	ld.global.nc.f32 	%f1, [%rd5&#43;4];
+	ld.global.nc.f32 	%f1, [%rd5+4];
 	cvta.to.global.u64 	%rd6, %rd1;
 	mul.wide.s32 	%rd7, %r1, 4;
 	add.s64 	%rd8, %rd6, %rd7;
@@ -377,10 +377,10 @@ $L__BB0_2:
 	.param .u32 imag_param_2
 )
 {
-	.reg .pred 	%p&lt;2&gt;;
-	.reg .f32 	%f&lt;2&gt;;
-	.reg .b32 	%r&lt;10&gt;;
-	.reg .b64 	%rd&lt;9&gt;;
+	.reg .pred 	%p<2>;
+	.reg .f32 	%f<2>;
+	.reg .b32 	%r<10>;
+	.reg .b64 	%rd<9>;
 
 
 	ld.param.u64 	%rd1, [imag_param_0];
@@ -400,7 +400,7 @@ $L__BB0_2:
 	shl.b32 	%r9, %r1, 1;
 	mul.wide.s32 	%rd4, %r9, 4;
 	add.s64 	%rd5, %rd3, %rd4;
-	ld.global.nc.f32 	%f1, [%rd5&#43;4];
+	ld.global.nc.f32 	%f1, [%rd5+4];
 	cvta.to.global.u64 	%rd6, %rd1;
 	mul.wide.s32 	%rd7, %r1, 4;
 	add.s64 	%rd8, %rd6, %rd7;
@@ -425,10 +425,10 @@ $L__BB0_2:
 	.param .u32 imag_param_2
 )
 {
-	.reg .pred 	%p&lt;2&gt;;
-	.reg .f32 	%f&lt;2&gt;;
-	.reg .b32 	%r&lt;10&gt;;
-	.reg .b64 	%rd&lt;9&gt;;
+	.reg .pred 	%p<2>;
+	.reg .f32 	%f<2>;
+	.reg .b32 	%r<10>;
+	.reg .b64 	%rd<9>;
 
 
 	ld.param.u64 	%rd1, [imag_param_0];
@@ -448,7 +448,7 @@ $L__BB0_2:
 	shl.b32 	%r9, %r1, 1;
 	mul.wide.s32 	%rd4, %r9, 4;
 	add.s64 	%rd5, %rd3, %rd4;
-	ld.global.nc.f32 	%f1, [%rd5&#43;4];
+	ld.global.nc.f32 	%f1, [%rd5+4];
 	cvta.to.global.u64 	%rd6, %rd1;
 	mul.wide.s32 	%rd7, %r1, 4;
 	add.s64 	%rd8, %rd6, %rd7;
@@ -473,10 +473,10 @@ $L__BB0_2:
 	.param .u32 imag_param_2
 )
 {
-	.reg .pred 	%p&lt;2&gt;;
-	.reg .f32 	%f&lt;2&gt;;
-	.reg .b32 	%r&lt;10&gt;;
-	.reg .b64 	%rd&lt;9&gt;;
+	.reg .pred 	%p<2>;
+	.reg .f32 	%f<2>;
+	.reg .b32 	%r<10>;
+	.reg .b64 	%rd<9>;
 
 
 	ld.param.u64 	%rd1, [imag_param_0];
@@ -496,7 +496,7 @@ $L__BB0_2:
 	shl.b32 	%r9, %r1, 1;
 	mul.wide.s32 	%rd4, %r9, 4;
 	add.s64 	%rd5, %rd3, %rd4;
-	ld.global.nc.f32 	%f1, [%rd5&#43;4];
+	ld.global.nc.f32 	%f1, [%rd5+4];
 	cvta.to.global.u64 	%rd6, %rd1;
 	mul.wide.s32 	%rd7, %r1, 4;
 	add.s64 	%rd8, %rd6, %rd7;
@@ -521,10 +521,10 @@ $L__BB0_2:
 	.param .u32 imag_param_2
 )
 {
-	.reg .pred 	%p&lt;2&gt;;
-	.reg .f32 	%f&lt;2&gt;;
-	.reg .b32 	%r&lt;10&gt;;
-	.reg .b64 	%rd&lt;9&gt;;
+	.reg .pred 	%p<2>;
+	.reg .f32 	%f<2>;
+	.reg .b32 	%r<10>;
+	.reg .b64 	%rd<9>;
 
 
 	ld.param.u64 	%rd1, [imag_param_0];
@@ -544,7 +544,7 @@ $L__BB0_2:
 	shl.b32 	%r9, %r1, 1;
 	mul.wide.s32 	%rd4, %r9, 4;
 	add.s64 	%rd5, %rd3, %rd4;
-	ld.global.nc.f32 	%f1, [%rd5&#43;4];
+	ld.global.nc.f32 	%f1, [%rd5+4];
 	cvta.to.global.u64 	%rd6, %rd1;
 	mul.wide.s32 	%rd7, %r1, 4;
 	add.s64 	%rd8, %rd6, %rd7;

@@ -1,0 +1,110 @@
+# ------------------------------------------------------------------------------
+#  Example Makefile for building multiple .ptx files from each .cu source,
+#  one per compute capability. Then (optionally) generate a wrapper .go file.
+#  
+#  Usage:
+#    make               # defaults to all PTX files
+#    make -j8           # build them in parallel on 8 cores
+#    make clean         # remove all .ptx files
+#    make realclean     # remove .ptx and wrappers + cuda2go
+#
+#  Customize CUDA_CC, NVCC, NVCCFLAGS, etc. as needed.
+# ------------------------------------------------------------------------------
+
+SHELL := /bin/bash
+
+# Default compute capabilities if not set externally
+CUDA_CC ?= 50 52 60 61 70 75 80
+
+# If CUDA_HOME is set, use that for nvcc; otherwise, just `nvcc` from PATH
+ifeq ($(CUDA_HOME),)
+    NVCC = nvcc
+else
+    NVCC = $(CUDA_HOME)/bin/nvcc
+endif
+
+# Try to detect the number of cores (Linux: nproc, macOS/*BSD: sysctl).
+# Fall back to "1" if detection fails.
+NUM_CORES := $(shell nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1)
+
+# If the user did NOT provide any -j option, and we're at top-level make (MAKELEVEL=0),
+# then append -j<NUM_CORES> to MAKEFLAGS.
+ifneq ($(filter -j%,$(MAKEFLAGS)),)  # Did user already provide -j?
+  # Yes -> do nothing; let their choice stand.
+else ifneq ($(MAKELEVEL),0)
+  # We are in a sub-make, so don't override -j here.
+else
+  # We are in the top-level make, and user didn't set -j.
+  MAKEFLAGS += -j$(NUM_CORES)
+endif
+
+# The gcc (or g++) host compiler for nvcc
+NVCC_CCBIN ?= /usr/bin/gcc
+
+# Common nvcc flags (adjust to your needs)
+NVCCFLAGS = -ccbin=$(NVCC_CCBIN) \
+            -Xptxas -O3 \
+            -ptx
+
+# Collect all .cu files in current directory
+CUDAFILES  := $(wildcard *.cu)
+
+# For each .cu file (e.g. kernel.cu) and each CC (e.g. 50),
+# produce kernel_50.ptx, kernel_52.ptx, etc.
+PTXFILES   := $(foreach cu,$(CUDAFILES), \
+                $(foreach cc,$(CUDA_CC), \
+                  $(basename $(cu))_$(cc).ptx))
+
+# Each .cu will optionally produce a *_wrapper.go
+# (if you have a codegen utility like cuda2go).
+WRAPPERS   := $(CUDAFILES:.cu=_wrapper.go)
+
+# ------------------------------------------------------------------------------
+# Default build target: build all PTX files (and optionally wrappers).
+# Uncomment the target you need or keep both.
+# ------------------------------------------------------------------------------
+# Build all .ptx files
+.PHONY: ptx
+ptx: $(PTXFILES)
+
+# Build all Go wrappers (if you want them)
+.PHONY: wrappers
+wrappers: $(WRAPPERS)
+
+.PHONY: all
+all: ptx wrappers # or: all: ptx wrappers
+# ------------------------------------------------------------------------------
+# Pattern rule: build <base>_<cc>.ptx from <base>.cu
+# For example: kernel_50.ptx depends on kernel.cu
+# ------------------------------------------------------------------------------
+%*.ptx: %.cu
+	@ base=$$(echo "$@" | sed 's/_.*//; s/.ptx$$//'); \
+	   cc=$$(echo "$@"   | sed 's/.*_//; s/\.ptx$//'); \
+	   echo $$base;\
+	   echo $$cc;\
+	   echo "[NVCC] Building $$base.cu for compute_$$cc -> $@"; \
+	   $(NVCC) $(NVCCFLAGS) -arch=compute_$$cc "$<" -o "$@"
+
+# ------------------------------------------------------------------------------
+# Optional: Generate <base>_wrapper.go from <base>.cu, after all .ptx are built.
+# ------------------------------------------------------------------------------
+%_wrapper.go: %.cu cuda2go $(foreach cc,$(CUDA_CC),$(basename $<)_$(cc).ptx)
+	@ echo "[cuda2go] Generating $@ from $<"
+	@ ./cuda2go "$<" > /dev/null
+	@ gofmt -w -s -l "$@" > /dev/null
+
+# ------------------------------------------------------------------------------
+# Build the cuda2go tool (if you have cuda2go.go in the same dir)
+# ------------------------------------------------------------------------------
+cuda2go: cuda2go.go
+	go build $<
+
+# ------------------------------------------------------------------------------
+# Cleanup
+# ------------------------------------------------------------------------------
+.PHONY: clean realclean
+clean:
+	rm -f *.ptx
+
+realclean: clean
+	rm -f *_wrapper.go cuda2go

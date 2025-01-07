@@ -4,7 +4,9 @@ package cu
 
 //#include <cuda.h>
 import "C"
-import "unsafe"
+import (
+	"unsafe"
+)
 
 // CUDA stream.
 type Stream uintptr

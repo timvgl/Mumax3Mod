@@ -24,6 +24,19 @@ SHELL = /bin/bash
 
 export CUDA_CC=30 32 35 37 50 52 53 60 61 62 70 72 75 80
 
+NUM_CORES := $(shell nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1)
+
+# If the user did NOT provide any -j option, and we're at top-level make (MAKELEVEL=0),
+# then append -j<NUM_CORES> to MAKEFLAGS.
+ifneq ($(filter -j%,$(MAKEFLAGS)),)  # Did user already provide -j?
+  # Yes -> do nothing; let their choice stand.
+else ifneq ($(MAKELEVEL),0)
+  # We are in a sub-make, so don't override -j here.
+else
+  # We are in the top-level make, and user didn't set -j.
+  MAKEFLAGS += -j$(NUM_CORES)
+endif
+
 # When CUDA_HOME is not an environment variable and is not set on the command line, use the nvcc compiler
 # from the PATH
 ifeq ($(CUDA_HOME),)
@@ -39,7 +52,7 @@ endif
 
 # The gcc host compiler for nvcc
 ifeq ($(NVCC_CCBIN),)
-	NVCC_CCBIN=/usr/bin/g++-12
+	NVCC_CCBIN=/usr/bin/gcc
 endif
 
 CUDA_VERSION := $(shell $(NVCC) --version | grep "Cuda compilation" | grep -Eo '[+-]?[0-9]+([.][0-9]+)?' | head -n 1)
@@ -52,13 +65,20 @@ endif
 NVCCFLAGS = $(NVCC_COMPATIBILITY_FLAGS) -ccbin=$(NVCC_CCBIN) --compiler-options -Werror --compiler-options -Wall -Xptxas -O3 -ptx
 
 CUDAFILES := $(wildcard *.cu)
+
+ACUDAFILES := $(wildcard *.a.cu)
+
+CUDAFILES := $(filter-out $(ACUDAFILES), $(CUDAFILES))
+
 WRAPPERS := $(CUDAFILES:.cu=_wrapper.go)
 
+AWRAPPERS := $(ACUDAFILES:.a.cu=_wrapper.a.go)
 
-.PHONY: all wrappers clean realclean
+
+.PHONY: all wrappers awrappers clean realclean
 
 
-all: wrappers
+all: wrappers awrappers
 	@echo "Built with CUDA version ${CUDA_VERSION}"
 	go install -v
 
@@ -79,10 +99,25 @@ wrappers: $(WRAPPERS)
 cuda2go: cuda2go.go
 	go build $<
 
+awrappers: $(AWRAPPERS)
+
+%_wrapper.a.go: %.a.cu acuda2go
+	@ rm -f $(basename $(basename $<))*.ptx.a
+	@ for cc in $(CUDA_CC); do \
+		echo $(NVCC) $(NVCCFLAGS) -arch=compute_$$cc -code=sm_$$cc $< -o $(basename $(basename $<))_$$cc.ptx.a ;\
+		     $(NVCC) $(NVCCFLAGS) -arch=compute_$$cc -code=sm_$$cc $< -o $(basename $(basename $<))_$$cc.ptx.a ;\
+	done
+	@ ./acuda2go $< > /dev/null
+	@ gofmt -w -s -l $@ > /dev/null
+
+acuda2go: acuda2go.go
+	go build $<
 
 clean:
 	rm -vf *.ptx
+	rm -vf *.ptx.a
 
 
 realclean:
 	rm -vf *_wrapper.go *.ptx cuda2go
+	rm -vf *_wrapper.a.go *.ptx.a acuda2go

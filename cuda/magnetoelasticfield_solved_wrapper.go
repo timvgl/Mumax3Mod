@@ -145,11 +145,11 @@ const (
 	.param .u8 addmagnetoelasticfield_solved_param_16
 )
 {
-	.reg .pred 	%p&lt;116&gt;;
-	.reg .b16 	%rs&lt;5&gt;;
-	.reg .f32 	%f&lt;489&gt;;
-	.reg .b32 	%r&lt;130&gt;;
-	.reg .b64 	%rd&lt;78&gt;;
+	.reg .pred 	%p<116>;
+	.reg .b16 	%rs<5>;
+	.reg .f32 	%f<489>;
+	.reg .b32 	%r<130>;
+	.reg .b64 	%rd<78>;
 
 
 	ld.param.u8 	%rs4, [addmagnetoelasticfield_solved_param_16];
@@ -1092,11 +1092,11 @@ $L__BB0_108:
 	.param .u8 addmagnetoelasticfield_solved_param_16
 )
 {
-	.reg .pred 	%p&lt;116&gt;;
-	.reg .b16 	%rs&lt;5&gt;;
-	.reg .f32 	%f&lt;489&gt;;
-	.reg .b32 	%r&lt;130&gt;;
-	.reg .b64 	%rd&lt;78&gt;;
+	.reg .pred 	%p<116>;
+	.reg .b16 	%rs<5>;
+	.reg .f32 	%f<489>;
+	.reg .b32 	%r<130>;
+	.reg .b64 	%rd<78>;
 
 
 	ld.param.u8 	%rs4, [addmagnetoelasticfield_solved_param_16];
@@ -2039,11 +2039,11 @@ $L__BB0_108:
 	.param .u8 addmagnetoelasticfield_solved_param_16
 )
 {
-	.reg .pred 	%p&lt;116&gt;;
-	.reg .b16 	%rs&lt;5&gt;;
-	.reg .f32 	%f&lt;489&gt;;
-	.reg .b32 	%r&lt;130&gt;;
-	.reg .b64 	%rd&lt;78&gt;;
+	.reg .pred 	%p<116>;
+	.reg .b16 	%rs<5>;
+	.reg .f32 	%f<489>;
+	.reg .b32 	%r<130>;
+	.reg .b64 	%rd<78>;
 
 
 	ld.param.u8 	%rs4, [addmagnetoelasticfield_solved_param_16];
@@ -2986,11 +2986,11 @@ $L__BB0_108:
 	.param .u8 addmagnetoelasticfield_solved_param_16
 )
 {
-	.reg .pred 	%p&lt;116&gt;;
-	.reg .b16 	%rs&lt;5&gt;;
-	.reg .f32 	%f&lt;489&gt;;
-	.reg .b32 	%r&lt;130&gt;;
-	.reg .b64 	%rd&lt;78&gt;;
+	.reg .pred 	%p<116>;
+	.reg .b16 	%rs<5>;
+	.reg .f32 	%f<489>;
+	.reg .b32 	%r<130>;
+	.reg .b64 	%rd<78>;
 
 
 	ld.param.u8 	%rs4, [addmagnetoelasticfield_solved_param_16];
@@ -3933,11 +3933,11 @@ $L__BB0_108:
 	.param .u8 addmagnetoelasticfield_solved_param_16
 )
 {
-	.reg .pred 	%p&lt;116&gt;;
-	.reg .b16 	%rs&lt;5&gt;;
-	.reg .f32 	%f&lt;489&gt;;
-	.reg .b32 	%r&lt;130&gt;;
-	.reg .b64 	%rd&lt;78&gt;;
+	.reg .pred 	%p<116>;
+	.reg .b16 	%rs<5>;
+	.reg .f32 	%f<489>;
+	.reg .b32 	%r<130>;
+	.reg .b64 	%rd<78>;
 
 
 	ld.param.u8 	%rs4, [addmagnetoelasticfield_solved_param_16];
@@ -4880,11 +4880,11 @@ $L__BB0_108:
 	.param .u8 addmagnetoelasticfield_solved_param_16
 )
 {
-	.reg .pred 	%p&lt;116&gt;;
-	.reg .b16 	%rs&lt;5&gt;;
-	.reg .f32 	%f&lt;489&gt;;
-	.reg .b32 	%r&lt;130&gt;;
-	.reg .b64 	%rd&lt;78&gt;;
+	.reg .pred 	%p<116>;
+	.reg .b16 	%rs<5>;
+	.reg .f32 	%f<489>;
+	.reg .b32 	%r<130>;
+	.reg .b64 	%rd<78>;
 
 
 	ld.param.u8 	%rs4, [addmagnetoelasticfield_solved_param_16];
@@ -5827,11 +5827,11 @@ $L__BB0_108:
 	.param .u8 addmagnetoelasticfield_solved_param_16
 )
 {
-	.reg .pred 	%p&lt;116&gt;;
-	.reg .b16 	%rs&lt;5&gt;;
-	.reg .f32 	%f&lt;489&gt;;
-	.reg .b32 	%r&lt;130&gt;;
-	.reg .b64 	%rd&lt;78&gt;;
+	.reg .pred 	%p<116>;
+	.reg .b16 	%rs<5>;
+	.reg .f32 	%f<489>;
+	.reg .b32 	%r<130>;
+	.reg .b64 	%rd<78>;
 
 
 	ld.param.u8 	%rs4, [addmagnetoelasticfield_solved_param_16];
@@ -6774,11 +6774,11 @@ $L__BB0_108:
 	.param .u8 addmagnetoelasticfield_solved_param_16
 )
 {
-	.reg .pred 	%p&lt;116&gt;;
-	.reg .b16 	%rs&lt;5&gt;;
-	.reg .f32 	%f&lt;489&gt;;
-	.reg .b32 	%r&lt;130&gt;;
-	.reg .b64 	%rd&lt;78&gt;;
+	.reg .pred 	%p<116>;
+	.reg .b16 	%rs<5>;
+	.reg .f32 	%f<489>;
+	.reg .b32 	%r<130>;
+	.reg .b64 	%rd<78>;
 
 
 	ld.param.u8 	%rs4, [addmagnetoelasticfield_solved_param_16];
@@ -7721,11 +7721,11 @@ $L__BB0_108:
 	.param .u8 addmagnetoelasticfield_solved_param_16
 )
 {
-	.reg .pred 	%p&lt;116&gt;;
-	.reg .b16 	%rs&lt;5&gt;;
-	.reg .f32 	%f&lt;489&gt;;
-	.reg .b32 	%r&lt;130&gt;;
-	.reg .b64 	%rd&lt;78&gt;;
+	.reg .pred 	%p<116>;
+	.reg .b16 	%rs<5>;
+	.reg .f32 	%f<489>;
+	.reg .b32 	%r<130>;
+	.reg .b64 	%rd<78>;
 
 
 	ld.param.u8 	%rs4, [addmagnetoelasticfield_solved_param_16];
@@ -8668,11 +8668,11 @@ $L__BB0_108:
 	.param .u8 addmagnetoelasticfield_solved_param_16
 )
 {
-	.reg .pred 	%p&lt;116&gt;;
-	.reg .b16 	%rs&lt;5&gt;;
-	.reg .f32 	%f&lt;489&gt;;
-	.reg .b32 	%r&lt;130&gt;;
-	.reg .b64 	%rd&lt;78&gt;;
+	.reg .pred 	%p<116>;
+	.reg .b16 	%rs<5>;
+	.reg .f32 	%f<489>;
+	.reg .b32 	%r<130>;
+	.reg .b64 	%rd<78>;
 
 
 	ld.param.u8 	%rs4, [addmagnetoelasticfield_solved_param_16];

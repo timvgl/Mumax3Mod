@@ -185,12 +185,12 @@ const (
 	.param .u8 addzhanglitorque2_param_26
 )
 {
-	.reg .pred 	%p&lt;35&gt;;
-	.reg .b16 	%rs&lt;5&gt;;
-	.reg .f32 	%f&lt;149&gt;;
-	.reg .b32 	%r&lt;173&gt;;
-	.reg .f64 	%fd&lt;5&gt;;
-	.reg .b64 	%rd&lt;84&gt;;
+	.reg .pred 	%p<35>;
+	.reg .b16 	%rs<5>;
+	.reg .f32 	%f<149>;
+	.reg .b32 	%r<173>;
+	.reg .f64 	%fd<5>;
+	.reg .b64 	%rd<84>;
 
 
 	ld.param.u8 	%rs4, [addzhanglitorque2_param_26];
@@ -808,12 +808,12 @@ $L__BB0_78:
 	.param .u8 addzhanglitorque2_param_26
 )
 {
-	.reg .pred 	%p&lt;35&gt;;
-	.reg .b16 	%rs&lt;5&gt;;
-	.reg .f32 	%f&lt;149&gt;;
-	.reg .b32 	%r&lt;173&gt;;
-	.reg .f64 	%fd&lt;5&gt;;
-	.reg .b64 	%rd&lt;84&gt;;
+	.reg .pred 	%p<35>;
+	.reg .b16 	%rs<5>;
+	.reg .f32 	%f<149>;
+	.reg .b32 	%r<173>;
+	.reg .f64 	%fd<5>;
+	.reg .b64 	%rd<84>;
 
 
 	ld.param.u8 	%rs4, [addzhanglitorque2_param_26];
@@ -1431,12 +1431,12 @@ $L__BB0_78:
 	.param .u8 addzhanglitorque2_param_26
 )
 {
-	.reg .pred 	%p&lt;35&gt;;
-	.reg .b16 	%rs&lt;5&gt;;
-	.reg .f32 	%f&lt;149&gt;;
-	.reg .b32 	%r&lt;173&gt;;
-	.reg .f64 	%fd&lt;5&gt;;
-	.reg .b64 	%rd&lt;84&gt;;
+	.reg .pred 	%p<35>;
+	.reg .b16 	%rs<5>;
+	.reg .f32 	%f<149>;
+	.reg .b32 	%r<173>;
+	.reg .f64 	%fd<5>;
+	.reg .b64 	%rd<84>;
 
 
 	ld.param.u8 	%rs4, [addzhanglitorque2_param_26];
@@ -2054,12 +2054,12 @@ $L__BB0_78:
 	.param .u8 addzhanglitorque2_param_26
 )
 {
-	.reg .pred 	%p&lt;35&gt;;
-	.reg .b16 	%rs&lt;5&gt;;
-	.reg .f32 	%f&lt;149&gt;;
-	.reg .b32 	%r&lt;173&gt;;
-	.reg .f64 	%fd&lt;5&gt;;
-	.reg .b64 	%rd&lt;84&gt;;
+	.reg .pred 	%p<35>;
+	.reg .b16 	%rs<5>;
+	.reg .f32 	%f<149>;
+	.reg .b32 	%r<173>;
+	.reg .f64 	%fd<5>;
+	.reg .b64 	%rd<84>;
 
 
 	ld.param.u8 	%rs4, [addzhanglitorque2_param_26];
@@ -2677,12 +2677,12 @@ $L__BB0_78:
 	.param .u8 addzhanglitorque2_param_26
 )
 {
-	.reg .pred 	%p&lt;35&gt;;
-	.reg .b16 	%rs&lt;5&gt;;
-	.reg .f32 	%f&lt;149&gt;;
-	.reg .b32 	%r&lt;173&gt;;
-	.reg .f64 	%fd&lt;5&gt;;
-	.reg .b64 	%rd&lt;84&gt;;
+	.reg .pred 	%p<35>;
+	.reg .b16 	%rs<5>;
+	.reg .f32 	%f<149>;
+	.reg .b32 	%r<173>;
+	.reg .f64 	%fd<5>;
+	.reg .b64 	%rd<84>;
 
 
 	ld.param.u8 	%rs4, [addzhanglitorque2_param_26];
@@ -3300,12 +3300,12 @@ $L__BB0_78:
 	.param .u8 addzhanglitorque2_param_26
 )
 {
-	.reg .pred 	%p&lt;35&gt;;
-	.reg .b16 	%rs&lt;5&gt;;
-	.reg .f32 	%f&lt;149&gt;;
-	.reg .b32 	%r&lt;173&gt;;
-	.reg .f64 	%fd&lt;5&gt;;
-	.reg .b64 	%rd&lt;84&gt;;
+	.reg .pred 	%p<35>;
+	.reg .b16 	%rs<5>;
+	.reg .f32 	%f<149>;
+	.reg .b32 	%r<173>;
+	.reg .f64 	%fd<5>;
+	.reg .b64 	%rd<84>;
 
 
 	ld.param.u8 	%rs4, [addzhanglitorque2_param_26];
@@ -3923,12 +3923,12 @@ $L__BB0_78:
 	.param .u8 addzhanglitorque2_param_26
 )
 {
-	.reg .pred 	%p&lt;35&gt;;
-	.reg .b16 	%rs&lt;5&gt;;
-	.reg .f32 	%f&lt;149&gt;;
-	.reg .b32 	%r&lt;173&gt;;
-	.reg .f64 	%fd&lt;5&gt;;
-	.reg .b64 	%rd&lt;84&gt;;
+	.reg .pred 	%p<35>;
+	.reg .b16 	%rs<5>;
+	.reg .f32 	%f<149>;
+	.reg .b32 	%r<173>;
+	.reg .f64 	%fd<5>;
+	.reg .b64 	%rd<84>;
 
 
 	ld.param.u8 	%rs4, [addzhanglitorque2_param_26];
@@ -4546,12 +4546,12 @@ $L__BB0_78:
 	.param .u8 addzhanglitorque2_param_26
 )
 {
-	.reg .pred 	%p&lt;35&gt;;
-	.reg .b16 	%rs&lt;5&gt;;
-	.reg .f32 	%f&lt;149&gt;;
-	.reg .b32 	%r&lt;173&gt;;
-	.reg .f64 	%fd&lt;5&gt;;
-	.reg .b64 	%rd&lt;84&gt;;
+	.reg .pred 	%p<35>;
+	.reg .b16 	%rs<5>;
+	.reg .f32 	%f<149>;
+	.reg .b32 	%r<173>;
+	.reg .f64 	%fd<5>;
+	.reg .b64 	%rd<84>;
 
 
 	ld.param.u8 	%rs4, [addzhanglitorque2_param_26];
@@ -5169,12 +5169,12 @@ $L__BB0_78:
 	.param .u8 addzhanglitorque2_param_26
 )
 {
-	.reg .pred 	%p&lt;35&gt;;
-	.reg .b16 	%rs&lt;5&gt;;
-	.reg .f32 	%f&lt;149&gt;;
-	.reg .b32 	%r&lt;173&gt;;
-	.reg .f64 	%fd&lt;5&gt;;
-	.reg .b64 	%rd&lt;84&gt;;
+	.reg .pred 	%p<35>;
+	.reg .b16 	%rs<5>;
+	.reg .f32 	%f<149>;
+	.reg .b32 	%r<173>;
+	.reg .f64 	%fd<5>;
+	.reg .b64 	%rd<84>;
 
 
 	ld.param.u8 	%rs4, [addzhanglitorque2_param_26];
@@ -5792,12 +5792,12 @@ $L__BB0_78:
 	.param .u8 addzhanglitorque2_param_26
 )
 {
-	.reg .pred 	%p&lt;35&gt;;
-	.reg .b16 	%rs&lt;5&gt;;
-	.reg .f32 	%f&lt;149&gt;;
-	.reg .b32 	%r&lt;173&gt;;
-	.reg .f64 	%fd&lt;5&gt;;
-	.reg .b64 	%rd&lt;84&gt;;
+	.reg .pred 	%p<35>;
+	.reg .b16 	%rs<5>;
+	.reg .f32 	%f<149>;
+	.reg .b32 	%r<173>;
+	.reg .f64 	%fd<5>;
+	.reg .b64 	%rd<84>;
 
 
 	ld.param.u8 	%rs4, [addzhanglitorque2_param_26];
