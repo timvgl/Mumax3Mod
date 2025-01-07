@@ -237,6 +237,9 @@ func (s *fftOperation4D) Eval() {
 		lowerEnd += filesPerCore
 	}
 	wg.Wait()
+	if FFT_T_in_mem {
+		FFT_T_data_map[s.q] = FFT_T_data
+	}
 	mu.Lock()
 	FFT_T_OPRunning[s] = false
 	condCalcComplete.Broadcast()
@@ -304,6 +307,8 @@ func DoFFT4D() {
 func WaitFFTs4DDone() {
 	for i, _ := range FFT_T_OP {
 		FFT_T_OP[i].waitUntilPreviousCalcDone()
-		FFT_T_OP[i].SaveResults()
+		if FFT_T_in_mem {
+			FFT_T_OP[i].SaveResults()
+		}
 	}
 }

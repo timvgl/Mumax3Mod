@@ -4,30 +4,35 @@ import (
 	"fmt"
 	"io"
 	"sort"
+	"sync"
 	"time"
 )
 
 var (
-	clocks     map[string]*clock
+	clocks sync.Map
+	//clocks     map[string]*clock
 	firstStart time.Time
 )
 
 func Start(key string) {
-	if clocks == nil {
-		clocks = make(map[string]*clock)
+	_, ok := clocks.Load(key)
+	if !ok {
+		clocks.Store(key, new(clock))
 		firstStart = time.Now()
 	}
 
-	if c, ok := clocks[key]; ok {
-		c.Start()
+	if c, ok := clocks.Load(key); ok {
+		c.(*clock).Start()
 	} else {
-		clocks[key] = new(clock)
+		clocks.Store(key, new(clock))
 		// do not start, first run = warmup time
 	}
 }
 
 func Stop(key string) {
-	clocks[key].Stop()
+	if c, ok := clocks.Load(key); ok {
+		c.(*clock).Stop()
+	}
 }
 
 type clock struct {
@@ -76,25 +81,90 @@ func (l entries) Len() int           { return len(l) }
 func (l entries) Less(i, j int) bool { return l[i].total > l[j].total }
 func (l entries) Swap(i, j int)      { l[i], l[j] = l[j], l[i] }
 
+/*
+	func Print(out io.Writer) {
+		if clocks == nil {
+			return
+		}
+		wallTime := time.Since(firstStart)
+		lines := make(entries, 0, len(clocks))
+		var accounted time.Duration
+		for k, v := range clocks {
+			pct := 100 * float32(int64(v.total)) / float32(int64(wallTime))
+			lines = append(lines, entry{k, v.total, v.invocations, pct})
+			accounted += v.total
+		}
+
+		unaccounted := wallTime - accounted
+		pct := 100 * float32(int64(unaccounted)) / float32(int64(wallTime))
+		lines = append(lines, entry{"NOT TIMED", unaccounted, 1, pct})
+
+		sort.Sort(lines)
+
+		for _, l := range lines {
+			fmt.Fprintln(out, &l)
+		}
+	}
+*/
 func Print(out io.Writer) {
-	if clocks == nil {
-		return
-	}
+	// Calculate the wall time since tracking started
 	wallTime := time.Since(firstStart)
-	lines := make(entries, 0, len(clocks))
+
+	// Initialize a slice to hold the entries
+	var lines entries
+
+	// Variable to accumulate the total accounted time
 	var accounted time.Duration
-	for k, v := range clocks {
-		pct := 100 * float32(int64(v.total)) / float32(int64(wallTime))
-		lines = append(lines, entry{k, v.total, v.invocations, pct})
+
+	// Iterate over all entries in the sync.Map
+	clocks.Range(func(key, value interface{}) bool {
+		// Type assert the key to a string
+		k, ok := key.(string)
+		if !ok {
+			// If the key is not a string, skip this entry
+			return true
+		}
+
+		// Type assert the value to a clock struct
+		v, ok := value.(clock)
+		if !ok {
+			// If the value is not of type clock, skip this entry
+			return true
+		}
+
+		// Calculate the percentage of wall time accounted for by this clock
+		pct := 100 * float32(v.total.Nanoseconds()) / float32(wallTime.Nanoseconds())
+
+		// Append the entry to the lines slice
+		lines = append(lines, entry{
+			name:        k,
+			total:       v.total,
+			invocations: v.invocations,
+			pct:         pct,
+		})
+
+		// Accumulate the accounted time
 		accounted += v.total
-	}
 
+		return true // Continue iterating
+	})
+
+	// Calculate the unaccounted time
 	unaccounted := wallTime - accounted
-	pct := 100 * float32(int64(unaccounted)) / float32(int64(wallTime))
-	lines = append(lines, entry{"NOT TIMED", unaccounted, 1, pct})
+	pct := 100 * float32(unaccounted.Nanoseconds()) / float32(wallTime.Nanoseconds())
 
+	// Append the "NOT TIMED" entry
+	lines = append(lines, entry{
+		name:        "NOT TIMED",
+		total:       unaccounted,
+		invocations: 1,
+		pct:         pct,
+	})
+
+	// Sort the entries in descending order of total time
 	sort.Sort(lines)
 
+	// Output each entry to the provided io.Writer
 	for _, l := range lines {
 		fmt.Fprintln(out, &l)
 	}

@@ -127,6 +127,7 @@ func runFileAndServe(fname string) {
 	} else {
 		runScript(fname)
 	}
+	engine.WaitFFTs4DDone()
 }
 
 func runScript(fname string) {
