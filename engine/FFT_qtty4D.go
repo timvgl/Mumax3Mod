@@ -143,7 +143,7 @@ func (s *fftOperation4D) Eval() {
 			bufsGPUOP = append(bufsGPUOP, cuda.BufferFFT_T(dataT.NComp(), dataT.Size(), fmt.Sprintf(NameOf(s.q)+"_%d", core)))
 		}
 		if FFT_T_in_mem {
-			cuda.IncreaseBufMax(3 * amountFiles)
+			cuda.IncreaseBufMax(dataT.NComp() * amountFiles)
 			for range amountFiles {
 				FFT_T_data = append(FFT_T_data, cuda.BufferFFT_T(dataT.NComp(), dataT.Size(), NameOf(s.q)))
 			}

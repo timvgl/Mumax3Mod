@@ -196,7 +196,7 @@ func init(){
 func k_{{.Name}}_async ( {{range $i, $t := .ArgT}}{{index $.ArgN $i}} {{$t}}, {{end}}key string, cfg *config) {
 	if Synchronous{ // debug
 		SyncFFT_T(key)
-		timer.Start("{{.Name}}")
+		timer.Start("{{.Name}}" + key)
 	}
 
 	{{.Name}}_args.Lock()
@@ -214,7 +214,7 @@ func k_{{.Name}}_async ( {{range $i, $t := .ArgT}}{{index $.ArgN $i}} {{$t}}, {{
 
 	if Synchronous{ // debug
 		SyncFFT_T(key)
-		timer.Stop("{{.Name}}")
+		timer.Stop("{{.Name}}" + key)
 	}
 }
 

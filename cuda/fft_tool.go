@@ -27,6 +27,11 @@ func Perform3DR2CFFT(src, dst *data.Slice, FFT3DR2CPlanInterface interface{}) {
 	FFT3DR2CPlan.ExecAsync(src, dst)
 }
 
+func Perform3DR2CFFT_T(src, dst *data.Slice, FFT3DR2CPlanInterface interface{}, key string) {
+	FFT3DR2CPlan := FFT3DR2CPlanInterface.(fft3DR2CPlan)
+	FFT3DR2CPlan.ExecAsync_FFT_T(src, dst, key)
+}
+
 func OutputSizeFloatsFFT3D(FFT3DR2CPlanInterface interface{}) (int, int, int) {
 	FFT3DR2CPlan := FFT3DR2CPlanInterface.(fft3DR2CPlan)
 	return FFT3DR2CPlan.OutputSizeFloats()

@@ -186,7 +186,7 @@ func (d *fftOperation3D) evalIntern() {
 		cuda.ZeroFFT_T(buf, NameOf(d.q))
 		defer cuda.Recycle(buf)
 		for i := range d.nComp {
-			cuda.Perform3DR2CFFT(input.Comp(i), buf.Comp(i), FFT3DR2CPlans[d.q])
+			cuda.Perform3DR2CFFT_T(input.Comp(i), buf.Comp(i), FFT3DR2CPlans[d.q], NameOf(d.q))
 		}
 		cuda.ReorderCufftData(FFT3DData[d.q], buf)
 	}

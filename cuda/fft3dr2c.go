@@ -52,6 +52,27 @@ func (p *fft3DR2CPlan) ExecAsync(src, dst *data.Slice) {
 	}
 }
 
+func (p *fft3DR2CPlan) ExecAsync_FFT_T(src, dst *data.Slice, key string) {
+	if Synchronous {
+		SyncFFT_T(key)
+		timer.Start("fft" + key)
+	}
+	util.Argument(src.NComp() == 1 && dst.NComp() == 1)
+	oksrclen := p.InputLen()
+	if src.Len() != oksrclen {
+		log.Panicf("fft size mismatch: expecting src len %v, got %v", oksrclen, src.Len())
+	}
+	okdstlen := p.OutputLen()
+	if dst.Len() != okdstlen {
+		log.Panicf("fft size mismatch: expecting dst len %v, got %v", okdstlen, dst.Len())
+	}
+	p.handle.ExecR2C(cu.DevicePtr(uintptr(src.DevPtr(0))), cu.DevicePtr(uintptr(dst.DevPtr(0))))
+	if Synchronous {
+		SyncFFT_T(key)
+		timer.Stop("fft" + key)
+	}
+}
+
 // 3D size of the input array.
 func (p *fft3DR2CPlan) InputSizeFloats() (Nx, Ny, Nz int) {
 	return p.size[X], p.size[Y], p.size[Z]
