@@ -11,7 +11,7 @@ __device__ __forceinline__ cuComplex my_cexpf (cuComplex z) {
 }
 
 extern "C" __global__ void
-FFT_Step(float* __restrict__ dst, float* __restrict__ src1, float* __restrict__ src2, int Nx, int Ny, int Nz, float phase, int n) {
+FFT_Step(float* __restrict__ dst, float* __restrict__ src1, float* __restrict__ src2, int Nx, int Ny, int Nz, float phase, float n) {
     int ix = blockIdx.x * blockDim.x + threadIdx.x;
     int iy = blockIdx.y * blockDim.y + threadIdx.y;
     int iz = blockIdx.z * blockDim.z + threadIdx.z;

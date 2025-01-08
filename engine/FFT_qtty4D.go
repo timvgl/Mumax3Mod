@@ -213,7 +213,7 @@ func (s *fftOperation4D) Eval() {
 						data.Zero(bufCPU)
 					}
 					data.Copy(bufGPUIP, bufCPU)
-					phase := -2 * math.Pi * float64(i) * s.dF * Time * s.dF
+					phase := -2 * math.Pi * float64(i) * s.dF * Time
 					cuda.FFT_T_Step(bufGPUOP, bufGPUIP, dataT, float32(phase), int((s.maxF-s.minF)/s.dF), fmt.Sprintf(NameOf(s.q)+"_%d", core))
 					info := data.Meta{Freq: s.minF + float64(i)*s.dF, Name: "k_x_y_z_f_" + NameOf(s.q), Unit: UnitOf(FFTOP), CellSize: MeshOf(FFTOP).CellSize()}
 					saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, "k_x_y_z_f_"+NameOf(s.q), i)+".ovf", bufGPUOP.HostCopy(), info, outputFormat, NxNyNz, startK, endK, transformedAxis, true, false)
@@ -229,7 +229,7 @@ func (s *fftOperation4D) Eval() {
 				for i := startIndex; i < endIndex; i++ {
 					data.Copy(bufGPUIP, FFT_T_data[i], fmt.Sprintf(NameOf(s.q)+"_%d", core))
 					//angle := -2i * complex64(complex(math.Pi*float64(i)*Time*s.dF, 0))
-					phase := -2 * math.Pi * float64(i) * s.dF * Time * s.dF
+					phase := -2 * math.Pi * float64(i) * s.dF * Time
 					cuda.FFT_T_Step(FFT_T_data[i], bufGPUIP, dataT, float32(phase), amountFiles, fmt.Sprintf(NameOf(s.q)+"_%d", core))
 				}
 				cuda.Destroy_Stream(fmt.Sprintf(NameOf(s.q)+"_%d", core))
