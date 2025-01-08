@@ -190,12 +190,10 @@ func (s *fftOperation4D) Eval() {
 		if lowerEnd+filesPerCore < int((s.maxF-s.minF)/s.dF) {
 			upperEnd = (core + 1) * filesPerCore
 		} else {
-			if FFT_T_in_mem {
-				upperEnd = amountFiles - 1
-			} else {
-				upperEnd = amountFiles
-			}
+			upperEnd = amountFiles
 		}
+		//fmt.Println(fmt.Sprintf("lower end %v", lowerEnd))
+		//fmt.Println(fmt.Sprintf("upper end %v", upperEnd))
 		wg.Add(1)
 		if !FFT_T_in_mem {
 			go func(core int, s *fftOperation4D, startIndex, endIndex int, bufCPU, bufGPUIP, bufGPUOP, dataT *data.Slice, FFTOP *fftOperation3D, NxNyNz [3]int, startK, endK [3]float64, transformedAxis []string) {
@@ -203,7 +201,7 @@ func (s *fftOperation4D) Eval() {
 				defer runtime.UnlockOSThread()
 				cuda.SetCurrent_Ctx()
 				cuda.Create_Stream(NameOf(s.q) + fmt.Sprintf("_%d", core))
-				for i := startIndex; i <= endIndex; i++ {
+				for i := startIndex; i < endIndex; i++ {
 					in, err := httpfs.Open(OD() + fmt.Sprintf(FilenameFormat, "k_x_y_z_f_"+NameOf(s.q), i) + ".ovf")
 					if err == nil {
 						err := oommf.ReadOVF2DataBinary4Optimized(in, bufCPU)
@@ -228,7 +226,7 @@ func (s *fftOperation4D) Eval() {
 				defer runtime.UnlockOSThread()
 				cuda.SetCurrent_Ctx()
 				cuda.Create_Stream(NameOf(s.q) + fmt.Sprintf("_%d", core))
-				for i := startIndex; i <= endIndex; i++ {
+				for i := startIndex; i < endIndex; i++ {
 					data.Copy(bufGPUIP, FFT_T_data[i], fmt.Sprintf(NameOf(s.q)+"_%d", core))
 					//angle := -2i * complex64(complex(math.Pi*float64(i)*Time*s.dF, 0))
 					phase := -2 * math.Pi * float64(i) * s.dF * Time * s.dF
