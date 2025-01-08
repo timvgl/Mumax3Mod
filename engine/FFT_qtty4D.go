@@ -31,11 +31,17 @@ var (
 	bufsGPUOP_map      = make(map[Quantity][]*data.Slice)
 	FFT_T_data_map     = make(map[Quantity][]*data.Slice)
 	FFT_T_in_mem       = true
+	minFrequency       float64
+	maxFrequency       float64
+	dFrequency         float64
 )
 
 func init() {
 	DeclFunc("FFT4D", FFT4D, "performs FFT in x, y z and t")
 	DeclVar("FFT_T_IN_MEM", &FFT_T_in_mem, "")
+	DeclVar("minFrequency", &minFrequency, "")
+	DeclVar("maxFrequency", &maxFrequency, "")
+	DeclVar("dFrequency", &dFrequency, "")
 	//DeclFunc("FFT2D", FFT2D, "performs FFT in x, y and z")
 }
 
@@ -43,25 +49,18 @@ type fftOperation4D struct {
 	fieldOp
 	name     string
 	q        Quantity
-	dF       float64
-	maxF     float64
-	minF     float64
+	dF       *float64
+	maxF     *float64
+	minF     *float64
 	start    float64
 	period   float64
 	count    int
-	args     []float64
 	fDataSet bool
 	fft3D    *fftOperation3D
 }
 
-func FFT4D(q Quantity, period float64, args ...float64) {
-	if len(args) > 3 {
-		panic("FFT4D needs between two and five arguments for FFT.")
-	}
-	dF := 0.
-	maxF := 0.
-	minF := 0.
-	FFT_T_OP_Obj := fftOperation4D{fieldOp{q, q, q.NComp()}, "k_x_y_z_f_" + NameOf(q), q, dF, maxF, minF, Time, period, -1, args, false, FFT3D_FFT_T(q)}
+func FFT4D(q Quantity, period float64) {
+	FFT_T_OP_Obj := fftOperation4D{fieldOp{q, q, q.NComp()}, "k_x_y_z_f_" + NameOf(q), q, &dFrequency, &maxFrequency, &minFrequency, Time, period, -1, false, FFT3D_FFT_T(q)}
 	FFT_T_OP = append(FFT_T_OP, &FFT_T_OP_Obj)
 	FFT_T_OPRunning[&FFT_T_OP_Obj] = false
 	FFT_T_OPDataCopied[&FFT_T_OP_Obj] = false
@@ -76,55 +75,31 @@ func (s *fftOperation4D) Eval() {
 	mu.Unlock()
 	if !s.fDataSet {
 		period := s.period
-		args := s.args
-		dF := 0.
-		minF := 0.
-		maxF := 0.
-		if len(args) == 0 {
+		dF := s.dF
+		minF := s.minF
+		maxF := s.maxF
+		if dF == nil {
 			if running {
-				dF = 1 / currentRunningTime
+				dF = new(float64)
+				*dF = 1 / currentRunningTime
 			} else if stepping {
-				panic("For Step mode FFT needs at least three arguments.\n In case of three arguments the third one is determining delta F")
+				panic("For Step mode FFT dFrequency has to be set")
 			} else if runningWhile {
-				panic("For RunWhile mode FFT needs at least three arguments.\n In case of three arguments the third one is determining delta F")
-			} else {
-				panic("An error occured in setting up FFT for time.")
-			}
-			maxF = 1 / (2 * period)
-			minF = 0.
-		} else if len(args) == 1 {
-			if running {
-				dF = 1 / currentRunningTime
-				maxF = args[0]
-				minF = 0.
-			} else if stepping || runningWhile {
-				dF = args[0]
-				maxF = 1 / (2 * period)
-				minF = 0.
-			} else {
-				panic("An error occured in setting up FFT for time.")
-			}
-		} else if len(args) == 2 {
-			if running {
-				dF = args[1]
-				maxF = args[0]
-				minF = 0.
-			} else if stepping || runningWhile {
-				dF = args[1]
-				maxF = args[0]
-				minF = 0.
-			} else {
-				panic("An error occured in setting up FFT for time.")
-			}
-		} else if len(args) == 3 {
-			if stepping || runningWhile || running {
-				dF = args[2]
-				maxF = args[0]
-				minF = args[1]
+				panic("For RunWhile mode FFT dFrequency has to be set")
 			} else {
 				panic("An error occured in setting up FFT for time.")
 			}
 		}
+
+		if minF == nil {
+			minF = new(float64)
+			*minF = 0
+		}
+		if maxF == nil {
+			maxF = new(float64)
+			*maxF = 1 / period
+		}
+
 		s.dF = dF
 		s.maxF = maxF
 		s.minF = minF
@@ -139,13 +114,20 @@ func (s *fftOperation4D) Eval() {
 
 	dataT := FFT3DData[s.q]
 	cores := runtime.NumCPU()
-	amountFiles := int((s.maxF - s.minF) / s.dF)
-	if int(s.maxF-s.minF)%int(s.dF) != 0 {
+	amountFiles := int((*s.maxF - *s.minF) / *s.dF)
+	if cores > amountFiles {
+		if amountFiles < 32 {
+			cores = 1
+		} else {
+			cores = amountFiles / 32
+		}
+	}
+	if int(*s.maxF-*s.minF)%int(*s.dF) != 0 {
 		amountFiles += 1
 	}
 	filesPerCore := int(amountFiles / cores)
 	lowerEnd := 0
-	if int((s.maxF-s.minF)/s.dF)%cores != 0 {
+	if int((*s.maxF-*s.minF) / *s.dF)%cores != 0 {
 		cores += 1
 	}
 	bufsCPU := make([]*data.Slice, 0)
@@ -162,7 +144,7 @@ func (s *fftOperation4D) Eval() {
 		}
 		if FFT_T_in_mem {
 			cuda.IncreaseBufMax(3 * amountFiles)
-			for _ = range amountFiles {
+			for range amountFiles {
 				FFT_T_data = append(FFT_T_data, cuda.BufferFFT_T(dataT.NComp(), dataT.Size(), NameOf(s.q)))
 			}
 			FFT_T_data_map[s.q] = FFT_T_data
@@ -185,18 +167,17 @@ func (s *fftOperation4D) Eval() {
 	}
 	NxNyNz, startK, endK, transformedAxis := FFTOP.Axis()
 	wg := sync.WaitGroup{}
+	fftT := Time
 	for core := range cores {
 		upperEnd := 0
-		if lowerEnd+filesPerCore < int((s.maxF-s.minF)/s.dF) {
+		if lowerEnd+filesPerCore < amountFiles {
 			upperEnd = (core + 1) * filesPerCore
 		} else {
 			upperEnd = amountFiles
 		}
-		//fmt.Println(fmt.Sprintf("lower end %v", lowerEnd))
-		//fmt.Println(fmt.Sprintf("upper end %v", upperEnd))
 		wg.Add(1)
 		if !FFT_T_in_mem {
-			go func(core int, s *fftOperation4D, startIndex, endIndex int, bufCPU, bufGPUIP, bufGPUOP, dataT *data.Slice, FFTOP *fftOperation3D, NxNyNz [3]int, startK, endK [3]float64, transformedAxis []string) {
+			go func(core int, s *fftOperation4D, startIndex, endIndex int, bufCPU, bufGPUIP, bufGPUOP, dataT *data.Slice, FFTOP *fftOperation3D, NxNyNz [3]int, startK, endK [3]float64, transformedAxis []string, fftT float64) {
 				runtime.LockOSThread()
 				defer runtime.UnlockOSThread()
 				cuda.SetCurrent_Ctx()
@@ -213,15 +194,15 @@ func (s *fftOperation4D) Eval() {
 						data.Zero(bufCPU)
 					}
 					data.Copy(bufGPUIP, bufCPU)
-					phase := -2 * math.Pi * float64(i) * s.dF * Time
-					cuda.FFT_T_Step(bufGPUOP, bufGPUIP, dataT, float32(phase), int((s.maxF-s.minF)/s.dF), fmt.Sprintf(NameOf(s.q)+"_%d", core))
-					info := data.Meta{Freq: s.minF + float64(i)*s.dF, Name: "k_x_y_z_f_" + NameOf(s.q), Unit: UnitOf(FFTOP), CellSize: MeshOf(FFTOP).CellSize()}
+					phase := -2 * math.Pi * float64(i) * (*s.minF + float64(i)**s.dF) * fftT
+					cuda.FFT_T_Step(bufGPUOP, bufGPUIP, dataT, float32(phase), amountFiles, fmt.Sprintf(NameOf(s.q)+"_%d", core))
+					info := data.Meta{Freq: *s.minF + float64(i)**s.dF, Name: "k_x_y_z_f_" + NameOf(s.q), Unit: UnitOf(FFTOP), CellSize: MeshOf(FFTOP).CellSize()}
 					saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, "k_x_y_z_f_"+NameOf(s.q), i)+".ovf", bufGPUOP.HostCopy(), info, outputFormat, NxNyNz, startK, endK, transformedAxis, true, false)
 				}
 				wg.Done()
-			}(core, s, lowerEnd, upperEnd, bufsCPU[core], bufsGPUIP[core], bufsGPUOP[core], dataT, FFTOP, NxNyNz, startK, endK, transformedAxis)
+			}(core, s, lowerEnd, upperEnd, bufsCPU[core], bufsGPUIP[core], bufsGPUOP[core], dataT, FFTOP, NxNyNz, startK, endK, transformedAxis, fftT)
 		} else {
-			go func(core int, s *fftOperation4D, startIndex, endIndex int, FFT_T_data []*data.Slice, bufGPUIP, dataT *data.Slice, FFTOP *fftOperation3D, NxNyNz [3]int, startK, endK [3]float64, transformedAxis []string, amountFiles int) {
+			go func(core int, s *fftOperation4D, startIndex, endIndex int, bufGPUIP, dataT *data.Slice, FFTOP *fftOperation3D, NxNyNz [3]int, startK, endK [3]float64, transformedAxis []string, amountFiles int, fftT float64) {
 				runtime.LockOSThread()
 				defer runtime.UnlockOSThread()
 				cuda.SetCurrent_Ctx()
@@ -229,12 +210,12 @@ func (s *fftOperation4D) Eval() {
 				for i := startIndex; i < endIndex; i++ {
 					data.Copy(bufGPUIP, FFT_T_data[i], fmt.Sprintf(NameOf(s.q)+"_%d", core))
 					//angle := -2i * complex64(complex(math.Pi*float64(i)*Time*s.dF, 0))
-					phase := -2 * math.Pi * float64(i) * s.dF * Time
+					phase := -2 * math.Pi * (*s.minF + float64(i)**s.dF) * fftT
 					cuda.FFT_T_Step(FFT_T_data[i], bufGPUIP, dataT, float32(phase), amountFiles, fmt.Sprintf(NameOf(s.q)+"_%d", core))
 				}
 				cuda.Destroy_Stream(fmt.Sprintf(NameOf(s.q)+"_%d", core))
 				wg.Done()
-			}(core, s, lowerEnd, upperEnd, FFT_T_data, bufsGPUIP[core], dataT, FFTOP, NxNyNz, startK, endK, transformedAxis, amountFiles)
+			}(core, s, lowerEnd, upperEnd, bufsGPUIP[core], dataT, FFTOP, NxNyNz, startK, endK, transformedAxis, amountFiles, fftT)
 		}
 		lowerEnd += filesPerCore
 	}
@@ -249,10 +230,10 @@ func (s *fftOperation4D) Eval() {
 }
 
 func (s *fftOperation4D) SaveResults() {
-	FFTOP := FFT3D_FFT_T(s.q)
+	FFTOP := s.fft3D
 	NxNyNz, startK, endK, transformedAxis := FFTOP.Axis()
 	for i := range len(FFT_T_data_map[s.q]) {
-		info := data.Meta{Freq: s.minF + float64(i)*s.dF, Name: "k_x_y_z_f_" + NameOf(s.q), Unit: UnitOf(FFTOP), CellSize: MeshOf(FFTOP).CellSize()}
+		info := data.Meta{Freq: *s.minF + float64(i)**s.dF, Name: "k_x_y_z_f_" + NameOf(s.q), Unit: UnitOf(FFTOP), CellSize: MeshOf(FFTOP).CellSize()}
 		saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, "k_x_y_z_f_"+NameOf(s.q), i)+".ovf", FFT_T_data_map[s.q][i].HostCopy(), info, outputFormat, NxNyNz, startK, endK, transformedAxis, true, false)
 	}
 }
@@ -290,7 +271,7 @@ func (s *fftOperation4D) waitUntilPreviousCalcDone() {
 }
 
 func DoFFT4D() {
-	for i, _ := range FFT_T_OP {
+	for i := range FFT_T_OP {
 		if FFT_T_OP[i].needUpdate() {
 			FFT_T_OP[i].waitUntilPreviousCalcDone()
 			mu.Lock()
@@ -307,7 +288,7 @@ func DoFFT4D() {
 }
 
 func WaitFFTs4DDone() {
-	for i, _ := range FFT_T_OP {
+	for i := range FFT_T_OP {
 		FFT_T_OP[i].waitUntilPreviousCalcDone()
 		if FFT_T_in_mem {
 			FFT_T_OP[i].SaveResults()

@@ -1,6 +1,8 @@
 package cuda
 
-import "github.com/mumax/3/data"
+import (
+	"github.com/mumax/3/data"
+)
 
 func FFT_T_Step(dst, src1, src2 *data.Slice, phase float32, n int, key string) {
 	size := dst.Size()
