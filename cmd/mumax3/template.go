@@ -372,6 +372,7 @@ func generateFiles(parentDir, mx3, orgScriptName string, expressions []Expressio
 		for _, exp := range expressionsSweep {
 			newMx3List := strings.Split(newMx3, "\n")
 			newMx3 = strings.Join(append(newMx3List[:exp.LineIndex-shiftLine], newMx3List[exp.LineIndex+1:]...), "\n")
+			shiftLine += 1
 		}
 
 		var joinedPath string
