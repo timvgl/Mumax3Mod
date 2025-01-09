@@ -77,7 +77,7 @@ func GetKeys[T any](m *sync.Map) []T {
 
 func FFT4D(q Quantity, period float64) {
 	QTTYName := ""
-	if fft4DLabel == "" {
+	if fft4DLabel != "" {
 		QTTYName = fft4DLabel
 	} else {
 		QTTYName = NameOf(q)
