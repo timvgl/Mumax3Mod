@@ -132,7 +132,7 @@ Comment: Loading strains is highly experimental - if you want to use the strain 
         - __maxFrequency__ - __float__ frequency to which the fouriertransform in time is supposed to be calculated from (default 1/timeperiod)
         - __dFrequency__ - __float__ frequency steps - has to be set if Mumax is stepping or running while (for Run the default is 1/(time provided in running))
         - __FFT4D_Label__ - __string__ use this string instead of the name of the quantity
-        - Commment: the code is written as async as possible from what I know. For me the sims with the FFT4D didn't need longer compared to without - however this highly depends on the amount of frequencies that have to be calculated and the FixDt parameter
+        - Comment: the code is written as async as possible from what I know. For me the sims with the FFT4D didn't need longer compared to without - however this highly depends on the amount of frequencies that have to be calculated and the FixDt parameter
       
 
     Created OVF file has twice the amount of values calculated for kx for holding imag and real value.
