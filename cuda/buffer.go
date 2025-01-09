@@ -25,6 +25,9 @@ var buf_max = 100 // maximum number of buffers to allocate (detect memory leak e
 func IncreaseBufMax(val int) {
 	buf_max += val
 }
+func DecreaseBufMax(val int) {
+	buf_max -= val
+}
 
 // Returns a GPU slice for temporary use. To be returned to the pool with Recycle
 func Buffer(nComp int, size [3]int) *data.Slice {
@@ -134,9 +137,9 @@ func Recycle(s *data.Slice) {
 	buf_pool[N] = pool
 }
 
-func Recycle_FFT_T(s *data.Slice) {
+func Recycle_FFT_T(s *data.Slice, key string) {
 	if Synchronous {
-		Sync()
+		SyncFFT_T(key)
 	}
 
 	N := s.Len()

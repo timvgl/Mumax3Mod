@@ -155,7 +155,7 @@ func (s *fftOperation4D) Eval() {
 	FFT_T_data := make([]*data.Slice, 0)
 	bufInitalized := slices.Contains(GetKeys[Quantity](&bufsCPU_map), s.q)
 	if !bufInitalized {
-		cuda.IncreaseBufMax(cores * 3)
+		cuda.IncreaseBufMax(cores * 3 * dataT.NComp())
 		for core := range cores {
 			bufsCPU = append(bufsCPU, data.NewSlice(dataT.NComp(), dataT.Size()))
 			bufsGPUIP = append(bufsGPUIP, cuda.BufferFFT_T(dataT.NComp(), dataT.Size(), fmt.Sprintf(NameOf(s.q)+"_%d", core)))
@@ -286,6 +286,48 @@ func (s *fftOperation4D) SaveResults() {
 	}
 }
 
+func (s *fftOperation4D) Clear_Buffers() {
+	FFT_T_data_buffer_length := 0
+	if FFT_T_in_mem {
+		tmpVar, ok := FFT_T_data_map.Load(s.q)
+		if ok {
+			FFT_T_data := tmpVar.([]*data.Slice)
+			for i := range len(FFT_T_data) {
+				cuda.Recycle_FFT_T(FFT_T_data[i], NameOf(s.q))
+				FFT_T_data_buffer_length += 1
+			}
+			FFT_T_data_map.Delete(s.q)
+		}
+	}
+	tmpVar, ok := bufsCPU_map.Load(s.q)
+	lengthBuffers := 0
+	if ok {
+		bufsCPU := tmpVar.([]*data.Slice)
+		for i := range len(bufsCPU) {
+			bufsCPU[i].Free()
+			lengthBuffers += 1
+		}
+		bufsCPU_map.Delete(s.q)
+	}
+	tmpVar, ok = bufsGPUIP_map.Load(s.q)
+	if ok {
+		bufsGPUIP := tmpVar.([]*data.Slice)
+		for i := range len(bufsGPUIP) {
+			cuda.Recycle_FFT_T(bufsGPUIP[i], fmt.Sprintf(NameOf(s.q)+"_%d", i))
+		}
+		bufsGPUIP_map.Delete(s.q)
+	}
+	tmpVar, ok = bufsGPUOP_map.Load(s.q)
+	if ok {
+		bufsGPUOP := tmpVar.([]*data.Slice)
+		for i := range len(bufsGPUOP) {
+			cuda.Recycle_FFT_T(bufsGPUOP[i], fmt.Sprintf(NameOf(s.q)+"_%d", i))
+		}
+		bufsGPUOP_map.Delete(s.q)
+	}
+	cuda.DecreaseBufMax(s.q.NComp()*3*lengthBuffers + FFT_T_data_buffer_length)
+}
+
 func (s *fftOperation4D) needUpdate() bool {
 	t := Time - s.start
 	return s.period != 0 && t-float64(s.count)*s.period >= s.period
@@ -341,5 +383,6 @@ func WaitFFTs4DDone() {
 		if FFT_T_in_mem {
 			FFT_T_OP[i].SaveResults()
 		}
+		FFT_T_OP[i].Clear_Buffers()
 	}
 }

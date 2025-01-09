@@ -116,8 +116,8 @@ acuda2go: acuda2go.go
 	go build $<
 
 clean:
-	rm -vf *.ptx
-	rm -vf *.ptx.a
+	rm -vf *.ptx cuda2go
+	rm -vf *.ptx.a acuda2go
 
 
 realclean:
