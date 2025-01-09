@@ -48,7 +48,7 @@ func init() {
 func k_FFT_Step_async(dst unsafe.Pointer, src1 unsafe.Pointer, src2 unsafe.Pointer, Nx int, Ny int, Nz int, phase float32, n float32, key string, cfg *config) {
 	if Synchronous { // debug
 		SyncFFT_T(key)
-		timer.Start("FFT_Step")
+		timer.Start("FFT_Step" + key)
 	}
 
 	FFT_Step_args.Lock()
@@ -72,7 +72,7 @@ func k_FFT_Step_async(dst unsafe.Pointer, src1 unsafe.Pointer, src2 unsafe.Point
 
 	if Synchronous { // debug
 		SyncFFT_T(key)
-		timer.Stop("FFT_Step")
+		timer.Stop("FFT_Step" + key)
 	}
 }
 

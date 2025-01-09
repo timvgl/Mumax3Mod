@@ -97,6 +97,7 @@ wrappers: $(WRAPPERS)
 
 
 cuda2go: cuda2go.go
+	rm -vf cuda2go
 	go build $<
 
 awrappers: $(AWRAPPERS)
@@ -111,6 +112,7 @@ awrappers: $(AWRAPPERS)
 	@ gofmt -w -s -l $@ > /dev/null
 
 acuda2go: acuda2go.go
+	rm -vf acuda2go
 	go build $<
 
 clean:
