@@ -34,7 +34,7 @@ var (
 	minFrequency   float64
 	maxFrequency   float64
 	dFrequency     float64
-	fft4DLabel     string
+	fft4DLabel     *string
 )
 
 func init() {
@@ -43,7 +43,7 @@ func init() {
 	DeclVar("minFrequency", &minFrequency, "")
 	DeclVar("maxFrequency", &maxFrequency, "")
 	DeclVar("dFrequency", &dFrequency, "")
-	DeclVar("FFT4D_Label", &fft4DLabel, "")
+	DeclVar("FFT4D_Label", fft4DLabel, "")
 	//DeclFunc("FFT2D", FFT2D, "performs FFT in x, y and z")
 }
 
@@ -59,7 +59,7 @@ type fftOperation4D struct {
 	count    int
 	fDataSet bool
 	fft3D    *fftOperation3D
-	label    *string
+	label    string
 }
 
 func GetKeys[T any](m *sync.Map) []T {
@@ -76,7 +76,13 @@ func GetKeys[T any](m *sync.Map) []T {
 }
 
 func FFT4D(q Quantity, period float64) {
-	FFT_T_OP_Obj := fftOperation4D{fieldOp{q, q, q.NComp()}, "k_x_y_z_f_" + NameOf(q), q, &dFrequency, &maxFrequency, &minFrequency, Time, period, -1, false, FFT3D_FFT_T(q), &fft4DLabel}
+	QTTYName := ""
+	if fft4DLabel != nil {
+		QTTYName = *fft4DLabel
+	} else {
+		QTTYName = NameOf(q)
+	}
+	FFT_T_OP_Obj := fftOperation4D{fieldOp{q, q, q.NComp()}, "k_x_y_z_f_" + NameOf(q), q, &dFrequency, &maxFrequency, &minFrequency, Time, period, -1, false, FFT3D_FFT_T(q), QTTYName}
 	FFT_T_OP = append(FFT_T_OP, &FFT_T_OP_Obj)
 	FFT_T_OPRunning[&FFT_T_OP_Obj] = false
 	FFT_T_OPDataCopied[&FFT_T_OP_Obj] = false
@@ -206,12 +212,6 @@ func (s *fftOperation4D) Eval() {
 	NxNyNz, startK, endK, transformedAxis := FFTOP.Axis()
 	wg := sync.WaitGroup{}
 	fftT := Time
-	QTTYName := ""
-	if s.label != nil {
-		QTTYName = *s.label
-	} else {
-		QTTYName = NameOf(s.q)
-	}
 	for core := range cores {
 		upperEnd := 0
 		if lowerEnd+filesPerCore < amountFiles {
@@ -221,13 +221,13 @@ func (s *fftOperation4D) Eval() {
 		}
 		wg.Add(1)
 		if !FFT_T_in_mem {
-			go func(core int, s *fftOperation4D, startIndex, endIndex int, bufCPU, bufGPUIP, bufGPUOP, dataT *data.Slice, FFTOP *fftOperation3D, NxNyNz [3]int, startK, endK [3]float64, transformedAxis []string, fftT float64, QTTYName string) {
+			go func(core int, s *fftOperation4D, startIndex, endIndex int, bufCPU, bufGPUIP, bufGPUOP, dataT *data.Slice, FFTOP *fftOperation3D, NxNyNz [3]int, startK, endK [3]float64, transformedAxis []string, fftT float64) {
 				runtime.LockOSThread()
 				defer runtime.UnlockOSThread()
 				cuda.SetCurrent_Ctx()
 				cuda.Create_Stream(NameOf(s.q) + fmt.Sprintf("_%d", core))
 				for i := startIndex; i < endIndex; i++ {
-					in, err := httpfs.Open(OD() + fmt.Sprintf(FilenameFormat, "k_x_y_z_f_"+QTTYName, i) + ".ovf")
+					in, err := httpfs.Open(OD() + fmt.Sprintf(FilenameFormat, "k_x_y_z_f_"+s.label, i) + ".ovf")
 					if err == nil {
 						err := oommf.ReadOVF2DataBinary4Optimized(in, bufCPU)
 						if err != nil {
@@ -240,11 +240,11 @@ func (s *fftOperation4D) Eval() {
 					data.Copy(bufGPUIP, bufCPU)
 					phase := -2 * math.Pi * float64(i) * (*s.minF + float64(i)**s.dF) * fftT
 					cuda.FFT_T_Step(bufGPUOP, bufGPUIP, dataT, float32(phase), amountFiles, fmt.Sprintf(NameOf(s.q)+"_%d", core))
-					info := data.Meta{Freq: *s.minF + float64(i)**s.dF, Name: "k_x_y_z_f_" + QTTYName, Unit: UnitOf(FFTOP), CellSize: MeshOf(FFTOP).CellSize()}
-					saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, "k_x_y_z_f_"+QTTYName, i)+".ovf", bufGPUOP.HostCopy(), info, outputFormat, NxNyNz, startK, endK, transformedAxis, true, false)
+					info := data.Meta{Freq: *s.minF + float64(i)**s.dF, Name: "k_x_y_z_f_" + s.label, Unit: UnitOf(FFTOP), CellSize: MeshOf(FFTOP).CellSize()}
+					saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, "k_x_y_z_f_"+s.label, i)+".ovf", bufGPUOP.HostCopy(), info, outputFormat, NxNyNz, startK, endK, transformedAxis, true, false)
 				}
 				wg.Done()
-			}(core, s, lowerEnd, upperEnd, bufsCPU[core], bufsGPUIP[core], bufsGPUOP[core], dataT, FFTOP, NxNyNz, startK, endK, transformedAxis, fftT, QTTYName)
+			}(core, s, lowerEnd, upperEnd, bufsCPU[core], bufsGPUIP[core], bufsGPUOP[core], dataT, FFTOP, NxNyNz, startK, endK, transformedAxis, fftT)
 		} else {
 			go func(core int, s *fftOperation4D, startIndex, endIndex int, bufGPUIP, dataT *data.Slice, FFTOP *fftOperation3D, NxNyNz [3]int, startK, endK [3]float64, transformedAxis []string, amountFiles int, fftT float64) {
 				runtime.LockOSThread()
@@ -278,20 +278,14 @@ func (s *fftOperation4D) SaveResults() {
 	NxNyNz, startK, endK, transformedAxis := FFTOP.Axis()
 	tmpVar, ok := FFT_T_data_map.Load(s.q)
 	FFT_T_data := make([]*data.Slice, 0)
-	QTTYName := ""
-	if s.label != nil {
-		QTTYName = *s.label
-	} else {
-		QTTYName = NameOf(s.q)
-	}
 	if ok {
 		FFT_T_data = tmpVar.([]*data.Slice)
 	} else {
 		panic("FFT_T data could not be found during export.")
 	}
 	for i := range len(FFT_T_data) {
-		info := data.Meta{Freq: *s.minF + float64(i)**s.dF, Name: "k_x_y_z_f_" + QTTYName, Unit: UnitOf(FFTOP), CellSize: MeshOf(FFTOP).CellSize()}
-		saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, "k_x_y_z_f_"+QTTYName, i)+".ovf", FFT_T_data[i].HostCopy(), info, outputFormat, NxNyNz, startK, endK, transformedAxis, true, false)
+		info := data.Meta{Freq: *s.minF + float64(i)**s.dF, Name: "k_x_y_z_f_" + s.label, Unit: UnitOf(FFTOP), CellSize: MeshOf(FFTOP).CellSize()}
+		saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, "k_x_y_z_f_"+s.label, i)+".ovf", FFT_T_data[i].HostCopy(), info, outputFormat, NxNyNz, startK, endK, transformedAxis, true, false)
 	}
 }
 
