@@ -26,7 +26,7 @@ var (
 	flag_vet      = flag.Bool("vet", false, "Check input files for errors, but don't run them")
 	flag_template = flag.Bool("template", false, "use template method from amumax")
 	flag_flat     = flag.Bool("flat", false, "flat structure for template")
-	flag_pipeline = flag.Int("pipelineLenth", 1, "")
+	flag_pipeline = flag.Int("pipelineLength", 1, "")
 	flag_encapsle = flag.Bool("encapsle", false, "")
 	// more flags in engine/gofiles.go
 )
