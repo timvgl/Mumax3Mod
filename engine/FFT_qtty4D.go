@@ -30,11 +30,15 @@ var (
 	bufsGPUIP_map  sync.Map
 	bufsGPUOP_map  sync.Map
 	FFT_T_data_map sync.Map
+	bufsTable_map  sync.Map
 	FFT_T_in_mem           = true
 	minFrequency   float64 = math.NaN()
 	maxFrequency   float64 = math.NaN()
 	dFrequency     float64 = math.NaN()
 	fft4DLabel     string  = ""
+	kx             float64 = math.NaN()
+	ky             float64 = math.NaN()
+	kz             float64 = math.NaN()
 )
 
 func init() {
@@ -44,6 +48,9 @@ func init() {
 	DeclVar("maxFrequency", &maxFrequency, "")
 	DeclVar("dFrequency", &dFrequency, "")
 	DeclVar("FFT4D_Label", &fft4DLabel, "")
+	//DeclVar("kx", &kx, "")
+	//DeclVar("ky", &ky, "")
+	//DeclVar("kz", &kz, "")
 	//DeclFunc("FFT2D", FFT2D, "performs FFT in x, y and z")
 }
 
@@ -60,6 +67,9 @@ type fftOperation4D struct {
 	fDataSet bool
 	fft3D    *fftOperation3D
 	label    string
+	ikx      float64
+	iky      float64
+	ikz      float64
 }
 
 func GetKeys[T any](m *sync.Map) []T {
@@ -75,18 +85,223 @@ func GetKeys[T any](m *sync.Map) []T {
 	return keys
 }
 
-func FFT4D(q Quantity, period float64) {
+func FFT4D(q Quantity, period float64) *fftOperation4D {
 	QTTYName := ""
 	if fft4DLabel != "" {
 		QTTYName = fft4DLabel
 	} else {
 		QTTYName = NameOf(q)
 	}
-	FFT_T_OP_Obj := fftOperation4D{fieldOp{q, q, q.NComp()}, "k_x_y_z_f_" + NameOf(q), q, dFrequency, maxFrequency, minFrequency, Time, period, -1, false, FFT3D_FFT_T(q), QTTYName}
+	ikx := math.NaN()
+	iky := math.NaN()
+	ikz := math.NaN()
+	fft3D := FFT3D_FFT_T(q)
+	/*
+		s, _, KXYZEnd, _ := fft3D.Axis()
+		if !math.IsNaN(kx) {
+			ikx = KXYZEnd[0] / kx
+			if int(ikx) > s[0] {
+				panic("kx is too large for the given mesh. ")
+			}
+		}
+		if !math.IsNaN(ky) {
+			iky = (1 + ky/KXYZEnd[1]) * float64(s[1]) / 2
+			if int(iky) > s[1] {
+				panic("ky is too large for the given mesh. ")
+			}
+		}
+		if !math.IsNaN(kz) {
+			ikz = (1 + kz/KXYZEnd[2]) * float64(s[2]) / 2
+			if int(ikz) > s[2] {
+				panic("kz is too large for the given mesh. ")
+			}
+		}
+		if !kx_ky_kz_prop_defined(q, ikx, iky, ikz) {
+			panic("kx, ky, kz are not properly defined.")
+		}*/
+	FFT_T_OP_Obj := fftOperation4D{fieldOp{q, q, q.NComp()}, "k_x_y_z_f_" + NameOf(q), q, dFrequency, maxFrequency, minFrequency, Time, period, -1, false, fft3D, QTTYName, ikx, iky, ikz}
 	FFT_T_OP = append(FFT_T_OP, &FFT_T_OP_Obj)
 	FFT_T_OPRunning[&FFT_T_OP_Obj] = false
 	FFT_T_OPDataCopied[&FFT_T_OP_Obj] = false
+	return &FFT_T_OP_Obj
 }
+
+func XOR3(a, b, c bool) bool {
+	return (a != b) != c
+}
+
+func XOR3_2True(a, b, c bool) bool {
+	// Count the number of true inputs
+	count := 0
+	if a {
+		count++
+	}
+	if b {
+		count++
+	}
+	if c {
+		count++
+	}
+
+	// Return true if count is 1 or 2
+	return count == 2
+}
+
+func kx_ky_kz_prop_defined(q Quantity, ikx, iky, ikz float64) bool {
+	// Determine if kx, ky, kz are NaN (undefined)
+	isNaN_kx := math.IsNaN(ikx)
+	isNaN_ky := math.IsNaN(iky)
+	isNaN_kz := math.IsNaN(ikz)
+
+	// Count NaNs
+	numNaNs := 0
+	if isNaN_kx {
+		numNaNs++
+	}
+	if isNaN_ky {
+		numNaNs++
+	}
+	if isNaN_kz {
+		numNaNs++
+	}
+	// Count dimensions equal to 1
+	dim1 := SizeOf(q)[0] == 1
+	dim2 := SizeOf(q)[1] == 1
+	dim3 := SizeOf(q)[2] == 1
+
+	numDims1 := 0
+	if dim1 {
+		numDims1++
+	}
+	if dim2 {
+		numDims1++
+	}
+	if dim3 {
+		numDims1++
+	}
+
+	// Define the two cases
+	// Case 1: Exactly 1 NaN (two k values defined) and all dimensions > 1
+	case1 := (numNaNs == 1) && (numDims1 == 0)
+
+	// Case 2: Exactly 2 NaNs (one k value defined) and exactly 1 dimension == 1
+	case2 := (numNaNs == 2) && (numDims1 == 1)
+
+	// Ensure that the NaNs correspond to the dimensions that are not 1
+	// For Case 2, if a dimension is 1, its corresponding k should be NaN
+	// Example: If dim1 == 1, then isNaN_kx should be true
+	// We need to verify that exactly one of the mappings matches
+
+	// Count correct mappings
+	correctMappings := 0
+	if (dim1 && isNaN_kx) || (!dim1 && !isNaN_kx) {
+		correctMappings++
+	}
+	if (dim2 && isNaN_ky) || (!dim2 && !isNaN_ky) {
+		correctMappings++
+	}
+	if (dim3 && isNaN_kz) || (!dim3 && !isNaN_kz) {
+		correctMappings++
+	}
+
+	// For Case 1: All mappings should be correct
+	correctCase1 := (numNaNs == 1) && (correctMappings == 3)
+
+	// For Case 2: Exactly one mapping should be mismatched (since one dim is 1 and two k's are NaN)
+	correctCase2 := (numNaNs == 2) && (numDims1 == 1) && (correctMappings == 2)
+
+	return (case1 && correctCase1) || (case2 && correctCase2)
+}
+
+/*
+func (s *fftOperation4D) average() [][]float64 {
+	//(a != b) != c
+	averegedData := make([][]float32, s.q.NComp())
+	cores := runtime.NumCPU()
+	amountFiles := int((s.maxF - s.minF) / s.dF)
+	if cores > amountFiles {
+		if amountFiles < 32 {
+			cores = 1
+		} else {
+			cores = amountFiles / 32
+		}
+	}
+	if int(s.maxF-s.minF)%int(s.dF) != 0 {
+		amountFiles += 1
+	}
+	filesPerCore := int(amountFiles / cores)
+	lowerEnd := 0
+	if int((s.maxF-s.minF)/s.dF)%cores != 0 {
+		cores += 1
+	}
+	runtime.LockOSThread()
+	defer runtime.UnlockOSThread()
+	cuda.SetCurrent_Ctx()
+	cuda.Create_Stream(NameOf(s.q) + "_table")
+	s.waitUntilPreviousCalcDone()
+	FFT_T_data := make([]*data.Slice, 0)
+	tmpVar, ok := FFT_T_data_map.Load(s.q)
+	if ok {
+		FFT_T_data = tmpVar.([]*data.Slice)
+	} else {
+		panic("FFT_T data could not be found during export for table. FFT needs to be calculated in GPU memory.")
+	}
+	bufsTable := make([]*data.Slice, 0)
+	bufInitalized := slices.Contains(GetKeys[Quantity](&bufsTable_map), s.q)
+	if !bufInitalized {
+		sizeBufTable := FFT_T_data[0].Size()
+		if !math.IsNaN(s.ikx) {
+			sizeBufTable[0] = 1
+		}
+		if !math.IsNaN(s.iky) {
+			sizeBufTable[1] = 1
+		}
+		if !math.IsNaN(s.ikz) {
+			sizeBufTable[2] = 1
+		}
+		cuda.IncreaseBufMax(cores * FFT_T_data[0].NComp())
+		for _ = range cores {
+			bufsTable = append(bufsTable, cuda.BufferFFT_T(FFT_T_data[0].NComp(), sizeBufTable, NameOf(s.q)+"_table"))
+		}
+		bufsTable_map.Store(s.q, bufsTable)
+	} else {
+		tmpVar, ok = bufsTable_map.Load(s.q)
+		if ok {
+			bufsTable = tmpVar.([]*data.Slice)
+		} else {
+			panic("Could not load table buffers.")
+		}
+	}
+	wg := sync.WaitGroup{}
+	for core := range cores {
+		upperEnd := 0
+		if lowerEnd+filesPerCore < amountFiles {
+			upperEnd = (core + 1) * filesPerCore
+		} else {
+			upperEnd = amountFiles
+		}
+		wg.Add(1)
+		go func(core int, s *fftOperation4D, startIndex, endIndex int) {
+			runtime.LockOSThread()
+			defer runtime.UnlockOSThread()
+			cuda.SetCurrent_Ctx()
+			cuda.Create_Stream(NameOf(s.q) + fmt.Sprintf("_%d_table", core))
+			for i := startIndex; i < endIndex; i++ {
+				cuda.ExtractSlice(bufsTable[core], FFT_T_data[i], s.ikx, s.iky, s.ikz, NameOf(s.q)+fmt.Sprintf("_%d_table", core))
+				reducedData := bufsTable[core].HostCopy().Host()
+				for i := range reducedData {
+					averegedData[i][startIndex:endIndex] = reducedData[i]
+				}
+			}
+			cuda.Destroy_Stream(fmt.Sprintf(NameOf(s.q)+"_%d", core))
+			wg.Done()
+		}(core, s, lowerEnd, upperEnd)
+		lowerEnd += filesPerCore
+	}
+	wg.Wait()
+
+}
+*/
 
 func (s *fftOperation4D) Eval() {
 	mu.Lock()

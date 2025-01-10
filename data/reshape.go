@@ -22,3 +22,14 @@ func reshape(array []float32, size [3]int) [][][]float32 {
 	}
 	return sliced
 }
+
+func reshape2D(array []float32, comp int) [][]float32 {
+	if len(array)%comp != 0 {
+		panic(fmt.Errorf("reshape2D: size mismatch: %v mod %v != 0", len(array), comp))
+	}
+	sliced := make([][]float32, comp)
+	for i := range sliced {
+		sliced[i] = array[i*len(array)/comp : (i+1)*len(array)/comp]
+	}
+	return sliced
+}
