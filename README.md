@@ -126,6 +126,14 @@ Comment: Loading strains is highly experimental - if you want to use the strain 
 
 * FFT:
     + __FFT3D__ - calculate FFT in 3D (x, y, z) and e.g. save to ovf file. When this command is runned the real and imag part the FFT is visible in the Web-UI. The data in the WebUI is being updated, when this command is called again, so in case of AutoSave every dt s. Args: __Quantity__
+    + __FFT4D__ - performs FFT in 3D (x, y, z) and fouriertransform incremental in time. The data is saved to file when the simulation is finished (performance). The period passed to the function defines how often the fourier coefficiens are updated. Args: __Quantity__, __float__ (timeperiod)
+        - __FFT_T_IN_MEM__ - set to false the needed data is stored in ovf files that are read and written continously - lower GPU memory consumption, but slower
+        - __minFrequency__ - __float__ frequency from which the fouriertransform in time is supposed to be calculated from (default 0)
+        - __maxFrequency__ - __float__ frequency to which the fouriertransform in time is supposed to be calculated from (default 1/timeperiod)
+        - __dFrequency__ - __float__ frequency steps - has to be set if Mumax is stepping or running while (for Run the default is 1/(time provided in running))
+        - __FFT4D_Label__ - __string__ use this string instead of the name of the quantity
+        - Comment: the code is written as async as possible from what I know. For me the sims with the FFT4D didn't need longer compared to without - however this highly depends on the amount of frequencies that have to be calculated and the FixDt parameter
+      
 
     Created OVF file has twice the amount of values calculated for kx for holding imag and real value.
     Can be imported into xarray by making use of mumaxXR. Please don't combine data holding non-FFT data and FFT data
