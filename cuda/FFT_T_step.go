@@ -7,6 +7,7 @@ import (
 
 func FFT_T_Step(dst, src1, src2 *data.Slice, phase float32, n int, key string) {
 	size := dst.Size()
+	size[0] /= 2
 	util.Assert(src1.NComp() == src2.NComp() && src1.NComp() == dst.NComp())
 	cfg := make3DConf(size)
 	for c := range dst.NComp() {
