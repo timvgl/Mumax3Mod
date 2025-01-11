@@ -5,7 +5,9 @@
 #define index(ix,iy,iz,Nx,Ny,Nz) ( ( (iz)*(Ny) + (iy) ) * (Nx) + (ix) )
 #define idx(ix,iy,iz) ( index((ix),(iy),(iz),(Nx),(Ny),(Nz)) )
 
-
+//4D array indexing
+#define index4D(ix,iy,iz,fi,Nx,Ny,Nz,Nf) ( ( ( (fi)*(Nz) + (iz) ) * (Ny) + (iy) ) * (Nx) + (ix) )
+#define idx4D(ix,iy,iz,fi) ( index4D((ix),(iy),(iz),(fi),(Nx),(Ny),(Nz),(Nf)) )
 // modulo used for PBC wrap around
 #define MOD(n, M) ( (( (n) % (M) ) + (M) ) % (M)  )
 

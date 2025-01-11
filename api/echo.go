@@ -10,6 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/mumax/3/logUI"
+
 	//"github.com/mumax/3/engine"
 	"github.com/mumax/3/script"
 )
@@ -53,7 +54,6 @@ func Start(host string, port int, basePath string, tunnel string, debug bool) {
 	wsManager.startBroadcastLoop()
 	engineState := initEngineStateAPI(api, wsManager)
 	wsManager.engineState = engineState
-
 	startGuiServer(e, host, basePath, port, tunnel)
 }
 

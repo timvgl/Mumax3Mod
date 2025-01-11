@@ -86,6 +86,34 @@ func BufferFFT_T(nComp int, size [3]int, key string) *data.Slice {
 	return data.SliceFromPtrs(size, data.GPUMemory, ptrs)
 }
 
+func BufferFFT_T_F(nComp int, size [3]int, fLength int, key string) *data.Slice {
+	if Synchronous {
+		SyncFFT_T(key)
+	}
+
+	ptrs := make([]unsafe.Pointer, nComp)
+
+	// re-use as many buffers as possible form our stack
+	N := prod(size) * fLength
+	pool := buf_pool[N]
+	nFromPool := iMin(nComp, len(pool))
+	for i := 0; i < nFromPool; i++ {
+		ptrs[i] = pool[len(pool)-i-1]
+	}
+	buf_pool[N] = pool[:len(pool)-nFromPool]
+
+	// allocate as much new memory as needed
+	for i := nFromPool; i < nComp; i++ {
+		if len(buf_check) >= buf_max {
+			log.Panic(fmt.Sprintf("too many buffers in use, possible memory leak: %v", buf_max))
+		}
+		ptrs[i] = MemAlloc(int64(cu.SIZEOF_FLOAT32 * N))
+		buf_check[ptrs[i]] = struct{}{} // mark this pointer as mine
+	}
+
+	return data.SliceFromPtrsF(size, fLength, data.GPUMemory, ptrs)
+}
+
 func BufferComplex(nComp int, size [3]int) *data.Slice {
 	if Synchronous {
 		Sync()

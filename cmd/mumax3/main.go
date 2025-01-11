@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"path"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/mumax/3/api"
@@ -62,20 +63,37 @@ func main() {
 		if len(args) > *flag_pipeline {
 			panic(fmt.Sprintf("Found unparsed args.\n %v", args))
 		}
+		var wg sync.WaitGroup
 		for i := range args {
 			mmx3ScriptsTmp, SweepExec, err := template(args[i], *flag_flat)
 			if err != nil {
 				panic(err)
 			}
 			RunQueue(mmx3ScriptsTmp)
-			for _, expr := range SweepExec {
-				if expr.Dir {
-					engine.RunExecDir(expr.Arg)
+			if len(SweepExec) == 1 {
+				wg.Add(1)
+				if SweepExec[0].Dir {
+					go func(arg string) {
+						engine.RunExecDir(arg)
+						wg.Done()
+					}(SweepExec[0].Arg)
 				} else {
-					engine.RunExec(expr.Arg)
+					go func(arg string) {
+						engine.RunExec(arg)
+						wg.Done()
+					}(SweepExec[0].Arg)
+				}
+			} else {
+				for j := range SweepExec {
+					if SweepExec[j].Dir {
+						engine.RunExecDir(SweepExec[j].Arg)
+					} else {
+						engine.RunExec(SweepExec[j].Arg)
+					}
 				}
 			}
 		}
+		wg.Wait()
 		os.Exit(int(exitStatus))
 	} else {
 		switch flag.NArg() {

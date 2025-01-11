@@ -367,22 +367,23 @@ func (s *fftOperation4D) Eval() {
 	bufsCPU := make([]*data.Slice, 0)
 	bufsGPUIP := make([]*data.Slice, 0)
 	bufsGPUOP := make([]*data.Slice, 0)
-	FFT_T_data := make([]*data.Slice, 0)
+	var FFT_T_data *data.Slice
 	bufInitalized := slices.Contains(GetKeys[Quantity](&bufsCPU_map), s.q)
 	if !bufInitalized {
-		cuda.IncreaseBufMax(cores * 3 * dataT.NComp())
-		for core := range cores {
-			bufsCPU = append(bufsCPU, data.NewSlice(dataT.NComp(), dataT.Size()))
-			bufsGPUIP = append(bufsGPUIP, cuda.BufferFFT_T(dataT.NComp(), dataT.Size(), fmt.Sprintf(NameOf(s.q)+"_%d", core)))
-			bufsGPUOP = append(bufsGPUOP, cuda.BufferFFT_T(dataT.NComp(), dataT.Size(), fmt.Sprintf(NameOf(s.q)+"_%d", core)))
-		}
-		if FFT_T_in_mem {
-			cuda.IncreaseBufMax(dataT.NComp() * amountFiles)
-			for range amountFiles {
-				FFT_T_data = append(FFT_T_data, cuda.BufferFFT_T(dataT.NComp(), dataT.Size(), NameOf(s.q)))
+		if !FFT_T_in_mem {
+			cuda.IncreaseBufMax(cores * 3 * dataT.NComp())
+			for core := range cores {
+				bufsCPU = append(bufsCPU, data.NewSlice(dataT.NComp(), dataT.Size()))
+				cuda.Create_Stream(NameOf(s.q) + fmt.Sprintf("_%d", core))
+				bufsGPUIP = append(bufsGPUIP, cuda.BufferFFT_T(dataT.NComp(), dataT.Size(), fmt.Sprintf(NameOf(s.q)+"_%d", core)))
+				bufsGPUOP = append(bufsGPUOP, cuda.BufferFFT_T(dataT.NComp(), dataT.Size(), fmt.Sprintf(NameOf(s.q)+"_%d", core)))
 			}
+		} else {
+			cuda.IncreaseBufMax(dataT.NComp())
+			FFT_T_data = cuda.BufferFFT_T_F(dataT.NComp(), dataT.Size(), amountFiles, NameOf(s.q))
 			FFT_T_data_map.Store(s.q, FFT_T_data)
 		}
+
 		bufsCPU_map.Store(s.q, bufsCPU)
 		bufsGPUIP_map.Store(s.q, bufsGPUIP)
 		bufsGPUOP_map.Store(s.q, bufsGPUOP)
@@ -394,50 +395,50 @@ func (s *fftOperation4D) Eval() {
 	if bufInitalized {
 		var ok bool
 		var tmpVar any
-		tmpVar, ok = bufsCPU_map.Load(s.q)
-		if ok {
-			bufsCPU = tmpVar.([]*data.Slice)
+		if !FFT_T_in_mem {
+			tmpVar, ok = bufsCPU_map.Load(s.q)
+			if ok {
+				bufsCPU = tmpVar.([]*data.Slice)
+			} else {
+				panic("Could not load CPU buffers.")
+			}
+			tmpVar, ok = bufsGPUIP_map.Load(s.q)
+			if ok {
+				bufsGPUIP = tmpVar.([]*data.Slice)
+			} else {
+				panic("Could not load CPU IP buffers.")
+			}
+			tmpVar, ok = bufsGPUOP_map.Load(s.q)
+			if ok {
+				bufsGPUOP = tmpVar.([]*data.Slice)
+			} else {
+				panic("Could not load GPU OP buffers.")
+			}
 		} else {
-			panic("Could not load CPU buffers.")
-		}
-		tmpVar, ok = bufsGPUIP_map.Load(s.q)
-		if ok {
-			bufsGPUIP = tmpVar.([]*data.Slice)
-		} else {
-			panic("Could not load CPU IP buffers.")
-		}
-		tmpVar, ok = bufsGPUOP_map.Load(s.q)
-		if ok {
-			bufsGPUOP = tmpVar.([]*data.Slice)
-		} else {
-			panic("Could not load GPU OP buffers.")
-		}
-		if FFT_T_in_mem {
 			tmpVar, ok = FFT_T_data_map.Load(s.q)
 			if ok {
-				FFT_T_data = tmpVar.([]*data.Slice)
+				FFT_T_data = tmpVar.(*data.Slice)
 			} else {
 				panic("Could not load FFT_T buffers.")
 			}
 		}
 	}
 	NxNyNz, startK, endK, transformedAxis := FFTOP.Axis()
-	wg := sync.WaitGroup{}
 	fftT := Time
-	for core := range cores {
-		upperEnd := 0
-		if lowerEnd+filesPerCore < amountFiles {
-			upperEnd = (core + 1) * filesPerCore
-		} else {
-			upperEnd = amountFiles
-		}
-		wg.Add(1)
-		if !FFT_T_in_mem {
+	if !FFT_T_in_mem {
+		wg := sync.WaitGroup{}
+		for core := range cores {
+			upperEnd := 0
+			if lowerEnd+filesPerCore < amountFiles {
+				upperEnd = (core + 1) * filesPerCore
+			} else {
+				upperEnd = amountFiles
+			}
+			wg.Add(1)
 			go func(core int, s *fftOperation4D, startIndex, endIndex int, bufCPU, bufGPUIP, bufGPUOP, dataT *data.Slice, FFTOP *fftOperation3D, NxNyNz [3]int, startK, endK [3]float64, transformedAxis []string, fftT float64) {
 				runtime.LockOSThread()
 				defer runtime.UnlockOSThread()
 				cuda.SetCurrent_Ctx()
-				cuda.Create_Stream(NameOf(s.q) + fmt.Sprintf("_%d", core))
 				for i := startIndex; i < endIndex; i++ {
 					in, err := httpfs.Open(OD() + fmt.Sprintf(FilenameFormat, "k_x_y_z_f_"+s.label, i) + ".ovf")
 					if err == nil {
@@ -457,25 +458,13 @@ func (s *fftOperation4D) Eval() {
 				}
 				wg.Done()
 			}(core, s, lowerEnd, upperEnd, bufsCPU[core], bufsGPUIP[core], bufsGPUOP[core], dataT, FFTOP, NxNyNz, startK, endK, transformedAxis, fftT)
-		} else {
-			go func(core int, s *fftOperation4D, startIndex, endIndex int, bufGPUIP, dataT *data.Slice, FFTOP *fftOperation3D, NxNyNz [3]int, startK, endK [3]float64, transformedAxis []string, amountFiles int, fftT float64) {
-				runtime.LockOSThread()
-				defer runtime.UnlockOSThread()
-				cuda.SetCurrent_Ctx()
-				cuda.Create_Stream(NameOf(s.q) + fmt.Sprintf("_%d", core))
-				for i := startIndex; i < endIndex; i++ {
-					data.Copy(bufGPUIP, FFT_T_data[i], fmt.Sprintf(NameOf(s.q)+"_%d", core))
-					//angle := -2i * complex64(complex(math.Pi*float64(i)*Time*s.dF, 0))
-					phase := -2 * math.Pi * (s.minF + float64(i)*s.dF) * fftT
-					cuda.FFT_T_Step(FFT_T_data[i], bufGPUIP, dataT, float32(phase), amountFiles, fmt.Sprintf(NameOf(s.q)+"_%d", core))
-				}
-				cuda.Destroy_Stream(fmt.Sprintf(NameOf(s.q)+"_%d", core))
-				wg.Done()
-			}(core, s, lowerEnd, upperEnd, bufsGPUIP[core], dataT, FFTOP, NxNyNz, startK, endK, transformedAxis, amountFiles, fftT)
+			lowerEnd += filesPerCore
 		}
-		lowerEnd += filesPerCore
+		wg.Wait()
+
+	} else {
+		cuda.FFT_T_Step_F(FFT_T_data, FFT_T_data, dataT, float32(s.minF), float32(s.dF), float32(fftT), NameOf(s.q))
 	}
-	wg.Wait()
 	if FFT_T_in_mem {
 		FFT_T_data_map.Store(s.q, FFT_T_data)
 	}
@@ -489,15 +478,16 @@ func (s *fftOperation4D) SaveResults() {
 	FFTOP := s.fft3D
 	NxNyNz, startK, endK, transformedAxis := FFTOP.Axis()
 	tmpVar, ok := FFT_T_data_map.Load(s.q)
-	FFT_T_data := make([]*data.Slice, 0)
+	var FFT_T_data *data.Slice
 	if ok {
-		FFT_T_data = tmpVar.([]*data.Slice)
+		FFT_T_data = tmpVar.(*data.Slice)
 	} else {
 		panic("FFT_T data could not be found during export.")
 	}
-	for i := range len(FFT_T_data) {
+	size := FFT_T_data.Size()
+	for i := range FFT_T_data.LengthF {
 		info := data.Meta{Freq: s.minF + float64(i)*s.dF, Name: "k_x_y_z_f_" + s.label, Unit: UnitOf(FFTOP), CellSize: MeshOf(FFTOP).CellSize()}
-		saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, "k_x_y_z_f_"+s.label, i)+".ovf", FFT_T_data[i].HostCopy(), info, outputFormat, NxNyNz, startK, endK, transformedAxis, true, false)
+		saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, "k_x_y_z_f_"+s.label, i)+".ovf", FFT_T_data.HostCopyPart(0, size[X], 0, size[Y], 0, size[Z], i, i+1), info, outputFormat, NxNyNz, startK, endK, transformedAxis, true, false)
 	}
 }
 
@@ -506,11 +496,9 @@ func (s *fftOperation4D) Clear_Buffers() {
 	if FFT_T_in_mem {
 		tmpVar, ok := FFT_T_data_map.Load(s.q)
 		if ok {
-			FFT_T_data := tmpVar.([]*data.Slice)
-			for i := range len(FFT_T_data) {
-				cuda.Recycle_FFT_T(FFT_T_data[i], NameOf(s.q))
-				FFT_T_data_buffer_length += 1
-			}
+			FFT_T_data := tmpVar.(*data.Slice)
+			cuda.Recycle_FFT_T(FFT_T_data, NameOf(s.q))
+			FFT_T_data_buffer_length += 1
 			FFT_T_data_map.Delete(s.q)
 		}
 	}
@@ -537,6 +525,8 @@ func (s *fftOperation4D) Clear_Buffers() {
 		bufsGPUOP := tmpVar.([]*data.Slice)
 		for i := range len(bufsGPUOP) {
 			cuda.Recycle_FFT_T(bufsGPUOP[i], fmt.Sprintf(NameOf(s.q)+"_%d", i))
+			cuda.Destroy_Stream(fmt.Sprintf(NameOf(s.q)+"_%d", i))
+
 		}
 		bufsGPUOP_map.Delete(s.q)
 	}
@@ -576,20 +566,26 @@ func (s *fftOperation4D) waitUntilPreviousCalcDone() {
 }
 
 func DoFFT4D() {
+	var wg sync.WaitGroup
 	for i := range FFT_T_OP {
 		if FFT_T_OP[i].needUpdate() {
-			FFT_T_OP[i].waitUntilPreviousCalcDone()
-			mu.Lock()
-			FFT_T_OPDataCopied[FFT_T_OP[i]] = false
-			condDataCopied.Broadcast()
-			mu.Unlock()
-			go FFT_T_OP[i].Eval()
-			FFT_T_OP[i].waitUntilCopied()
-			tmpOp := FFT_T_OP[i]
-			tmpOp.count++
-			FFT_T_OP[i] = tmpOp
+			wg.Add(1)
+			go func(i int) {
+				FFT_T_OP[i].waitUntilPreviousCalcDone()
+				mu.Lock()
+				FFT_T_OPDataCopied[FFT_T_OP[i]] = false
+				condDataCopied.Broadcast()
+				mu.Unlock()
+				go FFT_T_OP[i].Eval()
+				FFT_T_OP[i].waitUntilCopied()
+				tmpOp := FFT_T_OP[i]
+				tmpOp.count++
+				FFT_T_OP[i] = tmpOp
+				wg.Done()
+			}(i)
 		}
 	}
+	wg.Wait()
 }
 
 func WaitFFTs4DDone() {
