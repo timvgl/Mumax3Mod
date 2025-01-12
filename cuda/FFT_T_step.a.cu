@@ -16,7 +16,7 @@ FFT_Step(float* __restrict__ dst, float* __restrict__ src1, float* __restrict__ 
     int iy = blockIdx.y * blockDim.y + threadIdx.y;
     int iz = blockIdx.z * blockDim.z + threadIdx.z;
 
-    if (ix >= Nx / 2 || iy >= Ny || iz >= Nz) {
+    if (ix >= Nx || iy >= Ny || iz >= Nz) {
         return;
     }
     int IReal = idx(2*ix, iy, iz);

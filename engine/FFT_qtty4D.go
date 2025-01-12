@@ -48,6 +48,7 @@ func init() {
 	DeclVar("maxFrequency", &maxFrequency, "")
 	DeclVar("dFrequency", &dFrequency, "")
 	DeclVar("FFT4D_Label", &fft4DLabel, "")
+	DeclFunc("Tidy_up_FFT_4D", WaitFFTs4DDone, "Waits until all FFTs are done and clears buffers")
 	//DeclVar("kx", &kx, "")
 	//DeclVar("ky", &ky, "")
 	//DeclVar("kz", &kz, "")

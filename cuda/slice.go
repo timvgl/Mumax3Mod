@@ -63,7 +63,7 @@ func MemCpyDtoH(dst, src unsafe.Pointer, bytes int64) {
 func MemCpyDtoHPart(dst, src unsafe.Pointer, offset, bytes int64) {
 	Sync() // sync previous kernels
 	timer.Start("memcpyDtoH")
-	cu.MemcpyDtoH(dst, cu.DevicePtr(uintptr(src)), bytes)
+	cu.MemcpyDtoH(dst, cu.DevicePtr(uintptr(src)+uintptr(offset)), bytes)
 	Sync() // sync copy
 	timer.Stop("memcpyDtoH")
 }
