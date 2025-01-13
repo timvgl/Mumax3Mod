@@ -3,6 +3,7 @@ module github.com/mumax/3
 go 1.23.2
 
 require (
+	github.com/c-bata/goptuna v0.9.0
 	github.com/fatih/color v1.18.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/kevinburke/ssh_config v1.2.0
@@ -10,7 +11,6 @@ require (
 	github.com/shirou/gopsutil/v3 v3.24.5
 	github.com/vmihailenco/msgpack/v5 v5.4.1
 	golang.org/x/crypto v0.28.0
-	golang.org/x/exp v0.0.0-20241215155358-4a5509556b9e
 	golang.org/x/term v0.25.0
 )
 
@@ -29,8 +29,10 @@ require (
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
+	golang.org/x/exp v0.0.0-20241215155358-4a5509556b9e // indirect
 	golang.org/x/net v0.24.0 // indirect
 	golang.org/x/sys v0.26.0 // indirect
 	golang.org/x/text v0.19.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
+	gonum.org/v1/gonum v0.14.0 // indirect
 )

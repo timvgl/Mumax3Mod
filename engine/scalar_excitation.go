@@ -3,12 +3,26 @@ package engine
 import (
 	"fmt"
 	"reflect"
+	"sync"
 
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/data"
 	"github.com/mumax/3/script"
 	"github.com/mumax/3/util"
 )
+
+var mapSetScalarExcitation sync.Map
+
+func SetScalarExcitation(name string, s ScalarExcitationSlice) {
+	mapSetScalarExcitation.Store(name, s)
+}
+
+type ScalarExcitationSlice struct {
+	name  string
+	start [3]int
+	end   [3]int
+	d     *data.Slice
+}
 
 // An excitation, typically field or current,
 // can be defined region-wise plus extra mask*multiplier terms.
@@ -51,9 +65,19 @@ func (e *ScalarExcitation) isZero() bool {
 }
 
 func (e *ScalarExcitation) Slice() (*data.Slice, bool) {
-	buf := cuda.Buffer(e.NComp(), e.Mesh().Size())
+	size := e.Mesh().Size()
+	buf := cuda.Buffer(e.NComp(), size)
 	cuda.Zero(buf)
 	e.AddTo(buf)
+	tmp, ok := mapSetScalarExcitation.Load(e.name)
+	if ok {
+		setExcitations := tmp.(ScalarExcitationSlice)
+		newData := setExcitations.d
+		regionStart := setExcitations.start
+		regionEnd := setExcitations.end
+		data.CopyPart(buf, newData, regionStart[X], regionStart[Y], regionStart[Z], 0, regionEnd[X], regionEnd[Y], regionEnd[Z], 0, regionStart[X], regionStart[Y], regionStart[Z], 1)
+
+	}
 	return buf, true
 }
 

@@ -28,13 +28,13 @@ var (
 	memFree, memFreeHost           func(unsafe.Pointer)
 	memCpyDtoH, memCpyHtoD         func(dst, src unsafe.Pointer, bytes int64)
 	memCpy                         func(dst, src unsafe.Pointer, bytes int64, args ...string)
-	memCpyDtoHPart, memCpyHtoDPart func(dst, src unsafe.Pointer, offset, bytes int64)
-	memCpyPart                     func(dst, src unsafe.Pointer, offset, bytes int64, args ...string)
+	memCpyDtoHPart, memCpyHtoDPart func(dst, src unsafe.Pointer, offset_dst, offset_src, bytes int64)
+	memCpyPart                     func(dst, src unsafe.Pointer, offset_dst, offset_src, bytes int64, args ...string)
 )
 
 // Internal: enables slices on GPU. Called upon cuda init.
 func EnableGPU(free, freeHost func(unsafe.Pointer),
-	cpyDtoH, cpyHtoD func(dst, src unsafe.Pointer, bytes int64), cpy func(dst, src unsafe.Pointer, bytes int64, args ...string), cpyDtoHPart, cpyHtoDPart func(dst, src unsafe.Pointer, offset, bytes int64), cpyPart func(dst, src unsafe.Pointer, offset, bytes int64, args ...string)) {
+	cpyDtoH, cpyHtoD func(dst, src unsafe.Pointer, bytes int64), cpy func(dst, src unsafe.Pointer, bytes int64, args ...string), cpyDtoHPart, cpyHtoDPart func(dst, src unsafe.Pointer, offset_dst, offset_src, bytes int64), cpyPart func(dst, src unsafe.Pointer, offset_dst, offset_src, bytes int64, args ...string)) {
 	memFree = free
 	memFreeHost = freeHost
 	memCpy = cpy
@@ -268,7 +268,7 @@ func (s *Slice) HostCopy() *Slice {
 
 func (s *Slice) HostCopyPart(xStart, xEnd, yStart, yEnd, zStart, zEnd, fStart, fEnd int) *Slice {
 	cpy := NewSlice(s.NComp(), [3]int{xEnd - xStart, yEnd - yStart, zEnd - zStart})
-	CopyPart(cpy, s, xStart, xEnd, yStart, yEnd, zStart, zEnd, fStart, fEnd)
+	CopyPart(cpy, s, xStart, xEnd, yStart, yEnd, zStart, zEnd, fStart, fEnd, 0, 0, 0, 0)
 	return cpy
 }
 
@@ -304,24 +304,26 @@ func Copy(dst, src *Slice, args ...string) {
 	}
 }
 
-func CopyPart(dst, src *Slice, xStart, xEnd, yStart, yEnd, zStart, zEnd, fStart, fEnd int, args ...string) {
+func CopyPart(dst, src *Slice, xStart_src, xEnd_src, yStart_src, yEnd_src, zStart_src, zEnd_src, fStart_src, fEnd_src, xStart_dst, yStart_dst, zStart_dst, fStart_dst int, args ...string) {
 	if dst.NComp() != src.NComp() || dst.Len() != src.Len() {
 		panic(fmt.Sprintf("slice copy: illegal sizes: dst: %vx%v, src: %vx%v", dst.NComp(), dst.Len(), src.NComp(), src.Len()))
 	}
 	//fmt.Println(dst.Len())
 	d, s := dst.GPUAccess(), src.GPUAccess()
 	size := src.Size()
-	offset := int64(xStart + size[X]*(yStart+size[Y]*(zStart+size[Z]*fStart)))
-	xEnd -= 1
-	yEnd -= 1
-	zEnd -= 1
-	fEnd -= 1
-	bytes := int64(xEnd+size[X]*(yEnd+size[Y]*(zEnd+size[Z]*fEnd))) - offset
+	offset_src := int64(xStart_src + size[X]*(yStart_src+size[Y]*(zStart_src+size[Z]*fStart_src)))
+	offset_dst := int64(xStart_dst + size[X]*(yStart_dst+size[Y]*(zStart_dst+size[Z]*fStart_dst)))
+	xEnd_src -= 1
+	yEnd_src -= 1
+	zEnd_src -= 1
+	fEnd_src -= 1
+	bytes := int64(xEnd_src+size[X]*(yEnd_src+size[Y]*(zEnd_src+size[Z]*fEnd_src))) - offset_src
 	//fmt.Println("bytes", bytes, "offset", offset)
 	//bytes := int64(dst.Len())
 	//fmt.Println("bytes", bytes)
 	bytes *= int64(SIZEOF_FLOAT32)
-	offset *= int64(SIZEOF_FLOAT32)
+	offset_src *= int64(SIZEOF_FLOAT32)
+	offset_dst *= int64(SIZEOF_FLOAT32)
 
 	if len(args) > 1 {
 		panic("Only one string arg allowed in Copy.")
@@ -331,20 +333,20 @@ func CopyPart(dst, src *Slice, xStart, xEnd, yStart, yEnd, zStart, zEnd, fStart,
 		panic("bug")
 	case d && s:
 		for c := 0; c < dst.NComp(); c++ {
-			memCpyPart(dst.DevPtr(c), src.DevPtr(c), offset, bytes, args...)
+			memCpyPart(dst.DevPtr(c), src.DevPtr(c), offset_dst, offset_src, bytes, args...)
 		}
 	case s && !d:
 		for c := 0; c < dst.NComp(); c++ {
-			memCpyDtoHPart(dst.ptrs[c], src.DevPtr(c), offset, bytes)
+			memCpyDtoHPart(dst.ptrs[c], src.DevPtr(c), offset_dst, offset_src, bytes)
 		}
 	case !s && d:
 		for c := 0; c < dst.NComp(); c++ {
-			memCpyHtoDPart(dst.DevPtr(c), src.ptrs[c], offset, bytes)
+			memCpyHtoDPart(dst.DevPtr(c), src.ptrs[c], offset_dst, offset_src, bytes)
 		}
 	case !d && !s:
 		dst, src := dst.Host(), src.Host()
 		for c := range dst {
-			copy(dst[c], src[c][offset/SIZEOF_FLOAT32:offset+bytes/SIZEOF_FLOAT32])
+			copy(dst[c][offset_dst/SIZEOF_FLOAT32:(offset_dst+bytes)/SIZEOF_FLOAT32], src[c][offset_src/SIZEOF_FLOAT32:(offset_src+bytes)/SIZEOF_FLOAT32])
 		}
 	}
 }
