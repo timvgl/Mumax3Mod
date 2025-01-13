@@ -16,7 +16,7 @@ func NewSlice(nComp int, size [3]int) *data.Slice {
 }
 
 func newSlice(nComp int, size [3]int, alloc func(int64) unsafe.Pointer, memType int8) *data.Slice {
-	data.EnableGPU(memFree, cu.MemFreeHost, MemCpyDtoH, MemCpyHtoD, MemCpy)
+	data.EnableGPU(memFree, cu.MemFreeHost, MemCpyDtoH, MemCpyHtoD, MemCpy, MemCpyDtoHPart, MemCpyHtoDPart, MemCpyPart)
 	length := prod(size)
 	bytes := int64(length) * cu.SIZEOF_FLOAT32
 	ptrs := make([]unsafe.Pointer, nComp)
@@ -32,7 +32,7 @@ func NewSliceInt(nComp int, size [3]int) *data.Slice {
 }
 
 func newSliceInt(nComp int, size [3]int, alloc func(int64) unsafe.Pointer, memType int8) *data.Slice {
-	data.EnableGPU(memFree, cu.MemFreeHost, MemCpyDtoH, MemCpyHtoD, MemCpy)
+	data.EnableGPU(memFree, cu.MemFreeHost, MemCpyDtoH, MemCpyHtoD, MemCpy, MemCpyDtoHPart, MemCpyHtoDPart, MemCpyPart)
 	length := prod(size)
 	bytes := int64(length) * cu.SIZEOF_INT
 	ptrs := make([]unsafe.Pointer, nComp)
@@ -60,6 +60,14 @@ func MemCpyDtoH(dst, src unsafe.Pointer, bytes int64) {
 	timer.Stop("memcpyDtoH")
 }
 
+func MemCpyDtoHPart(dst, src unsafe.Pointer, offset, bytes int64) {
+	Sync() // sync previous kernels
+	timer.Start("memcpyDtoH")
+	cu.MemcpyDtoH(dst, cu.DevicePtr(uintptr(src)+uintptr(offset)), bytes)
+	Sync() // sync copy
+	timer.Stop("memcpyDtoH")
+}
+
 func MemCpyHtoD(dst, src unsafe.Pointer, bytes int64) {
 	Sync() // sync previous kernels
 	timer.Start("memcpyHtoD")
@@ -68,28 +76,48 @@ func MemCpyHtoD(dst, src unsafe.Pointer, bytes int64) {
 	timer.Stop("memcpyHtoD")
 }
 
+func MemCpyHtoDPart(dst, src unsafe.Pointer, offset, bytes int64) {
+	Sync() // sync previous kernels
+	timer.Start("memcpyHtoD")
+	cu.MemcpyHtoD(cu.DevicePtr(uintptr(dst)+uintptr(offset)), src, bytes)
+	Sync() // sync copy
+	timer.Stop("memcpyHtoD")
+}
+
 func MemCpy(dst, src unsafe.Pointer, bytes int64, args ...string) {
-	if len(args) > 0 {
+	if len(args) == 1 {
 		SyncFFT_T(args[0])
 		timer.Start("memcpy" + args[0])
 		cu.MemcpyAsync(cu.DevicePtr(uintptr(dst)), cu.DevicePtr(uintptr(src)), bytes, Get_Stream(args[0]))
 		SyncFFT_T(args[0])
 		timer.Stop("memcpy" + args[0])
-	} else {
+	} else if len(args) == 0 {
 		Sync()
 		timer.Start("memcpy")
 		cu.MemcpyAsync(cu.DevicePtr(uintptr(dst)), cu.DevicePtr(uintptr(src)), bytes, stream0)
 		Sync()
 		timer.Stop("memcpy")
+	} else {
+		panic("wrong number of arguments")
 	}
 }
 
-func MemCpyFFT_T(dst, src unsafe.Pointer, bytes int64, key string) {
-	SyncFFT_T(key)
-	timer.Start("memcpy")
-	cu.MemcpyAsync(cu.DevicePtr(uintptr(dst)), cu.DevicePtr(uintptr(src)), bytes, Get_Stream(key))
-	SyncFFT_T(key)
-	timer.Stop("memcpy")
+func MemCpyPart(dst, src unsafe.Pointer, offset, bytes int64, args ...string) {
+	if len(args) == 1 {
+		SyncFFT_T(args[0])
+		timer.Start("memcpy" + args[0])
+		cu.MemcpyAsync(cu.DevicePtr(uintptr(dst)), cu.DevicePtr(uintptr(src)+uintptr(offset)), bytes, Get_Stream(args[0]))
+		SyncFFT_T(args[0])
+		timer.Stop("memcpy" + args[0])
+	} else if len(args) == 0 {
+		Sync()
+		timer.Start("memcpy")
+		cu.MemcpyAsync(cu.DevicePtr(uintptr(dst)), cu.DevicePtr(uintptr(src)+uintptr(offset)), bytes, stream0)
+		Sync()
+		timer.Stop("memcpy")
+	} else {
+		panic("wrong number of arguments")
+	}
 }
 
 // Memset sets the Slice's components to the specified values.

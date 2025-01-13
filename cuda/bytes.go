@@ -37,7 +37,7 @@ func (dst *Bytes) Copy(src *Bytes) {
 }
 func (dst *Bytes) CopyFFT_T(src *Bytes, key string) {
 	util.Argument(dst.Len == src.Len)
-	MemCpyFFT_T(dst.Ptr, src.Ptr, int64(dst.Len), key)
+	MemCpy(dst.Ptr, src.Ptr, int64(dst.Len), key)
 }
 
 // Copy to host: dst = src.

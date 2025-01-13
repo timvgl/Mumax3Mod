@@ -107,13 +107,12 @@ func FFT3D_FFT_T(q Quantity) *fftOperation3D {
 	FFTEvaluatedReal[q] = false
 	FFTEvaluatedImag[q] = false
 	if !slices.Contains(DeclVarFFTDyn, q) {
-		if q.NComp() == 3 {
-			FFT3DData[q] = cuda.BufferFFT_T(3, fftOP3D.FFTOutputSize(), NameOf(q))
+		if q.NComp() == 3 || q.NComp() == 1 {
+			FFT3DData[q] = cuda.BufferFFT_T(q.NComp(), fftOP3D.FFTOutputSize(), NameOf(q))
 			cuda.ZeroFFT_T(FFT3DData[q], NameOf(q))
 			//fmt.Println(FFT3DData[q].HostCopy().Tensors())
-		} else if q.NComp() == 1 {
-			FFT3DData[q] = cuda.BufferFFT_T(1, fftOP3D.FFTOutputSize(), NameOf(q))
-			cuda.ZeroFFT_T(FFT3DData[q], NameOf(q))
+		} else {
+			panic("FFT_T only works for 1 or 3 components")
 		}
 		DeclVarFFTDyn = append(DeclVarFFTDyn, q)
 	}
@@ -187,6 +186,7 @@ func (d *fftOperation3D) evalIntern() {
 		defer cuda.Recycle(buf)
 		for i := range d.nComp {
 			cuda.Perform3DR2CFFT_T(input.Comp(i), buf.Comp(i), FFT3DR2CPlans[d.q], NameOf(d.q))
+			//cuda.Perform3DR2CFFT_T(input.Comp(i), FFT3DData[d.q].Comp(i), FFT3DR2CPlans[d.q], NameOf(d.q))
 		}
 		cuda.ReorderCufftData(FFT3DData[d.q], buf)
 	}

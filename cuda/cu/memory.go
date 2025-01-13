@@ -213,7 +213,7 @@ func (p DevicePtr) String() string {
 
 // Type size in bytes
 const (
-	SIZEOF_INT		  = 4
+	SIZEOF_INT        = 4
 	SIZEOF_FLOAT32    = 4
 	SIZEOF_FLOAT64    = 8
 	SIZEOF_COMPLEX64  = 8
