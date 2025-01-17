@@ -5,6 +5,7 @@ import (
 	"log"
 	"math"
 	"os"
+	"sort"
 	"strings"
 	"sync"
 
@@ -217,6 +218,7 @@ func (s optimize) generate_vector_from_string(trial goptuna.Trial, q Quantity, j
 
 	for key := range vars {
 		if key != "x" && key != "y" && key != "z" && key != "t" && math.IsNaN(vars[key].(float64)) {
+			//fmt.Println(key, s.variablesStart[j][key].vector[comp], s.variablesEnd[j][key].vector[comp])
 			value, err := trial.SuggestFloat(fmt.Sprintf("%s_%s_%d", NameOf(q), key, comp), s.variablesStart[j][key].vector[comp], s.variablesEnd[j][key].vector[comp])
 			if err != nil {
 				return nil, err
@@ -284,7 +286,7 @@ func (s optimize) objective(trial goptuna.Trial) (float64, error) {
 			buf := data.SliceFromArray(suggestData, size)
 			bufGPU := cuda.Buffer(buf.NComp(), buf.Size())
 			data.Copy(bufGPU, buf)
-			SetScalarExcitation(NameOf(q), ScalarExcitationSlice{NameOf(q), s.areaStart[ii], s.areaEnd[ii], bufGPU})
+			SetExcitation(NameOf(q), ExcitationSlice{NameOf(q), s.areaStart[ii], s.areaEnd[ii], bufGPU, q.NComp()})
 			buf.Free()
 		} else {
 			suggestData := make([][]float32, 1)
@@ -456,6 +458,7 @@ func OptimizeQuantity(output Quantity, target dummyQuantity, variables []Quantit
 			if variables[k].NComp() == 3 {
 				for c := range variables[k].NComp() {
 					vars := optim.parsedFunctions[k][c].required
+					sort.Strings(vars)
 					for _, par := range vars {
 						if par != "x" && par != "y" && par != "z" && par != "t" {
 							fprint(optiTable, "\t", NameOf(variables[k])+"_"+par+"_"+string('x'+c))
@@ -464,6 +467,7 @@ func OptimizeQuantity(output Quantity, target dummyQuantity, variables []Quantit
 				}
 			} else if variables[k].NComp() == 1 {
 				vars := optim.parsedFunctions[k][0].required
+				sort.Strings(vars)
 				for _, par := range vars {
 					if par != "x" && par != "y" && par != "z" && par != "t" {
 						fprint(optiTable, "\t", NameOf(variables[k])+"_"+par)
@@ -496,11 +500,13 @@ func OptimizeQuantity(output Quantity, target dummyQuantity, variables []Quantit
 			xDep := false
 			yDep := false
 			zDep := false
-			vars, err := InitializeVars(optim.parsedFunctions[k][c].required)
+			varsSlice := optim.parsedFunctions[k][c].required
+			vars, err := InitializeVars(varsSlice)
 			if err != nil {
 				panic(err)
 			}
-			for par := range vars {
+			sort.Strings(varsSlice)
+			for _, par := range varsSlice {
 				if par != "x" && par != "y" && par != "z" && par != "t" {
 					val := bestParams[fmt.Sprintf("%s_%s_%d", NameOf(variables[k]), par, c)].(float64)
 					vars[par] = val
@@ -527,7 +533,7 @@ func OptimizeQuantity(output Quantity, target dummyQuantity, variables []Quantit
 		data.Copy(bufGPU, buf)
 		buf.Free()
 		if variables[k].NComp() == 3 {
-			SetScalarExcitation(NameOf(variables[k]), ScalarExcitationSlice{NameOf(variables[k]), optim.areaStart[k], optim.areaEnd[k], bufGPU})
+			SetExcitation(NameOf(variables[k]), ExcitationSlice{NameOf(variables[k]), optim.areaStart[k], optim.areaEnd[k], bufGPU, variables[k].NComp()})
 		} else {
 			SetScalarExcitation(NameOf(variables[k]), ScalarExcitationSlice{NameOf(variables[k]), optim.areaStart[k], optim.areaEnd[k], bufGPU})
 			//buf.Free()
@@ -549,7 +555,11 @@ func OptimizeQuantity(output Quantity, target dummyQuantity, variables []Quantit
 	SaveAs(output, fmt.Sprintf(FilenameFormat, NameOf(output), idx)+".ovf")
 	SaveCounter[NameOf(output)] = idx + 1
 	for k := range variables {
-		EraseSetScalarExcitation(NameOf(variables[k]))
+		if variables[k].NComp() == 1 {
+			EraseSetScalarExcitation(NameOf(variables[k]))
+		} else {
+			EraseSetExcitation(NameOf(variables[k]))
+		}
 	}
 	DeleteBackup([]Quantity{output})
 	cuda.Recycle(target.storage)
