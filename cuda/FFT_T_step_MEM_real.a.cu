@@ -11,7 +11,7 @@ __device__ __forceinline__ cuComplex my_cexpf(cuComplex z) {
 }
 
 extern "C" __global__ void
-FFT_Step_F(float* __restrict__ dst, float* __restrict__ src1, float* __restrict__ src2, int Nx, int Ny, int Nz, int Nf, float minF, float dF, float t, float n) {
+FFT_Step_MEM_real(float* __restrict__ dst, float* __restrict__ src1, float* __restrict__ src2, int Nx, int Ny, int Nz, int Nf, float minF, float dF, float t, float n) {
     int i = (blockIdx.y * gridDim.x + blockIdx.x) * blockDim.x + threadIdx.x;
     if (i >= Nx * Ny * Nz / 2) {
         return;
@@ -21,8 +21,7 @@ FFT_Step_F(float* __restrict__ dst, float* __restrict__ src1, float* __restrict_
     int iy = ((i - ix) / Nx) % Ny;
     int iz = ((i - iy * Nx - ix) / (Nx * Ny)) % Nz;
 
-    int IIReal = idx(2 * ix, iy, iz);
-    int IIImag = idx(2 * ix + 1, iy, iz);
+    int IIReal = index(ix, iy, iz, Nx/2, Ny, Nz);
 
     for (int fi = 0;
          fi < Nf;
@@ -31,7 +30,7 @@ FFT_Step_F(float* __restrict__ dst, float* __restrict__ src1, float* __restrict_
         int IImag = idx4D(2 * ix + 1, iy, iz, fi);
 
         // Load src2 data
-        cuComplex src2Complex = make_cuComplex(src2[IIReal], src2[IIImag]);
+        cuComplex src2Complex = make_cuComplex(src2[IIReal], 0);
 
         // Calculate phase and exponential
         float phase = -2 * M_PI * (minF + dF * float(fi)) * t;
