@@ -18,18 +18,18 @@ import (
 
 const TableAutoflushRate = 5 // auto-flush table every X seconds
 var (
-	createNewTable      bool = true
-	rewriteHeaderTable  bool = false
+	CreateNewTable      bool = true
+	RewriteHeaderTable  bool = false
 	Table               *DataTable
 	TableAutoSavePeriod float64 = 0.0
 	negativeTime        bool    = false
 )
 
 func init() {
-	DeclVar("createNewTable", &createNewTable, "")
-	DeclVar("rewriteHeaderTable", &rewriteHeaderTable, "")
-	if createNewTable == true {
-		Table = newTable("table") // output handle for tabular data (average magnetization etc.)
+	DeclVar("createNewTable", &CreateNewTable, "")
+	DeclVar("rewriteHeaderTable", &RewriteHeaderTable, "")
+	if CreateNewTable == true {
+		Table = NewTable("table") // output handle for tabular data (average magnetization etc.)
 	}
 	DeclFunc("TableAdd", TableAdd, "Add quantity as a column to the data table.")
 	DeclFunc("TableAddVar", TableAddVariable, "Add user-defined variable + name + unit to data table.")
@@ -90,7 +90,7 @@ func (t *DataTable) Flush() error {
 	return err
 }
 
-func newTable(name string) *DataTable {
+func NewTable(name string) *DataTable {
 	t := new(DataTable)
 	t.name = name
 	t.Data = map[string][]float64{"t": make([]float64, 0)}
@@ -234,8 +234,7 @@ func (t *DataTable) init() {
 	if t.inited() {
 		return
 	}
-
-	if createNewTable == true {
+	if CreateNewTable == true {
 		f, err := httpfs.Create(OD() + t.name + ".txt")
 		util.FatalErr(err)
 		t.output = f
@@ -244,7 +243,7 @@ func (t *DataTable) init() {
 		util.FatalErr(err)
 		t.output = f
 	}
-	if rewriteHeaderTable == true || createNewTable == true {
+	if (RewriteHeaderTable == true || CreateNewTable == true) && !OptimizeTable {
 		// write header
 		fprint(t, "# t (s)")
 		for _, o := range t.outputs {

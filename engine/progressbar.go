@@ -12,9 +12,8 @@ import (
 
 var (
 	HideProgressBarManualSet = false
-	HideProgressBarManual = false
+	HideProgressBarManual    = false
 )
-
 
 type ProgressBar struct {
 	start       float64
@@ -26,11 +25,13 @@ type ProgressBar struct {
 	symbolWidth int
 	minLength   int
 	lastUpdate  time.Time
+	IsFinished  bool
 }
 
 func init() {
 	DeclFunc("ResetProgressBarMode", ResetProgressBarMode, "")
 	DeclFunc("HideProgressBar", HideProgressBarManualF, "")
+	DeclFunc("NewProgressBar", NewProgressBar, "")
 }
 
 func ResetProgressBarMode() {
@@ -41,7 +42,6 @@ func HideProgressBarManualF(s bool) {
 	HideProgressBarManualSet = true
 	HideProgressBarManual = s
 }
-
 
 func NewProgressBar(start float64, stop float64, symbol string, hideProgressBar bool) *ProgressBar {
 	return &ProgressBar{
@@ -54,6 +54,7 @@ func NewProgressBar(start float64, stop float64, symbol string, hideProgressBar 
 		symbolWidth: 2, // Width of the symbol in characters
 		minLength:   1, // Minimum bar length in symbols
 		lastUpdate:  time.Now(),
+		IsFinished:  false,
 	}
 }
 
@@ -100,13 +101,16 @@ func (bar *ProgressBar) Update(currentTime float64) {
 		percentage = 0
 	}
 
-	if percentage > bar.last {
+	if percentage > bar.last || bar.IsFinished {
 		width := bar.getTermWidth()
 		if width < 10 {
 			// Don't display the progress bar if the terminal is too small
 			return
 		}
 		bar.last = percentage
+		if bar.IsFinished {
+			bar.last = int(bar.start)
+		}
 
 		emptyLength, filledLength := bar.calculateDimensions(percentage)
 
@@ -118,6 +122,10 @@ func (bar *ProgressBar) Update(currentTime float64) {
 			emptySymbols,
 			percentage)
 
+		if bar.IsFinished {
+			bar.out.Print("\033[F")
+			bar.IsFinished = false
+		}
 		// Clear the line
 		bar.out.Print("\r\033[K")
 
@@ -140,5 +148,6 @@ func (bar *ProgressBar) Finish() {
 
 		// Write the progress bar
 		bar.out.Print(progressBar)
+		bar.IsFinished = true
 	}
 }

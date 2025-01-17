@@ -124,7 +124,14 @@ var StreamMap sync.Map
 
 // Hahaha not quiet - so we need a new stream for the async FFT in time - one Stream per FFT parallelization
 func Create_Stream(key string) {
-	StreamMap.Store(key, cu.StreamCreate())
+	if !Check_Stream(key) {
+		StreamMap.Store(key, cu.StreamCreate())
+	}
+}
+
+func Check_Stream(key string) bool {
+	_, ok := StreamMap.Load(key)
+	return ok
 }
 
 func Destroy_Stream(key string) {

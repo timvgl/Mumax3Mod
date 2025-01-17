@@ -14,7 +14,21 @@ import (
 var mapSetScalarExcitation sync.Map
 
 func SetScalarExcitation(name string, s ScalarExcitationSlice) {
+	EraseSetScalarExcitation(name)
 	mapSetScalarExcitation.Store(name, s)
+}
+
+func EraseSetScalarExcitation(name string) {
+	tmp, ok := mapSetScalarExcitation.Load(name)
+	if ok {
+		s := tmp.(ScalarExcitationSlice)
+		if s.d.GPUAccess() {
+			cuda.Recycle(s.d)
+		} else {
+			s.d.Free()
+		}
+		mapSetScalarExcitation.Delete(name)
+	}
 }
 
 type ScalarExcitationSlice struct {
@@ -75,7 +89,7 @@ func (e *ScalarExcitation) Slice() (*data.Slice, bool) {
 		newData := setExcitations.d
 		regionStart := setExcitations.start
 		regionEnd := setExcitations.end
-		data.CopyPart(buf, newData, regionStart[X], regionStart[Y], regionStart[Z], 0, regionEnd[X], regionEnd[Y], regionEnd[Z], 0, regionStart[X], regionStart[Y], regionStart[Z], 1)
+		data.CopyPart(buf, newData, 0, regionEnd[X]-regionStart[X], 0, regionEnd[Y]-regionStart[Y], 0, regionEnd[Z]-regionStart[Z], 0, 1, regionStart[X], regionStart[Y], regionStart[Z], 0)
 
 	}
 	return buf, true

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"sync"
 	"unsafe"
 
 	"github.com/mumax/3/util"
@@ -30,11 +31,15 @@ var (
 	memCpy                         func(dst, src unsafe.Pointer, bytes int64, args ...string)
 	memCpyDtoHPart, memCpyHtoDPart func(dst, src unsafe.Pointer, offset_dst, offset_src, bytes int64)
 	memCpyPart                     func(dst, src unsafe.Pointer, offset_dst, offset_src, bytes int64, args ...string)
+	createStream                   func(key string)
+	destroyStream                  func(key string)
+	setCurrentCtx                  func()
+	MAX_STREAMS                    = 5
 )
 
 // Internal: enables slices on GPU. Called upon cuda init.
 func EnableGPU(free, freeHost func(unsafe.Pointer),
-	cpyDtoH, cpyHtoD func(dst, src unsafe.Pointer, bytes int64), cpy func(dst, src unsafe.Pointer, bytes int64, args ...string), cpyDtoHPart, cpyHtoDPart func(dst, src unsafe.Pointer, offset_dst, offset_src, bytes int64), cpyPart func(dst, src unsafe.Pointer, offset_dst, offset_src, bytes int64, args ...string)) {
+	cpyDtoH, cpyHtoD func(dst, src unsafe.Pointer, bytes int64), cpy func(dst, src unsafe.Pointer, bytes int64, args ...string), cpyDtoHPart, cpyHtoDPart func(dst, src unsafe.Pointer, offset_dst, offset_src, bytes int64), cpyPart func(dst, src unsafe.Pointer, offset_dst, offset_src, bytes int64, args ...string), CreateStream, DestroyStream func(key string), SetCurrentCtx func()) {
 	memFree = free
 	memFreeHost = freeHost
 	memCpy = cpy
@@ -43,6 +48,9 @@ func EnableGPU(free, freeHost func(unsafe.Pointer),
 	memCpyDtoHPart = cpyDtoHPart
 	memCpyHtoDPart = cpyHtoDPart
 	memCpyPart = cpyPart
+	createStream = CreateStream
+	destroyStream = DestroyStream
+	setCurrentCtx = SetCurrentCtx
 }
 
 func Zero(data *Slice) {
@@ -99,7 +107,7 @@ func SliceFromPtrs(size [3]int, memType int8, ptrs []unsafe.Pointer) *Slice {
 		s.ptrs[c] = ptrs[c]
 	}
 	s.memType = memType
-	s.LengthF = 0
+	s.LengthF = 1
 	return s
 }
 
@@ -304,20 +312,199 @@ func Copy(dst, src *Slice, args ...string) {
 	}
 }
 
+func CopyComp(dst, src *Slice, comp int, args ...string) {
+	if dst.NComp() != 1 || dst.Len() != src.Len() && comp > 2 || comp < 0 {
+		panic(fmt.Sprintf("slice copy: illegal sizes: dst: %vx%v, src: %vx%v with %v being selected", dst.NComp(), dst.Len(), src.Len(), comp))
+	}
+	d, s := dst.GPUAccess(), src.GPUAccess()
+	bytes := SIZEOF_FLOAT32 * int64(dst.Len())
+	if len(args) > 1 {
+		panic("Only one string arg allowed in Copy.")
+	}
+	switch {
+	default:
+		panic("bug")
+	case d && s:
+		memCpy(dst.DevPtr(0), src.DevPtr(comp), bytes, args...)
+	case s && !d:
+		memCpyDtoH(dst.ptrs[0], src.DevPtr(comp), bytes)
+	case !s && d:
+		memCpyHtoD(dst.DevPtr(0), src.ptrs[comp], bytes)
+	case !d && !s:
+		dst, src := dst.Host(), src.Host()
+		copy(dst[0], src[comp])
+	}
+}
+
+func CopyPart(dst, src *Slice,
+	xStart_src, xEnd_src,
+	yStart_src, yEnd_src,
+	zStart_src, zEnd_src,
+	fStart_src, fEnd_src,
+	xStart_dst, yStart_dst,
+	zStart_dst, fStart_dst int,
+	args ...string) {
+
+	if dst.NComp() != src.NComp() {
+		panic(fmt.Sprintf("slice copy: illegal sizes: dst: %vx%v, src: %vx%v",
+			dst.NComp(), dst.Len(), src.NComp(), src.Len()))
+	}
+
+	d, s := dst.GPUAccess(), src.GPUAccess()
+	sizeSrc := src.Size()
+	sizeDst := dst.Size()
+
+	// Strides for each dimension in source and destination
+	strideXSrc := 1
+	strideYSrc := sizeSrc[X]
+	strideZSrc := sizeSrc[X] * sizeSrc[Y]
+	strideFSrc := sizeSrc[X] * sizeSrc[Y] * sizeSrc[Z]
+
+	strideXDst := 1
+	strideYDst := sizeDst[X]
+	strideZDst := sizeDst[X] * sizeDst[Y]
+	strideFDst := sizeDst[X] * sizeDst[Y] * sizeDst[Z]
+
+	// Calculate number of elements to copy along each dimension
+	xCount := xEnd_src - xStart_src
+	yCount := yEnd_src - yStart_src
+	zCount := zEnd_src - zStart_src
+	fCount := fEnd_src - fStart_src
+
+	if d && !s || !d && s || !d && !s {
+		for f := 0; f < fCount; f++ {
+			for z := 0; z < zCount; z++ {
+				for y := 0; y < yCount; y++ {
+					// Calculate the source and destination offsets for this slice
+					offsetSrc := int64(
+						xStart_src*strideXSrc+
+							(yStart_src+y)*strideYSrc+
+							(zStart_src+z)*strideZSrc+
+							(fStart_src+f)*strideFSrc,
+					) * int64(SIZEOF_FLOAT32)
+
+					offsetDst := int64(
+						xStart_dst*strideXDst+
+							(yStart_dst+y)*strideYDst+
+							(zStart_dst+z)*strideZDst+
+							(fStart_dst+f)*strideFDst,
+					) * int64(SIZEOF_FLOAT32)
+
+					// Calculate the number of bytes to copy for the x dimension
+					bytes := int64(xCount) * int64(SIZEOF_FLOAT32)
+
+					// Perform the copy based on the access types
+					if s && !d {
+						for c := 0; c < dst.NComp(); c++ {
+							memCpyDtoHPart(
+								dst.ptrs[c],
+								src.DevPtr(c),
+								offsetDst,
+								offsetSrc,
+								bytes,
+							)
+						}
+					} else if !s && d {
+						for c := 0; c < dst.NComp(); c++ {
+							memCpyHtoDPart(
+								dst.DevPtr(c),
+								src.ptrs[c],
+								offsetDst,
+								offsetSrc,
+								bytes,
+							)
+						}
+					} else { // !d && !s
+						for c := 0; c < dst.NComp(); c++ {
+							hostDst := dst.Host()[c]
+							hostSrc := src.Host()[c]
+							copy(
+								hostDst[offsetDst/int64(SIZEOF_FLOAT32):(offsetDst+bytes)/int64(SIZEOF_FLOAT32)],
+								hostSrc[offsetSrc/int64(SIZEOF_FLOAT32):(offsetSrc+bytes)/int64(SIZEOF_FLOAT32)],
+							)
+						}
+					}
+				}
+			}
+		}
+	} else {
+		taskChan := make(chan func(int), MAX_STREAMS)
+		for i := 0; i < MAX_STREAMS; i++ {
+			createStream(fmt.Sprintf("copy_%v", i))
+		}
+		for i := 0; i < MAX_STREAMS; i++ {
+			go func(workerID int) {
+				for task := range taskChan {
+					task(workerID)
+				}
+			}(i)
+		}
+		var wg sync.WaitGroup
+		for f := 0; f < fCount; f++ {
+			for z := 0; z < zCount; z++ {
+				wg.Add(1)
+				taskChan <- func(f, z int) func(workerID int) {
+					return func(workerID int) {
+						defer wg.Done()
+						setCurrentCtx()
+						for y := 0; y < yCount; y++ {
+							// Calculate the source and destination offsets for this slice
+							offsetSrc := int64(
+								xStart_src*strideXSrc+
+									(yStart_src+y)*strideYSrc+
+									(zStart_src+z)*strideZSrc+
+									(fStart_src+f)*strideFSrc,
+							) * int64(SIZEOF_FLOAT32)
+
+							offsetDst := int64(
+								xStart_dst*strideXDst+
+									(yStart_dst+y)*strideYDst+
+									(zStart_dst+z)*strideZDst+
+									(fStart_dst+f)*strideFDst,
+							) * int64(SIZEOF_FLOAT32)
+
+							// Calculate the number of bytes to copy for the x dimension
+							bytes := int64(xCount) * int64(SIZEOF_FLOAT32)
+							for c := 0; c < dst.NComp(); c++ {
+								memCpyPart(
+									dst.DevPtr(c),
+									src.DevPtr(c),
+									offsetDst,
+									offsetSrc,
+									bytes,
+									fmt.Sprintf("copy_%v", workerID),
+								)
+							}
+						}
+					}
+				}(f, z)
+			}
+		}
+		close(taskChan)
+		wg.Wait()
+		for i := 0; i < MAX_STREAMS; i++ {
+			destroyStream(fmt.Sprintf("copy_%v", i))
+		}
+	}
+
+}
+
+/*
 func CopyPart(dst, src *Slice, xStart_src, xEnd_src, yStart_src, yEnd_src, zStart_src, zEnd_src, fStart_src, fEnd_src, xStart_dst, yStart_dst, zStart_dst, fStart_dst int, args ...string) {
-	if dst.NComp() != src.NComp() || dst.Len() != src.Len() {
+	if dst.NComp() != src.NComp() {
 		panic(fmt.Sprintf("slice copy: illegal sizes: dst: %vx%v, src: %vx%v", dst.NComp(), dst.Len(), src.NComp(), src.Len()))
 	}
 	//fmt.Println(dst.Len())
 	d, s := dst.GPUAccess(), src.GPUAccess()
-	size := src.Size()
-	offset_src := int64(xStart_src + size[X]*(yStart_src+size[Y]*(zStart_src+size[Z]*fStart_src)))
-	offset_dst := int64(xStart_dst + size[X]*(yStart_dst+size[Y]*(zStart_dst+size[Z]*fStart_dst)))
+	sizeSrc := src.Size()
+	sizeDst := dst.Size()
+	offset_src := int64(xStart_src + sizeSrc[X]*(yStart_src+sizeSrc[Y]*(zStart_src+sizeSrc[Z]*fStart_src)))
+	offset_dst := int64(xStart_dst + sizeDst[X]*(yStart_dst+sizeDst[Y]*(zStart_dst+sizeDst[Z]*fStart_dst)))
 	xEnd_src -= 1
 	yEnd_src -= 1
 	zEnd_src -= 1
 	fEnd_src -= 1
-	bytes := int64(xEnd_src+size[X]*(yEnd_src+size[Y]*(zEnd_src+size[Z]*fEnd_src))) - offset_src
+	bytes := int64(xEnd_src+sizeSrc[X]*(yEnd_src+sizeSrc[Y]*(zEnd_src+sizeSrc[Z]*fEnd_src))) - offset_src
 	//fmt.Println("bytes", bytes, "offset", offset)
 	//bytes := int64(dst.Len())
 	//fmt.Println("bytes", bytes)
@@ -350,6 +537,7 @@ func CopyPart(dst, src *Slice, xStart_src, xEnd_src, yStart_src, yEnd_src, zStar
 		}
 	}
 }
+*/
 
 // Floats returns the data as 3D array,
 // indexed by cell position. Data should be
