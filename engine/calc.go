@@ -51,6 +51,7 @@ func CalcAs(q Quantity, Name, Category string) {
 	}); !isFFT {
 		if !slices.Contains(Categories, Category) && Category != "FFT" {
 			Categories = append(Categories, Category)
+		} else if Category != "FFT" {
 		} else {
 			panic("Cannot call FFT3D or FFT3DAs function from within CalcAs. Call FFT3DAs/FFT3D alone instead.")
 		}

@@ -16,7 +16,7 @@ func NewSlice(nComp int, size [3]int) *data.Slice {
 }
 
 func newSlice(nComp int, size [3]int, alloc func(int64) unsafe.Pointer, memType int8) *data.Slice {
-	data.EnableGPU(memFree, cu.MemFreeHost, MemCpyDtoH, MemCpyHtoD, MemCpy, MemCpyDtoHPart, MemCpyHtoDPart, MemCpyPart)
+	data.EnableGPU(memFree, cu.MemFreeHost, MemCpyDtoH, MemCpyHtoD, MemCpy, MemCpyDtoHPart, MemCpyHtoDPart, MemCpyPart, Create_Stream, Destroy_Stream, SetCurrent_Ctx)
 	length := prod(size)
 	bytes := int64(length) * cu.SIZEOF_FLOAT32
 	ptrs := make([]unsafe.Pointer, nComp)
@@ -32,7 +32,7 @@ func NewSliceInt(nComp int, size [3]int) *data.Slice {
 }
 
 func newSliceInt(nComp int, size [3]int, alloc func(int64) unsafe.Pointer, memType int8) *data.Slice {
-	data.EnableGPU(memFree, cu.MemFreeHost, MemCpyDtoH, MemCpyHtoD, MemCpy, MemCpyDtoHPart, MemCpyHtoDPart, MemCpyPart)
+	data.EnableGPU(memFree, cu.MemFreeHost, MemCpyDtoH, MemCpyHtoD, MemCpy, MemCpyDtoHPart, MemCpyHtoDPart, MemCpyPart, Create_Stream, Destroy_Stream, SetCurrent_Ctx)
 	length := prod(size)
 	bytes := int64(length) * cu.SIZEOF_INT
 	ptrs := make([]unsafe.Pointer, nComp)
@@ -60,10 +60,10 @@ func MemCpyDtoH(dst, src unsafe.Pointer, bytes int64) {
 	timer.Stop("memcpyDtoH")
 }
 
-func MemCpyDtoHPart(dst, src unsafe.Pointer, offset, bytes int64) {
+func MemCpyDtoHPart(dst, src unsafe.Pointer, offset_dst, offset_src, bytes int64) {
 	Sync() // sync previous kernels
 	timer.Start("memcpyDtoH")
-	cu.MemcpyDtoH(dst, cu.DevicePtr(uintptr(src)+uintptr(offset)), bytes)
+	cu.MemcpyDtoH(unsafe.Pointer(uintptr(dst)+uintptr(offset_dst)), cu.DevicePtr(uintptr(src)+uintptr(offset_src)), bytes)
 	Sync() // sync copy
 	timer.Stop("memcpyDtoH")
 }
@@ -76,10 +76,10 @@ func MemCpyHtoD(dst, src unsafe.Pointer, bytes int64) {
 	timer.Stop("memcpyHtoD")
 }
 
-func MemCpyHtoDPart(dst, src unsafe.Pointer, offset, bytes int64) {
+func MemCpyHtoDPart(dst, src unsafe.Pointer, offset_dst, offset_src, bytes int64) {
 	Sync() // sync previous kernels
 	timer.Start("memcpyHtoD")
-	cu.MemcpyHtoD(cu.DevicePtr(uintptr(dst)+uintptr(offset)), src, bytes)
+	cu.MemcpyHtoD(cu.DevicePtr(uintptr(dst)+uintptr(offset_dst)), unsafe.Pointer(uintptr(src)+uintptr(offset_src)), bytes)
 	Sync() // sync copy
 	timer.Stop("memcpyHtoD")
 }
@@ -102,17 +102,17 @@ func MemCpy(dst, src unsafe.Pointer, bytes int64, args ...string) {
 	}
 }
 
-func MemCpyPart(dst, src unsafe.Pointer, offset, bytes int64, args ...string) {
+func MemCpyPart(dst, src unsafe.Pointer, offset_dst, offset_src, bytes int64, args ...string) {
 	if len(args) == 1 {
 		SyncFFT_T(args[0])
 		timer.Start("memcpy" + args[0])
-		cu.MemcpyAsync(cu.DevicePtr(uintptr(dst)), cu.DevicePtr(uintptr(src)+uintptr(offset)), bytes, Get_Stream(args[0]))
+		cu.MemcpyAsync(cu.DevicePtr(uintptr(dst)+uintptr(offset_dst)), cu.DevicePtr(uintptr(src)+uintptr(offset_src)), bytes, Get_Stream(args[0]))
 		SyncFFT_T(args[0])
 		timer.Stop("memcpy" + args[0])
 	} else if len(args) == 0 {
 		Sync()
 		timer.Start("memcpy")
-		cu.MemcpyAsync(cu.DevicePtr(uintptr(dst)), cu.DevicePtr(uintptr(src)+uintptr(offset)), bytes, stream0)
+		cu.MemcpyAsync(cu.DevicePtr(uintptr(dst)+uintptr(offset_dst)), cu.DevicePtr(uintptr(src)+uintptr(offset_src)), bytes, stream0)
 		Sync()
 		timer.Stop("memcpy")
 	} else {

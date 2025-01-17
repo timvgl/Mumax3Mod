@@ -43,6 +43,7 @@ func init() {
 	DeclFunc("Vector", Vector, "Constructs a vector with given components")
 	DeclConst("Mu0", mag.Mu0, "Permittivity of vaccum (Tm/A)")
 	DeclFunc("Print", myprint, "Print to standard output")
+	DeclFunc("ExpandFloat", func(d float64) string { return strconv.FormatFloat(d, 'f', -1, 64) }, "Print to standard output")
 	DeclFunc("LoadFile", LoadFileDSlice, "Load a data file (ovf or dump)")
 	DeclFunc("LoadFileMyDir", LoadFileDSliceMyDir, "Load a data file from the ouput directory")
 	DeclFunc("LoadFileWithoutMem", LoadFileWithoutMem, "")
@@ -60,6 +61,7 @@ func init() {
 	DeclFunc("EraseOD", EraseOD, "")
 	DeclVar("Suffix", &Suffix, "")
 	DeclFunc("int", castInt, "")
+	DeclFunc("float", castFloat, "")
 	DeclFunc("string", castString, "")
 	DeclFunc("NUndoneToLog", NUndoneToLog, "")
 	DeclFunc("exec", RunExec, "")
@@ -211,6 +213,26 @@ func castInt(val interface{}) int {
 		return int(v)
 	case float64:
 		return int(v)
+	default:
+		panic(fmt.Sprintf("Type not recognized for %v", v))
+	}
+}
+
+func castFloat(val interface{}) float64 {
+	switch v := val.(type) {
+	case string:
+		valStr, ok := strconv.ParseFloat(v, 64)
+		if ok == nil {
+			return valStr
+		} else {
+			panic("Got non-castable string.")
+		}
+	case int32:
+		return float64(v)
+	case float32:
+		return float64(v)
+	case float64:
+		return v
 	default:
 		panic(fmt.Sprintf("Type not recognized for %v", v))
 	}

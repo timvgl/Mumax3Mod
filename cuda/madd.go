@@ -1,9 +1,10 @@
 package cuda
 
 import (
+	"fmt"
+
 	"github.com/mumax/3/data"
 	"github.com/mumax/3/util"
-	"fmt"
 )
 
 // multiply: dst[i] = a[i] * b[i]
@@ -23,7 +24,7 @@ func Mul(dst, a, b *data.Slice) {
 		for c := 0; c < nComp; c++ {
 			k_mul_async(dst.DevPtr(c), a.DevPtr(c), b.DevPtr(0), N, cfg)
 		}
-	} 
+	}
 }
 
 // divide: dst[i] = a[i] / b[i]
@@ -42,7 +43,7 @@ func Div(dst, a, b *data.Slice) {
 		for c := 0; c < nComp; c++ {
 			k_pointwise_div_async(dst.DevPtr(c), a.DevPtr(c), b.DevPtr(0), N, cfg)
 		}
-	} 
+	}
 }
 
 // Add: dst = src1 + src2.

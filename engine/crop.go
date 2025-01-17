@@ -20,6 +20,11 @@ func init() {
 	DeclFunc("CropLayer", CropLayer, "Crops a quantity to a single layer")
 	DeclFunc("CropRegion", CropRegion, "Crops a quantity to a region")
 	DeclVar("ignoreCropName", &ignoreCropName, "")
+	DeclFunc("CropXOperator", CropXOperator, "")
+	DeclFunc("CropYOperator", CropYOperator, "")
+	DeclFunc("CropZOperator", CropZOperator, "")
+	DeclFunc("CropOperator", CropOperator, "")
+	DeclFunc("CropLayerOperator", CropLayerOperator, "")
 }
 
 type cropped struct {
@@ -68,6 +73,26 @@ func CropRegion(parent Quantity, region int) *cropped {
 		}
 	}
 	return Crop(parent, x1, x2+1, y1, y2+1, z1, z2+1)
+}
+
+func CropLayerOperator(layer int) func(parent Quantity) *cropped {
+	return func(parent Quantity) *cropped { return CropLayer(parent, layer) }
+}
+
+func CropXOperator(x1, x2 int) func(parent Quantity) *cropped {
+	return func(parent Quantity) *cropped { return CropX(parent, x1, x2) }
+}
+
+func CropYOperator(y1, y2 int) func(parent Quantity) *cropped {
+	return func(parent Quantity) *cropped { return CropY(parent, y1, y2) }
+}
+
+func CropZOperator(z1, z2 int) func(parent Quantity) *cropped {
+	return func(parent Quantity) *cropped { return CropZ(parent, z1, z2) }
+}
+
+func CropOperator(x1, x2, y1, y2, z1, z2 int) func(parent Quantity) *cropped {
+	return func(parent Quantity) *cropped { return Crop(parent, x1, x2, y1, y2, z1, z2) }
 }
 
 func CropLayer(parent Quantity, layer int) *cropped {

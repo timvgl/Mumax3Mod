@@ -4,12 +4,41 @@ import (
 	"fmt"
 	"math"
 	"reflect"
+	"sync"
 
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/data"
 	"github.com/mumax/3/script"
 	"github.com/mumax/3/util"
 )
+
+var mapSetExcitation sync.Map
+
+func SetExcitation(name string, s ExcitationSlice) {
+	EraseSetExcitation(name)
+	mapSetExcitation.Store(name, s)
+}
+
+func EraseSetExcitation(name string) {
+	tmp, ok := mapSetExcitation.Load(name)
+	if ok {
+		s := tmp.(ExcitationSlice)
+		if s.d.GPUAccess() {
+			cuda.Recycle(s.d)
+		} else {
+			s.d.Free()
+		}
+		mapSetExcitation.Delete(name)
+	}
+}
+
+type ExcitationSlice struct {
+	name  string
+	start [3]int
+	end   [3]int
+	d     *data.Slice
+	ncomp int
+}
 
 // An excitation, typically field or current,
 // can be defined region-wise plus extra mask*multiplier terms.
@@ -61,6 +90,15 @@ func (e *Excitation) Slice() (*data.Slice, bool) {
 	buf := cuda.Buffer(e.NComp(), e.Mesh().Size())
 	cuda.Zero(buf)
 	e.AddTo(buf)
+	tmp, ok := mapSetExcitation.Load(e.name)
+	if ok {
+		setExcitations := tmp.(ExcitationSlice)
+		newData := setExcitations.d
+		regionStart := setExcitations.start
+		regionEnd := setExcitations.end
+		data.CopyPart(buf, newData, 0, regionEnd[X]-regionStart[X], 0, regionEnd[Y]-regionStart[Y], 0, regionEnd[Z]-regionStart[Z], 0, 1, regionStart[X], regionStart[Y], regionStart[Z], 0)
+
+	}
 	return buf, true
 }
 
