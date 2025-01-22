@@ -247,6 +247,28 @@ func Run(seconds float64) {
 	running = false
 }
 
+func RunNoOutput(seconds float64) {
+	SanityCheck()
+	running = true
+	currentRunningTime = seconds
+	Pause = false // may be set by <-Inject
+	const output = false
+	stepper.Free() // start from a clean state
+	stop := Time + seconds
+	alarm = stop // don't have dt adapt to go over alarms
+	for (Time < stop) && !Pause {
+		select {
+		default:
+			step(output)
+		// accept tasks form Inject channel
+		case f := <-Inject:
+			f()
+		}
+	}
+	Pause = true
+	running = false
+}
+
 // Run the simulation for a number of steps.
 func Steps(n int) {
 	stepping = true

@@ -12,11 +12,11 @@ import (
 	"unsafe"
 )
 
-// CUDA handle for FFT_Step kernel
-var FFT_Step_code cu.Function
+// CUDA handle for FFT_Step_Complex kernel
+var FFT_Step_Complex_code cu.Function
 
-// Stores the arguments for FFT_Step kernel invocation
-type FFT_Step_args_t struct {
+// Stores the arguments for FFT_Step_Complex kernel invocation
+type FFT_Step_Complex_args_t struct {
 	arg_dst   unsafe.Pointer
 	arg_src1  unsafe.Pointer
 	arg_src2  unsafe.Pointer
@@ -29,85 +29,85 @@ type FFT_Step_args_t struct {
 	sync.Mutex
 }
 
-// Stores the arguments for FFT_Step kernel invocation
-var FFT_Step_args FFT_Step_args_t
+// Stores the arguments for FFT_Step_Complex kernel invocation
+var FFT_Step_Complex_args FFT_Step_Complex_args_t
 
 func init() {
 	// CUDA driver kernel call wants pointers to arguments, set them up once.
-	FFT_Step_args.argptr[0] = unsafe.Pointer(&FFT_Step_args.arg_dst)
-	FFT_Step_args.argptr[1] = unsafe.Pointer(&FFT_Step_args.arg_src1)
-	FFT_Step_args.argptr[2] = unsafe.Pointer(&FFT_Step_args.arg_src2)
-	FFT_Step_args.argptr[3] = unsafe.Pointer(&FFT_Step_args.arg_Nx)
-	FFT_Step_args.argptr[4] = unsafe.Pointer(&FFT_Step_args.arg_Ny)
-	FFT_Step_args.argptr[5] = unsafe.Pointer(&FFT_Step_args.arg_Nz)
-	FFT_Step_args.argptr[6] = unsafe.Pointer(&FFT_Step_args.arg_phase)
-	FFT_Step_args.argptr[7] = unsafe.Pointer(&FFT_Step_args.arg_n)
+	FFT_Step_Complex_args.argptr[0] = unsafe.Pointer(&FFT_Step_Complex_args.arg_dst)
+	FFT_Step_Complex_args.argptr[1] = unsafe.Pointer(&FFT_Step_Complex_args.arg_src1)
+	FFT_Step_Complex_args.argptr[2] = unsafe.Pointer(&FFT_Step_Complex_args.arg_src2)
+	FFT_Step_Complex_args.argptr[3] = unsafe.Pointer(&FFT_Step_Complex_args.arg_Nx)
+	FFT_Step_Complex_args.argptr[4] = unsafe.Pointer(&FFT_Step_Complex_args.arg_Ny)
+	FFT_Step_Complex_args.argptr[5] = unsafe.Pointer(&FFT_Step_Complex_args.arg_Nz)
+	FFT_Step_Complex_args.argptr[6] = unsafe.Pointer(&FFT_Step_Complex_args.arg_phase)
+	FFT_Step_Complex_args.argptr[7] = unsafe.Pointer(&FFT_Step_Complex_args.arg_n)
 }
 
-// Wrapper for FFT_Step CUDA kernel, asynchronous.
-func k_FFT_Step_async(dst unsafe.Pointer, src1 unsafe.Pointer, src2 unsafe.Pointer, Nx int, Ny int, Nz int, phase float32, n float32, key string, cfg *config) {
+// Wrapper for FFT_Step_Complex CUDA kernel, asynchronous.
+func k_FFT_Step_Complex_async(dst unsafe.Pointer, src1 unsafe.Pointer, src2 unsafe.Pointer, Nx int, Ny int, Nz int, phase float32, n float32, key string, cfg *config) {
 	if Synchronous { // debug
 		SyncFFT_T(key)
-		timer.Start("FFT_Step" + key)
+		timer.Start("FFT_Step_Complex" + key)
 	}
 
-	FFT_Step_args.Lock()
-	defer FFT_Step_args.Unlock()
+	FFT_Step_Complex_args.Lock()
+	defer FFT_Step_Complex_args.Unlock()
 
-	if FFT_Step_code == 0 {
-		FFT_Step_code = fatbinLoad(FFT_Step_map, "FFT_Step")
+	if FFT_Step_Complex_code == 0 {
+		FFT_Step_Complex_code = fatbinLoad(FFT_Step_Complex_map, "FFT_Step_Complex")
 	}
 
-	FFT_Step_args.arg_dst = dst
-	FFT_Step_args.arg_src1 = src1
-	FFT_Step_args.arg_src2 = src2
-	FFT_Step_args.arg_Nx = Nx
-	FFT_Step_args.arg_Ny = Ny
-	FFT_Step_args.arg_Nz = Nz
-	FFT_Step_args.arg_phase = phase
-	FFT_Step_args.arg_n = n
+	FFT_Step_Complex_args.arg_dst = dst
+	FFT_Step_Complex_args.arg_src1 = src1
+	FFT_Step_Complex_args.arg_src2 = src2
+	FFT_Step_Complex_args.arg_Nx = Nx
+	FFT_Step_Complex_args.arg_Ny = Ny
+	FFT_Step_Complex_args.arg_Nz = Nz
+	FFT_Step_Complex_args.arg_phase = phase
+	FFT_Step_Complex_args.arg_n = n
 
-	args := FFT_Step_args.argptr[:]
-	cu.LaunchKernel(FFT_Step_code, cfg.Grid.X, cfg.Grid.Y, cfg.Grid.Z, cfg.Block.X, cfg.Block.Y, cfg.Block.Z, 0, Get_Stream(key), args)
+	args := FFT_Step_Complex_args.argptr[:]
+	cu.LaunchKernel(FFT_Step_Complex_code, cfg.Grid.X, cfg.Grid.Y, cfg.Grid.Z, cfg.Block.X, cfg.Block.Y, cfg.Block.Z, 0, Get_Stream(key), args)
 
 	if Synchronous { // debug
 		SyncFFT_T(key)
-		timer.Stop("FFT_Step" + key)
+		timer.Stop("FFT_Step_Complex" + key)
 	}
 }
 
-// maps compute capability on PTX code for FFT_Step kernel.
-var FFT_Step_map = map[int]string{0: "",
-	50: FFT_Step_ptx_50,
-	52: FFT_Step_ptx_52,
-	53: FFT_Step_ptx_53,
-	60: FFT_Step_ptx_60,
-	61: FFT_Step_ptx_61,
-	62: FFT_Step_ptx_62,
-	70: FFT_Step_ptx_70,
-	72: FFT_Step_ptx_72,
-	75: FFT_Step_ptx_75,
-	80: FFT_Step_ptx_80}
+// maps compute capability on PTX code for FFT_Step_Complex kernel.
+var FFT_Step_Complex_map = map[int]string{0: "",
+	50: FFT_Step_Complex_ptx_50,
+	52: FFT_Step_Complex_ptx_52,
+	53: FFT_Step_Complex_ptx_53,
+	60: FFT_Step_Complex_ptx_60,
+	61: FFT_Step_Complex_ptx_61,
+	62: FFT_Step_Complex_ptx_62,
+	70: FFT_Step_Complex_ptx_70,
+	72: FFT_Step_Complex_ptx_72,
+	75: FFT_Step_Complex_ptx_75,
+	80: FFT_Step_Complex_ptx_80}
 
-// FFT_Step PTX code for various compute capabilities.
+// FFT_Step_Complex PTX code for various compute capabilities.
 const (
-	FFT_Step_ptx_50 = `
-.version 8.2
+	FFT_Step_Complex_ptx_50 = `
+.version 8.5
 .target sm_50
 .address_size 64
 
-	// .globl	FFT_Step
+	// .globl	FFT_Step_Complex
 .global .align 4 .b8 __cudart_i2opi_f[24] = {65, 144, 67, 60, 153, 149, 98, 219, 192, 221, 52, 245, 209, 87, 39, 252, 41, 21, 68, 78, 110, 131, 249, 162};
 
-.visible .entry FFT_Step(
-	.param .u64 FFT_Step_param_0,
-	.param .u64 FFT_Step_param_1,
-	.param .u64 FFT_Step_param_2,
-	.param .u32 FFT_Step_param_3,
-	.param .u32 FFT_Step_param_4,
-	.param .u32 FFT_Step_param_5,
-	.param .f32 FFT_Step_param_6,
-	.param .f32 FFT_Step_param_7
+.visible .entry FFT_Step_Complex(
+	.param .u64 FFT_Step_Complex_param_0,
+	.param .u64 FFT_Step_Complex_param_1,
+	.param .u64 FFT_Step_Complex_param_2,
+	.param .u32 FFT_Step_Complex_param_3,
+	.param .u32 FFT_Step_Complex_param_4,
+	.param .u32 FFT_Step_Complex_param_5,
+	.param .f32 FFT_Step_Complex_param_6,
+	.param .f32 FFT_Step_Complex_param_7
 )
 {
 	.local .align 4 .b8 	__local_depot0[28];
@@ -121,14 +121,14 @@ const (
 
 
 	mov.u64 	%SPL, __local_depot0;
-	ld.param.u64 	%rd9, [FFT_Step_param_0];
-	ld.param.u64 	%rd10, [FFT_Step_param_1];
-	ld.param.u64 	%rd11, [FFT_Step_param_2];
-	ld.param.u32 	%r22, [FFT_Step_param_3];
-	ld.param.u32 	%r23, [FFT_Step_param_4];
-	ld.param.u32 	%r24, [FFT_Step_param_5];
-	ld.param.f32 	%f8, [FFT_Step_param_6];
-	ld.param.f32 	%f9, [FFT_Step_param_7];
+	ld.param.u64 	%rd9, [FFT_Step_Complex_param_0];
+	ld.param.u64 	%rd10, [FFT_Step_Complex_param_1];
+	ld.param.u64 	%rd11, [FFT_Step_Complex_param_2];
+	ld.param.u32 	%r22, [FFT_Step_Complex_param_3];
+	ld.param.u32 	%r23, [FFT_Step_Complex_param_4];
+	ld.param.u32 	%r24, [FFT_Step_Complex_param_5];
+	ld.param.f32 	%f8, [FFT_Step_Complex_param_6];
+	ld.param.f32 	%f9, [FFT_Step_Complex_param_7];
 	add.u64 	%rd1, %SPL, 0;
 	mov.u32 	%r25, %ntid.x;
 	mov.u32 	%r26, %ctaid.x;
@@ -266,18 +266,18 @@ $L__BB0_9:
 	mov.f32 	%f21, 0f3BBB989D;
 	mov.f32 	%f22, 0f00000000;
 	fma.rn.f32 	%f23, %f22, %f21, %f20;
-	mov.f32 	%f24, 0f3FB8AA3B;
-	mov.f32 	%f25, 0f437C0000;
-	cvt.sat.f32.f32 	%f26, %f23;
-	mov.f32 	%f27, 0f4B400001;
-	fma.rm.f32 	%f28, %f26, %f25, %f27;
-	add.f32 	%f29, %f28, 0fCB40007F;
-	neg.f32 	%f30, %f29;
-	fma.rn.f32 	%f31, %f22, %f24, %f30;
+	cvt.sat.f32.f32 	%f24, %f23;
+	mov.f32 	%f25, 0f4B400001;
+	mov.f32 	%f26, 0f437C0000;
+	fma.rm.f32 	%f27, %f24, %f26, %f25;
+	add.f32 	%f28, %f27, 0fCB40007F;
+	neg.f32 	%f29, %f28;
+	mov.f32 	%f30, 0f3FB8AA3B;
+	fma.rn.f32 	%f31, %f22, %f30, %f29;
 	mov.f32 	%f32, 0f32A57060;
 	fma.rn.f32 	%f33, %f22, %f32, %f31;
 	ex2.approx.ftz.f32 	%f34, %f33;
-	mov.b32 	%r66, %f28;
+	mov.b32 	%r66, %f27;
 	shl.b32 	%r67, %r66, 23;
 	mov.b32 	%f35, %r67;
 	mul.f32 	%f36, %f34, %f35;
@@ -339,23 +339,23 @@ $L__BB0_10:
 }
 
 `
-	FFT_Step_ptx_52 = `
-.version 8.2
+	FFT_Step_Complex_ptx_52 = `
+.version 8.5
 .target sm_52
 .address_size 64
 
-	// .globl	FFT_Step
+	// .globl	FFT_Step_Complex
 .global .align 4 .b8 __cudart_i2opi_f[24] = {65, 144, 67, 60, 153, 149, 98, 219, 192, 221, 52, 245, 209, 87, 39, 252, 41, 21, 68, 78, 110, 131, 249, 162};
 
-.visible .entry FFT_Step(
-	.param .u64 FFT_Step_param_0,
-	.param .u64 FFT_Step_param_1,
-	.param .u64 FFT_Step_param_2,
-	.param .u32 FFT_Step_param_3,
-	.param .u32 FFT_Step_param_4,
-	.param .u32 FFT_Step_param_5,
-	.param .f32 FFT_Step_param_6,
-	.param .f32 FFT_Step_param_7
+.visible .entry FFT_Step_Complex(
+	.param .u64 FFT_Step_Complex_param_0,
+	.param .u64 FFT_Step_Complex_param_1,
+	.param .u64 FFT_Step_Complex_param_2,
+	.param .u32 FFT_Step_Complex_param_3,
+	.param .u32 FFT_Step_Complex_param_4,
+	.param .u32 FFT_Step_Complex_param_5,
+	.param .f32 FFT_Step_Complex_param_6,
+	.param .f32 FFT_Step_Complex_param_7
 )
 {
 	.local .align 4 .b8 	__local_depot0[28];
@@ -369,14 +369,14 @@ $L__BB0_10:
 
 
 	mov.u64 	%SPL, __local_depot0;
-	ld.param.u64 	%rd9, [FFT_Step_param_0];
-	ld.param.u64 	%rd10, [FFT_Step_param_1];
-	ld.param.u64 	%rd11, [FFT_Step_param_2];
-	ld.param.u32 	%r22, [FFT_Step_param_3];
-	ld.param.u32 	%r23, [FFT_Step_param_4];
-	ld.param.u32 	%r24, [FFT_Step_param_5];
-	ld.param.f32 	%f8, [FFT_Step_param_6];
-	ld.param.f32 	%f9, [FFT_Step_param_7];
+	ld.param.u64 	%rd9, [FFT_Step_Complex_param_0];
+	ld.param.u64 	%rd10, [FFT_Step_Complex_param_1];
+	ld.param.u64 	%rd11, [FFT_Step_Complex_param_2];
+	ld.param.u32 	%r22, [FFT_Step_Complex_param_3];
+	ld.param.u32 	%r23, [FFT_Step_Complex_param_4];
+	ld.param.u32 	%r24, [FFT_Step_Complex_param_5];
+	ld.param.f32 	%f8, [FFT_Step_Complex_param_6];
+	ld.param.f32 	%f9, [FFT_Step_Complex_param_7];
 	add.u64 	%rd1, %SPL, 0;
 	mov.u32 	%r25, %ntid.x;
 	mov.u32 	%r26, %ctaid.x;
@@ -514,18 +514,18 @@ $L__BB0_9:
 	mov.f32 	%f21, 0f3BBB989D;
 	mov.f32 	%f22, 0f00000000;
 	fma.rn.f32 	%f23, %f22, %f21, %f20;
-	mov.f32 	%f24, 0f3FB8AA3B;
-	mov.f32 	%f25, 0f437C0000;
-	cvt.sat.f32.f32 	%f26, %f23;
-	mov.f32 	%f27, 0f4B400001;
-	fma.rm.f32 	%f28, %f26, %f25, %f27;
-	add.f32 	%f29, %f28, 0fCB40007F;
-	neg.f32 	%f30, %f29;
-	fma.rn.f32 	%f31, %f22, %f24, %f30;
+	cvt.sat.f32.f32 	%f24, %f23;
+	mov.f32 	%f25, 0f4B400001;
+	mov.f32 	%f26, 0f437C0000;
+	fma.rm.f32 	%f27, %f24, %f26, %f25;
+	add.f32 	%f28, %f27, 0fCB40007F;
+	neg.f32 	%f29, %f28;
+	mov.f32 	%f30, 0f3FB8AA3B;
+	fma.rn.f32 	%f31, %f22, %f30, %f29;
 	mov.f32 	%f32, 0f32A57060;
 	fma.rn.f32 	%f33, %f22, %f32, %f31;
 	ex2.approx.ftz.f32 	%f34, %f33;
-	mov.b32 	%r66, %f28;
+	mov.b32 	%r66, %f27;
 	shl.b32 	%r67, %r66, 23;
 	mov.b32 	%f35, %r67;
 	mul.f32 	%f36, %f34, %f35;
@@ -587,23 +587,23 @@ $L__BB0_10:
 }
 
 `
-	FFT_Step_ptx_53 = `
-.version 8.2
+	FFT_Step_Complex_ptx_53 = `
+.version 8.5
 .target sm_53
 .address_size 64
 
-	// .globl	FFT_Step
+	// .globl	FFT_Step_Complex
 .global .align 4 .b8 __cudart_i2opi_f[24] = {65, 144, 67, 60, 153, 149, 98, 219, 192, 221, 52, 245, 209, 87, 39, 252, 41, 21, 68, 78, 110, 131, 249, 162};
 
-.visible .entry FFT_Step(
-	.param .u64 FFT_Step_param_0,
-	.param .u64 FFT_Step_param_1,
-	.param .u64 FFT_Step_param_2,
-	.param .u32 FFT_Step_param_3,
-	.param .u32 FFT_Step_param_4,
-	.param .u32 FFT_Step_param_5,
-	.param .f32 FFT_Step_param_6,
-	.param .f32 FFT_Step_param_7
+.visible .entry FFT_Step_Complex(
+	.param .u64 FFT_Step_Complex_param_0,
+	.param .u64 FFT_Step_Complex_param_1,
+	.param .u64 FFT_Step_Complex_param_2,
+	.param .u32 FFT_Step_Complex_param_3,
+	.param .u32 FFT_Step_Complex_param_4,
+	.param .u32 FFT_Step_Complex_param_5,
+	.param .f32 FFT_Step_Complex_param_6,
+	.param .f32 FFT_Step_Complex_param_7
 )
 {
 	.local .align 4 .b8 	__local_depot0[28];
@@ -617,14 +617,14 @@ $L__BB0_10:
 
 
 	mov.u64 	%SPL, __local_depot0;
-	ld.param.u64 	%rd9, [FFT_Step_param_0];
-	ld.param.u64 	%rd10, [FFT_Step_param_1];
-	ld.param.u64 	%rd11, [FFT_Step_param_2];
-	ld.param.u32 	%r22, [FFT_Step_param_3];
-	ld.param.u32 	%r23, [FFT_Step_param_4];
-	ld.param.u32 	%r24, [FFT_Step_param_5];
-	ld.param.f32 	%f8, [FFT_Step_param_6];
-	ld.param.f32 	%f9, [FFT_Step_param_7];
+	ld.param.u64 	%rd9, [FFT_Step_Complex_param_0];
+	ld.param.u64 	%rd10, [FFT_Step_Complex_param_1];
+	ld.param.u64 	%rd11, [FFT_Step_Complex_param_2];
+	ld.param.u32 	%r22, [FFT_Step_Complex_param_3];
+	ld.param.u32 	%r23, [FFT_Step_Complex_param_4];
+	ld.param.u32 	%r24, [FFT_Step_Complex_param_5];
+	ld.param.f32 	%f8, [FFT_Step_Complex_param_6];
+	ld.param.f32 	%f9, [FFT_Step_Complex_param_7];
 	add.u64 	%rd1, %SPL, 0;
 	mov.u32 	%r25, %ntid.x;
 	mov.u32 	%r26, %ctaid.x;
@@ -762,18 +762,18 @@ $L__BB0_9:
 	mov.f32 	%f21, 0f3BBB989D;
 	mov.f32 	%f22, 0f00000000;
 	fma.rn.f32 	%f23, %f22, %f21, %f20;
-	mov.f32 	%f24, 0f3FB8AA3B;
-	mov.f32 	%f25, 0f437C0000;
-	cvt.sat.f32.f32 	%f26, %f23;
-	mov.f32 	%f27, 0f4B400001;
-	fma.rm.f32 	%f28, %f26, %f25, %f27;
-	add.f32 	%f29, %f28, 0fCB40007F;
-	neg.f32 	%f30, %f29;
-	fma.rn.f32 	%f31, %f22, %f24, %f30;
+	cvt.sat.f32.f32 	%f24, %f23;
+	mov.f32 	%f25, 0f4B400001;
+	mov.f32 	%f26, 0f437C0000;
+	fma.rm.f32 	%f27, %f24, %f26, %f25;
+	add.f32 	%f28, %f27, 0fCB40007F;
+	neg.f32 	%f29, %f28;
+	mov.f32 	%f30, 0f3FB8AA3B;
+	fma.rn.f32 	%f31, %f22, %f30, %f29;
 	mov.f32 	%f32, 0f32A57060;
 	fma.rn.f32 	%f33, %f22, %f32, %f31;
 	ex2.approx.ftz.f32 	%f34, %f33;
-	mov.b32 	%r66, %f28;
+	mov.b32 	%r66, %f27;
 	shl.b32 	%r67, %r66, 23;
 	mov.b32 	%f35, %r67;
 	mul.f32 	%f36, %f34, %f35;
@@ -835,23 +835,23 @@ $L__BB0_10:
 }
 
 `
-	FFT_Step_ptx_60 = `
-.version 8.2
+	FFT_Step_Complex_ptx_60 = `
+.version 8.5
 .target sm_60
 .address_size 64
 
-	// .globl	FFT_Step
+	// .globl	FFT_Step_Complex
 .global .align 4 .b8 __cudart_i2opi_f[24] = {65, 144, 67, 60, 153, 149, 98, 219, 192, 221, 52, 245, 209, 87, 39, 252, 41, 21, 68, 78, 110, 131, 249, 162};
 
-.visible .entry FFT_Step(
-	.param .u64 FFT_Step_param_0,
-	.param .u64 FFT_Step_param_1,
-	.param .u64 FFT_Step_param_2,
-	.param .u32 FFT_Step_param_3,
-	.param .u32 FFT_Step_param_4,
-	.param .u32 FFT_Step_param_5,
-	.param .f32 FFT_Step_param_6,
-	.param .f32 FFT_Step_param_7
+.visible .entry FFT_Step_Complex(
+	.param .u64 FFT_Step_Complex_param_0,
+	.param .u64 FFT_Step_Complex_param_1,
+	.param .u64 FFT_Step_Complex_param_2,
+	.param .u32 FFT_Step_Complex_param_3,
+	.param .u32 FFT_Step_Complex_param_4,
+	.param .u32 FFT_Step_Complex_param_5,
+	.param .f32 FFT_Step_Complex_param_6,
+	.param .f32 FFT_Step_Complex_param_7
 )
 {
 	.local .align 4 .b8 	__local_depot0[28];
@@ -865,14 +865,14 @@ $L__BB0_10:
 
 
 	mov.u64 	%SPL, __local_depot0;
-	ld.param.u64 	%rd9, [FFT_Step_param_0];
-	ld.param.u64 	%rd10, [FFT_Step_param_1];
-	ld.param.u64 	%rd11, [FFT_Step_param_2];
-	ld.param.u32 	%r22, [FFT_Step_param_3];
-	ld.param.u32 	%r23, [FFT_Step_param_4];
-	ld.param.u32 	%r24, [FFT_Step_param_5];
-	ld.param.f32 	%f8, [FFT_Step_param_6];
-	ld.param.f32 	%f9, [FFT_Step_param_7];
+	ld.param.u64 	%rd9, [FFT_Step_Complex_param_0];
+	ld.param.u64 	%rd10, [FFT_Step_Complex_param_1];
+	ld.param.u64 	%rd11, [FFT_Step_Complex_param_2];
+	ld.param.u32 	%r22, [FFT_Step_Complex_param_3];
+	ld.param.u32 	%r23, [FFT_Step_Complex_param_4];
+	ld.param.u32 	%r24, [FFT_Step_Complex_param_5];
+	ld.param.f32 	%f8, [FFT_Step_Complex_param_6];
+	ld.param.f32 	%f9, [FFT_Step_Complex_param_7];
 	add.u64 	%rd1, %SPL, 0;
 	mov.u32 	%r25, %ntid.x;
 	mov.u32 	%r26, %ctaid.x;
@@ -1010,18 +1010,18 @@ $L__BB0_9:
 	mov.f32 	%f21, 0f3BBB989D;
 	mov.f32 	%f22, 0f00000000;
 	fma.rn.f32 	%f23, %f22, %f21, %f20;
-	mov.f32 	%f24, 0f3FB8AA3B;
-	mov.f32 	%f25, 0f437C0000;
-	cvt.sat.f32.f32 	%f26, %f23;
-	mov.f32 	%f27, 0f4B400001;
-	fma.rm.f32 	%f28, %f26, %f25, %f27;
-	add.f32 	%f29, %f28, 0fCB40007F;
-	neg.f32 	%f30, %f29;
-	fma.rn.f32 	%f31, %f22, %f24, %f30;
+	cvt.sat.f32.f32 	%f24, %f23;
+	mov.f32 	%f25, 0f4B400001;
+	mov.f32 	%f26, 0f437C0000;
+	fma.rm.f32 	%f27, %f24, %f26, %f25;
+	add.f32 	%f28, %f27, 0fCB40007F;
+	neg.f32 	%f29, %f28;
+	mov.f32 	%f30, 0f3FB8AA3B;
+	fma.rn.f32 	%f31, %f22, %f30, %f29;
 	mov.f32 	%f32, 0f32A57060;
 	fma.rn.f32 	%f33, %f22, %f32, %f31;
 	ex2.approx.ftz.f32 	%f34, %f33;
-	mov.b32 	%r66, %f28;
+	mov.b32 	%r66, %f27;
 	shl.b32 	%r67, %r66, 23;
 	mov.b32 	%f35, %r67;
 	mul.f32 	%f36, %f34, %f35;
@@ -1083,23 +1083,23 @@ $L__BB0_10:
 }
 
 `
-	FFT_Step_ptx_61 = `
-.version 8.2
+	FFT_Step_Complex_ptx_61 = `
+.version 8.5
 .target sm_61
 .address_size 64
 
-	// .globl	FFT_Step
+	// .globl	FFT_Step_Complex
 .global .align 4 .b8 __cudart_i2opi_f[24] = {65, 144, 67, 60, 153, 149, 98, 219, 192, 221, 52, 245, 209, 87, 39, 252, 41, 21, 68, 78, 110, 131, 249, 162};
 
-.visible .entry FFT_Step(
-	.param .u64 FFT_Step_param_0,
-	.param .u64 FFT_Step_param_1,
-	.param .u64 FFT_Step_param_2,
-	.param .u32 FFT_Step_param_3,
-	.param .u32 FFT_Step_param_4,
-	.param .u32 FFT_Step_param_5,
-	.param .f32 FFT_Step_param_6,
-	.param .f32 FFT_Step_param_7
+.visible .entry FFT_Step_Complex(
+	.param .u64 FFT_Step_Complex_param_0,
+	.param .u64 FFT_Step_Complex_param_1,
+	.param .u64 FFT_Step_Complex_param_2,
+	.param .u32 FFT_Step_Complex_param_3,
+	.param .u32 FFT_Step_Complex_param_4,
+	.param .u32 FFT_Step_Complex_param_5,
+	.param .f32 FFT_Step_Complex_param_6,
+	.param .f32 FFT_Step_Complex_param_7
 )
 {
 	.local .align 4 .b8 	__local_depot0[28];
@@ -1113,14 +1113,14 @@ $L__BB0_10:
 
 
 	mov.u64 	%SPL, __local_depot0;
-	ld.param.u64 	%rd9, [FFT_Step_param_0];
-	ld.param.u64 	%rd10, [FFT_Step_param_1];
-	ld.param.u64 	%rd11, [FFT_Step_param_2];
-	ld.param.u32 	%r22, [FFT_Step_param_3];
-	ld.param.u32 	%r23, [FFT_Step_param_4];
-	ld.param.u32 	%r24, [FFT_Step_param_5];
-	ld.param.f32 	%f8, [FFT_Step_param_6];
-	ld.param.f32 	%f9, [FFT_Step_param_7];
+	ld.param.u64 	%rd9, [FFT_Step_Complex_param_0];
+	ld.param.u64 	%rd10, [FFT_Step_Complex_param_1];
+	ld.param.u64 	%rd11, [FFT_Step_Complex_param_2];
+	ld.param.u32 	%r22, [FFT_Step_Complex_param_3];
+	ld.param.u32 	%r23, [FFT_Step_Complex_param_4];
+	ld.param.u32 	%r24, [FFT_Step_Complex_param_5];
+	ld.param.f32 	%f8, [FFT_Step_Complex_param_6];
+	ld.param.f32 	%f9, [FFT_Step_Complex_param_7];
 	add.u64 	%rd1, %SPL, 0;
 	mov.u32 	%r25, %ntid.x;
 	mov.u32 	%r26, %ctaid.x;
@@ -1258,18 +1258,18 @@ $L__BB0_9:
 	mov.f32 	%f21, 0f3BBB989D;
 	mov.f32 	%f22, 0f00000000;
 	fma.rn.f32 	%f23, %f22, %f21, %f20;
-	mov.f32 	%f24, 0f3FB8AA3B;
-	mov.f32 	%f25, 0f437C0000;
-	cvt.sat.f32.f32 	%f26, %f23;
-	mov.f32 	%f27, 0f4B400001;
-	fma.rm.f32 	%f28, %f26, %f25, %f27;
-	add.f32 	%f29, %f28, 0fCB40007F;
-	neg.f32 	%f30, %f29;
-	fma.rn.f32 	%f31, %f22, %f24, %f30;
+	cvt.sat.f32.f32 	%f24, %f23;
+	mov.f32 	%f25, 0f4B400001;
+	mov.f32 	%f26, 0f437C0000;
+	fma.rm.f32 	%f27, %f24, %f26, %f25;
+	add.f32 	%f28, %f27, 0fCB40007F;
+	neg.f32 	%f29, %f28;
+	mov.f32 	%f30, 0f3FB8AA3B;
+	fma.rn.f32 	%f31, %f22, %f30, %f29;
 	mov.f32 	%f32, 0f32A57060;
 	fma.rn.f32 	%f33, %f22, %f32, %f31;
 	ex2.approx.ftz.f32 	%f34, %f33;
-	mov.b32 	%r66, %f28;
+	mov.b32 	%r66, %f27;
 	shl.b32 	%r67, %r66, 23;
 	mov.b32 	%f35, %r67;
 	mul.f32 	%f36, %f34, %f35;
@@ -1331,23 +1331,23 @@ $L__BB0_10:
 }
 
 `
-	FFT_Step_ptx_62 = `
-.version 8.2
+	FFT_Step_Complex_ptx_62 = `
+.version 8.5
 .target sm_62
 .address_size 64
 
-	// .globl	FFT_Step
+	// .globl	FFT_Step_Complex
 .global .align 4 .b8 __cudart_i2opi_f[24] = {65, 144, 67, 60, 153, 149, 98, 219, 192, 221, 52, 245, 209, 87, 39, 252, 41, 21, 68, 78, 110, 131, 249, 162};
 
-.visible .entry FFT_Step(
-	.param .u64 FFT_Step_param_0,
-	.param .u64 FFT_Step_param_1,
-	.param .u64 FFT_Step_param_2,
-	.param .u32 FFT_Step_param_3,
-	.param .u32 FFT_Step_param_4,
-	.param .u32 FFT_Step_param_5,
-	.param .f32 FFT_Step_param_6,
-	.param .f32 FFT_Step_param_7
+.visible .entry FFT_Step_Complex(
+	.param .u64 FFT_Step_Complex_param_0,
+	.param .u64 FFT_Step_Complex_param_1,
+	.param .u64 FFT_Step_Complex_param_2,
+	.param .u32 FFT_Step_Complex_param_3,
+	.param .u32 FFT_Step_Complex_param_4,
+	.param .u32 FFT_Step_Complex_param_5,
+	.param .f32 FFT_Step_Complex_param_6,
+	.param .f32 FFT_Step_Complex_param_7
 )
 {
 	.local .align 4 .b8 	__local_depot0[28];
@@ -1361,14 +1361,14 @@ $L__BB0_10:
 
 
 	mov.u64 	%SPL, __local_depot0;
-	ld.param.u64 	%rd9, [FFT_Step_param_0];
-	ld.param.u64 	%rd10, [FFT_Step_param_1];
-	ld.param.u64 	%rd11, [FFT_Step_param_2];
-	ld.param.u32 	%r22, [FFT_Step_param_3];
-	ld.param.u32 	%r23, [FFT_Step_param_4];
-	ld.param.u32 	%r24, [FFT_Step_param_5];
-	ld.param.f32 	%f8, [FFT_Step_param_6];
-	ld.param.f32 	%f9, [FFT_Step_param_7];
+	ld.param.u64 	%rd9, [FFT_Step_Complex_param_0];
+	ld.param.u64 	%rd10, [FFT_Step_Complex_param_1];
+	ld.param.u64 	%rd11, [FFT_Step_Complex_param_2];
+	ld.param.u32 	%r22, [FFT_Step_Complex_param_3];
+	ld.param.u32 	%r23, [FFT_Step_Complex_param_4];
+	ld.param.u32 	%r24, [FFT_Step_Complex_param_5];
+	ld.param.f32 	%f8, [FFT_Step_Complex_param_6];
+	ld.param.f32 	%f9, [FFT_Step_Complex_param_7];
 	add.u64 	%rd1, %SPL, 0;
 	mov.u32 	%r25, %ntid.x;
 	mov.u32 	%r26, %ctaid.x;
@@ -1506,18 +1506,18 @@ $L__BB0_9:
 	mov.f32 	%f21, 0f3BBB989D;
 	mov.f32 	%f22, 0f00000000;
 	fma.rn.f32 	%f23, %f22, %f21, %f20;
-	mov.f32 	%f24, 0f3FB8AA3B;
-	mov.f32 	%f25, 0f437C0000;
-	cvt.sat.f32.f32 	%f26, %f23;
-	mov.f32 	%f27, 0f4B400001;
-	fma.rm.f32 	%f28, %f26, %f25, %f27;
-	add.f32 	%f29, %f28, 0fCB40007F;
-	neg.f32 	%f30, %f29;
-	fma.rn.f32 	%f31, %f22, %f24, %f30;
+	cvt.sat.f32.f32 	%f24, %f23;
+	mov.f32 	%f25, 0f4B400001;
+	mov.f32 	%f26, 0f437C0000;
+	fma.rm.f32 	%f27, %f24, %f26, %f25;
+	add.f32 	%f28, %f27, 0fCB40007F;
+	neg.f32 	%f29, %f28;
+	mov.f32 	%f30, 0f3FB8AA3B;
+	fma.rn.f32 	%f31, %f22, %f30, %f29;
 	mov.f32 	%f32, 0f32A57060;
 	fma.rn.f32 	%f33, %f22, %f32, %f31;
 	ex2.approx.ftz.f32 	%f34, %f33;
-	mov.b32 	%r66, %f28;
+	mov.b32 	%r66, %f27;
 	shl.b32 	%r67, %r66, 23;
 	mov.b32 	%f35, %r67;
 	mul.f32 	%f36, %f34, %f35;
@@ -1579,23 +1579,23 @@ $L__BB0_10:
 }
 
 `
-	FFT_Step_ptx_70 = `
-.version 8.2
+	FFT_Step_Complex_ptx_70 = `
+.version 8.5
 .target sm_70
 .address_size 64
 
-	// .globl	FFT_Step
+	// .globl	FFT_Step_Complex
 .global .align 4 .b8 __cudart_i2opi_f[24] = {65, 144, 67, 60, 153, 149, 98, 219, 192, 221, 52, 245, 209, 87, 39, 252, 41, 21, 68, 78, 110, 131, 249, 162};
 
-.visible .entry FFT_Step(
-	.param .u64 FFT_Step_param_0,
-	.param .u64 FFT_Step_param_1,
-	.param .u64 FFT_Step_param_2,
-	.param .u32 FFT_Step_param_3,
-	.param .u32 FFT_Step_param_4,
-	.param .u32 FFT_Step_param_5,
-	.param .f32 FFT_Step_param_6,
-	.param .f32 FFT_Step_param_7
+.visible .entry FFT_Step_Complex(
+	.param .u64 FFT_Step_Complex_param_0,
+	.param .u64 FFT_Step_Complex_param_1,
+	.param .u64 FFT_Step_Complex_param_2,
+	.param .u32 FFT_Step_Complex_param_3,
+	.param .u32 FFT_Step_Complex_param_4,
+	.param .u32 FFT_Step_Complex_param_5,
+	.param .f32 FFT_Step_Complex_param_6,
+	.param .f32 FFT_Step_Complex_param_7
 )
 {
 	.local .align 4 .b8 	__local_depot0[28];
@@ -1609,14 +1609,14 @@ $L__BB0_10:
 
 
 	mov.u64 	%SPL, __local_depot0;
-	ld.param.u64 	%rd9, [FFT_Step_param_0];
-	ld.param.u64 	%rd10, [FFT_Step_param_1];
-	ld.param.u64 	%rd11, [FFT_Step_param_2];
-	ld.param.u32 	%r22, [FFT_Step_param_3];
-	ld.param.u32 	%r23, [FFT_Step_param_4];
-	ld.param.u32 	%r24, [FFT_Step_param_5];
-	ld.param.f32 	%f8, [FFT_Step_param_6];
-	ld.param.f32 	%f9, [FFT_Step_param_7];
+	ld.param.u64 	%rd9, [FFT_Step_Complex_param_0];
+	ld.param.u64 	%rd10, [FFT_Step_Complex_param_1];
+	ld.param.u64 	%rd11, [FFT_Step_Complex_param_2];
+	ld.param.u32 	%r22, [FFT_Step_Complex_param_3];
+	ld.param.u32 	%r23, [FFT_Step_Complex_param_4];
+	ld.param.u32 	%r24, [FFT_Step_Complex_param_5];
+	ld.param.f32 	%f8, [FFT_Step_Complex_param_6];
+	ld.param.f32 	%f9, [FFT_Step_Complex_param_7];
 	add.u64 	%rd1, %SPL, 0;
 	mov.u32 	%r25, %ntid.x;
 	mov.u32 	%r26, %ctaid.x;
@@ -1755,18 +1755,18 @@ $L__BB0_9:
 	mov.f32 	%f21, 0f3BBB989D;
 	mov.f32 	%f22, 0f00000000;
 	fma.rn.f32 	%f23, %f22, %f21, %f20;
-	mov.f32 	%f24, 0f3FB8AA3B;
-	mov.f32 	%f25, 0f437C0000;
-	cvt.sat.f32.f32 	%f26, %f23;
-	mov.f32 	%f27, 0f4B400001;
-	fma.rm.f32 	%f28, %f26, %f25, %f27;
-	add.f32 	%f29, %f28, 0fCB40007F;
-	neg.f32 	%f30, %f29;
-	fma.rn.f32 	%f31, %f22, %f24, %f30;
+	cvt.sat.f32.f32 	%f24, %f23;
+	mov.f32 	%f25, 0f4B400001;
+	mov.f32 	%f26, 0f437C0000;
+	fma.rm.f32 	%f27, %f24, %f26, %f25;
+	add.f32 	%f28, %f27, 0fCB40007F;
+	neg.f32 	%f29, %f28;
+	mov.f32 	%f30, 0f3FB8AA3B;
+	fma.rn.f32 	%f31, %f22, %f30, %f29;
 	mov.f32 	%f32, 0f32A57060;
 	fma.rn.f32 	%f33, %f22, %f32, %f31;
 	ex2.approx.ftz.f32 	%f34, %f33;
-	mov.b32 	%r67, %f28;
+	mov.b32 	%r67, %f27;
 	shl.b32 	%r68, %r67, 23;
 	mov.b32 	%f35, %r68;
 	mul.f32 	%f36, %f34, %f35;
@@ -1828,23 +1828,23 @@ $L__BB0_10:
 }
 
 `
-	FFT_Step_ptx_72 = `
-.version 8.2
+	FFT_Step_Complex_ptx_72 = `
+.version 8.5
 .target sm_72
 .address_size 64
 
-	// .globl	FFT_Step
+	// .globl	FFT_Step_Complex
 .global .align 4 .b8 __cudart_i2opi_f[24] = {65, 144, 67, 60, 153, 149, 98, 219, 192, 221, 52, 245, 209, 87, 39, 252, 41, 21, 68, 78, 110, 131, 249, 162};
 
-.visible .entry FFT_Step(
-	.param .u64 FFT_Step_param_0,
-	.param .u64 FFT_Step_param_1,
-	.param .u64 FFT_Step_param_2,
-	.param .u32 FFT_Step_param_3,
-	.param .u32 FFT_Step_param_4,
-	.param .u32 FFT_Step_param_5,
-	.param .f32 FFT_Step_param_6,
-	.param .f32 FFT_Step_param_7
+.visible .entry FFT_Step_Complex(
+	.param .u64 FFT_Step_Complex_param_0,
+	.param .u64 FFT_Step_Complex_param_1,
+	.param .u64 FFT_Step_Complex_param_2,
+	.param .u32 FFT_Step_Complex_param_3,
+	.param .u32 FFT_Step_Complex_param_4,
+	.param .u32 FFT_Step_Complex_param_5,
+	.param .f32 FFT_Step_Complex_param_6,
+	.param .f32 FFT_Step_Complex_param_7
 )
 {
 	.local .align 4 .b8 	__local_depot0[28];
@@ -1858,14 +1858,14 @@ $L__BB0_10:
 
 
 	mov.u64 	%SPL, __local_depot0;
-	ld.param.u64 	%rd9, [FFT_Step_param_0];
-	ld.param.u64 	%rd10, [FFT_Step_param_1];
-	ld.param.u64 	%rd11, [FFT_Step_param_2];
-	ld.param.u32 	%r22, [FFT_Step_param_3];
-	ld.param.u32 	%r23, [FFT_Step_param_4];
-	ld.param.u32 	%r24, [FFT_Step_param_5];
-	ld.param.f32 	%f8, [FFT_Step_param_6];
-	ld.param.f32 	%f9, [FFT_Step_param_7];
+	ld.param.u64 	%rd9, [FFT_Step_Complex_param_0];
+	ld.param.u64 	%rd10, [FFT_Step_Complex_param_1];
+	ld.param.u64 	%rd11, [FFT_Step_Complex_param_2];
+	ld.param.u32 	%r22, [FFT_Step_Complex_param_3];
+	ld.param.u32 	%r23, [FFT_Step_Complex_param_4];
+	ld.param.u32 	%r24, [FFT_Step_Complex_param_5];
+	ld.param.f32 	%f8, [FFT_Step_Complex_param_6];
+	ld.param.f32 	%f9, [FFT_Step_Complex_param_7];
 	add.u64 	%rd1, %SPL, 0;
 	mov.u32 	%r25, %ntid.x;
 	mov.u32 	%r26, %ctaid.x;
@@ -2004,18 +2004,18 @@ $L__BB0_9:
 	mov.f32 	%f21, 0f3BBB989D;
 	mov.f32 	%f22, 0f00000000;
 	fma.rn.f32 	%f23, %f22, %f21, %f20;
-	mov.f32 	%f24, 0f3FB8AA3B;
-	mov.f32 	%f25, 0f437C0000;
-	cvt.sat.f32.f32 	%f26, %f23;
-	mov.f32 	%f27, 0f4B400001;
-	fma.rm.f32 	%f28, %f26, %f25, %f27;
-	add.f32 	%f29, %f28, 0fCB40007F;
-	neg.f32 	%f30, %f29;
-	fma.rn.f32 	%f31, %f22, %f24, %f30;
+	cvt.sat.f32.f32 	%f24, %f23;
+	mov.f32 	%f25, 0f4B400001;
+	mov.f32 	%f26, 0f437C0000;
+	fma.rm.f32 	%f27, %f24, %f26, %f25;
+	add.f32 	%f28, %f27, 0fCB40007F;
+	neg.f32 	%f29, %f28;
+	mov.f32 	%f30, 0f3FB8AA3B;
+	fma.rn.f32 	%f31, %f22, %f30, %f29;
 	mov.f32 	%f32, 0f32A57060;
 	fma.rn.f32 	%f33, %f22, %f32, %f31;
 	ex2.approx.ftz.f32 	%f34, %f33;
-	mov.b32 	%r67, %f28;
+	mov.b32 	%r67, %f27;
 	shl.b32 	%r68, %r67, 23;
 	mov.b32 	%f35, %r68;
 	mul.f32 	%f36, %f34, %f35;
@@ -2077,23 +2077,23 @@ $L__BB0_10:
 }
 
 `
-	FFT_Step_ptx_75 = `
-.version 8.2
+	FFT_Step_Complex_ptx_75 = `
+.version 8.5
 .target sm_75
 .address_size 64
 
-	// .globl	FFT_Step
+	// .globl	FFT_Step_Complex
 .global .align 4 .b8 __cudart_i2opi_f[24] = {65, 144, 67, 60, 153, 149, 98, 219, 192, 221, 52, 245, 209, 87, 39, 252, 41, 21, 68, 78, 110, 131, 249, 162};
 
-.visible .entry FFT_Step(
-	.param .u64 FFT_Step_param_0,
-	.param .u64 FFT_Step_param_1,
-	.param .u64 FFT_Step_param_2,
-	.param .u32 FFT_Step_param_3,
-	.param .u32 FFT_Step_param_4,
-	.param .u32 FFT_Step_param_5,
-	.param .f32 FFT_Step_param_6,
-	.param .f32 FFT_Step_param_7
+.visible .entry FFT_Step_Complex(
+	.param .u64 FFT_Step_Complex_param_0,
+	.param .u64 FFT_Step_Complex_param_1,
+	.param .u64 FFT_Step_Complex_param_2,
+	.param .u32 FFT_Step_Complex_param_3,
+	.param .u32 FFT_Step_Complex_param_4,
+	.param .u32 FFT_Step_Complex_param_5,
+	.param .f32 FFT_Step_Complex_param_6,
+	.param .f32 FFT_Step_Complex_param_7
 )
 {
 	.local .align 4 .b8 	__local_depot0[28];
@@ -2107,14 +2107,14 @@ $L__BB0_10:
 
 
 	mov.u64 	%SPL, __local_depot0;
-	ld.param.u64 	%rd9, [FFT_Step_param_0];
-	ld.param.u64 	%rd10, [FFT_Step_param_1];
-	ld.param.u64 	%rd11, [FFT_Step_param_2];
-	ld.param.u32 	%r22, [FFT_Step_param_3];
-	ld.param.u32 	%r23, [FFT_Step_param_4];
-	ld.param.u32 	%r24, [FFT_Step_param_5];
-	ld.param.f32 	%f8, [FFT_Step_param_6];
-	ld.param.f32 	%f9, [FFT_Step_param_7];
+	ld.param.u64 	%rd9, [FFT_Step_Complex_param_0];
+	ld.param.u64 	%rd10, [FFT_Step_Complex_param_1];
+	ld.param.u64 	%rd11, [FFT_Step_Complex_param_2];
+	ld.param.u32 	%r22, [FFT_Step_Complex_param_3];
+	ld.param.u32 	%r23, [FFT_Step_Complex_param_4];
+	ld.param.u32 	%r24, [FFT_Step_Complex_param_5];
+	ld.param.f32 	%f8, [FFT_Step_Complex_param_6];
+	ld.param.f32 	%f9, [FFT_Step_Complex_param_7];
 	add.u64 	%rd1, %SPL, 0;
 	mov.u32 	%r25, %ntid.x;
 	mov.u32 	%r26, %ctaid.x;
@@ -2253,18 +2253,18 @@ $L__BB0_9:
 	mov.f32 	%f21, 0f3BBB989D;
 	mov.f32 	%f22, 0f00000000;
 	fma.rn.f32 	%f23, %f22, %f21, %f20;
-	mov.f32 	%f24, 0f3FB8AA3B;
-	mov.f32 	%f25, 0f437C0000;
-	cvt.sat.f32.f32 	%f26, %f23;
-	mov.f32 	%f27, 0f4B400001;
-	fma.rm.f32 	%f28, %f26, %f25, %f27;
-	add.f32 	%f29, %f28, 0fCB40007F;
-	neg.f32 	%f30, %f29;
-	fma.rn.f32 	%f31, %f22, %f24, %f30;
+	cvt.sat.f32.f32 	%f24, %f23;
+	mov.f32 	%f25, 0f4B400001;
+	mov.f32 	%f26, 0f437C0000;
+	fma.rm.f32 	%f27, %f24, %f26, %f25;
+	add.f32 	%f28, %f27, 0fCB40007F;
+	neg.f32 	%f29, %f28;
+	mov.f32 	%f30, 0f3FB8AA3B;
+	fma.rn.f32 	%f31, %f22, %f30, %f29;
 	mov.f32 	%f32, 0f32A57060;
 	fma.rn.f32 	%f33, %f22, %f32, %f31;
 	ex2.approx.ftz.f32 	%f34, %f33;
-	mov.b32 	%r67, %f28;
+	mov.b32 	%r67, %f27;
 	shl.b32 	%r68, %r67, 23;
 	mov.b32 	%f35, %r68;
 	mul.f32 	%f36, %f34, %f35;
@@ -2326,23 +2326,23 @@ $L__BB0_10:
 }
 
 `
-	FFT_Step_ptx_80 = `
-.version 8.2
+	FFT_Step_Complex_ptx_80 = `
+.version 8.5
 .target sm_80
 .address_size 64
 
-	// .globl	FFT_Step
+	// .globl	FFT_Step_Complex
 .global .align 4 .b8 __cudart_i2opi_f[24] = {65, 144, 67, 60, 153, 149, 98, 219, 192, 221, 52, 245, 209, 87, 39, 252, 41, 21, 68, 78, 110, 131, 249, 162};
 
-.visible .entry FFT_Step(
-	.param .u64 FFT_Step_param_0,
-	.param .u64 FFT_Step_param_1,
-	.param .u64 FFT_Step_param_2,
-	.param .u32 FFT_Step_param_3,
-	.param .u32 FFT_Step_param_4,
-	.param .u32 FFT_Step_param_5,
-	.param .f32 FFT_Step_param_6,
-	.param .f32 FFT_Step_param_7
+.visible .entry FFT_Step_Complex(
+	.param .u64 FFT_Step_Complex_param_0,
+	.param .u64 FFT_Step_Complex_param_1,
+	.param .u64 FFT_Step_Complex_param_2,
+	.param .u32 FFT_Step_Complex_param_3,
+	.param .u32 FFT_Step_Complex_param_4,
+	.param .u32 FFT_Step_Complex_param_5,
+	.param .f32 FFT_Step_Complex_param_6,
+	.param .f32 FFT_Step_Complex_param_7
 )
 {
 	.local .align 4 .b8 	__local_depot0[28];
@@ -2356,14 +2356,14 @@ $L__BB0_10:
 
 
 	mov.u64 	%SPL, __local_depot0;
-	ld.param.u64 	%rd9, [FFT_Step_param_0];
-	ld.param.u64 	%rd10, [FFT_Step_param_1];
-	ld.param.u64 	%rd11, [FFT_Step_param_2];
-	ld.param.u32 	%r22, [FFT_Step_param_3];
-	ld.param.u32 	%r23, [FFT_Step_param_4];
-	ld.param.u32 	%r24, [FFT_Step_param_5];
-	ld.param.f32 	%f8, [FFT_Step_param_6];
-	ld.param.f32 	%f9, [FFT_Step_param_7];
+	ld.param.u64 	%rd9, [FFT_Step_Complex_param_0];
+	ld.param.u64 	%rd10, [FFT_Step_Complex_param_1];
+	ld.param.u64 	%rd11, [FFT_Step_Complex_param_2];
+	ld.param.u32 	%r22, [FFT_Step_Complex_param_3];
+	ld.param.u32 	%r23, [FFT_Step_Complex_param_4];
+	ld.param.u32 	%r24, [FFT_Step_Complex_param_5];
+	ld.param.f32 	%f8, [FFT_Step_Complex_param_6];
+	ld.param.f32 	%f9, [FFT_Step_Complex_param_7];
 	add.u64 	%rd1, %SPL, 0;
 	mov.u32 	%r25, %ntid.x;
 	mov.u32 	%r26, %ctaid.x;
@@ -2502,18 +2502,18 @@ $L__BB0_9:
 	mov.f32 	%f21, 0f3BBB989D;
 	mov.f32 	%f22, 0f00000000;
 	fma.rn.f32 	%f23, %f22, %f21, %f20;
-	mov.f32 	%f24, 0f3FB8AA3B;
-	mov.f32 	%f25, 0f437C0000;
-	cvt.sat.f32.f32 	%f26, %f23;
-	mov.f32 	%f27, 0f4B400001;
-	fma.rm.f32 	%f28, %f26, %f25, %f27;
-	add.f32 	%f29, %f28, 0fCB40007F;
-	neg.f32 	%f30, %f29;
-	fma.rn.f32 	%f31, %f22, %f24, %f30;
+	cvt.sat.f32.f32 	%f24, %f23;
+	mov.f32 	%f25, 0f4B400001;
+	mov.f32 	%f26, 0f437C0000;
+	fma.rm.f32 	%f27, %f24, %f26, %f25;
+	add.f32 	%f28, %f27, 0fCB40007F;
+	neg.f32 	%f29, %f28;
+	mov.f32 	%f30, 0f3FB8AA3B;
+	fma.rn.f32 	%f31, %f22, %f30, %f29;
 	mov.f32 	%f32, 0f32A57060;
 	fma.rn.f32 	%f33, %f22, %f32, %f31;
 	ex2.approx.ftz.f32 	%f34, %f33;
-	mov.b32 	%r67, %f28;
+	mov.b32 	%r67, %f27;
 	shl.b32 	%r68, %r67, 23;
 	mov.b32 	%f35, %r68;
 	mul.f32 	%f36, %f34, %f35;

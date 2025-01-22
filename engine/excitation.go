@@ -45,12 +45,17 @@ type ExcitationSlice struct {
 type Excitation struct {
 	name       string
 	perRegion  RegionwiseVector // Region-based excitation
-	extraTerms []mulmask        // add extra mask*multiplier terms
+	extraTerms []mulmask3D      // add extra mask*multiplier terms
 }
 
 // space-dependent mask plus time dependent multiplier
 type mulmask struct {
 	mul  func() float64
+	mask *data.Slice
+}
+
+type mulmask3D struct {
+	mul  []func() float64
 	mask *data.Slice
 }
 
@@ -74,11 +79,20 @@ func (e *Excitation) AddTo(dst *data.Slice) {
 	}
 
 	for _, t := range e.extraTerms {
-		var mul float32 = 1
-		if t.mul != nil {
-			mul = float32(t.mul())
+		MulSlice := make([]float32, len(t.mul))
+		for i := range MulSlice {
+			if t.mul[i] != nil {
+				MulSlice[i] = float32(t.mul[i]())
+			} else {
+				MulSlice[i] = 0
+			}
 		}
-		cuda.Madd2(dst, dst, t.mask, 1, mul)
+
+		OneSlice := make([]float32, dst.NComp())
+		for i := range OneSlice {
+			OneSlice[i] = 1.
+		}
+		cuda.Madd2Comp(dst, dst, t.mask, OneSlice, MulSlice)
 	}
 }
 
@@ -118,6 +132,47 @@ func (e *Excitation) RemoveExtraTerms() {
 }
 
 // Add an extra mask*multiplier term to the excitation.
+func (e *Excitation) AddComp(mask *data.Slice, f0, f1, f2 script.ScalarFunction) {
+	var mul0, mul1, mul2 func() float64
+	if f0 != nil {
+		if IsConst(f0) {
+			val := f0.Float()
+			mul0 = func() float64 {
+				return val
+			}
+		} else {
+			mul0 = func() float64 {
+				return f0.Float()
+			}
+		}
+	}
+	if f1 != nil {
+		if IsConst(f1) {
+			val := f1.Float()
+			mul1 = func() float64 {
+				return val
+			}
+		} else {
+			mul1 = func() float64 {
+				return f1.Float()
+			}
+		}
+	}
+	if f2 != nil {
+		if IsConst(f2) {
+			val := f2.Float()
+			mul2 = func() float64 {
+				return val
+			}
+		} else {
+			mul2 = func() float64 {
+				return f2.Float()
+			}
+		}
+	}
+	e.AddGo(mask, mul0, mul1, mul2)
+}
+
 func (e *Excitation) Add(mask *data.Slice, f script.ScalarFunction) {
 	var mul func() float64
 	if f != nil {
@@ -132,17 +187,22 @@ func (e *Excitation) Add(mask *data.Slice, f script.ScalarFunction) {
 			}
 		}
 	}
-	e.AddGo(mask, mul)
+	e.AddGo(mask, mul, mul, mul)
 }
 
 // An Add(mask, f) equivalent for Go use
-func (e *Excitation) AddGo(mask *data.Slice, mul func() float64) {
+func (e *Excitation) AddGo(mask *data.Slice, mul0, mul1, mul2 func() float64) {
 	if mask != nil {
 		checkNaN(mask, e.Name()+".add()") // TODO: in more places
 		mask = data.Resample(mask, e.Mesh().Size())
 		mask = assureGPU(mask)
 	}
-	e.extraTerms = append(e.extraTerms, mulmask{mul, mask})
+	funcSlice := make([]func() float64, 3)
+	funcSlice[0] = mul0
+	funcSlice[1] = mul1
+	funcSlice[2] = mul2
+
+	e.extraTerms = append(e.extraTerms, mulmask3D{funcSlice, mask})
 }
 
 func (e *Excitation) SetRegion(region int, f script.VectorFunction) { e.perRegion.SetRegion(region, f) }

@@ -46,6 +46,10 @@ func Calc(q Quantity, Category string) {
 }
 
 func CalcAs(q Quantity, Name, Category string) {
+	defer func() {
+		if r := recover(); r == "identifier "+Name+" already defined" {
+		}
+	}()
 	if _, isFFT := q.(interface {
 		FFTOutputSize() [3]int
 	}); !isFFT {

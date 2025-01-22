@@ -74,6 +74,7 @@ func init() {
 	DeclVar("newestOvfFileIndex", &newestOvfFileIndex, "")
 	DeclVar("gotValidOvfFile", &gotValidOvfFile, "")
 	DeclVar("newestOvfFile", &newestOvfFile, "")
+	DeclFunc("GetTime", LoadFileTime, "")
 
 }
 
@@ -359,6 +360,19 @@ func LoadFileMeta(fname string) (*data.Slice, data.Meta) {
 	}
 	util.FatalErr(err)
 	return d, s
+}
+
+func LoadFileTime(fname string) float64 {
+	in, err := httpfs.Open(fname)
+	util.FatalErr(err)
+	var s data.Meta
+	if path.Ext(fname) == ".dump" {
+		_, s, err = dump.Read(in)
+	} else {
+		_, s, err = oommf.Read(in)
+	}
+	util.FatalErr(err)
+	return s.Time
 }
 
 func LoadFileAsConfig(fname string) Config {

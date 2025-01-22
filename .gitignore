@@ -112,3 +112,4 @@ cuda/FFT_T_step_F_70.ptx.a
 cuda/FFT_T_step_F_72.ptx.a
 cuda/FFT_T_step_F_75.ptx.a
 cuda/FFT_T_step_F_80.ptx.a
+cuda/*.ptx.a
