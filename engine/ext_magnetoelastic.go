@@ -3,35 +3,35 @@ package engine
 // Mangeto-elastic coupling.
 
 import (
+	"math"
+
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/data"
 	"github.com/mumax/3/util"
-	"math"
 	//"fmt"
 )
 
 var (
-	B1        = NewScalarParam("B1", "J/m3", "First magneto-elastic coupling constant")
-	B2        = NewScalarParam("B2", "J/m3", "Second magneto-elastic coupling constant")
-	exx       = NewScalarExcitation("exx", "", "exx component of the strain tensor")
-	eyy       = NewScalarExcitation("eyy", "", "eyy component of the strain tensor")
-	ezz       = NewScalarExcitation("ezz", "", "ezz component of the strain tensor")
-	exy       = NewScalarExcitation("exy", "", "exy component of the strain tensor")
-	exz       = NewScalarExcitation("exz", "", "exz component of the strain tensor")
-	eyz       = NewScalarExcitation("eyz", "", "eyz component of the strain tensor")
-	B_mel     = NewVectorField("B_mel", "T", "Magneto-elastic filed", AddMagnetoelasticField)
-	F_mel     = NewVectorField("F_mel", "N/m3", "Magneto-elastic force density", GetMagnetoelasticForceDensity)
-	F_melM    = NewVectorField("F_melM", "N/m3", "Magneto-elastic force density", GetMagnetoelasticForceDensityM)
-	F_el	  = NewVectorField("F_el", "N/m3", "Elastic force density", GetElasticForceDensity)
-	F_elsys   = NewVectorField("F_elsys", "N/m3", "Elastic force density", GetSumElasticForces)
-	rhod2udt2 = NewVectorField("rhod2udt2", "N/m3", "Force of displacement", GetDisplacementForceDensity)
-	etadudt   = NewVectorField("etadudt", "N/m3", "Force of displacement due to speed", GetDisplacementSpeedForceDensity)
-	Edens_mel = NewScalarField("Edens_mel", "J/m3", "Magneto-elastic energy density", AddMagnetoelasticEnergyDensity)
-	E_mel     = NewScalarValue("E_mel", "J", "Magneto-elastic energy", GetMagnetoelasticEnergy)
-	DDU	  	  = NewVectorField("ddu", "", "", GetDisplacementAcceleration)
-	fixM bool = false
-	zeroMel = NewScalarParam("_zeroMel", "", "utility zero parameter")
-
+	B1             = NewScalarParam("B1", "J/m3", "First magneto-elastic coupling constant")
+	B2             = NewScalarParam("B2", "J/m3", "Second magneto-elastic coupling constant")
+	exx            = NewScalarExcitation("exx", "", "exx component of the strain tensor")
+	eyy            = NewScalarExcitation("eyy", "", "eyy component of the strain tensor")
+	ezz            = NewScalarExcitation("ezz", "", "ezz component of the strain tensor")
+	exy            = NewScalarExcitation("exy", "", "exy component of the strain tensor")
+	exz            = NewScalarExcitation("exz", "", "exz component of the strain tensor")
+	eyz            = NewScalarExcitation("eyz", "", "eyz component of the strain tensor")
+	B_mel          = NewVectorField("B_mel", "T", "Magneto-elastic filed", AddMagnetoelasticField)
+	F_mel          = NewVectorField("F_mel", "N/m3", "Magneto-elastic force density", GetMagnetoelasticForceDensity)
+	F_melM         = NewVectorField("F_melM", "N/m3", "Magneto-elastic force density", GetMagnetoelasticForceDensityM)
+	F_el           = NewVectorField("F_el", "N/m3", "Elastic force density", GetElasticForceDensity)
+	F_elsys        = NewVectorField("F_elsys", "N/m3", "Elastic force density", GetSumElasticForces)
+	rhod2udt2      = NewVectorField("rhod2udt2", "N/m3", "Force of displacement", GetDisplacementForceDensity)
+	etadudt        = NewVectorField("etadudt", "N/m3", "Force of displacement due to speed", GetDisplacementSpeedForceDensity)
+	Edens_mel      = NewScalarField("Edens_mel", "J/m3", "Magneto-elastic energy density", AddMagnetoelasticEnergyDensity)
+	E_mel          = NewScalarValue("E_mel", "J", "Magneto-elastic energy", GetMagnetoelasticEnergy)
+	DDU            = NewVectorField("ddu", "", "", GetDisplacementAcceleration)
+	fixM      bool = false
+	zeroMel        = NewScalarParam("_zeroMel", "", "utility zero parameter")
 )
 
 func init() {
@@ -278,4 +278,3 @@ func GetMagnetoelasticForceDensityM(dst *data.Slice) {
 	cuda.Mul(dst, dst, buf)
 	cuda.Grad(dst, Edens_melV, B_mel.Mesh())
 }
-

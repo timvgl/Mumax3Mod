@@ -75,6 +75,10 @@ type fitFunction struct {
 	useScalar bool
 }
 
+func (d dummyQuantity) Time() float64 {
+	return d.time
+}
+
 func (d dummyQuantity) Mesh() *data.Mesh {
 	return data.NewMesh(d.size[X], d.size[Y], d.size[Z], d.cellsize[X], d.cellsize[Y], d.cellsize[Z])
 }
@@ -120,6 +124,11 @@ func ImportOVFAsQuantity(file, name string, i ...int) dummyQuantity {
 	cpuBuf.Free()
 	return qtty
 }
+
+func (d dummyQuantity) Free() {
+	cuda.Recycle(d.storage)
+}
+
 func cloneVars(original map[string]interface{}) map[string]interface{} {
 	cloned := make(map[string]interface{}, len(original))
 	for key, value := range original {
@@ -285,6 +294,7 @@ func (s optimize) objective(trial goptuna.Trial) (float64, error) {
 			suggestData[2] = vector2
 			buf := data.SliceFromArray(suggestData, size)
 			bufGPU := cuda.Buffer(buf.NComp(), buf.Size())
+			defer cuda.Recycle(bufGPU)
 			data.Copy(bufGPU, buf)
 			SetExcitation(NameOf(q), ExcitationSlice{NameOf(q), s.areaStart[ii], s.areaEnd[ii], bufGPU, q.NComp()})
 			buf.Free()
@@ -293,6 +303,7 @@ func (s optimize) objective(trial goptuna.Trial) (float64, error) {
 			suggestData[0] = vector0
 			buf := data.SliceFromArray(suggestData, size)
 			bufGPU := cuda.Buffer(buf.NComp(), buf.Size())
+			defer cuda.Recycle(bufGPU)
 			data.Copy(bufGPU, buf)
 			SetScalarExcitation(NameOf(q), ScalarExcitationSlice{NameOf(q), s.areaStart[ii], s.areaEnd[ii], bufGPU})
 			buf.Free()
@@ -304,10 +315,7 @@ func (s optimize) objective(trial goptuna.Trial) (float64, error) {
 	RestoreBackup([]Quantity{s.output})
 
 	Time = s.time
-	HideProgressBarManualF(true)
-	Run(s.period)
-	HideProgressBarManualF(false)
-	ResetProgressBarMode()
+	RunNoOutput(s.period)
 
 	target := cuda.Buffer(s.target.NComp(), SizeOf(s.target))
 	defer cuda.Recycle(target)

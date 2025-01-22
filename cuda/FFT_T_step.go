@@ -27,7 +27,7 @@ func FFT_T_Step_MEM_Real(dst, src1, src2 *data.Slice, minF, dF, fftT float32, ke
 	//fmt.Println("size:", size, "LengthF:", src1.LengthF)
 	cfg := make1DConf(prod(size))
 	for c := range dst.NComp() {
-		k_FFT_Step_MEM_Complex_async(dst.DevPtr(c), src1.DevPtr(c), src2.DevPtr(c), 2*size[X], size[Y], size[Z], dst.LengthF, minF, dF, fftT, float32(dst.LengthF), key, cfg)
+		k_FFT_Step_MEM_Real_async(dst.DevPtr(c), src1.DevPtr(c), src2.DevPtr(c), 2*size[X], size[Y], size[Z], dst.LengthF, minF, dF, fftT, float32(dst.LengthF), key, cfg)
 	}
 	//SyncFFT_T(key)
 }

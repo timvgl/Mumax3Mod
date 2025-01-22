@@ -54,6 +54,12 @@ func NewScalarExcitation(name, unit, desc string) *ScalarExcitation {
 	return e
 }
 
+func (p *ScalarExcitation) LoadFile(path string, xOffset, yOffset, zOffset int) {
+	d := LoadFileDSlice(path)
+	SetScalarExcitation(p.name, ScalarExcitationSlice{p.name, [3]int{xOffset, yOffset, zOffset}, [3]int{xOffset + d.Size()[X], yOffset + d.Size()[Y], zOffset + d.Size()[Z]}, d})
+
+}
+
 func (p *ScalarExcitation) MSlice() cuda.MSlice {
 	buf, r := p.Slice()
 	util.Assert(r == true)

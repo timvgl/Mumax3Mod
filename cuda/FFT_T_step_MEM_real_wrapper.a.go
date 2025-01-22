@@ -12,11 +12,11 @@ import (
 	"unsafe"
 )
 
-// CUDA handle for FFT_Step_MEM_real kernel
-var FFT_Step_MEM_real_code cu.Function
+// CUDA handle for FFT_Step_MEM_Real kernel
+var FFT_Step_MEM_Real_code cu.Function
 
-// Stores the arguments for FFT_Step_MEM_real kernel invocation
-type FFT_Step_MEM_real_args_t struct {
+// Stores the arguments for FFT_Step_MEM_Real kernel invocation
+type FFT_Step_MEM_Real_args_t struct {
 	arg_dst  unsafe.Pointer
 	arg_src1 unsafe.Pointer
 	arg_src2 unsafe.Pointer
@@ -32,94 +32,94 @@ type FFT_Step_MEM_real_args_t struct {
 	sync.Mutex
 }
 
-// Stores the arguments for FFT_Step_MEM_real kernel invocation
-var FFT_Step_MEM_real_args FFT_Step_MEM_real_args_t
+// Stores the arguments for FFT_Step_MEM_Real kernel invocation
+var FFT_Step_MEM_Real_args FFT_Step_MEM_Real_args_t
 
 func init() {
 	// CUDA driver kernel call wants pointers to arguments, set them up once.
-	FFT_Step_MEM_real_args.argptr[0] = unsafe.Pointer(&FFT_Step_MEM_real_args.arg_dst)
-	FFT_Step_MEM_real_args.argptr[1] = unsafe.Pointer(&FFT_Step_MEM_real_args.arg_src1)
-	FFT_Step_MEM_real_args.argptr[2] = unsafe.Pointer(&FFT_Step_MEM_real_args.arg_src2)
-	FFT_Step_MEM_real_args.argptr[3] = unsafe.Pointer(&FFT_Step_MEM_real_args.arg_Nx)
-	FFT_Step_MEM_real_args.argptr[4] = unsafe.Pointer(&FFT_Step_MEM_real_args.arg_Ny)
-	FFT_Step_MEM_real_args.argptr[5] = unsafe.Pointer(&FFT_Step_MEM_real_args.arg_Nz)
-	FFT_Step_MEM_real_args.argptr[6] = unsafe.Pointer(&FFT_Step_MEM_real_args.arg_Nf)
-	FFT_Step_MEM_real_args.argptr[7] = unsafe.Pointer(&FFT_Step_MEM_real_args.arg_minF)
-	FFT_Step_MEM_real_args.argptr[8] = unsafe.Pointer(&FFT_Step_MEM_real_args.arg_dF)
-	FFT_Step_MEM_real_args.argptr[9] = unsafe.Pointer(&FFT_Step_MEM_real_args.arg_t)
-	FFT_Step_MEM_real_args.argptr[10] = unsafe.Pointer(&FFT_Step_MEM_real_args.arg_n)
+	FFT_Step_MEM_Real_args.argptr[0] = unsafe.Pointer(&FFT_Step_MEM_Real_args.arg_dst)
+	FFT_Step_MEM_Real_args.argptr[1] = unsafe.Pointer(&FFT_Step_MEM_Real_args.arg_src1)
+	FFT_Step_MEM_Real_args.argptr[2] = unsafe.Pointer(&FFT_Step_MEM_Real_args.arg_src2)
+	FFT_Step_MEM_Real_args.argptr[3] = unsafe.Pointer(&FFT_Step_MEM_Real_args.arg_Nx)
+	FFT_Step_MEM_Real_args.argptr[4] = unsafe.Pointer(&FFT_Step_MEM_Real_args.arg_Ny)
+	FFT_Step_MEM_Real_args.argptr[5] = unsafe.Pointer(&FFT_Step_MEM_Real_args.arg_Nz)
+	FFT_Step_MEM_Real_args.argptr[6] = unsafe.Pointer(&FFT_Step_MEM_Real_args.arg_Nf)
+	FFT_Step_MEM_Real_args.argptr[7] = unsafe.Pointer(&FFT_Step_MEM_Real_args.arg_minF)
+	FFT_Step_MEM_Real_args.argptr[8] = unsafe.Pointer(&FFT_Step_MEM_Real_args.arg_dF)
+	FFT_Step_MEM_Real_args.argptr[9] = unsafe.Pointer(&FFT_Step_MEM_Real_args.arg_t)
+	FFT_Step_MEM_Real_args.argptr[10] = unsafe.Pointer(&FFT_Step_MEM_Real_args.arg_n)
 }
 
-// Wrapper for FFT_Step_MEM_real CUDA kernel, asynchronous.
-func k_FFT_Step_MEM_real_async(dst unsafe.Pointer, src1 unsafe.Pointer, src2 unsafe.Pointer, Nx int, Ny int, Nz int, Nf int, minF float32, dF float32, t float32, n float32, key string, cfg *config) {
+// Wrapper for FFT_Step_MEM_Real CUDA kernel, asynchronous.
+func k_FFT_Step_MEM_Real_async(dst unsafe.Pointer, src1 unsafe.Pointer, src2 unsafe.Pointer, Nx int, Ny int, Nz int, Nf int, minF float32, dF float32, t float32, n float32, key string, cfg *config) {
 	if Synchronous { // debug
 		SyncFFT_T(key)
-		timer.Start("FFT_Step_MEM_real" + key)
+		timer.Start("FFT_Step_MEM_Real" + key)
 	}
 
-	FFT_Step_MEM_real_args.Lock()
-	defer FFT_Step_MEM_real_args.Unlock()
+	FFT_Step_MEM_Real_args.Lock()
+	defer FFT_Step_MEM_Real_args.Unlock()
 
-	if FFT_Step_MEM_real_code == 0 {
-		FFT_Step_MEM_real_code = fatbinLoad(FFT_Step_MEM_real_map, "FFT_Step_MEM_real")
+	if FFT_Step_MEM_Real_code == 0 {
+		FFT_Step_MEM_Real_code = fatbinLoad(FFT_Step_MEM_Real_map, "FFT_Step_MEM_Real")
 	}
 
-	FFT_Step_MEM_real_args.arg_dst = dst
-	FFT_Step_MEM_real_args.arg_src1 = src1
-	FFT_Step_MEM_real_args.arg_src2 = src2
-	FFT_Step_MEM_real_args.arg_Nx = Nx
-	FFT_Step_MEM_real_args.arg_Ny = Ny
-	FFT_Step_MEM_real_args.arg_Nz = Nz
-	FFT_Step_MEM_real_args.arg_Nf = Nf
-	FFT_Step_MEM_real_args.arg_minF = minF
-	FFT_Step_MEM_real_args.arg_dF = dF
-	FFT_Step_MEM_real_args.arg_t = t
-	FFT_Step_MEM_real_args.arg_n = n
+	FFT_Step_MEM_Real_args.arg_dst = dst
+	FFT_Step_MEM_Real_args.arg_src1 = src1
+	FFT_Step_MEM_Real_args.arg_src2 = src2
+	FFT_Step_MEM_Real_args.arg_Nx = Nx
+	FFT_Step_MEM_Real_args.arg_Ny = Ny
+	FFT_Step_MEM_Real_args.arg_Nz = Nz
+	FFT_Step_MEM_Real_args.arg_Nf = Nf
+	FFT_Step_MEM_Real_args.arg_minF = minF
+	FFT_Step_MEM_Real_args.arg_dF = dF
+	FFT_Step_MEM_Real_args.arg_t = t
+	FFT_Step_MEM_Real_args.arg_n = n
 
-	args := FFT_Step_MEM_real_args.argptr[:]
-	cu.LaunchKernel(FFT_Step_MEM_real_code, cfg.Grid.X, cfg.Grid.Y, cfg.Grid.Z, cfg.Block.X, cfg.Block.Y, cfg.Block.Z, 0, Get_Stream(key), args)
+	args := FFT_Step_MEM_Real_args.argptr[:]
+	cu.LaunchKernel(FFT_Step_MEM_Real_code, cfg.Grid.X, cfg.Grid.Y, cfg.Grid.Z, cfg.Block.X, cfg.Block.Y, cfg.Block.Z, 0, Get_Stream(key), args)
 
 	if Synchronous { // debug
 		SyncFFT_T(key)
-		timer.Stop("FFT_Step_MEM_real" + key)
+		timer.Stop("FFT_Step_MEM_Real" + key)
 	}
 }
 
-// maps compute capability on PTX code for FFT_Step_MEM_real kernel.
-var FFT_Step_MEM_real_map = map[int]string{0: "",
-	50: FFT_Step_MEM_real_ptx_50,
-	52: FFT_Step_MEM_real_ptx_52,
-	53: FFT_Step_MEM_real_ptx_53,
-	60: FFT_Step_MEM_real_ptx_60,
-	61: FFT_Step_MEM_real_ptx_61,
-	62: FFT_Step_MEM_real_ptx_62,
-	70: FFT_Step_MEM_real_ptx_70,
-	72: FFT_Step_MEM_real_ptx_72,
-	75: FFT_Step_MEM_real_ptx_75,
-	80: FFT_Step_MEM_real_ptx_80}
+// maps compute capability on PTX code for FFT_Step_MEM_Real kernel.
+var FFT_Step_MEM_Real_map = map[int]string{0: "",
+	50: FFT_Step_MEM_Real_ptx_50,
+	52: FFT_Step_MEM_Real_ptx_52,
+	53: FFT_Step_MEM_Real_ptx_53,
+	60: FFT_Step_MEM_Real_ptx_60,
+	61: FFT_Step_MEM_Real_ptx_61,
+	62: FFT_Step_MEM_Real_ptx_62,
+	70: FFT_Step_MEM_Real_ptx_70,
+	72: FFT_Step_MEM_Real_ptx_72,
+	75: FFT_Step_MEM_Real_ptx_75,
+	80: FFT_Step_MEM_Real_ptx_80}
 
-// FFT_Step_MEM_real PTX code for various compute capabilities.
+// FFT_Step_MEM_Real PTX code for various compute capabilities.
 const (
-	FFT_Step_MEM_real_ptx_50 = `
-.version 8.2
+	FFT_Step_MEM_Real_ptx_50 = `
+.version 8.5
 .target sm_50
 .address_size 64
 
-	// .globl	FFT_Step_MEM_real
+	// .globl	FFT_Step_MEM_Real
 .global .align 4 .b8 __cudart_i2opi_f[24] = {65, 144, 67, 60, 153, 149, 98, 219, 192, 221, 52, 245, 209, 87, 39, 252, 41, 21, 68, 78, 110, 131, 249, 162};
 
-.visible .entry FFT_Step_MEM_real(
-	.param .u64 FFT_Step_MEM_real_param_0,
-	.param .u64 FFT_Step_MEM_real_param_1,
-	.param .u64 FFT_Step_MEM_real_param_2,
-	.param .u32 FFT_Step_MEM_real_param_3,
-	.param .u32 FFT_Step_MEM_real_param_4,
-	.param .u32 FFT_Step_MEM_real_param_5,
-	.param .u32 FFT_Step_MEM_real_param_6,
-	.param .f32 FFT_Step_MEM_real_param_7,
-	.param .f32 FFT_Step_MEM_real_param_8,
-	.param .f32 FFT_Step_MEM_real_param_9,
-	.param .f32 FFT_Step_MEM_real_param_10
+.visible .entry FFT_Step_MEM_Real(
+	.param .u64 FFT_Step_MEM_Real_param_0,
+	.param .u64 FFT_Step_MEM_Real_param_1,
+	.param .u64 FFT_Step_MEM_Real_param_2,
+	.param .u32 FFT_Step_MEM_Real_param_3,
+	.param .u32 FFT_Step_MEM_Real_param_4,
+	.param .u32 FFT_Step_MEM_Real_param_5,
+	.param .u32 FFT_Step_MEM_Real_param_6,
+	.param .f32 FFT_Step_MEM_Real_param_7,
+	.param .f32 FFT_Step_MEM_Real_param_8,
+	.param .f32 FFT_Step_MEM_Real_param_9,
+	.param .f32 FFT_Step_MEM_Real_param_10
 )
 {
 	.local .align 4 .b8 	__local_depot0[28];
@@ -133,17 +133,17 @@ const (
 
 
 	mov.u64 	%SPL, __local_depot0;
-	ld.param.u64 	%rd10, [FFT_Step_MEM_real_param_0];
-	ld.param.u64 	%rd11, [FFT_Step_MEM_real_param_1];
-	ld.param.u64 	%rd12, [FFT_Step_MEM_real_param_2];
-	ld.param.u32 	%r26, [FFT_Step_MEM_real_param_3];
-	ld.param.u32 	%r27, [FFT_Step_MEM_real_param_4];
-	ld.param.u32 	%r28, [FFT_Step_MEM_real_param_5];
-	ld.param.u32 	%r29, [FFT_Step_MEM_real_param_6];
-	ld.param.f32 	%f9, [FFT_Step_MEM_real_param_7];
-	ld.param.f32 	%f10, [FFT_Step_MEM_real_param_8];
-	ld.param.f32 	%f11, [FFT_Step_MEM_real_param_9];
-	ld.param.f32 	%f12, [FFT_Step_MEM_real_param_10];
+	ld.param.u64 	%rd10, [FFT_Step_MEM_Real_param_0];
+	ld.param.u64 	%rd11, [FFT_Step_MEM_Real_param_1];
+	ld.param.u64 	%rd12, [FFT_Step_MEM_Real_param_2];
+	ld.param.u32 	%r26, [FFT_Step_MEM_Real_param_3];
+	ld.param.u32 	%r27, [FFT_Step_MEM_Real_param_4];
+	ld.param.u32 	%r28, [FFT_Step_MEM_Real_param_5];
+	ld.param.u32 	%r29, [FFT_Step_MEM_Real_param_6];
+	ld.param.f32 	%f9, [FFT_Step_MEM_Real_param_7];
+	ld.param.f32 	%f10, [FFT_Step_MEM_Real_param_8];
+	ld.param.f32 	%f11, [FFT_Step_MEM_Real_param_9];
+	ld.param.f32 	%f12, [FFT_Step_MEM_Real_param_10];
 	add.u64 	%rd1, %SPL, 0;
 	mov.u32 	%r30, %nctaid.x;
 	mov.u32 	%r31, %ctaid.y;
@@ -186,17 +186,17 @@ const (
 	mov.f32 	%f14, 0f3BBB989D;
 	mov.f32 	%f15, 0f00000000;
 	fma.rn.f32 	%f16, %f15, %f14, %f13;
-	mov.f32 	%f17, 0f3FB8AA3B;
-	mov.f32 	%f18, 0f437C0000;
-	cvt.sat.f32.f32 	%f19, %f16;
-	mov.f32 	%f20, 0f4B400001;
-	fma.rm.f32 	%f21, %f19, %f18, %f20;
-	add.f32 	%f22, %f21, 0fCB40007F;
-	neg.f32 	%f23, %f22;
-	fma.rn.f32 	%f24, %f15, %f17, %f23;
+	cvt.sat.f32.f32 	%f17, %f16;
+	mov.f32 	%f18, 0f4B400001;
+	mov.f32 	%f19, 0f437C0000;
+	fma.rm.f32 	%f20, %f17, %f19, %f18;
+	add.f32 	%f21, %f20, 0fCB40007F;
+	neg.f32 	%f22, %f21;
+	mov.f32 	%f23, 0f3FB8AA3B;
+	fma.rn.f32 	%f24, %f15, %f23, %f22;
 	mov.f32 	%f25, 0f32A57060;
 	fma.rn.f32 	%f26, %f15, %f25, %f24;
-	mov.b32 	%r51, %f21;
+	mov.b32 	%r51, %f20;
 	shl.b32 	%r52, %r51, 23;
 	mov.b32 	%f27, %r52;
 	ex2.approx.ftz.f32 	%f28, %f26;
@@ -376,26 +376,26 @@ $L__BB0_12:
 }
 
 `
-	FFT_Step_MEM_real_ptx_52 = `
-.version 8.2
+	FFT_Step_MEM_Real_ptx_52 = `
+.version 8.5
 .target sm_52
 .address_size 64
 
-	// .globl	FFT_Step_MEM_real
+	// .globl	FFT_Step_MEM_Real
 .global .align 4 .b8 __cudart_i2opi_f[24] = {65, 144, 67, 60, 153, 149, 98, 219, 192, 221, 52, 245, 209, 87, 39, 252, 41, 21, 68, 78, 110, 131, 249, 162};
 
-.visible .entry FFT_Step_MEM_real(
-	.param .u64 FFT_Step_MEM_real_param_0,
-	.param .u64 FFT_Step_MEM_real_param_1,
-	.param .u64 FFT_Step_MEM_real_param_2,
-	.param .u32 FFT_Step_MEM_real_param_3,
-	.param .u32 FFT_Step_MEM_real_param_4,
-	.param .u32 FFT_Step_MEM_real_param_5,
-	.param .u32 FFT_Step_MEM_real_param_6,
-	.param .f32 FFT_Step_MEM_real_param_7,
-	.param .f32 FFT_Step_MEM_real_param_8,
-	.param .f32 FFT_Step_MEM_real_param_9,
-	.param .f32 FFT_Step_MEM_real_param_10
+.visible .entry FFT_Step_MEM_Real(
+	.param .u64 FFT_Step_MEM_Real_param_0,
+	.param .u64 FFT_Step_MEM_Real_param_1,
+	.param .u64 FFT_Step_MEM_Real_param_2,
+	.param .u32 FFT_Step_MEM_Real_param_3,
+	.param .u32 FFT_Step_MEM_Real_param_4,
+	.param .u32 FFT_Step_MEM_Real_param_5,
+	.param .u32 FFT_Step_MEM_Real_param_6,
+	.param .f32 FFT_Step_MEM_Real_param_7,
+	.param .f32 FFT_Step_MEM_Real_param_8,
+	.param .f32 FFT_Step_MEM_Real_param_9,
+	.param .f32 FFT_Step_MEM_Real_param_10
 )
 {
 	.local .align 4 .b8 	__local_depot0[28];
@@ -409,17 +409,17 @@ $L__BB0_12:
 
 
 	mov.u64 	%SPL, __local_depot0;
-	ld.param.u64 	%rd10, [FFT_Step_MEM_real_param_0];
-	ld.param.u64 	%rd11, [FFT_Step_MEM_real_param_1];
-	ld.param.u64 	%rd12, [FFT_Step_MEM_real_param_2];
-	ld.param.u32 	%r26, [FFT_Step_MEM_real_param_3];
-	ld.param.u32 	%r27, [FFT_Step_MEM_real_param_4];
-	ld.param.u32 	%r28, [FFT_Step_MEM_real_param_5];
-	ld.param.u32 	%r29, [FFT_Step_MEM_real_param_6];
-	ld.param.f32 	%f9, [FFT_Step_MEM_real_param_7];
-	ld.param.f32 	%f10, [FFT_Step_MEM_real_param_8];
-	ld.param.f32 	%f11, [FFT_Step_MEM_real_param_9];
-	ld.param.f32 	%f12, [FFT_Step_MEM_real_param_10];
+	ld.param.u64 	%rd10, [FFT_Step_MEM_Real_param_0];
+	ld.param.u64 	%rd11, [FFT_Step_MEM_Real_param_1];
+	ld.param.u64 	%rd12, [FFT_Step_MEM_Real_param_2];
+	ld.param.u32 	%r26, [FFT_Step_MEM_Real_param_3];
+	ld.param.u32 	%r27, [FFT_Step_MEM_Real_param_4];
+	ld.param.u32 	%r28, [FFT_Step_MEM_Real_param_5];
+	ld.param.u32 	%r29, [FFT_Step_MEM_Real_param_6];
+	ld.param.f32 	%f9, [FFT_Step_MEM_Real_param_7];
+	ld.param.f32 	%f10, [FFT_Step_MEM_Real_param_8];
+	ld.param.f32 	%f11, [FFT_Step_MEM_Real_param_9];
+	ld.param.f32 	%f12, [FFT_Step_MEM_Real_param_10];
 	add.u64 	%rd1, %SPL, 0;
 	mov.u32 	%r30, %nctaid.x;
 	mov.u32 	%r31, %ctaid.y;
@@ -462,17 +462,17 @@ $L__BB0_12:
 	mov.f32 	%f14, 0f3BBB989D;
 	mov.f32 	%f15, 0f00000000;
 	fma.rn.f32 	%f16, %f15, %f14, %f13;
-	mov.f32 	%f17, 0f3FB8AA3B;
-	mov.f32 	%f18, 0f437C0000;
-	cvt.sat.f32.f32 	%f19, %f16;
-	mov.f32 	%f20, 0f4B400001;
-	fma.rm.f32 	%f21, %f19, %f18, %f20;
-	add.f32 	%f22, %f21, 0fCB40007F;
-	neg.f32 	%f23, %f22;
-	fma.rn.f32 	%f24, %f15, %f17, %f23;
+	cvt.sat.f32.f32 	%f17, %f16;
+	mov.f32 	%f18, 0f4B400001;
+	mov.f32 	%f19, 0f437C0000;
+	fma.rm.f32 	%f20, %f17, %f19, %f18;
+	add.f32 	%f21, %f20, 0fCB40007F;
+	neg.f32 	%f22, %f21;
+	mov.f32 	%f23, 0f3FB8AA3B;
+	fma.rn.f32 	%f24, %f15, %f23, %f22;
 	mov.f32 	%f25, 0f32A57060;
 	fma.rn.f32 	%f26, %f15, %f25, %f24;
-	mov.b32 	%r51, %f21;
+	mov.b32 	%r51, %f20;
 	shl.b32 	%r52, %r51, 23;
 	mov.b32 	%f27, %r52;
 	ex2.approx.ftz.f32 	%f28, %f26;
@@ -652,26 +652,26 @@ $L__BB0_12:
 }
 
 `
-	FFT_Step_MEM_real_ptx_53 = `
-.version 8.2
+	FFT_Step_MEM_Real_ptx_53 = `
+.version 8.5
 .target sm_53
 .address_size 64
 
-	// .globl	FFT_Step_MEM_real
+	// .globl	FFT_Step_MEM_Real
 .global .align 4 .b8 __cudart_i2opi_f[24] = {65, 144, 67, 60, 153, 149, 98, 219, 192, 221, 52, 245, 209, 87, 39, 252, 41, 21, 68, 78, 110, 131, 249, 162};
 
-.visible .entry FFT_Step_MEM_real(
-	.param .u64 FFT_Step_MEM_real_param_0,
-	.param .u64 FFT_Step_MEM_real_param_1,
-	.param .u64 FFT_Step_MEM_real_param_2,
-	.param .u32 FFT_Step_MEM_real_param_3,
-	.param .u32 FFT_Step_MEM_real_param_4,
-	.param .u32 FFT_Step_MEM_real_param_5,
-	.param .u32 FFT_Step_MEM_real_param_6,
-	.param .f32 FFT_Step_MEM_real_param_7,
-	.param .f32 FFT_Step_MEM_real_param_8,
-	.param .f32 FFT_Step_MEM_real_param_9,
-	.param .f32 FFT_Step_MEM_real_param_10
+.visible .entry FFT_Step_MEM_Real(
+	.param .u64 FFT_Step_MEM_Real_param_0,
+	.param .u64 FFT_Step_MEM_Real_param_1,
+	.param .u64 FFT_Step_MEM_Real_param_2,
+	.param .u32 FFT_Step_MEM_Real_param_3,
+	.param .u32 FFT_Step_MEM_Real_param_4,
+	.param .u32 FFT_Step_MEM_Real_param_5,
+	.param .u32 FFT_Step_MEM_Real_param_6,
+	.param .f32 FFT_Step_MEM_Real_param_7,
+	.param .f32 FFT_Step_MEM_Real_param_8,
+	.param .f32 FFT_Step_MEM_Real_param_9,
+	.param .f32 FFT_Step_MEM_Real_param_10
 )
 {
 	.local .align 4 .b8 	__local_depot0[28];
@@ -685,17 +685,17 @@ $L__BB0_12:
 
 
 	mov.u64 	%SPL, __local_depot0;
-	ld.param.u64 	%rd10, [FFT_Step_MEM_real_param_0];
-	ld.param.u64 	%rd11, [FFT_Step_MEM_real_param_1];
-	ld.param.u64 	%rd12, [FFT_Step_MEM_real_param_2];
-	ld.param.u32 	%r26, [FFT_Step_MEM_real_param_3];
-	ld.param.u32 	%r27, [FFT_Step_MEM_real_param_4];
-	ld.param.u32 	%r28, [FFT_Step_MEM_real_param_5];
-	ld.param.u32 	%r29, [FFT_Step_MEM_real_param_6];
-	ld.param.f32 	%f9, [FFT_Step_MEM_real_param_7];
-	ld.param.f32 	%f10, [FFT_Step_MEM_real_param_8];
-	ld.param.f32 	%f11, [FFT_Step_MEM_real_param_9];
-	ld.param.f32 	%f12, [FFT_Step_MEM_real_param_10];
+	ld.param.u64 	%rd10, [FFT_Step_MEM_Real_param_0];
+	ld.param.u64 	%rd11, [FFT_Step_MEM_Real_param_1];
+	ld.param.u64 	%rd12, [FFT_Step_MEM_Real_param_2];
+	ld.param.u32 	%r26, [FFT_Step_MEM_Real_param_3];
+	ld.param.u32 	%r27, [FFT_Step_MEM_Real_param_4];
+	ld.param.u32 	%r28, [FFT_Step_MEM_Real_param_5];
+	ld.param.u32 	%r29, [FFT_Step_MEM_Real_param_6];
+	ld.param.f32 	%f9, [FFT_Step_MEM_Real_param_7];
+	ld.param.f32 	%f10, [FFT_Step_MEM_Real_param_8];
+	ld.param.f32 	%f11, [FFT_Step_MEM_Real_param_9];
+	ld.param.f32 	%f12, [FFT_Step_MEM_Real_param_10];
 	add.u64 	%rd1, %SPL, 0;
 	mov.u32 	%r30, %nctaid.x;
 	mov.u32 	%r31, %ctaid.y;
@@ -738,17 +738,17 @@ $L__BB0_12:
 	mov.f32 	%f14, 0f3BBB989D;
 	mov.f32 	%f15, 0f00000000;
 	fma.rn.f32 	%f16, %f15, %f14, %f13;
-	mov.f32 	%f17, 0f3FB8AA3B;
-	mov.f32 	%f18, 0f437C0000;
-	cvt.sat.f32.f32 	%f19, %f16;
-	mov.f32 	%f20, 0f4B400001;
-	fma.rm.f32 	%f21, %f19, %f18, %f20;
-	add.f32 	%f22, %f21, 0fCB40007F;
-	neg.f32 	%f23, %f22;
-	fma.rn.f32 	%f24, %f15, %f17, %f23;
+	cvt.sat.f32.f32 	%f17, %f16;
+	mov.f32 	%f18, 0f4B400001;
+	mov.f32 	%f19, 0f437C0000;
+	fma.rm.f32 	%f20, %f17, %f19, %f18;
+	add.f32 	%f21, %f20, 0fCB40007F;
+	neg.f32 	%f22, %f21;
+	mov.f32 	%f23, 0f3FB8AA3B;
+	fma.rn.f32 	%f24, %f15, %f23, %f22;
 	mov.f32 	%f25, 0f32A57060;
 	fma.rn.f32 	%f26, %f15, %f25, %f24;
-	mov.b32 	%r51, %f21;
+	mov.b32 	%r51, %f20;
 	shl.b32 	%r52, %r51, 23;
 	mov.b32 	%f27, %r52;
 	ex2.approx.ftz.f32 	%f28, %f26;
@@ -928,26 +928,26 @@ $L__BB0_12:
 }
 
 `
-	FFT_Step_MEM_real_ptx_60 = `
-.version 8.2
+	FFT_Step_MEM_Real_ptx_60 = `
+.version 8.5
 .target sm_60
 .address_size 64
 
-	// .globl	FFT_Step_MEM_real
+	// .globl	FFT_Step_MEM_Real
 .global .align 4 .b8 __cudart_i2opi_f[24] = {65, 144, 67, 60, 153, 149, 98, 219, 192, 221, 52, 245, 209, 87, 39, 252, 41, 21, 68, 78, 110, 131, 249, 162};
 
-.visible .entry FFT_Step_MEM_real(
-	.param .u64 FFT_Step_MEM_real_param_0,
-	.param .u64 FFT_Step_MEM_real_param_1,
-	.param .u64 FFT_Step_MEM_real_param_2,
-	.param .u32 FFT_Step_MEM_real_param_3,
-	.param .u32 FFT_Step_MEM_real_param_4,
-	.param .u32 FFT_Step_MEM_real_param_5,
-	.param .u32 FFT_Step_MEM_real_param_6,
-	.param .f32 FFT_Step_MEM_real_param_7,
-	.param .f32 FFT_Step_MEM_real_param_8,
-	.param .f32 FFT_Step_MEM_real_param_9,
-	.param .f32 FFT_Step_MEM_real_param_10
+.visible .entry FFT_Step_MEM_Real(
+	.param .u64 FFT_Step_MEM_Real_param_0,
+	.param .u64 FFT_Step_MEM_Real_param_1,
+	.param .u64 FFT_Step_MEM_Real_param_2,
+	.param .u32 FFT_Step_MEM_Real_param_3,
+	.param .u32 FFT_Step_MEM_Real_param_4,
+	.param .u32 FFT_Step_MEM_Real_param_5,
+	.param .u32 FFT_Step_MEM_Real_param_6,
+	.param .f32 FFT_Step_MEM_Real_param_7,
+	.param .f32 FFT_Step_MEM_Real_param_8,
+	.param .f32 FFT_Step_MEM_Real_param_9,
+	.param .f32 FFT_Step_MEM_Real_param_10
 )
 {
 	.local .align 4 .b8 	__local_depot0[28];
@@ -961,17 +961,17 @@ $L__BB0_12:
 
 
 	mov.u64 	%SPL, __local_depot0;
-	ld.param.u64 	%rd10, [FFT_Step_MEM_real_param_0];
-	ld.param.u64 	%rd11, [FFT_Step_MEM_real_param_1];
-	ld.param.u64 	%rd12, [FFT_Step_MEM_real_param_2];
-	ld.param.u32 	%r26, [FFT_Step_MEM_real_param_3];
-	ld.param.u32 	%r27, [FFT_Step_MEM_real_param_4];
-	ld.param.u32 	%r28, [FFT_Step_MEM_real_param_5];
-	ld.param.u32 	%r29, [FFT_Step_MEM_real_param_6];
-	ld.param.f32 	%f9, [FFT_Step_MEM_real_param_7];
-	ld.param.f32 	%f10, [FFT_Step_MEM_real_param_8];
-	ld.param.f32 	%f11, [FFT_Step_MEM_real_param_9];
-	ld.param.f32 	%f12, [FFT_Step_MEM_real_param_10];
+	ld.param.u64 	%rd10, [FFT_Step_MEM_Real_param_0];
+	ld.param.u64 	%rd11, [FFT_Step_MEM_Real_param_1];
+	ld.param.u64 	%rd12, [FFT_Step_MEM_Real_param_2];
+	ld.param.u32 	%r26, [FFT_Step_MEM_Real_param_3];
+	ld.param.u32 	%r27, [FFT_Step_MEM_Real_param_4];
+	ld.param.u32 	%r28, [FFT_Step_MEM_Real_param_5];
+	ld.param.u32 	%r29, [FFT_Step_MEM_Real_param_6];
+	ld.param.f32 	%f9, [FFT_Step_MEM_Real_param_7];
+	ld.param.f32 	%f10, [FFT_Step_MEM_Real_param_8];
+	ld.param.f32 	%f11, [FFT_Step_MEM_Real_param_9];
+	ld.param.f32 	%f12, [FFT_Step_MEM_Real_param_10];
 	add.u64 	%rd1, %SPL, 0;
 	mov.u32 	%r30, %nctaid.x;
 	mov.u32 	%r31, %ctaid.y;
@@ -1014,17 +1014,17 @@ $L__BB0_12:
 	mov.f32 	%f14, 0f3BBB989D;
 	mov.f32 	%f15, 0f00000000;
 	fma.rn.f32 	%f16, %f15, %f14, %f13;
-	mov.f32 	%f17, 0f3FB8AA3B;
-	mov.f32 	%f18, 0f437C0000;
-	cvt.sat.f32.f32 	%f19, %f16;
-	mov.f32 	%f20, 0f4B400001;
-	fma.rm.f32 	%f21, %f19, %f18, %f20;
-	add.f32 	%f22, %f21, 0fCB40007F;
-	neg.f32 	%f23, %f22;
-	fma.rn.f32 	%f24, %f15, %f17, %f23;
+	cvt.sat.f32.f32 	%f17, %f16;
+	mov.f32 	%f18, 0f4B400001;
+	mov.f32 	%f19, 0f437C0000;
+	fma.rm.f32 	%f20, %f17, %f19, %f18;
+	add.f32 	%f21, %f20, 0fCB40007F;
+	neg.f32 	%f22, %f21;
+	mov.f32 	%f23, 0f3FB8AA3B;
+	fma.rn.f32 	%f24, %f15, %f23, %f22;
 	mov.f32 	%f25, 0f32A57060;
 	fma.rn.f32 	%f26, %f15, %f25, %f24;
-	mov.b32 	%r51, %f21;
+	mov.b32 	%r51, %f20;
 	shl.b32 	%r52, %r51, 23;
 	mov.b32 	%f27, %r52;
 	ex2.approx.ftz.f32 	%f28, %f26;
@@ -1204,26 +1204,26 @@ $L__BB0_12:
 }
 
 `
-	FFT_Step_MEM_real_ptx_61 = `
-.version 8.2
+	FFT_Step_MEM_Real_ptx_61 = `
+.version 8.5
 .target sm_61
 .address_size 64
 
-	// .globl	FFT_Step_MEM_real
+	// .globl	FFT_Step_MEM_Real
 .global .align 4 .b8 __cudart_i2opi_f[24] = {65, 144, 67, 60, 153, 149, 98, 219, 192, 221, 52, 245, 209, 87, 39, 252, 41, 21, 68, 78, 110, 131, 249, 162};
 
-.visible .entry FFT_Step_MEM_real(
-	.param .u64 FFT_Step_MEM_real_param_0,
-	.param .u64 FFT_Step_MEM_real_param_1,
-	.param .u64 FFT_Step_MEM_real_param_2,
-	.param .u32 FFT_Step_MEM_real_param_3,
-	.param .u32 FFT_Step_MEM_real_param_4,
-	.param .u32 FFT_Step_MEM_real_param_5,
-	.param .u32 FFT_Step_MEM_real_param_6,
-	.param .f32 FFT_Step_MEM_real_param_7,
-	.param .f32 FFT_Step_MEM_real_param_8,
-	.param .f32 FFT_Step_MEM_real_param_9,
-	.param .f32 FFT_Step_MEM_real_param_10
+.visible .entry FFT_Step_MEM_Real(
+	.param .u64 FFT_Step_MEM_Real_param_0,
+	.param .u64 FFT_Step_MEM_Real_param_1,
+	.param .u64 FFT_Step_MEM_Real_param_2,
+	.param .u32 FFT_Step_MEM_Real_param_3,
+	.param .u32 FFT_Step_MEM_Real_param_4,
+	.param .u32 FFT_Step_MEM_Real_param_5,
+	.param .u32 FFT_Step_MEM_Real_param_6,
+	.param .f32 FFT_Step_MEM_Real_param_7,
+	.param .f32 FFT_Step_MEM_Real_param_8,
+	.param .f32 FFT_Step_MEM_Real_param_9,
+	.param .f32 FFT_Step_MEM_Real_param_10
 )
 {
 	.local .align 4 .b8 	__local_depot0[28];
@@ -1237,17 +1237,17 @@ $L__BB0_12:
 
 
 	mov.u64 	%SPL, __local_depot0;
-	ld.param.u64 	%rd10, [FFT_Step_MEM_real_param_0];
-	ld.param.u64 	%rd11, [FFT_Step_MEM_real_param_1];
-	ld.param.u64 	%rd12, [FFT_Step_MEM_real_param_2];
-	ld.param.u32 	%r26, [FFT_Step_MEM_real_param_3];
-	ld.param.u32 	%r27, [FFT_Step_MEM_real_param_4];
-	ld.param.u32 	%r28, [FFT_Step_MEM_real_param_5];
-	ld.param.u32 	%r29, [FFT_Step_MEM_real_param_6];
-	ld.param.f32 	%f9, [FFT_Step_MEM_real_param_7];
-	ld.param.f32 	%f10, [FFT_Step_MEM_real_param_8];
-	ld.param.f32 	%f11, [FFT_Step_MEM_real_param_9];
-	ld.param.f32 	%f12, [FFT_Step_MEM_real_param_10];
+	ld.param.u64 	%rd10, [FFT_Step_MEM_Real_param_0];
+	ld.param.u64 	%rd11, [FFT_Step_MEM_Real_param_1];
+	ld.param.u64 	%rd12, [FFT_Step_MEM_Real_param_2];
+	ld.param.u32 	%r26, [FFT_Step_MEM_Real_param_3];
+	ld.param.u32 	%r27, [FFT_Step_MEM_Real_param_4];
+	ld.param.u32 	%r28, [FFT_Step_MEM_Real_param_5];
+	ld.param.u32 	%r29, [FFT_Step_MEM_Real_param_6];
+	ld.param.f32 	%f9, [FFT_Step_MEM_Real_param_7];
+	ld.param.f32 	%f10, [FFT_Step_MEM_Real_param_8];
+	ld.param.f32 	%f11, [FFT_Step_MEM_Real_param_9];
+	ld.param.f32 	%f12, [FFT_Step_MEM_Real_param_10];
 	add.u64 	%rd1, %SPL, 0;
 	mov.u32 	%r30, %nctaid.x;
 	mov.u32 	%r31, %ctaid.y;
@@ -1290,17 +1290,17 @@ $L__BB0_12:
 	mov.f32 	%f14, 0f3BBB989D;
 	mov.f32 	%f15, 0f00000000;
 	fma.rn.f32 	%f16, %f15, %f14, %f13;
-	mov.f32 	%f17, 0f3FB8AA3B;
-	mov.f32 	%f18, 0f437C0000;
-	cvt.sat.f32.f32 	%f19, %f16;
-	mov.f32 	%f20, 0f4B400001;
-	fma.rm.f32 	%f21, %f19, %f18, %f20;
-	add.f32 	%f22, %f21, 0fCB40007F;
-	neg.f32 	%f23, %f22;
-	fma.rn.f32 	%f24, %f15, %f17, %f23;
+	cvt.sat.f32.f32 	%f17, %f16;
+	mov.f32 	%f18, 0f4B400001;
+	mov.f32 	%f19, 0f437C0000;
+	fma.rm.f32 	%f20, %f17, %f19, %f18;
+	add.f32 	%f21, %f20, 0fCB40007F;
+	neg.f32 	%f22, %f21;
+	mov.f32 	%f23, 0f3FB8AA3B;
+	fma.rn.f32 	%f24, %f15, %f23, %f22;
 	mov.f32 	%f25, 0f32A57060;
 	fma.rn.f32 	%f26, %f15, %f25, %f24;
-	mov.b32 	%r51, %f21;
+	mov.b32 	%r51, %f20;
 	shl.b32 	%r52, %r51, 23;
 	mov.b32 	%f27, %r52;
 	ex2.approx.ftz.f32 	%f28, %f26;
@@ -1480,26 +1480,26 @@ $L__BB0_12:
 }
 
 `
-	FFT_Step_MEM_real_ptx_62 = `
-.version 8.2
+	FFT_Step_MEM_Real_ptx_62 = `
+.version 8.5
 .target sm_62
 .address_size 64
 
-	// .globl	FFT_Step_MEM_real
+	// .globl	FFT_Step_MEM_Real
 .global .align 4 .b8 __cudart_i2opi_f[24] = {65, 144, 67, 60, 153, 149, 98, 219, 192, 221, 52, 245, 209, 87, 39, 252, 41, 21, 68, 78, 110, 131, 249, 162};
 
-.visible .entry FFT_Step_MEM_real(
-	.param .u64 FFT_Step_MEM_real_param_0,
-	.param .u64 FFT_Step_MEM_real_param_1,
-	.param .u64 FFT_Step_MEM_real_param_2,
-	.param .u32 FFT_Step_MEM_real_param_3,
-	.param .u32 FFT_Step_MEM_real_param_4,
-	.param .u32 FFT_Step_MEM_real_param_5,
-	.param .u32 FFT_Step_MEM_real_param_6,
-	.param .f32 FFT_Step_MEM_real_param_7,
-	.param .f32 FFT_Step_MEM_real_param_8,
-	.param .f32 FFT_Step_MEM_real_param_9,
-	.param .f32 FFT_Step_MEM_real_param_10
+.visible .entry FFT_Step_MEM_Real(
+	.param .u64 FFT_Step_MEM_Real_param_0,
+	.param .u64 FFT_Step_MEM_Real_param_1,
+	.param .u64 FFT_Step_MEM_Real_param_2,
+	.param .u32 FFT_Step_MEM_Real_param_3,
+	.param .u32 FFT_Step_MEM_Real_param_4,
+	.param .u32 FFT_Step_MEM_Real_param_5,
+	.param .u32 FFT_Step_MEM_Real_param_6,
+	.param .f32 FFT_Step_MEM_Real_param_7,
+	.param .f32 FFT_Step_MEM_Real_param_8,
+	.param .f32 FFT_Step_MEM_Real_param_9,
+	.param .f32 FFT_Step_MEM_Real_param_10
 )
 {
 	.local .align 4 .b8 	__local_depot0[28];
@@ -1513,17 +1513,17 @@ $L__BB0_12:
 
 
 	mov.u64 	%SPL, __local_depot0;
-	ld.param.u64 	%rd10, [FFT_Step_MEM_real_param_0];
-	ld.param.u64 	%rd11, [FFT_Step_MEM_real_param_1];
-	ld.param.u64 	%rd12, [FFT_Step_MEM_real_param_2];
-	ld.param.u32 	%r26, [FFT_Step_MEM_real_param_3];
-	ld.param.u32 	%r27, [FFT_Step_MEM_real_param_4];
-	ld.param.u32 	%r28, [FFT_Step_MEM_real_param_5];
-	ld.param.u32 	%r29, [FFT_Step_MEM_real_param_6];
-	ld.param.f32 	%f9, [FFT_Step_MEM_real_param_7];
-	ld.param.f32 	%f10, [FFT_Step_MEM_real_param_8];
-	ld.param.f32 	%f11, [FFT_Step_MEM_real_param_9];
-	ld.param.f32 	%f12, [FFT_Step_MEM_real_param_10];
+	ld.param.u64 	%rd10, [FFT_Step_MEM_Real_param_0];
+	ld.param.u64 	%rd11, [FFT_Step_MEM_Real_param_1];
+	ld.param.u64 	%rd12, [FFT_Step_MEM_Real_param_2];
+	ld.param.u32 	%r26, [FFT_Step_MEM_Real_param_3];
+	ld.param.u32 	%r27, [FFT_Step_MEM_Real_param_4];
+	ld.param.u32 	%r28, [FFT_Step_MEM_Real_param_5];
+	ld.param.u32 	%r29, [FFT_Step_MEM_Real_param_6];
+	ld.param.f32 	%f9, [FFT_Step_MEM_Real_param_7];
+	ld.param.f32 	%f10, [FFT_Step_MEM_Real_param_8];
+	ld.param.f32 	%f11, [FFT_Step_MEM_Real_param_9];
+	ld.param.f32 	%f12, [FFT_Step_MEM_Real_param_10];
 	add.u64 	%rd1, %SPL, 0;
 	mov.u32 	%r30, %nctaid.x;
 	mov.u32 	%r31, %ctaid.y;
@@ -1566,17 +1566,17 @@ $L__BB0_12:
 	mov.f32 	%f14, 0f3BBB989D;
 	mov.f32 	%f15, 0f00000000;
 	fma.rn.f32 	%f16, %f15, %f14, %f13;
-	mov.f32 	%f17, 0f3FB8AA3B;
-	mov.f32 	%f18, 0f437C0000;
-	cvt.sat.f32.f32 	%f19, %f16;
-	mov.f32 	%f20, 0f4B400001;
-	fma.rm.f32 	%f21, %f19, %f18, %f20;
-	add.f32 	%f22, %f21, 0fCB40007F;
-	neg.f32 	%f23, %f22;
-	fma.rn.f32 	%f24, %f15, %f17, %f23;
+	cvt.sat.f32.f32 	%f17, %f16;
+	mov.f32 	%f18, 0f4B400001;
+	mov.f32 	%f19, 0f437C0000;
+	fma.rm.f32 	%f20, %f17, %f19, %f18;
+	add.f32 	%f21, %f20, 0fCB40007F;
+	neg.f32 	%f22, %f21;
+	mov.f32 	%f23, 0f3FB8AA3B;
+	fma.rn.f32 	%f24, %f15, %f23, %f22;
 	mov.f32 	%f25, 0f32A57060;
 	fma.rn.f32 	%f26, %f15, %f25, %f24;
-	mov.b32 	%r51, %f21;
+	mov.b32 	%r51, %f20;
 	shl.b32 	%r52, %r51, 23;
 	mov.b32 	%f27, %r52;
 	ex2.approx.ftz.f32 	%f28, %f26;
@@ -1756,26 +1756,26 @@ $L__BB0_12:
 }
 
 `
-	FFT_Step_MEM_real_ptx_70 = `
-.version 8.2
+	FFT_Step_MEM_Real_ptx_70 = `
+.version 8.5
 .target sm_70
 .address_size 64
 
-	// .globl	FFT_Step_MEM_real
+	// .globl	FFT_Step_MEM_Real
 .global .align 4 .b8 __cudart_i2opi_f[24] = {65, 144, 67, 60, 153, 149, 98, 219, 192, 221, 52, 245, 209, 87, 39, 252, 41, 21, 68, 78, 110, 131, 249, 162};
 
-.visible .entry FFT_Step_MEM_real(
-	.param .u64 FFT_Step_MEM_real_param_0,
-	.param .u64 FFT_Step_MEM_real_param_1,
-	.param .u64 FFT_Step_MEM_real_param_2,
-	.param .u32 FFT_Step_MEM_real_param_3,
-	.param .u32 FFT_Step_MEM_real_param_4,
-	.param .u32 FFT_Step_MEM_real_param_5,
-	.param .u32 FFT_Step_MEM_real_param_6,
-	.param .f32 FFT_Step_MEM_real_param_7,
-	.param .f32 FFT_Step_MEM_real_param_8,
-	.param .f32 FFT_Step_MEM_real_param_9,
-	.param .f32 FFT_Step_MEM_real_param_10
+.visible .entry FFT_Step_MEM_Real(
+	.param .u64 FFT_Step_MEM_Real_param_0,
+	.param .u64 FFT_Step_MEM_Real_param_1,
+	.param .u64 FFT_Step_MEM_Real_param_2,
+	.param .u32 FFT_Step_MEM_Real_param_3,
+	.param .u32 FFT_Step_MEM_Real_param_4,
+	.param .u32 FFT_Step_MEM_Real_param_5,
+	.param .u32 FFT_Step_MEM_Real_param_6,
+	.param .f32 FFT_Step_MEM_Real_param_7,
+	.param .f32 FFT_Step_MEM_Real_param_8,
+	.param .f32 FFT_Step_MEM_Real_param_9,
+	.param .f32 FFT_Step_MEM_Real_param_10
 )
 {
 	.local .align 4 .b8 	__local_depot0[28];
@@ -1789,17 +1789,17 @@ $L__BB0_12:
 
 
 	mov.u64 	%SPL, __local_depot0;
-	ld.param.u64 	%rd10, [FFT_Step_MEM_real_param_0];
-	ld.param.u64 	%rd11, [FFT_Step_MEM_real_param_1];
-	ld.param.u64 	%rd12, [FFT_Step_MEM_real_param_2];
-	ld.param.u32 	%r26, [FFT_Step_MEM_real_param_3];
-	ld.param.u32 	%r27, [FFT_Step_MEM_real_param_4];
-	ld.param.u32 	%r28, [FFT_Step_MEM_real_param_5];
-	ld.param.u32 	%r29, [FFT_Step_MEM_real_param_6];
-	ld.param.f32 	%f9, [FFT_Step_MEM_real_param_7];
-	ld.param.f32 	%f10, [FFT_Step_MEM_real_param_8];
-	ld.param.f32 	%f11, [FFT_Step_MEM_real_param_9];
-	ld.param.f32 	%f12, [FFT_Step_MEM_real_param_10];
+	ld.param.u64 	%rd10, [FFT_Step_MEM_Real_param_0];
+	ld.param.u64 	%rd11, [FFT_Step_MEM_Real_param_1];
+	ld.param.u64 	%rd12, [FFT_Step_MEM_Real_param_2];
+	ld.param.u32 	%r26, [FFT_Step_MEM_Real_param_3];
+	ld.param.u32 	%r27, [FFT_Step_MEM_Real_param_4];
+	ld.param.u32 	%r28, [FFT_Step_MEM_Real_param_5];
+	ld.param.u32 	%r29, [FFT_Step_MEM_Real_param_6];
+	ld.param.f32 	%f9, [FFT_Step_MEM_Real_param_7];
+	ld.param.f32 	%f10, [FFT_Step_MEM_Real_param_8];
+	ld.param.f32 	%f11, [FFT_Step_MEM_Real_param_9];
+	ld.param.f32 	%f12, [FFT_Step_MEM_Real_param_10];
 	add.u64 	%rd1, %SPL, 0;
 	mov.u32 	%r30, %nctaid.x;
 	mov.u32 	%r31, %ctaid.y;
@@ -1842,17 +1842,17 @@ $L__BB0_12:
 	mov.f32 	%f14, 0f3BBB989D;
 	mov.f32 	%f15, 0f00000000;
 	fma.rn.f32 	%f16, %f15, %f14, %f13;
-	mov.f32 	%f17, 0f3FB8AA3B;
-	mov.f32 	%f18, 0f437C0000;
-	cvt.sat.f32.f32 	%f19, %f16;
-	mov.f32 	%f20, 0f4B400001;
-	fma.rm.f32 	%f21, %f19, %f18, %f20;
-	add.f32 	%f22, %f21, 0fCB40007F;
-	neg.f32 	%f23, %f22;
-	fma.rn.f32 	%f24, %f15, %f17, %f23;
+	cvt.sat.f32.f32 	%f17, %f16;
+	mov.f32 	%f18, 0f4B400001;
+	mov.f32 	%f19, 0f437C0000;
+	fma.rm.f32 	%f20, %f17, %f19, %f18;
+	add.f32 	%f21, %f20, 0fCB40007F;
+	neg.f32 	%f22, %f21;
+	mov.f32 	%f23, 0f3FB8AA3B;
+	fma.rn.f32 	%f24, %f15, %f23, %f22;
 	mov.f32 	%f25, 0f32A57060;
 	fma.rn.f32 	%f26, %f15, %f25, %f24;
-	mov.b32 	%r51, %f21;
+	mov.b32 	%r51, %f20;
 	shl.b32 	%r52, %r51, 23;
 	mov.b32 	%f27, %r52;
 	ex2.approx.ftz.f32 	%f28, %f26;
@@ -2033,26 +2033,26 @@ $L__BB0_12:
 }
 
 `
-	FFT_Step_MEM_real_ptx_72 = `
-.version 8.2
+	FFT_Step_MEM_Real_ptx_72 = `
+.version 8.5
 .target sm_72
 .address_size 64
 
-	// .globl	FFT_Step_MEM_real
+	// .globl	FFT_Step_MEM_Real
 .global .align 4 .b8 __cudart_i2opi_f[24] = {65, 144, 67, 60, 153, 149, 98, 219, 192, 221, 52, 245, 209, 87, 39, 252, 41, 21, 68, 78, 110, 131, 249, 162};
 
-.visible .entry FFT_Step_MEM_real(
-	.param .u64 FFT_Step_MEM_real_param_0,
-	.param .u64 FFT_Step_MEM_real_param_1,
-	.param .u64 FFT_Step_MEM_real_param_2,
-	.param .u32 FFT_Step_MEM_real_param_3,
-	.param .u32 FFT_Step_MEM_real_param_4,
-	.param .u32 FFT_Step_MEM_real_param_5,
-	.param .u32 FFT_Step_MEM_real_param_6,
-	.param .f32 FFT_Step_MEM_real_param_7,
-	.param .f32 FFT_Step_MEM_real_param_8,
-	.param .f32 FFT_Step_MEM_real_param_9,
-	.param .f32 FFT_Step_MEM_real_param_10
+.visible .entry FFT_Step_MEM_Real(
+	.param .u64 FFT_Step_MEM_Real_param_0,
+	.param .u64 FFT_Step_MEM_Real_param_1,
+	.param .u64 FFT_Step_MEM_Real_param_2,
+	.param .u32 FFT_Step_MEM_Real_param_3,
+	.param .u32 FFT_Step_MEM_Real_param_4,
+	.param .u32 FFT_Step_MEM_Real_param_5,
+	.param .u32 FFT_Step_MEM_Real_param_6,
+	.param .f32 FFT_Step_MEM_Real_param_7,
+	.param .f32 FFT_Step_MEM_Real_param_8,
+	.param .f32 FFT_Step_MEM_Real_param_9,
+	.param .f32 FFT_Step_MEM_Real_param_10
 )
 {
 	.local .align 4 .b8 	__local_depot0[28];
@@ -2066,17 +2066,17 @@ $L__BB0_12:
 
 
 	mov.u64 	%SPL, __local_depot0;
-	ld.param.u64 	%rd10, [FFT_Step_MEM_real_param_0];
-	ld.param.u64 	%rd11, [FFT_Step_MEM_real_param_1];
-	ld.param.u64 	%rd12, [FFT_Step_MEM_real_param_2];
-	ld.param.u32 	%r26, [FFT_Step_MEM_real_param_3];
-	ld.param.u32 	%r27, [FFT_Step_MEM_real_param_4];
-	ld.param.u32 	%r28, [FFT_Step_MEM_real_param_5];
-	ld.param.u32 	%r29, [FFT_Step_MEM_real_param_6];
-	ld.param.f32 	%f9, [FFT_Step_MEM_real_param_7];
-	ld.param.f32 	%f10, [FFT_Step_MEM_real_param_8];
-	ld.param.f32 	%f11, [FFT_Step_MEM_real_param_9];
-	ld.param.f32 	%f12, [FFT_Step_MEM_real_param_10];
+	ld.param.u64 	%rd10, [FFT_Step_MEM_Real_param_0];
+	ld.param.u64 	%rd11, [FFT_Step_MEM_Real_param_1];
+	ld.param.u64 	%rd12, [FFT_Step_MEM_Real_param_2];
+	ld.param.u32 	%r26, [FFT_Step_MEM_Real_param_3];
+	ld.param.u32 	%r27, [FFT_Step_MEM_Real_param_4];
+	ld.param.u32 	%r28, [FFT_Step_MEM_Real_param_5];
+	ld.param.u32 	%r29, [FFT_Step_MEM_Real_param_6];
+	ld.param.f32 	%f9, [FFT_Step_MEM_Real_param_7];
+	ld.param.f32 	%f10, [FFT_Step_MEM_Real_param_8];
+	ld.param.f32 	%f11, [FFT_Step_MEM_Real_param_9];
+	ld.param.f32 	%f12, [FFT_Step_MEM_Real_param_10];
 	add.u64 	%rd1, %SPL, 0;
 	mov.u32 	%r30, %nctaid.x;
 	mov.u32 	%r31, %ctaid.y;
@@ -2119,17 +2119,17 @@ $L__BB0_12:
 	mov.f32 	%f14, 0f3BBB989D;
 	mov.f32 	%f15, 0f00000000;
 	fma.rn.f32 	%f16, %f15, %f14, %f13;
-	mov.f32 	%f17, 0f3FB8AA3B;
-	mov.f32 	%f18, 0f437C0000;
-	cvt.sat.f32.f32 	%f19, %f16;
-	mov.f32 	%f20, 0f4B400001;
-	fma.rm.f32 	%f21, %f19, %f18, %f20;
-	add.f32 	%f22, %f21, 0fCB40007F;
-	neg.f32 	%f23, %f22;
-	fma.rn.f32 	%f24, %f15, %f17, %f23;
+	cvt.sat.f32.f32 	%f17, %f16;
+	mov.f32 	%f18, 0f4B400001;
+	mov.f32 	%f19, 0f437C0000;
+	fma.rm.f32 	%f20, %f17, %f19, %f18;
+	add.f32 	%f21, %f20, 0fCB40007F;
+	neg.f32 	%f22, %f21;
+	mov.f32 	%f23, 0f3FB8AA3B;
+	fma.rn.f32 	%f24, %f15, %f23, %f22;
 	mov.f32 	%f25, 0f32A57060;
 	fma.rn.f32 	%f26, %f15, %f25, %f24;
-	mov.b32 	%r51, %f21;
+	mov.b32 	%r51, %f20;
 	shl.b32 	%r52, %r51, 23;
 	mov.b32 	%f27, %r52;
 	ex2.approx.ftz.f32 	%f28, %f26;
@@ -2310,26 +2310,26 @@ $L__BB0_12:
 }
 
 `
-	FFT_Step_MEM_real_ptx_75 = `
-.version 8.2
+	FFT_Step_MEM_Real_ptx_75 = `
+.version 8.5
 .target sm_75
 .address_size 64
 
-	// .globl	FFT_Step_MEM_real
+	// .globl	FFT_Step_MEM_Real
 .global .align 4 .b8 __cudart_i2opi_f[24] = {65, 144, 67, 60, 153, 149, 98, 219, 192, 221, 52, 245, 209, 87, 39, 252, 41, 21, 68, 78, 110, 131, 249, 162};
 
-.visible .entry FFT_Step_MEM_real(
-	.param .u64 FFT_Step_MEM_real_param_0,
-	.param .u64 FFT_Step_MEM_real_param_1,
-	.param .u64 FFT_Step_MEM_real_param_2,
-	.param .u32 FFT_Step_MEM_real_param_3,
-	.param .u32 FFT_Step_MEM_real_param_4,
-	.param .u32 FFT_Step_MEM_real_param_5,
-	.param .u32 FFT_Step_MEM_real_param_6,
-	.param .f32 FFT_Step_MEM_real_param_7,
-	.param .f32 FFT_Step_MEM_real_param_8,
-	.param .f32 FFT_Step_MEM_real_param_9,
-	.param .f32 FFT_Step_MEM_real_param_10
+.visible .entry FFT_Step_MEM_Real(
+	.param .u64 FFT_Step_MEM_Real_param_0,
+	.param .u64 FFT_Step_MEM_Real_param_1,
+	.param .u64 FFT_Step_MEM_Real_param_2,
+	.param .u32 FFT_Step_MEM_Real_param_3,
+	.param .u32 FFT_Step_MEM_Real_param_4,
+	.param .u32 FFT_Step_MEM_Real_param_5,
+	.param .u32 FFT_Step_MEM_Real_param_6,
+	.param .f32 FFT_Step_MEM_Real_param_7,
+	.param .f32 FFT_Step_MEM_Real_param_8,
+	.param .f32 FFT_Step_MEM_Real_param_9,
+	.param .f32 FFT_Step_MEM_Real_param_10
 )
 {
 	.local .align 4 .b8 	__local_depot0[28];
@@ -2343,17 +2343,17 @@ $L__BB0_12:
 
 
 	mov.u64 	%SPL, __local_depot0;
-	ld.param.u64 	%rd10, [FFT_Step_MEM_real_param_0];
-	ld.param.u64 	%rd11, [FFT_Step_MEM_real_param_1];
-	ld.param.u64 	%rd12, [FFT_Step_MEM_real_param_2];
-	ld.param.u32 	%r26, [FFT_Step_MEM_real_param_3];
-	ld.param.u32 	%r27, [FFT_Step_MEM_real_param_4];
-	ld.param.u32 	%r28, [FFT_Step_MEM_real_param_5];
-	ld.param.u32 	%r29, [FFT_Step_MEM_real_param_6];
-	ld.param.f32 	%f9, [FFT_Step_MEM_real_param_7];
-	ld.param.f32 	%f10, [FFT_Step_MEM_real_param_8];
-	ld.param.f32 	%f11, [FFT_Step_MEM_real_param_9];
-	ld.param.f32 	%f12, [FFT_Step_MEM_real_param_10];
+	ld.param.u64 	%rd10, [FFT_Step_MEM_Real_param_0];
+	ld.param.u64 	%rd11, [FFT_Step_MEM_Real_param_1];
+	ld.param.u64 	%rd12, [FFT_Step_MEM_Real_param_2];
+	ld.param.u32 	%r26, [FFT_Step_MEM_Real_param_3];
+	ld.param.u32 	%r27, [FFT_Step_MEM_Real_param_4];
+	ld.param.u32 	%r28, [FFT_Step_MEM_Real_param_5];
+	ld.param.u32 	%r29, [FFT_Step_MEM_Real_param_6];
+	ld.param.f32 	%f9, [FFT_Step_MEM_Real_param_7];
+	ld.param.f32 	%f10, [FFT_Step_MEM_Real_param_8];
+	ld.param.f32 	%f11, [FFT_Step_MEM_Real_param_9];
+	ld.param.f32 	%f12, [FFT_Step_MEM_Real_param_10];
 	add.u64 	%rd1, %SPL, 0;
 	mov.u32 	%r30, %nctaid.x;
 	mov.u32 	%r31, %ctaid.y;
@@ -2396,17 +2396,17 @@ $L__BB0_12:
 	mov.f32 	%f14, 0f3BBB989D;
 	mov.f32 	%f15, 0f00000000;
 	fma.rn.f32 	%f16, %f15, %f14, %f13;
-	mov.f32 	%f17, 0f3FB8AA3B;
-	mov.f32 	%f18, 0f437C0000;
-	cvt.sat.f32.f32 	%f19, %f16;
-	mov.f32 	%f20, 0f4B400001;
-	fma.rm.f32 	%f21, %f19, %f18, %f20;
-	add.f32 	%f22, %f21, 0fCB40007F;
-	neg.f32 	%f23, %f22;
-	fma.rn.f32 	%f24, %f15, %f17, %f23;
+	cvt.sat.f32.f32 	%f17, %f16;
+	mov.f32 	%f18, 0f4B400001;
+	mov.f32 	%f19, 0f437C0000;
+	fma.rm.f32 	%f20, %f17, %f19, %f18;
+	add.f32 	%f21, %f20, 0fCB40007F;
+	neg.f32 	%f22, %f21;
+	mov.f32 	%f23, 0f3FB8AA3B;
+	fma.rn.f32 	%f24, %f15, %f23, %f22;
 	mov.f32 	%f25, 0f32A57060;
 	fma.rn.f32 	%f26, %f15, %f25, %f24;
-	mov.b32 	%r51, %f21;
+	mov.b32 	%r51, %f20;
 	shl.b32 	%r52, %r51, 23;
 	mov.b32 	%f27, %r52;
 	ex2.approx.ftz.f32 	%f28, %f26;
@@ -2587,26 +2587,26 @@ $L__BB0_12:
 }
 
 `
-	FFT_Step_MEM_real_ptx_80 = `
-.version 8.2
+	FFT_Step_MEM_Real_ptx_80 = `
+.version 8.5
 .target sm_80
 .address_size 64
 
-	// .globl	FFT_Step_MEM_real
+	// .globl	FFT_Step_MEM_Real
 .global .align 4 .b8 __cudart_i2opi_f[24] = {65, 144, 67, 60, 153, 149, 98, 219, 192, 221, 52, 245, 209, 87, 39, 252, 41, 21, 68, 78, 110, 131, 249, 162};
 
-.visible .entry FFT_Step_MEM_real(
-	.param .u64 FFT_Step_MEM_real_param_0,
-	.param .u64 FFT_Step_MEM_real_param_1,
-	.param .u64 FFT_Step_MEM_real_param_2,
-	.param .u32 FFT_Step_MEM_real_param_3,
-	.param .u32 FFT_Step_MEM_real_param_4,
-	.param .u32 FFT_Step_MEM_real_param_5,
-	.param .u32 FFT_Step_MEM_real_param_6,
-	.param .f32 FFT_Step_MEM_real_param_7,
-	.param .f32 FFT_Step_MEM_real_param_8,
-	.param .f32 FFT_Step_MEM_real_param_9,
-	.param .f32 FFT_Step_MEM_real_param_10
+.visible .entry FFT_Step_MEM_Real(
+	.param .u64 FFT_Step_MEM_Real_param_0,
+	.param .u64 FFT_Step_MEM_Real_param_1,
+	.param .u64 FFT_Step_MEM_Real_param_2,
+	.param .u32 FFT_Step_MEM_Real_param_3,
+	.param .u32 FFT_Step_MEM_Real_param_4,
+	.param .u32 FFT_Step_MEM_Real_param_5,
+	.param .u32 FFT_Step_MEM_Real_param_6,
+	.param .f32 FFT_Step_MEM_Real_param_7,
+	.param .f32 FFT_Step_MEM_Real_param_8,
+	.param .f32 FFT_Step_MEM_Real_param_9,
+	.param .f32 FFT_Step_MEM_Real_param_10
 )
 {
 	.local .align 4 .b8 	__local_depot0[28];
@@ -2620,17 +2620,17 @@ $L__BB0_12:
 
 
 	mov.u64 	%SPL, __local_depot0;
-	ld.param.u64 	%rd10, [FFT_Step_MEM_real_param_0];
-	ld.param.u64 	%rd11, [FFT_Step_MEM_real_param_1];
-	ld.param.u64 	%rd12, [FFT_Step_MEM_real_param_2];
-	ld.param.u32 	%r26, [FFT_Step_MEM_real_param_3];
-	ld.param.u32 	%r27, [FFT_Step_MEM_real_param_4];
-	ld.param.u32 	%r28, [FFT_Step_MEM_real_param_5];
-	ld.param.u32 	%r29, [FFT_Step_MEM_real_param_6];
-	ld.param.f32 	%f9, [FFT_Step_MEM_real_param_7];
-	ld.param.f32 	%f10, [FFT_Step_MEM_real_param_8];
-	ld.param.f32 	%f11, [FFT_Step_MEM_real_param_9];
-	ld.param.f32 	%f12, [FFT_Step_MEM_real_param_10];
+	ld.param.u64 	%rd10, [FFT_Step_MEM_Real_param_0];
+	ld.param.u64 	%rd11, [FFT_Step_MEM_Real_param_1];
+	ld.param.u64 	%rd12, [FFT_Step_MEM_Real_param_2];
+	ld.param.u32 	%r26, [FFT_Step_MEM_Real_param_3];
+	ld.param.u32 	%r27, [FFT_Step_MEM_Real_param_4];
+	ld.param.u32 	%r28, [FFT_Step_MEM_Real_param_5];
+	ld.param.u32 	%r29, [FFT_Step_MEM_Real_param_6];
+	ld.param.f32 	%f9, [FFT_Step_MEM_Real_param_7];
+	ld.param.f32 	%f10, [FFT_Step_MEM_Real_param_8];
+	ld.param.f32 	%f11, [FFT_Step_MEM_Real_param_9];
+	ld.param.f32 	%f12, [FFT_Step_MEM_Real_param_10];
 	add.u64 	%rd1, %SPL, 0;
 	mov.u32 	%r30, %nctaid.x;
 	mov.u32 	%r31, %ctaid.y;
@@ -2673,17 +2673,17 @@ $L__BB0_12:
 	mov.f32 	%f14, 0f3BBB989D;
 	mov.f32 	%f15, 0f00000000;
 	fma.rn.f32 	%f16, %f15, %f14, %f13;
-	mov.f32 	%f17, 0f3FB8AA3B;
-	mov.f32 	%f18, 0f437C0000;
-	cvt.sat.f32.f32 	%f19, %f16;
-	mov.f32 	%f20, 0f4B400001;
-	fma.rm.f32 	%f21, %f19, %f18, %f20;
-	add.f32 	%f22, %f21, 0fCB40007F;
-	neg.f32 	%f23, %f22;
-	fma.rn.f32 	%f24, %f15, %f17, %f23;
+	cvt.sat.f32.f32 	%f17, %f16;
+	mov.f32 	%f18, 0f4B400001;
+	mov.f32 	%f19, 0f437C0000;
+	fma.rm.f32 	%f20, %f17, %f19, %f18;
+	add.f32 	%f21, %f20, 0fCB40007F;
+	neg.f32 	%f22, %f21;
+	mov.f32 	%f23, 0f3FB8AA3B;
+	fma.rn.f32 	%f24, %f15, %f23, %f22;
 	mov.f32 	%f25, 0f32A57060;
 	fma.rn.f32 	%f26, %f15, %f25, %f24;
-	mov.b32 	%r51, %f21;
+	mov.b32 	%r51, %f20;
 	shl.b32 	%r52, %r51, 23;
 	mov.b32 	%f27, %r52;
 	ex2.approx.ftz.f32 	%f28, %f26;

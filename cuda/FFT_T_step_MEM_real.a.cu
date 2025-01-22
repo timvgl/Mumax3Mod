@@ -11,7 +11,7 @@ __device__ __forceinline__ cuComplex my_cexpf(cuComplex z) {
 }
 
 extern "C" __global__ void
-FFT_Step_MEM_real(float* __restrict__ dst, float* __restrict__ src1, float* __restrict__ src2, int Nx, int Ny, int Nz, int Nf, float minF, float dF, float t, float n) {
+FFT_Step_MEM_Real(float* __restrict__ dst, float* __restrict__ src1, float* __restrict__ src2, int Nx, int Ny, int Nz, int Nf, float minF, float dF, float t, float n) {
     int i = (blockIdx.y * gridDim.x + blockIdx.x) * blockDim.x + threadIdx.x;
     if (i >= Nx * Ny * Nz / 2) {
         return;

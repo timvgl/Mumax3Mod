@@ -76,6 +76,30 @@ func Madd2(dst, src1, src2 *data.Slice, factor1, factor2 float32) {
 	}
 }
 
+func Madd2Comp(dst, src1, src2 *data.Slice, factor1, factor2 []float32) {
+	N := dst.Len()
+	nComp := dst.NComp()
+	util.Assert(src1.Len() == N && src2.Len() == N)
+	util.AssertMsg(src1.NComp() == len(factor1) && src2.NComp() == len(factor2) && src1.NComp() == nComp && src2.NComp() == nComp || src1.NComp() == nComp && src2.NComp() == 1 || src2.NComp() == nComp && src1.NComp() == 1, fmt.Sprintf("Comp: %v vs %v vs %v", nComp, src1.NComp(), src2.NComp()))
+	cfg := make1DConf(N)
+	if src1.NComp() == nComp && src2.NComp() == nComp {
+		for c := 0; c < nComp; c++ {
+			k_madd2_async(dst.DevPtr(c), src1.DevPtr(c), factor1[c],
+				src2.DevPtr(c), factor2[c], N, cfg)
+		}
+	} else if src1.NComp() == nComp && src2.NComp() == 1 {
+		for c := 0; c < nComp; c++ {
+			k_madd2_async(dst.DevPtr(c), src1.DevPtr(c), factor1[c],
+				src2.DevPtr(0), factor2[0], N, cfg)
+		}
+	} else if src2.NComp() == nComp && src1.NComp() == 1 {
+		for c := 0; c < nComp; c++ {
+			k_madd2_async(dst.DevPtr(c), src1.DevPtr(0), factor1[0],
+				src2.DevPtr(c), factor2[c], N, cfg)
+		}
+	}
+}
+
 // multiply-add: dst[i] = src1[i] * factor1 + src2[i] * factor2 + src3[i] * factor3
 func Madd3(dst, src1, src2, src3 *data.Slice, factor1, factor2, factor3 float32) {
 	N := dst.Len()
