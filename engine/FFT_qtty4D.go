@@ -73,6 +73,7 @@ type fftOperation4D struct {
 	iky      float64
 	ikz      float64
 	kspace   bool
+	dataT    *data.Slice
 }
 
 func GetKeys[T any](m *sync.Map) []T {
@@ -122,7 +123,8 @@ func FFT4D(q Quantity, period float64) *fftOperation4D {
 		if !kx_ky_kz_prop_defined(q, ikx, iky, ikz) {
 			panic("kx, ky, kz are not properly defined.")
 		}*/
-	FFT_T_OP_Obj := fftOperation4D{fieldOp{q, q, q.NComp()}, "k_x_y_z_f_" + NameOf(q), q, dFrequency, maxFrequency, minFrequency, Time, period, -1, false, fft3D, QTTYName, ikx, iky, ikz, true}
+	var dataT *data.Slice
+	FFT_T_OP_Obj := fftOperation4D{fieldOp{q, q, q.NComp()}, "k_x_y_z_f_" + NameOf(q), q, dFrequency, maxFrequency, minFrequency, Time, period, -1, false, fft3D, QTTYName, ikx, iky, ikz, true, dataT}
 	FFT_T_OP = append(FFT_T_OP, &FFT_T_OP_Obj)
 	FFT_T_OPRunning[&FFT_T_OP_Obj] = false
 	FFT_T_OPDataCopied[&FFT_T_OP_Obj] = false
@@ -163,7 +165,8 @@ func FFT_T(q Quantity, period float64) *fftOperation4D {
 		if !kx_ky_kz_prop_defined(q, ikx, iky, ikz) {
 			panic("kx, ky, kz are not properly defined.")
 		}*/
-	FFT_T_OP_Obj := fftOperation4D{fieldOp{q, q, q.NComp()}, "f_" + NameOf(q), q, dFrequency, maxFrequency, minFrequency, Time, period, -1, false, fft3D, QTTYName, ikx, iky, ikz, false}
+	var dataT *data.Slice
+	FFT_T_OP_Obj := fftOperation4D{fieldOp{q, q, q.NComp()}, "f_" + NameOf(q), q, dFrequency, maxFrequency, minFrequency, Time, period, -1, false, fft3D, QTTYName, ikx, iky, ikz, false, dataT}
 	FFT_T_OP = append(FFT_T_OP, &FFT_T_OP_Obj)
 	FFT_T_OPRunning[&FFT_T_OP_Obj] = false
 	FFT_T_OPDataCopied[&FFT_T_OP_Obj] = false
@@ -257,96 +260,6 @@ func kx_ky_kz_prop_defined(q Quantity, ikx, iky, ikz float64) bool {
 	return (case1 && correctCase1) || (case2 && correctCase2)
 }
 
-/*
-func (s *fftOperation4D) average() [][]float64 {
-	//(a != b) != c
-	averegedData := make([][]float32, s.q.NComp())
-	cores := runtime.NumCPU()
-	amountFiles := int((s.maxF - s.minF) / s.dF)
-	if cores > amountFiles {
-		if amountFiles < 32 {
-			cores = 1
-		} else {
-			cores = amountFiles / 32
-		}
-	}
-	if int(s.maxF-s.minF)%int(s.dF) != 0 {
-		amountFiles += 1
-	}
-	filesPerCore := int(amountFiles / cores)
-	lowerEnd := 0
-	if int((s.maxF-s.minF)/s.dF)%cores != 0 {
-		cores += 1
-	}
-	runtime.LockOSThread()
-	defer runtime.UnlockOSThread()
-	cuda.SetCurrent_Ctx()
-	cuda.Create_Stream(NameOf(s.q) + "_table")
-	s.waitUntilPreviousCalcDone()
-	FFT_T_data := make([]*data.Slice, 0)
-	tmpVar, ok := FFT_T_data_map.Load(s.q)
-	if ok {
-		FFT_T_data = tmpVar.([]*data.Slice)
-	} else {
-		panic("FFT_T data could not be found during export for table. FFT needs to be calculated in GPU memory.")
-	}
-	bufsTable := make([]*data.Slice, 0)
-	bufInitalized := slices.Contains(GetKeys[Quantity](&bufsTable_map), s.q)
-	if !bufInitalized {
-		sizeBufTable := FFT_T_data[0].Size()
-		if !math.IsNaN(s.ikx) {
-			sizeBufTable[0] = 1
-		}
-		if !math.IsNaN(s.iky) {
-			sizeBufTable[1] = 1
-		}
-		if !math.IsNaN(s.ikz) {
-			sizeBufTable[2] = 1
-		}
-		cuda.IncreaseBufMax(cores * FFT_T_data[0].NComp())
-		for _ = range cores {
-			bufsTable = append(bufsTable, cuda.BufferFFT_T(FFT_T_data[0].NComp(), sizeBufTable, NameOf(s.q)+"_table"))
-		}
-		bufsTable_map.Store(s.q, bufsTable)
-	} else {
-		tmpVar, ok = bufsTable_map.Load(s.q)
-		if ok {
-			bufsTable = tmpVar.([]*data.Slice)
-		} else {
-			panic("Could not load table buffers.")
-		}
-	}
-	wg := sync.WaitGroup{}
-	for core := range cores {
-		upperEnd := 0
-		if lowerEnd+filesPerCore < amountFiles {
-			upperEnd = (core + 1) * filesPerCore
-		} else {
-			upperEnd = amountFiles
-		}
-		wg.Add(1)
-		go func(core int, s *fftOperation4D, startIndex, endIndex int) {
-			runtime.LockOSThread()
-			defer runtime.UnlockOSThread()
-			cuda.SetCurrent_Ctx()
-			cuda.Create_Stream(NameOf(s.q) + fmt.Sprintf("_%d_table", core))
-			for i := startIndex; i < endIndex; i++ {
-				cuda.ExtractSlice(bufsTable[core], FFT_T_data[i], s.ikx, s.iky, s.ikz, NameOf(s.q)+fmt.Sprintf("_%d_table", core))
-				reducedData := bufsTable[core].HostCopy().Host()
-				for i := range reducedData {
-					averegedData[i][startIndex:endIndex] = reducedData[i]
-				}
-			}
-			cuda.Destroy_Stream(fmt.Sprintf(NameOf(s.q)+"_%d", core))
-			wg.Done()
-		}(core, s, lowerEnd, upperEnd)
-		lowerEnd += filesPerCore
-	}
-	wg.Wait()
-
-}
-*/
-
 func (s *fftOperation4D) Eval() {
 	mu.Lock()
 	FFT_T_OPDataCopied[s] = false
@@ -395,7 +308,7 @@ func (s *fftOperation4D) Eval() {
 		dataT = FFT3DData[s.q]
 	} else {
 		dataT = cuda.BufferFFT_T(s.q.NComp(), SizeOf(s.q), NameOf(s.q)+"_real")
-		defer cuda.Recycle(dataT)
+		s.dataT = dataT
 		s.q.EvalTo(dataT)
 	}
 	cores := runtime.NumCPU()
@@ -677,6 +590,11 @@ func DoFFT4D() {
 	for i := range FFT_T_OP {
 		if FFT_T_OP[i].needUpdate() {
 			FFT_T_OP[i].waitUntilPreviousCalcDone()
+			if !FFT_T_OP[i].kspace {
+				if FFT_T_OP[i].dataT != nil {
+					cuda.Recycle_FFT_T(FFT_T_OP[i].dataT, NameOf(FFT_T_OP[i].q))
+				}
+			}
 			mu.Lock()
 			FFT_T_OPDataCopied[FFT_T_OP[i]] = false
 			condDataCopied.Broadcast()
