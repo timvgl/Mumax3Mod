@@ -17,9 +17,9 @@ FFT_Step_MEM_Real(float* __restrict__ dst, float* __restrict__ src1, float* __re
         return;
     }
     // Calculate 3D indices for src2
-    int ix = i % Nx;
-    int iy = ((i - ix) / Nx) % Ny;
-    int iz = ((i - iy * Nx - ix) / (Nx * Ny)) % Nz;
+    int ix = i % (Nx / 2);
+    int iy = ((i - ix) / (Nx / 2)) % Ny;
+    int iz = ((i - iy * (Nx / 2) - ix) / ((Nx / 2) * Ny)) % Nz;
 
     int IIReal = index(ix, iy, iz, Nx/2, Ny, Nz);
 
