@@ -74,6 +74,25 @@ type fftOperation4D struct {
 	ikz      float64
 	kspace   bool
 	dataT    *data.Slice
+	polar    bool
+	phi      bool
+	abs      bool
+}
+
+func (s *fftOperation4D) ToPolar() *fftOperation4D {
+	s.polar = true
+	return s
+}
+
+func (s *fftOperation4D) SavePhi() *fftOperation4D {
+	s.polar = true
+	s.phi = true
+	return s
+}
+func (s *fftOperation4D) SaveAbs() *fftOperation4D {
+	s.polar = true
+	s.abs = true
+	return s
 }
 
 func GetKeys[T any](m *sync.Map) []T {
@@ -124,7 +143,7 @@ func FFT4D(q Quantity, period float64) *fftOperation4D {
 			panic("kx, ky, kz are not properly defined.")
 		}*/
 	var dataT *data.Slice
-	FFT_T_OP_Obj := fftOperation4D{fieldOp{q, q, q.NComp()}, "k_x_y_z_f_" + NameOf(q), q, dFrequency, maxFrequency, minFrequency, Time, period, -1, false, fft3D, QTTYName, ikx, iky, ikz, true, dataT}
+	FFT_T_OP_Obj := fftOperation4D{fieldOp{q, q, q.NComp()}, "k_x_y_z_f_" + NameOf(q), q, dFrequency, maxFrequency, minFrequency, Time, period, -1, false, fft3D, QTTYName, ikx, iky, ikz, true, dataT, false, false, false}
 	FFT_T_OP = append(FFT_T_OP, &FFT_T_OP_Obj)
 	FFT_T_OPRunning[&FFT_T_OP_Obj] = false
 	FFT_T_OPDataCopied[&FFT_T_OP_Obj] = false
@@ -166,7 +185,7 @@ func FFT_T(q Quantity, period float64) *fftOperation4D {
 			panic("kx, ky, kz are not properly defined.")
 		}*/
 	var dataT *data.Slice
-	FFT_T_OP_Obj := fftOperation4D{fieldOp{q, q, q.NComp()}, "f_" + NameOf(q), q, dFrequency, maxFrequency, minFrequency, Time, period, -1, false, fft3D, QTTYName, ikx, iky, ikz, false, dataT}
+	FFT_T_OP_Obj := fftOperation4D{fieldOp{q, q, q.NComp()}, "f_" + NameOf(q), q, dFrequency, maxFrequency, minFrequency, Time, period, -1, false, fft3D, QTTYName, ikx, iky, ikz, false, dataT, false, false, false}
 	FFT_T_OP = append(FFT_T_OP, &FFT_T_OP_Obj)
 	FFT_T_OPRunning[&FFT_T_OP_Obj] = false
 	FFT_T_OPDataCopied[&FFT_T_OP_Obj] = false
@@ -405,6 +424,11 @@ func (s *fftOperation4D) Eval() {
 	)
 	if s.kspace {
 		NxNyNz, startK, endK, transformedAxis = FFTOP.Axis()
+	} else {
+		meshQ := MeshOf(s.q)
+		NxNyNz = meshQ.Size()
+		startK = [3]float64{0, 0, 0}
+		endK = [3]float64{float64(NxNyNz[0]) * meshQ.CellSize()[0], float64(NxNyNz[1]) * meshQ.CellSize()[1], float64(NxNyNz[1]) * meshQ.CellSize()[1]}
 	}
 	fftT := Time
 	if !FFT_T_in_mem {
@@ -437,11 +461,11 @@ func (s *fftOperation4D) Eval() {
 					if s.kspace {
 						cuda.FFT_T_Step_Complex(bufGPUOP, bufGPUIP, dataT, float32(phase), amountFiles, fmt.Sprintf(NameOf(s.q)+"_"+FFTType+"_%d", core))
 						info := data.Meta{Freq: s.minF + float64(i)*s.dF, Name: "k_x_y_z_f_" + s.label, Unit: UnitOf(FFTOP), CellSize: MeshOf(FFTOP).CellSize()}
-						saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, "k_x_y_z_f_"+s.label, i)+".ovf", bufGPUOP.HostCopy(), info, outputFormat, NxNyNz, startK, endK, transformedAxis, true, false)
+						saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, "k_x_y_z_f_"+s.label, i)+".ovf", bufGPUOP.HostCopy(), info, outputFormat, NxNyNz, startK, endK, transformedAxis, true, false, "real+imag")
 					} else {
 						cuda.FFT_T_Step_Real(bufGPUOP, bufGPUIP, dataT, float32(phase), amountFiles, fmt.Sprintf(NameOf(s.q)+"_"+FFTType+"_%d", core))
 						info := data.Meta{Freq: s.minF + float64(i)*s.dF, Name: "f_" + s.label, Unit: UnitOf(s.q), CellSize: MeshOf(s.q).CellSize()}
-						saveAs_sync(OD()+fmt.Sprintf(FilenameFormat, "f_"+s.label, i)+".ovf", bufGPUOP.HostCopy(), info, outputFormat)
+						saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, "f_"+s.label, i)+".ovf", bufGPUOP.HostCopy(), info, outputFormat, NxNyNz, startK, endK, transformedAxis, true, false, "real+imag")
 					}
 				}
 				wg.Done()
@@ -495,14 +519,69 @@ func (s *fftOperation4D) SaveResults() {
 		panic("FFT_T data could not be found during export.")
 	}
 	size := FFT_T_data.Size()
+	if s.polar {
+		cuda.ComplexToPolar(FFT_T_data, FFT_T_data)
+	}
 	for i := range FFT_T_data.LengthF {
 		if s.kspace {
 			FFTOP := s.fft3D
 			info := data.Meta{Freq: s.minF + float64(i)*s.dF, Name: "k_x_y_z_f_" + s.label, Unit: UnitOf(FFTOP), CellSize: MeshOf(FFTOP).CellSize()}
-			saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, "k_x_y_z_f_"+s.label, i)+".ovf", FFT_T_data.HostCopyPart(0, size[X], 0, size[Y], 0, size[Z], i, i+1), info, outputFormat, NxNyNz, startK, endK, transformedAxis, true, false)
+			if s.polar {
+				polarBuffer := cuda.Buffer(FFT_T_data.NComp(), size)
+				if s.phi || s.abs {
+					data.CopyPart(polarBuffer, FFT_T_data, 0, size[X], 0, size[Y], 0, size[Z], i, i+1, 0, 0, 0, 0)
+				}
+				if !s.phi && !s.abs {
+					saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, "k_x_y_z_f_polar_"+s.label, i)+".ovf", FFT_T_data.HostCopyPart(0, size[X], 0, size[Y], 0, size[Z], i, i+1), info, outputFormat, NxNyNz, startK, endK, transformedAxis, true, false, "abs+phi")
+				} else if s.phi {
+					sizePhi := size
+					sizePhi[0] /= 2
+					phiBuffer := cuda.Buffer(FFT_T_data.NComp(), sizePhi)
+					cuda.Imag(phiBuffer, polarBuffer) //same operation as imag - alternating real and imag or abs and phi
+					saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, "k_x_y_z_f_phi_"+s.label, i)+".ovf", phiBuffer.HostCopy(), info, outputFormat, NxNyNz, startK, endK, transformedAxis, false, false, "phi")
+					cuda.Recycle(phiBuffer)
+				}
+				if s.abs {
+					sizeAbs := size
+					sizeAbs[0] /= 2
+					absBuffer := cuda.Buffer(FFT_T_data.NComp(), sizeAbs)
+					cuda.Real(absBuffer, polarBuffer) //same operation as imag - alternating real and imag or abs and phi
+					saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, "k_x_y_z_f_abs_"+s.label, i)+".ovf", absBuffer.HostCopy(), info, outputFormat, NxNyNz, startK, endK, transformedAxis, false, false, "abs")
+					cuda.Recycle(absBuffer)
+				}
+				cuda.Recycle(polarBuffer)
+			} else {
+				saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, "k_x_y_z_f_"+s.label, i)+".ovf", FFT_T_data.HostCopyPart(0, size[X], 0, size[Y], 0, size[Z], i, i+1), info, outputFormat, NxNyNz, startK, endK, transformedAxis, true, false, "real+imag")
+			}
 		} else {
 			info := data.Meta{Freq: s.minF + float64(i)*s.dF, Name: "f_" + s.label, Unit: UnitOf(s.q), CellSize: MeshOf(s.q).CellSize()}
-			saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, "f_"+s.label, i)+".ovf", FFT_T_data.HostCopyPart(0, size[X], 0, size[Y], 0, size[Z], i, i+1), info, outputFormat, NxNyNz, startK, endK, transformedAxis, true, false)
+			if s.polar {
+				polarBuffer := cuda.Buffer(FFT_T_data.NComp(), size)
+				if s.phi || s.abs {
+					data.CopyPart(polarBuffer, FFT_T_data, 0, size[X], 0, size[Y], 0, size[Z], i, i+1, 0, 0, 0, 0)
+				}
+				if !s.phi && !s.abs {
+					saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, "f_polar_"+s.label, i)+".ovf", FFT_T_data.HostCopyPart(0, size[X], 0, size[Y], 0, size[Z], i, i+1), info, outputFormat, NxNyNz, startK, endK, transformedAxis, true, false, "abs+phi")
+				} else if s.phi {
+					sizePhi := size
+					sizePhi[0] /= 2
+					phiBuffer := cuda.Buffer(FFT_T_data.NComp(), sizePhi)
+					cuda.Imag(phiBuffer, polarBuffer) //same operation as imag - alternating real and imag or abs and phi
+					saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, "f_phi_"+s.label, i)+".ovf", phiBuffer.HostCopy(), info, outputFormat, NxNyNz, startK, endK, transformedAxis, false, false, "phi")
+					cuda.Recycle(phiBuffer)
+				}
+				if s.abs {
+					sizeAbs := size
+					sizeAbs[0] /= 2
+					absBuffer := cuda.Buffer(FFT_T_data.NComp(), sizeAbs)
+					cuda.Real(absBuffer, polarBuffer) //same operation as imag - alternating real and imag or abs and phi
+					saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, "f_abs_"+s.label, i)+".ovf", absBuffer.HostCopy(), info, outputFormat, NxNyNz, startK, endK, transformedAxis, false, false, "abs")
+					cuda.Recycle(absBuffer)
+				}
+				cuda.Recycle(polarBuffer)
+			} else {
+				saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, "f_"+s.label, i)+".ovf", FFT_T_data.HostCopyPart(0, size[X], 0, size[Y], 0, size[Z], i, i+1), info, outputFormat, NxNyNz, startK, endK, transformedAxis, true, false, "real+imag")
+			}
 		}
 
 	}

@@ -29,6 +29,7 @@ var (
 	flag_flat     = flag.Bool("flat", false, "flat structure for template")
 	flag_pipeline = flag.Int("pipelineLength", 1, "")
 	flag_encapsle = flag.Bool("encapsle", false, "")
+	flag_example  = flag.Bool("example", false, "")
 	// more flags in engine/gofiles.go
 )
 

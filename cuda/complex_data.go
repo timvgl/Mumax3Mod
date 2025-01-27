@@ -29,3 +29,15 @@ func Imag(dst, src *data.Slice) {
 		k_imag_async(dst.DevPtr(c), src.DevPtr(c), N, cfg)
 	}
 }
+
+func ComplexToPolar(dst, src *data.Slice) {
+	dstNxNyNz := dst.Size()
+	srcNxNyNz := src.Size()
+	util.Argument(dstNxNyNz == srcNxNyNz)
+
+	N := dst.Len()
+	cfg := make1DConf(N)
+	for c := range dst.NComp() {
+		k_complexToPolar_async(dst.DevPtr(c), src.DevPtr(c), N, cfg)
+	}
+}

@@ -414,6 +414,9 @@ func generateFiles(parentDir, mx3, orgScriptName string, expressions []Expressio
 			}
 			indices[j] = 0
 		}
+		if *flag_example {
+			break
+		}
 	}
 
 	return mx3ScriptsPaths, nil
