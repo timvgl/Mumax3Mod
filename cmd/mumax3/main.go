@@ -38,6 +38,11 @@ func main() {
 	log.SetPrefix("")
 	log.SetFlags(0)
 
+	if *flag_vet {
+		vet()
+		return
+	}
+
 	cuda.Init(*engine.Flag_gpu)
 
 	cuda.Synchronous = *engine.Flag_sync
@@ -53,11 +58,6 @@ func main() {
 	}
 
 	defer engine.Close() // flushes pending output, if any
-
-	if *flag_vet {
-		vet()
-		return
-	}
 
 	if *flag_template {
 		args := flag.Args()
