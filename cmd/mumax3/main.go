@@ -74,10 +74,10 @@ func main() {
 			if len(SweepExec) == 1 {
 				wg.Add(1)
 				if SweepExec[0].Dir {
-					go func(arg string) {
-						engine.RunExecDir(arg)
+					go func(arg, path string) {
+						engine.RunExecDirSweep(arg, path)
 						wg.Done()
-					}(SweepExec[0].Arg)
+					}(SweepExec[0].Arg, engine.ODSweep())
 				} else {
 					go func(arg string) {
 						engine.RunExec(arg)
@@ -87,7 +87,7 @@ func main() {
 			} else {
 				for j := range SweepExec {
 					if SweepExec[j].Dir {
-						engine.RunExecDir(SweepExec[j].Arg)
+						engine.RunExecDirSweep(SweepExec[j].Arg, engine.ODSweep())
 					} else {
 						engine.RunExec(SweepExec[j].Arg)
 					}

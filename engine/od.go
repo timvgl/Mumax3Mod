@@ -3,14 +3,27 @@ package engine
 // Management of output directory.
 
 import (
-	"github.com/mumax/3/httpfs"
 	"strings"
+
+	"github.com/mumax/3/httpfs"
 )
 
 var (
-	outputdir string // Output directory
-	InputFile string
+	outputdir      string // Output directory
+	InputFile      string
+	outputdirSweep string
 )
+
+func ODSweep() string {
+	if outputdirSweep == "" {
+		panic("output not yet initialized")
+	}
+	return outputdirSweep
+}
+
+func SetODSweep(name string) {
+	outputdirSweep = name
+}
 
 func OD() string {
 	if outputdir == "" {
