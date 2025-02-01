@@ -35,8 +35,11 @@ func RightSide(dst, f, g *data.Slice, Eta, Rho *RegionwiseScalar, Bf *Excitation
 		defer cuda.Recycle(melForce)
 		// cuda.Zero(melForce)
 		GetMagnetoelasticForceDensity(melForce)
+		thermalElasticNoise := cuda.Buffer(melForce.NComp(), melForce.Size())
+		defer cuda.Recycle(thermalElasticNoise)
+		F_therm.EvalTo(thermalElasticNoise)
 
-		cuda.RightSide(dst, f, g, eta, rho, bf, melForce)
+		cuda.RightSide(dst, f, g, eta, rho, bf, melForce, thermalElasticNoise)
 		//Sufficient to only set right to zero because udot2 = udot+right
 		//If initial udot!=0, then do also FreezeDisp(udot2)
 		FreezeDisp(dst)

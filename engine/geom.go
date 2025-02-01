@@ -8,9 +8,12 @@ import (
 	"github.com/mumax/3/util"
 )
 
+var limitElasticToGeometry = false
+
 func init() {
 	DeclFunc("SetGeom", SetGeom, "Sets the Geometry to a given shape")
 	DeclVar("EdgeSmooth", &edgeSmooth, "Geometry edge smoothing with edgeSmooth^3 samples per cell, 0=staircase, ~8=very smooth")
+	DeclVar("limitElasticToGeometry", &limitElasticToGeometry, "")
 	Geometry.init()
 }
 
@@ -191,7 +194,14 @@ func (Geometry *geom) setGeom(s Shape) {
 			}
 		}
 	}
-	if needupload2 {
+	if limitElasticToGeometry {
+		buf := cuda.Buffer(uhost.NComp(), uhost.Size())
+		data.Copy(buf, uhost)
+		cuda.LimitToGeometry(buf, Geometry.Buffer)
+		data.Copy(U.Buffer(), buf)
+		cuda.Recycle(buf)
+	}
+	if needupload2 && !limitElasticToGeometry {
 		data.Copy(U.Buffer(), uhost)
 	}
 
@@ -213,7 +223,14 @@ func (Geometry *geom) setGeom(s Shape) {
 			}
 		}
 	}
-	if needupload3 {
+	if limitElasticToGeometry {
+		buf := cuda.Buffer(duhost.NComp(), duhost.Size())
+		data.Copy(buf, duhost)
+		cuda.LimitToGeometry(buf, Geometry.Buffer)
+		data.Copy(DU.Buffer(), buf)
+		cuda.Recycle(buf)
+	}
+	if needupload3 && !limitElasticToGeometry {
 		data.Copy(DU.Buffer(), duhost)
 	}
 
