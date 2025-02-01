@@ -20,8 +20,8 @@ func WriteOVF2(out io.Writer, q *data.Slice, meta data.Meta, dataformat string) 
 	hdr(out, "End", "Segment")
 }
 
-func WriteOVF2FFT(out io.Writer, q *data.Slice, meta data.Meta, dataformat string, NxNyNz [3]int, startK, endK [3]float64, transformedAxes []string, timeSpace bool) {
-	writeOVF2HeaderFFT(out, q, meta, NxNyNz, startK, endK, transformedAxes, timeSpace)
+func WriteOVF2FFT(out io.Writer, q *data.Slice, meta data.Meta, dataformat string, NxNyNz [3]int, startK, endK [3]float64, transformedAxes []string, timeSpace bool, comment string) {
+	writeOVF2HeaderFFT(out, q, meta, NxNyNz, startK, endK, transformedAxes, timeSpace, comment)
 	writeOVF2Data(out, q, dataformat)
 	hdr(out, "End", "Segment")
 }
@@ -84,7 +84,7 @@ func writeOVF2Header(out io.Writer, q *data.Slice, meta data.Meta) {
 	hdr(out, "End", "Header")
 }
 
-func writeOVF2HeaderFFT(out io.Writer, q *data.Slice, meta data.Meta, NxNyNz [3]int, startK, endK [3]float64, transformedAxes []string, timeSpace bool) {
+func writeOVF2HeaderFFT(out io.Writer, q *data.Slice, meta data.Meta, NxNyNz [3]int, startK, endK [3]float64, transformedAxes []string, timeSpace bool, comment string) {
 	gridsize := NxNyNz
 	cellsize := meta.CellSize
 
@@ -166,6 +166,9 @@ func writeOVF2HeaderFFT(out io.Writer, q *data.Slice, meta data.Meta, NxNyNz [3]
 	hdr(out, "xstepsize", cellsize[X])
 	hdr(out, "ystepsize", cellsize[Y])
 	hdr(out, "zstepsize", cellsize[Z])
+	if comment != "" {
+		hdr(out, "comment", comment)
+	}
 	hdr(out, "End", "Header")
 }
 

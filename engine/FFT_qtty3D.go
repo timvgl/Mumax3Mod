@@ -15,6 +15,8 @@ var (
 	FFTEvaluated       = make(map[Quantity]bool)
 	FFTEvaluatedReal   = make(map[Quantity]bool)
 	FFTEvaluatedImag   = make(map[Quantity]bool)
+	FFTEvaluatedPhi    = make(map[Quantity]bool)
+	FFTEvaluatedAbs    = make(map[Quantity]bool)
 )
 
 func init() {
@@ -38,11 +40,28 @@ type fftOperation3DImag struct {
 	FFT_T bool
 }
 
+type fftOperation3DAbs struct {
+	fieldOp
+	name  string
+	q     Quantity
+	op    fftOperation3D
+	FFT_T bool
+}
+
+type fftOperation3DPhi struct {
+	fieldOp
+	name  string
+	q     Quantity
+	op    fftOperation3D
+	FFT_T bool
+}
+
 type fftOperation3D struct {
 	fieldOp
 	name  string
 	q     Quantity
 	FFT_T bool
+	polar bool
 }
 
 /*
@@ -58,10 +77,12 @@ func FFT3D(q Quantity) *fftOperation3D {
 	s := MeshOf(q).Size()
 	//fmt.Println(fmt.Sprintf("Initializing with %d, %d and %d", s[X], s[Y], s[Z]))
 	FFT3DR2CPlans[q] = cuda.Initialize3DR2CFFT(s[X], s[Y], s[Z])
-	fftOP3D := &fftOperation3D{fieldOp{q, q, q.NComp()}, "k_x_y_z_" + NameOf(q), q, false}
+	fftOP3D := &fftOperation3D{fieldOp{q, q, q.NComp()}, "k_x_y_z_" + NameOf(q), q, false, false}
 	FFTEvaluated[q] = false
 	FFTEvaluatedReal[q] = false
 	FFTEvaluatedImag[q] = false
+	FFTEvaluatedPhi[q] = false
+	FFTEvaluatedAbs[q] = false
 	if !slices.Contains(DeclVarFFTDyn, q) {
 		if q.NComp() == 3 {
 			if !slices.Contains(DeclVarFFTDynAlias, "FFT_"+NameOf(q)+"_real") {
@@ -102,10 +123,12 @@ func FFT3D_FFT_T(q Quantity) *fftOperation3D {
 	cuda.Create_Stream(NameOf(q))
 	//fmt.Println(fmt.Sprintf("Initializing with %d, %d and %d", s[X], s[Y], s[Z]))
 	FFT3DR2CPlans[q] = cuda.Initialize3DR2CFFT_FFT_T(s[X], s[Y], s[Z], cuda.Get_Stream(NameOf(q)))
-	fftOP3D := &fftOperation3D{fieldOp{q, q, q.NComp()}, "k_x_y_z_" + NameOf(q), q, true}
+	fftOP3D := &fftOperation3D{fieldOp{q, q, q.NComp()}, "k_x_y_z_" + NameOf(q), q, true, false}
 	FFTEvaluated[q] = false
 	FFTEvaluatedReal[q] = false
 	FFTEvaluatedImag[q] = false
+	FFTEvaluatedPhi[q] = false
+	FFTEvaluatedAbs[q] = false
 	if !slices.Contains(DeclVarFFTDyn, q) {
 		if q.NComp() == 3 || q.NComp() == 1 {
 			FFT3DData[q] = cuda.BufferFFT_T(q.NComp(), fftOP3D.FFTOutputSize(), NameOf(q))
@@ -122,10 +145,12 @@ func FFT3D_FFT_T(q Quantity) *fftOperation3D {
 func FFT3DAs(q Quantity, name string) *fftOperation3D {
 	s := MeshOf(q).Size()
 	FFT3DR2CPlans[q] = cuda.Initialize3DR2CFFT(s[X], s[Y], s[Z])
-	fftOP3D := &fftOperation3D{fieldOp{q, q, q.NComp()}, "k_x_y_z_" + NameOf(q), q, false}
+	fftOP3D := &fftOperation3D{fieldOp{q, q, q.NComp()}, "k_x_y_z_" + NameOf(q), q, false, false}
 	FFTEvaluated[q] = false
 	FFTEvaluatedReal[q] = false
 	FFTEvaluatedImag[q] = false
+	FFTEvaluatedPhi[q] = false
+	FFTEvaluatedAbs[q] = false
 	if !slices.Contains(DeclVarFFTDyn, q) {
 		if q.NComp() == 3 {
 			if !slices.Contains(DeclVarFFTDynAlias, name+"_real") {
@@ -164,7 +189,13 @@ func (d *fftOperation3D) EvalTo(dst *data.Slice) {
 	FFTEvaluated[d.q] = true
 	d.evalIntern()
 	data.Copy(dst, FFT3DData[d.q])
+}
 
+func (d *fftOperation3D) ToPolar() {
+	d.polar = true
+}
+func (d *fftOperation3D) IsPolar() bool {
+	return d.polar
 }
 
 func (d *fftOperation3D) evalIntern() {
@@ -178,6 +209,9 @@ func (d *fftOperation3D) evalIntern() {
 			cuda.Perform3DR2CFFT(input.Comp(i), buf.Comp(i), FFT3DR2CPlans[d.q])
 		}
 		cuda.ReorderCufftData(FFT3DData[d.q], buf)
+		if d.polar {
+			cuda.ComplexToPolar(FFT3DData[d.q], FFT3DData[d.q])
+		}
 	} else {
 		input := ValueOf(d.a)
 		defer cuda.Recycle(input)
@@ -217,11 +251,31 @@ func (d *fftOperation3D) Axis() ([3]int, [3]float64, [3]float64, []string) {
 }
 
 func (d *fftOperation3D) Real() *fftOperation3DReal {
+	if d.polar {
+		panic("Cannot be polar and take real value.")
+	}
 	return &fftOperation3DReal{fieldOp{d.q, d.q, d.q.NComp()}, "k_x_y_z_" + NameOf(d.q) + "_real", d.q, *d, false}
 }
 
 func (d *fftOperation3D) Imag() *fftOperation3DImag {
+	if d.polar {
+		panic("Cannot be polar and take imag value.")
+	}
 	return &fftOperation3DImag{fieldOp{d.q, d.q, d.q.NComp()}, "k_x_y_z_" + NameOf(d.q) + "_imag", d.q, *d, false}
+}
+
+func (d *fftOperation3D) Phi() *fftOperation3DPhi {
+	if d.polar {
+		panic("Cannot be polar and take real value.")
+	}
+	return &fftOperation3DPhi{fieldOp{d.q, d.q, d.q.NComp()}, "k_x_y_z_" + NameOf(d.q) + "_phi", d.q, *d, false}
+}
+
+func (d *fftOperation3D) Abs() *fftOperation3DAbs {
+	if d.polar {
+		panic("Cannot be polar and take real value.")
+	}
+	return &fftOperation3DAbs{fieldOp{d.q, d.q, d.q.NComp()}, "k_x_y_z_" + NameOf(d.q) + "_abs", d.q, *d, false}
 }
 
 func (d *fftOperation3D) SymmetricX() bool {
@@ -233,7 +287,7 @@ func (d *fftOperation3D) SymmetricY() bool {
 }
 
 func (d *fftOperation3DReal) EvalTo(dst *data.Slice) {
-	if !FFTEvaluated[d.q] && !FFTEvaluatedImag[d.q] {
+	if !FFTEvaluated[d.q] && !FFTEvaluatedImag[d.q] && !FFTEvaluatedPhi[d.q] && !FFTEvaluatedAbs[d.q] {
 		d.op.evalIntern()
 		FFTEvaluatedReal[d.q] = true
 	}
@@ -272,7 +326,7 @@ func (d *fftOperation3DReal) SymmetricY() bool {
 }
 
 func (d *fftOperation3DImag) EvalTo(dst *data.Slice) {
-	if !FFTEvaluated[d.q] && !FFTEvaluatedReal[d.q] {
+	if !FFTEvaluated[d.q] && !FFTEvaluatedReal[d.q] && !FFTEvaluatedPhi[d.q] && !FFTEvaluatedAbs[d.q] {
 		d.op.evalIntern()
 		FFTEvaluatedImag[d.q] = true
 	}
@@ -307,6 +361,92 @@ func (d *fftOperation3DImag) SymmetricX() bool {
 }
 
 func (d *fftOperation3DImag) SymmetricY() bool {
+	return true
+}
+
+func (d *fftOperation3DPhi) EvalTo(dst *data.Slice) {
+	if !FFTEvaluated[d.q] && !FFTEvaluatedReal[d.q] && !FFTEvaluatedImag[d.q] && !FFTEvaluatedAbs[d.q] {
+		d.op.evalIntern()
+		FFTEvaluatedPhi[d.q] = true
+	}
+	polarBuffer := cuda.Buffer(FFT3DData[d.q].NComp(), FFT3DData[d.q].Size())
+	data.Copy(polarBuffer, FFT3DData[d.q])
+	cuda.ComplexToPolar(polarBuffer, polarBuffer)
+	cuda.Imag(dst, polarBuffer)
+	cuda.Recycle(polarBuffer)
+}
+
+func (d *fftOperation3DPhi) Mesh() *data.Mesh {
+	s := d.fftOutputSize()
+	c := Mesh().CellSize()
+	return data.NewMesh(s[X], s[Y], s[Z], 1/(c[X]*float64(s[X])), 1/(c[Y]*float64(s[Y])), 1/(c[Z]*float64(s[Z])))
+}
+
+func (d *fftOperation3DPhi) Name() string {
+	return d.name
+}
+
+func (d *fftOperation3DPhi) Unit() string { return "a.u." }
+
+func (d *fftOperation3DPhi) fftOutputSize() [3]int {
+	var NxOP, NyOP, NzOP = cuda.OutputSizeFloatsFFT3D(FFT3DR2CPlans[d.q])
+	return [3]int{int(NxOP / 2), NyOP, NzOP}
+}
+
+func (d *fftOperation3DPhi) Axis() ([3]int, [3]float64, [3]float64, []string) {
+	c := Mesh().CellSize()
+	s := d.fftOutputSize()
+	return s, [3]float64{0., -1 / (2 * c[Y]), -1 / (2 * c[Z])}, [3]float64{1 / (2 * c[Y]), 1 / (2 * c[Y]), 1 / (2 * c[Z])}, []string{"x", "y", "z"}
+}
+
+func (d *fftOperation3DPhi) SymmetricX() bool {
+	return false
+}
+
+func (d *fftOperation3DPhi) SymmetricY() bool {
+	return true
+}
+
+func (d *fftOperation3DAbs) EvalTo(dst *data.Slice) {
+	if !FFTEvaluated[d.q] && !FFTEvaluatedReal[d.q] && !FFTEvaluatedImag[d.q] && !FFTEvaluatedPhi[d.q] {
+		d.op.evalIntern()
+		FFTEvaluatedAbs[d.q] = true
+	}
+	polarBuffer := cuda.Buffer(FFT3DData[d.q].NComp(), FFT3DData[d.q].Size())
+	data.Copy(polarBuffer, FFT3DData[d.q])
+	cuda.ComplexToPolar(polarBuffer, polarBuffer)
+	cuda.Real(dst, FFT3DData[d.q])
+	cuda.Recycle(polarBuffer)
+}
+
+func (d *fftOperation3DAbs) Mesh() *data.Mesh {
+	s := d.fftOutputSize()
+	c := Mesh().CellSize()
+	return data.NewMesh(s[X], s[Y], s[Z], 1/(c[X]*float64(s[X])), 1/(c[Y]*float64(s[Y])), 1/(c[Z]*float64(s[Z])))
+}
+
+func (d *fftOperation3DAbs) Name() string {
+	return d.name
+}
+
+func (d *fftOperation3DAbs) Unit() string { return "a.u." }
+
+func (d *fftOperation3DAbs) fftOutputSize() [3]int {
+	var NxOP, NyOP, NzOP = cuda.OutputSizeFloatsFFT3D(FFT3DR2CPlans[d.q])
+	return [3]int{int(NxOP / 2), NyOP, NzOP}
+}
+
+func (d *fftOperation3DAbs) Axis() ([3]int, [3]float64, [3]float64, []string) {
+	c := Mesh().CellSize()
+	s := d.fftOutputSize()
+	return s, [3]float64{0., -1 / (2 * c[Y]), -1 / (2 * c[Z])}, [3]float64{1 / (2 * c[Y]), 1 / (2 * c[Y]), 1 / (2 * c[Z])}, []string{"x", "y", "z"}
+}
+
+func (d *fftOperation3DAbs) SymmetricX() bool {
+	return false
+}
+
+func (d *fftOperation3DAbs) SymmetricY() bool {
 	return true
 }
 

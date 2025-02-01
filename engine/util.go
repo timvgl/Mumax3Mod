@@ -179,6 +179,18 @@ func RunExec(cmdStr string) {
 	fmt.Println("out:", outb.String(), "err:", errb.String())
 }
 
+func RunExecDirSweep(cmdStr, path string) {
+	if strings.Contains(cmdStr, "%v") || strings.Contains(cmdStr, "%s") {
+		argsSprintf := make([]any, strings.Count(cmdStr, "%v")+strings.Count(cmdStr, "%s"))
+		for i := range len(argsSprintf) {
+			argsSprintf[i] = absPath + ODSweep()
+		}
+		RunExec(fmt.Sprintf(cmdStr, argsSprintf...))
+	} else {
+		RunExec(cmdStr + " " + absPath + ODSweep())
+	}
+}
+
 func RunExecDir(cmdStr string) {
 	if strings.Contains(cmdStr, "%v") || strings.Contains(cmdStr, "%s") {
 		argsSprintf := make([]any, strings.Count(cmdStr, "%v")+strings.Count(cmdStr, "%s"))

@@ -7,6 +7,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/mumax/3/engine"
 )
 
 type Expression struct {
@@ -388,9 +390,10 @@ func generateFiles(parentDir, mx3, orgScriptName string, expressions []Expressio
 				return make([]string, 0), fmt.Errorf("error creating directories: %v", err)
 			}
 			fullPath = filepath.Join(parentDir, orgScriptName[:len(orgScriptName)-4]+".out", joinedPath+".mx3")
-
+			engine.SetODSweep(filepath.Join(parentDir, orgScriptName[:len(orgScriptName)-4]+".out"))
 		} else {
 			fullPath = filepath.Join(parentDir, joinedPath+".mx3")
+			engine.SetODSweep(filepath.Dir(fullPath))
 		}
 		if !flat {
 			err := os.MkdirAll(filepath.Dir(fullPath), os.ModePerm)
@@ -413,6 +416,9 @@ func generateFiles(parentDir, mx3, orgScriptName string, expressions []Expressio
 				break
 			}
 			indices[j] = 0
+		}
+		if *flag_example {
+			break
 		}
 	}
 

@@ -29,6 +29,7 @@ var (
 	flag_flat     = flag.Bool("flat", false, "flat structure for template")
 	flag_pipeline = flag.Int("pipelineLength", 1, "")
 	flag_encapsle = flag.Bool("encapsle", false, "")
+	flag_example  = flag.Bool("example", false, "")
 	// more flags in engine/gofiles.go
 )
 
@@ -36,6 +37,11 @@ func main() {
 	flag.Parse()
 	log.SetPrefix("")
 	log.SetFlags(0)
+
+	if *flag_vet {
+		vet()
+		return
+	}
 
 	cuda.Init(*engine.Flag_gpu)
 
@@ -53,11 +59,6 @@ func main() {
 
 	defer engine.Close() // flushes pending output, if any
 
-	if *flag_vet {
-		vet()
-		return
-	}
-
 	if *flag_template {
 		args := flag.Args()
 		if len(args) > *flag_pipeline {
@@ -73,10 +74,10 @@ func main() {
 			if len(SweepExec) == 1 {
 				wg.Add(1)
 				if SweepExec[0].Dir {
-					go func(arg string) {
-						engine.RunExecDir(arg)
+					go func(arg, path string) {
+						engine.RunExecDirSweep(arg, path)
 						wg.Done()
-					}(SweepExec[0].Arg)
+					}(SweepExec[0].Arg, engine.ODSweep())
 				} else {
 					go func(arg string) {
 						engine.RunExec(arg)
@@ -86,7 +87,7 @@ func main() {
 			} else {
 				for j := range SweepExec {
 					if SweepExec[j].Dir {
-						engine.RunExecDir(SweepExec[j].Arg)
+						engine.RunExecDirSweep(SweepExec[j].Arg, engine.ODSweep())
 					} else {
 						engine.RunExec(SweepExec[j].Arg)
 					}
