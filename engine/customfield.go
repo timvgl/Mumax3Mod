@@ -66,6 +66,17 @@ func AddCustomField(dst *data.Slice) {
 	}
 }
 
+func AddCustomFieldRegion(dst *data.Slice) {
+	for _, term := range customTerms {
+		buf := ValueOf(term)
+		bufRed := cuda.Buffer(dst.NComp(), dst.RegionSize())
+		cuda.Crop(bufRed, buf, dst.StartX, dst.StartY, dst.StartZ)
+		cuda.Add(dst, dst, bufRed)
+		cuda.Recycle(buf)
+		cuda.Recycle(bufRed)
+	}
+}
+
 // Adds the custom energy densities (defined with AddCustomE
 func AddCustomEnergyDensity(dst *data.Slice) {
 	for _, term := range customEnergies {

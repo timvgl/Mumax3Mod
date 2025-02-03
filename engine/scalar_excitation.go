@@ -170,6 +170,11 @@ func (e *ScalarExcitation) Eval() interface{}       { return e }
 func (e *ScalarExcitation) Type() reflect.Type      { return reflect.TypeOf(new(ScalarExcitation)) }
 func (e *ScalarExcitation) InputType() reflect.Type { return script.ScalarFunction_t }
 func (e *ScalarExcitation) EvalTo(dst *data.Slice)  { EvalTo(e, dst) }
+func (e *ScalarExcitation) EvalRegionTo(dst *data.Slice) {
+	buf := cuda.Buffer(e.NComp(), e.Mesh().Size())
+	e.EvalTo(buf)
+	cuda.Crop(dst, buf, dst.StartX, dst.StartY, dst.StartZ)
+}
 
 func (e *ScalarExcitation) GetRegionToString(region int) string {
 	return fmt.Sprintf("%g", e.perRegion.GetRegion(region))

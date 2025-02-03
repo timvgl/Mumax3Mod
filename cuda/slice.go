@@ -12,7 +12,9 @@ import (
 
 // Make a GPU Slice with nComp components each of size length.
 func NewSlice(nComp int, size [3]int) *data.Slice {
-	return newSlice(nComp, size, MemAlloc, data.GPUMemory)
+	slc := newSlice(nComp, size, MemAlloc, data.GPUMemory)
+	data.DataSliceSlice = append(data.DataSliceSlice, slc)
+	return slc
 }
 
 func newSlice(nComp int, size [3]int, alloc func(int64) unsafe.Pointer, memType int8) *data.Slice {
@@ -28,7 +30,9 @@ func newSlice(nComp int, size [3]int, alloc func(int64) unsafe.Pointer, memType 
 }
 
 func NewSliceInt(nComp int, size [3]int) *data.Slice {
-	return newSliceInt(nComp, size, MemAlloc, data.GPUMemory)
+	slc := newSliceInt(nComp, size, MemAlloc, data.GPUMemory)
+	data.DataSliceSlice = append(data.DataSliceSlice, slc)
+	return slc
 }
 
 func newSliceInt(nComp int, size [3]int, alloc func(int64) unsafe.Pointer, memType int8) *data.Slice {

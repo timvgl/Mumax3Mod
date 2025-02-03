@@ -48,6 +48,27 @@ func SetDemagField(dst *data.Slice) {
 	}
 }
 
+func SetDemagFieldRegion(dst *data.Slice) {
+	if EnableDemag {
+		msat := Msat.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+		defer msat.Recycle()
+		if NoDemagSpins.isZero() {
+			// Normal demag, everywhere
+			m := cuda.Buffer(M.NComp(), dst.RegionSize())
+			defer cuda.Recycle(m)
+			cuda.Crop(m, M.Buffer(), dst.StartX, dst.StartY, dst.StartZ)
+			geom := cuda.Buffer(M.NComp(), dst.RegionSize())
+			cuda.Crop(geom, Geometry.Gpu(), dst.StartX, dst.StartY, dst.StartZ)
+			defer cuda.Recycle(geom)
+			demagConv().Exec(dst, m, geom, msat)
+		} else {
+			setMaskedDemagField(dst, msat)
+		}
+	} else {
+		cuda.Zero(dst) // will ADD other terms to it
+	}
+}
+
 // Sets dst to the demag field, but cells where NoDemagSpins != 0 do not generate nor recieve field.
 func setMaskedDemagField(dst *data.Slice, msat cuda.MSlice) {
 	// No-demag spins: mask-out Geometry with zeros where NoDemagSpins is set,

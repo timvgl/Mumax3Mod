@@ -54,8 +54,9 @@ func Buffer(nComp int, size [3]int) *data.Slice {
 		ptrs[i] = MemAlloc(int64(cu.SIZEOF_FLOAT32 * N))
 		buf_check[ptrs[i]] = struct{}{} // mark this pointer as mine
 	}
-
-	return data.SliceFromPtrs(size, data.GPUMemory, ptrs)
+	slc := data.SliceFromPtrs(size, data.GPUMemory, ptrs)
+	data.DataSliceSlice = append(data.DataSliceSlice, slc)
+	return slc
 }
 
 func BufferFFT_T(nComp int, size [3]int, key string) *data.Slice {
@@ -114,39 +115,24 @@ func BufferFFT_T_F(nComp int, size [3]int, fLength int, key string) *data.Slice 
 	return data.SliceFromPtrsF(size, fLength, data.GPUMemory, ptrs)
 }
 
-func BufferComplex(nComp int, size [3]int) *data.Slice {
-	if Synchronous {
-		Sync()
-	}
-
-	ptrs := make([]unsafe.Pointer, nComp)
-
-	// re-use as many buffers as possible form our stack
-	N := prod(size)
-	pool := buf_pool[N]
-	nFromPool := iMin(nComp, len(pool))
-	for i := 0; i < nFromPool; i++ {
-		ptrs[i] = pool[len(pool)-i-1]
-	}
-	buf_pool[N] = pool[:len(pool)-nFromPool]
-
-	// allocate as much new memory as needed
-	for i := nFromPool; i < nComp; i++ {
-		if len(buf_check) >= buf_max {
-			log.Panic("too many buffers in use, possible memory leak")
-		}
-		ptrs[i] = MemAlloc(int64(cu.SIZEOF_COMPLEX64 * N))
-		buf_check[ptrs[i]] = struct{}{} // mark this pointer as mine
-	}
-
-	return data.SliceFromPtrs(size, data.GPUMemory, ptrs)
-}
-
 // Returns a buffer obtained from GetBuffer to the pool.
 func Recycle(s *data.Slice) {
 	if Synchronous {
 		Sync()
 	}
+	idx := 0
+	gotValue := false
+	for i, _ := range data.DataSliceSlice {
+		if data.DataSliceSlice[i] == s {
+			idx = i
+			gotValue = true
+			break
+		}
+	}
+	if !gotValue {
+		panic("Could not find buffer in buffer list.")
+	}
+	data.DataSliceSlice = append(data.DataSliceSlice[:idx], data.DataSliceSlice[idx+1:]...)
 
 	N := s.Len()
 	pool := buf_pool[N]

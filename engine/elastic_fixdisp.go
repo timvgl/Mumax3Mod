@@ -24,6 +24,21 @@ func FreezeDisp(dst *data.Slice) {
 	}
 }
 
+func FreezeDispRegion(dst *data.Slice) {
+	if !FrozenDispLoc.isZero() {
+		//Us, _ := U.Slice()
+		//defer cuda.Recycle(Us)
+
+		//Set rhs to zero
+		cuda.ZeroMask(dst, FrozenDispLoc.gpuLUT1(), regions.Gpu())
+		//Set displacment to the given value
+		u := cuda.Buffer(dst.NComp(), dst.RegionSize())
+		cuda.Crop(u, U.Buffer(), dst.StartX, dst.StartY, dst.StartZ)
+		cuda.CopyMask(u, FrozenDispLoc.gpuLUT1(), FrozenDispVal.gpuLUT(), regions.Gpu())
+		//Put du also to zero?
+	}
+}
+
 func SetFreezeDisp() {
 	if !FrozenDispLoc.isZero() {
 		//Set displacment to the given value

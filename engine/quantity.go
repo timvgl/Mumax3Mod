@@ -92,7 +92,7 @@ func ValueOf(q Quantity) *data.Slice {
 		FFTOutputSize() [3]int
 	}); ok {
 		//fmt.Println(s.FFTOutputSize())
-		buf := cuda.BufferComplex(q.NComp(), s.FFTOutputSize())
+		buf := cuda.Buffer(q.NComp(), s.FFTOutputSize())
 		q.EvalTo(buf)
 		return buf
 	} else {
@@ -100,6 +100,14 @@ func ValueOf(q Quantity) *data.Slice {
 		q.EvalTo(buf)
 		return buf
 	}
+}
+
+func ValueOfRegion(q Quantity, dst *data.Slice, StartX, StartY, StartZ int) {
+	// TODO: check for Buffered() implementation
+	buf := cuda.Buffer(q.NComp(), SizeOf(q))
+	defer cuda.Recycle(buf)
+	q.EvalTo(buf)
+	cuda.Crop(dst, buf, StartX, StartY, StartZ)
 }
 
 func AxisOf(q Quantity) ([3]int, [3]float64, [3]float64, []string) {

@@ -35,6 +35,9 @@ func (u *displacement) Type() reflect.Type      { return reflect.TypeOf(new(disp
 func (u *displacement) Eval() interface{}       { return u }
 func (u *displacement) average() []float64      { return sAverageMagnet(u.Buffer()) }
 func (u *displacement) Average() data.Vector    { return unslice(u.average()) }
+func (u *displacement) EvalRegionTo(dst *data.Slice) {
+	cuda.Crop(dst, u.buffer_, dst.StartX, dst.StartY, dst.StartZ)
+}
 
 //func (u *displacement) normalize()              { cuda.Normalize(u.Buffer(), Geometry.Gpu()) }
 //func (u *displacement) Strain()              { return Strain(u) }
