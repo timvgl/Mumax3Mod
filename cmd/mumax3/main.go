@@ -70,28 +70,32 @@ func main() {
 			if err != nil {
 				panic(err)
 			}
-			RunQueue(mmx3ScriptsTmp)
-			if len(SweepExec) == 1 {
-				wg.Add(1)
-				if SweepExec[0].Dir {
-					go func(arg, path string) {
-						engine.RunExecDirSweep(arg, path)
-						wg.Done()
-					}(SweepExec[0].Arg, engine.ODSweep())
-				} else {
-					go func(arg string) {
-						engine.RunExec(arg)
-						wg.Done()
-					}(SweepExec[0].Arg)
-				}
-			} else {
-				for j := range SweepExec {
-					if SweepExec[j].Dir {
-						engine.RunExecDirSweep(SweepExec[j].Arg, engine.ODSweep())
+			if !*flag_example {
+				RunQueue(mmx3ScriptsTmp)
+				if len(SweepExec) == 1 {
+					wg.Add(1)
+					if SweepExec[0].Dir {
+						go func(arg, path string) {
+							engine.RunExecDirSweep(arg, path)
+							wg.Done()
+						}(SweepExec[0].Arg, engine.ODSweep())
 					} else {
-						engine.RunExec(SweepExec[j].Arg)
+						go func(arg string) {
+							engine.RunExec(arg)
+							wg.Done()
+						}(SweepExec[0].Arg)
+					}
+				} else {
+					for j := range SweepExec {
+						if SweepExec[j].Dir {
+							engine.RunExecDirSweep(SweepExec[j].Arg, engine.ODSweep())
+						} else {
+							engine.RunExec(SweepExec[j].Arg)
+						}
 					}
 				}
+			} else {
+				runFileAndServe(mmx3ScriptsTmp[0])
 			}
 		}
 		wg.Wait()

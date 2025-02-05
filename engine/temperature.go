@@ -131,14 +131,9 @@ func (b *thermField) update() {
 }
 
 func (b *thermForce) update() {
-	if !useTempElastic {
-		return
-	}
+
 	// we need to fix the time step here because solver will not yet have done it before the first step.
 	// FixDt as an lvalue that sets Dt_si on change might be cleaner.
-	if FixDt != 0 {
-		Dt_si = FixDt
-	}
 
 	if b.generator == 0 {
 		b.generator = curand.CreateGenerator(curand.PSEUDO_DEFAULT)
@@ -156,6 +151,14 @@ func (b *thermForce) update() {
 		b.step = NSteps
 		b.dt = Dt_si
 		return
+	}
+
+	if !useTempElastic {
+		return
+	}
+
+	if FixDt != 0 {
+		Dt_si = FixDt
 	}
 
 	// keep constant during time step

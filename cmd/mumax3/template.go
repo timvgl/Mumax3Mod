@@ -298,9 +298,17 @@ func findExpressions(mx3 string) (expressions []Expression, SweepExec []Expressi
 		return nil, make([]ExpressionSweep, 0), fmt.Errorf("no expressions found")
 	}
 	regexSweepExec := regexp.MustCompile(`\b(ExecSweep(?:Dir)?)\("([^"]*)"\)`)
+	var cleanedLines []string
 	for i, line := range strings.Split(mx3, "\n") {
-		matchesSweepExec := regexSweepExec.FindAllStringSubmatch(line, -1)
-		if matches != nil {
+		trimmedLine := strings.TrimSpace(line)
+
+		// Falls Zeile mit // beginnt, ignorieren
+		if strings.HasPrefix(trimmedLine, "//") {
+			continue
+		}
+
+		matchesSweepExec := regexSweepExec.FindAllStringSubmatch(trimmedLine, -1)
+		if matchesSweepExec != nil {
 			for _, match := range matchesSweepExec {
 				if len(match) == 3 {
 					functionName := match[1]
@@ -314,6 +322,9 @@ func findExpressions(mx3 string) (expressions []Expression, SweepExec []Expressi
 				}
 			}
 		}
+
+		// Nur Zeilen ohne Kommentar zur bereinigten Liste hinzufügen
+		cleanedLines = append(cleanedLines, trimmedLine)
 	}
 	if len(SweepExec) > 1 {
 		for i, _ := range SweepExec {
