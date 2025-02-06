@@ -44,3 +44,16 @@ func ComplexToPolar(dst, src *data.Slice) {
 		k_complexToPolar_async(dst.DevPtr(c), src.DevPtr(c), dst.LengthF*N/2, cfg)
 	}
 }
+
+func ComplexConjugate(dst, src *data.Slice) {
+	dstNxNyNz := dst.Size()
+	srcNxNyNz := src.Size()
+	util.Argument(dstNxNyNz == srcNxNyNz)
+	util.Argument(dst.NComp() == src.NComp())
+
+	N := dst.Len()
+	cfg := make1DConf(dst.LengthF * N / 2)
+	for c := range dst.NComp() {
+		k_complexConjugate_async(dst.DevPtr(c), src.DevPtr(c), dst.LengthF*N/2, cfg)
+	}
+}
