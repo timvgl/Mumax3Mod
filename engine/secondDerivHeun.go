@@ -198,7 +198,7 @@ func (_ *secondHeun) StepRegion(region SolverRegion) {
 
 	right := cuda.Buffer(VECTOR, y.Size())
 	defer cuda.Recycle(right)
-	calcRhs(right, dudot0, udot)
+	calcRhsRegion(right, dudot0, udot)
 
 	right2 := cuda.Buffer(VECTOR, y.Size())
 	defer cuda.Recycle(right2)
@@ -217,7 +217,7 @@ func (_ *secondHeun) StepRegion(region SolverRegion) {
 	//Stage 1: predictor
 	//y1(t+dt) = y(t) + dt*g(t)
 	cuda.Madd2(y, y, udot, 1, dt)
-	calcSecondDerivDisp(dudot0)
+	calcSecondDerivDispRegion(dudot0)
 
 	//Without damping:
 	//g1(t+dt) = g(t) + dt*f(t)
@@ -226,7 +226,7 @@ func (_ *secondHeun) StepRegion(region SolverRegion) {
 	//With damping: g1(t+dt) = g(t) + dt*[f(t)-n*g(t)]/rho
 	//With damping: g1(t+dt) = g(t) + dt*right
 	cuda.Madd2(udot2, udot, right, 1, dt)
-	calcRhs(right2, dudot0, udot2)
+	calcRhsRegion(right2, dudot0, udot2)
 
 	//###############################
 	//Error calculation

@@ -16,7 +16,7 @@ func calcRhs(dst, f, g *data.Slice) {
 }
 
 func calcRhsRegion(dst, f, g *data.Slice) {
-	RightSide(dst, f, g, Eta, Rho, Bf)
+	RightSideRegion(dst, f, g, Eta, Rho, Bf)
 }
 
 func RightSide(dst, f, g *data.Slice, Eta, Rho *RegionwiseScalar, Bf *Excitation) {
