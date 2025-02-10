@@ -33,6 +33,7 @@ type fftOperation3DReal struct {
 	op         fftOperation3D
 	FFT_T      bool
 	NegativeKX bool
+	polar      bool
 }
 
 type fftOperation3DImag struct {
@@ -42,6 +43,7 @@ type fftOperation3DImag struct {
 	op         fftOperation3D
 	FFT_T      bool
 	NegativeKX bool
+	polar      bool
 }
 
 type fftOperation3DAbs struct {
@@ -51,6 +53,7 @@ type fftOperation3DAbs struct {
 	op         fftOperation3D
 	FFT_T      bool
 	NegativeKX bool
+	polar      bool
 }
 
 type fftOperation3DPhi struct {
@@ -60,6 +63,7 @@ type fftOperation3DPhi struct {
 	op         fftOperation3D
 	FFT_T      bool
 	NegativeKX bool
+	polar      bool
 }
 
 type fftOperation3D struct {
@@ -198,8 +202,9 @@ func (d *fftOperation3D) EvalTo(dst *data.Slice) {
 	data.Copy(dst, FFT3DData[d.q])
 }
 
-func (d *fftOperation3D) ToPolar() {
+func (d *fftOperation3D) ToPolar() *fftOperation3D {
 	d.polar = true
+	return d
 }
 func (d *fftOperation3D) IsPolar() bool {
 	return d.polar
@@ -296,39 +301,37 @@ func (d *fftOperation3D) Axis() ([3]int, [3]float64, [3]float64, []string) {
 	c := Mesh().CellSize()
 	s := d.FFTOutputSize()
 	s[0] /= 2
-	return s, [3]float64{-1 / (2 * c[X]), -1 / (2 * c[Y]), -1 / (2 * c[Z])}, [3]float64{1 / (2 * c[Y]), 1 / (2 * c[Y]), 1 / (2 * c[Z])}, []string{"x", "y", "z"}
+	if d.NegativeKX {
+		return s, [3]float64{-1 / (2 * c[X]), -1 / (2 * c[Y]), -1 / (2 * c[Z])}, [3]float64{1 / (2 * c[X]), 1 / (2 * c[Y]), 1 / (2 * c[Z])}, []string{"x", "y", "z"}
+	} else {
+		return s, [3]float64{0., -1 / (2 * c[Y]), -1 / (2 * c[Z])}, [3]float64{1 / (2 * c[X]), 1 / (2 * c[Y]), 1 / (2 * c[Z])}, []string{"x", "y", "z"}
+	}
 }
 
 func (d *fftOperation3D) Real() *fftOperation3DReal {
 	if d.polar {
 		panic("Cannot be polar and take real value.")
 	}
-	return &fftOperation3DReal{fieldOp{d.q, d.q, d.q.NComp()}, "k_x_y_z_" + NameOf(d.q) + "_real", d.q, *d, false, NegativeKX}
+	return &fftOperation3DReal{fieldOp{d.q, d.q, d.q.NComp()}, "k_x_y_z_" + NameOf(d.q) + "_real", d.q, *d, false, NegativeKX, d.polar}
 }
 
 func (d *fftOperation3D) Imag() *fftOperation3DImag {
 	if d.polar {
 		panic("Cannot be polar and take imag value.")
 	}
-	return &fftOperation3DImag{fieldOp{d.q, d.q, d.q.NComp()}, "k_x_y_z_" + NameOf(d.q) + "_imag", d.q, *d, false, NegativeKX}
+	return &fftOperation3DImag{fieldOp{d.q, d.q, d.q.NComp()}, "k_x_y_z_" + NameOf(d.q) + "_imag", d.q, *d, false, NegativeKX, d.polar}
 }
 
 func (d *fftOperation3D) Phi() *fftOperation3DPhi {
-	if d.polar {
-		panic("Cannot be polar and take real value.")
-	}
-	return &fftOperation3DPhi{fieldOp{d.q, d.q, d.q.NComp()}, "k_x_y_z_" + NameOf(d.q) + "_phi", d.q, *d, false, NegativeKX}
+	return &fftOperation3DPhi{fieldOp{d.q, d.q, d.q.NComp()}, "k_x_y_z_" + NameOf(d.q) + "_phi", d.q, *d, false, NegativeKX, d.polar}
 }
 
 func (d *fftOperation3D) Abs() *fftOperation3DAbs {
-	if d.polar {
-		panic("Cannot be polar and take real value.")
-	}
-	return &fftOperation3DAbs{fieldOp{d.q, d.q, d.q.NComp()}, "k_x_y_z_" + NameOf(d.q) + "_abs", d.q, *d, false, NegativeKX}
+	return &fftOperation3DAbs{fieldOp{d.q, d.q, d.q.NComp()}, "k_x_y_z_" + NameOf(d.q) + "_abs", d.q, *d, false, NegativeKX, d.polar}
 }
 
 func (d *fftOperation3D) SymmetricX() bool {
-	return false
+	return d.NegativeKX
 }
 
 func (d *fftOperation3D) SymmetricY() bool {
@@ -375,7 +378,7 @@ func (d *fftOperation3DReal) Axis() ([3]int, [3]float64, [3]float64, []string) {
 }
 
 func (d *fftOperation3DReal) SymmetricX() bool {
-	return false
+	return d.NegativeKX
 }
 
 func (d *fftOperation3DReal) SymmetricY() bool {
@@ -422,7 +425,7 @@ func (d *fftOperation3DImag) Axis() ([3]int, [3]float64, [3]float64, []string) {
 }
 
 func (d *fftOperation3DImag) SymmetricX() bool {
-	return false
+	return d.NegativeKX
 }
 
 func (d *fftOperation3DImag) SymmetricY() bool {
@@ -434,11 +437,14 @@ func (d *fftOperation3DPhi) EvalTo(dst *data.Slice) {
 		d.op.evalIntern()
 		FFTEvaluatedPhi[d.q] = true
 	}
-	polarBuffer := cuda.Buffer(FFT3DData[d.q].NComp(), FFT3DData[d.q].Size())
-	data.Copy(polarBuffer, FFT3DData[d.q])
-	cuda.ComplexToPolar(polarBuffer, polarBuffer)
-	cuda.Imag(dst, polarBuffer)
-	cuda.Recycle(polarBuffer)
+	if !d.polar {
+		buf := cuda.Buffer(FFT3DData[d.q].NComp(), FFT3DData[d.q].Size())
+		cuda.ComplexToPolar(buf, FFT3DData[d.q])
+		cuda.Imag(dst, buf)
+		cuda.Recycle(buf)
+	} else {
+		cuda.Imag(dst, FFT3DData[d.q])
+	}
 }
 
 func (d *fftOperation3DPhi) Mesh() *data.Mesh {
@@ -473,7 +479,7 @@ func (d *fftOperation3DPhi) Axis() ([3]int, [3]float64, [3]float64, []string) {
 }
 
 func (d *fftOperation3DPhi) SymmetricX() bool {
-	return false
+	return d.NegativeKX
 }
 
 func (d *fftOperation3DPhi) SymmetricY() bool {
@@ -485,11 +491,14 @@ func (d *fftOperation3DAbs) EvalTo(dst *data.Slice) {
 		d.op.evalIntern()
 		FFTEvaluatedAbs[d.q] = true
 	}
-	polarBuffer := cuda.Buffer(FFT3DData[d.q].NComp(), FFT3DData[d.q].Size())
-	data.Copy(polarBuffer, FFT3DData[d.q])
-	cuda.ComplexToPolar(polarBuffer, polarBuffer)
-	cuda.Real(dst, FFT3DData[d.q])
-	cuda.Recycle(polarBuffer)
+	if !d.polar {
+		buf := cuda.Buffer(FFT3DData[d.q].NComp(), FFT3DData[d.q].Size())
+		cuda.ComplexToPolar(buf, FFT3DData[d.q])
+		cuda.Real(dst, buf)
+		cuda.Recycle(buf)
+	} else {
+		cuda.Real(dst, FFT3DData[d.q])
+	}
 }
 
 func (d *fftOperation3DAbs) Mesh() *data.Mesh {
@@ -524,7 +533,7 @@ func (d *fftOperation3DAbs) Axis() ([3]int, [3]float64, [3]float64, []string) {
 }
 
 func (d *fftOperation3DAbs) SymmetricX() bool {
-	return false
+	return d.NegativeKX
 }
 
 func (d *fftOperation3DAbs) SymmetricY() bool {
