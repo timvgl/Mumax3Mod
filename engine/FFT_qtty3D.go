@@ -22,6 +22,7 @@ var (
 
 func init() {
 	DeclFunc("FFT3D", FFT3D, "performs FFT in x, y and z")
+	DeclVar("negativeKx", &NegativeKX, "")
 	//DeclFunc("FFT2D", FFT2D, "performs FFT in x, y and z")
 }
 
@@ -231,8 +232,9 @@ func (d *fftOperation3D) evalIntern() {
 			ccBuf := cuda.Buffer(bufReOrd.NComp(), bufReOrd.Size())
 			defer cuda.Recycle(ccBuf)
 			cuda.ComplexConjugate(ccBuf, bufReOrd)
-			data.CopyPart(FFT3DData[d.q], ccBuf, 0, ccBuf.Size()[X], 0, ccBuf.Size()[Z], 0, ccBuf.Size()[Z], 0, 1, 0, 0, 0, 0)
-			data.CopyPart(FFT3DData[d.q], bufReOrd, 0, bufReOrd.Size()[X], 0, bufReOrd.Size()[Z], 0, bufReOrd.Size()[Z], 0, 1, ccBuf.Size()[X], ccBuf.Size()[Y], ccBuf.Size()[Z], 0)
+			cuda.ReverseX(ccBuf, ccBuf)
+			data.CopyPart(FFT3DData[d.q], ccBuf, 0, ccBuf.Size()[X], 0, ccBuf.Size()[Y], 0, ccBuf.Size()[Z], 0, 1, 0, 0, 0, 0)
+			data.CopyPart(FFT3DData[d.q], bufReOrd, 0, bufReOrd.Size()[X], 0, bufReOrd.Size()[Y], 0, bufReOrd.Size()[Z], 0, 1, ccBuf.Size()[X], 0, 0, 0)
 		} else {
 			data.Copy(FFT3DData[d.q], bufReOrd)
 		}
@@ -260,8 +262,9 @@ func (d *fftOperation3D) evalIntern() {
 			ccBuf := cuda.BufferFFT_T(bufReOrd.NComp(), bufReOrd.Size(), NameOf(d.q))
 			defer cuda.Recycle(ccBuf)
 			cuda.ComplexConjugate(ccBuf, bufReOrd)
-			data.CopyPart(FFT3DData[d.q], ccBuf, 0, ccBuf.Size()[X], 0, ccBuf.Size()[Z], 0, ccBuf.Size()[Z], 0, 1, 0, 0, 0, 0)
-			data.CopyPart(FFT3DData[d.q], bufReOrd, 0, bufReOrd.Size()[X], 0, bufReOrd.Size()[Z], 0, bufReOrd.Size()[Z], 0, 1, ccBuf.Size()[X], ccBuf.Size()[Y], ccBuf.Size()[Z], 0)
+			cuda.ReverseX(ccBuf, ccBuf)
+			data.CopyPart(FFT3DData[d.q], ccBuf, 0, ccBuf.Size()[X], 0, ccBuf.Size()[Y], 0, ccBuf.Size()[Z], 0, 1, 0, 0, 0, 0)
+			data.CopyPart(FFT3DData[d.q], bufReOrd, 0, bufReOrd.Size()[X], 0, bufReOrd.Size()[Y], 0, bufReOrd.Size()[Z], 0, 1, ccBuf.Size()[X], 0, 0, 0)
 		} else {
 			data.Copy(FFT3DData[d.q], bufReOrd)
 		}
@@ -354,13 +357,21 @@ func (d *fftOperation3DReal) Unit() string { return "a.u." }
 
 func (d *fftOperation3DReal) fftOutputSize() [3]int {
 	var NxOP, NyOP, NzOP = cuda.OutputSizeFloatsFFT3D(FFT3DR2CPlans[d.q])
-	return [3]int{int(NxOP / 2), NyOP, NzOP}
+	if d.NegativeKX {
+		return [3]int{NxOP, NyOP, NzOP}
+	} else {
+		return [3]int{int(NxOP / 2), NyOP, NzOP}
+	}
 }
 
 func (d *fftOperation3DReal) Axis() ([3]int, [3]float64, [3]float64, []string) {
 	c := Mesh().CellSize()
 	s := d.fftOutputSize()
-	return s, [3]float64{0., -1 / (2 * c[Y]), -1 / (2 * c[Z])}, [3]float64{1 / (2 * c[Y]), 1 / (2 * c[Y]), 1 / (2 * c[Z])}, []string{"x", "y", "z"}
+	if d.NegativeKX {
+		return s, [3]float64{-1 / (2 * c[X]), -1 / (2 * c[Y]), -1 / (2 * c[Z])}, [3]float64{1 / (2 * c[X]), 1 / (2 * c[Y]), 1 / (2 * c[Z])}, []string{"x", "y", "z"}
+	} else {
+		return s, [3]float64{0., -1 / (2 * c[Y]), -1 / (2 * c[Z])}, [3]float64{1 / (2 * c[X]), 1 / (2 * c[Y]), 1 / (2 * c[Z])}, []string{"x", "y", "z"}
+	}
 }
 
 func (d *fftOperation3DReal) SymmetricX() bool {
@@ -393,13 +404,21 @@ func (d *fftOperation3DImag) Unit() string { return "a.u." }
 
 func (d *fftOperation3DImag) fftOutputSize() [3]int {
 	var NxOP, NyOP, NzOP = cuda.OutputSizeFloatsFFT3D(FFT3DR2CPlans[d.q])
-	return [3]int{int(NxOP / 2), NyOP, NzOP}
+	if d.NegativeKX {
+		return [3]int{NxOP, NyOP, NzOP}
+	} else {
+		return [3]int{int(NxOP / 2), NyOP, NzOP}
+	}
 }
 
 func (d *fftOperation3DImag) Axis() ([3]int, [3]float64, [3]float64, []string) {
 	c := Mesh().CellSize()
 	s := d.fftOutputSize()
-	return s, [3]float64{0., -1 / (2 * c[Y]), -1 / (2 * c[Z])}, [3]float64{1 / (2 * c[Y]), 1 / (2 * c[Y]), 1 / (2 * c[Z])}, []string{"x", "y", "z"}
+	if d.NegativeKX {
+		return s, [3]float64{-1 / (2 * c[X]), -1 / (2 * c[Y]), -1 / (2 * c[Z])}, [3]float64{1 / (2 * c[X]), 1 / (2 * c[Y]), 1 / (2 * c[Z])}, []string{"x", "y", "z"}
+	} else {
+		return s, [3]float64{0., -1 / (2 * c[Y]), -1 / (2 * c[Z])}, [3]float64{1 / (2 * c[X]), 1 / (2 * c[Y]), 1 / (2 * c[Z])}, []string{"x", "y", "z"}
+	}
 }
 
 func (d *fftOperation3DImag) SymmetricX() bool {
@@ -436,13 +455,21 @@ func (d *fftOperation3DPhi) Unit() string { return "a.u." }
 
 func (d *fftOperation3DPhi) fftOutputSize() [3]int {
 	var NxOP, NyOP, NzOP = cuda.OutputSizeFloatsFFT3D(FFT3DR2CPlans[d.q])
-	return [3]int{int(NxOP / 2), NyOP, NzOP}
+	if d.NegativeKX {
+		return [3]int{NxOP, NyOP, NzOP}
+	} else {
+		return [3]int{int(NxOP / 2), NyOP, NzOP}
+	}
 }
 
 func (d *fftOperation3DPhi) Axis() ([3]int, [3]float64, [3]float64, []string) {
 	c := Mesh().CellSize()
 	s := d.fftOutputSize()
-	return s, [3]float64{0., -1 / (2 * c[Y]), -1 / (2 * c[Z])}, [3]float64{1 / (2 * c[Y]), 1 / (2 * c[Y]), 1 / (2 * c[Z])}, []string{"x", "y", "z"}
+	if d.NegativeKX {
+		return s, [3]float64{-1 / (2 * c[X]), -1 / (2 * c[Y]), -1 / (2 * c[Z])}, [3]float64{1 / (2 * c[X]), 1 / (2 * c[Y]), 1 / (2 * c[Z])}, []string{"x", "y", "z"}
+	} else {
+		return s, [3]float64{0., -1 / (2 * c[Y]), -1 / (2 * c[Z])}, [3]float64{1 / (2 * c[X]), 1 / (2 * c[Y]), 1 / (2 * c[Z])}, []string{"x", "y", "z"}
+	}
 }
 
 func (d *fftOperation3DPhi) SymmetricX() bool {
@@ -479,13 +506,21 @@ func (d *fftOperation3DAbs) Unit() string { return "a.u." }
 
 func (d *fftOperation3DAbs) fftOutputSize() [3]int {
 	var NxOP, NyOP, NzOP = cuda.OutputSizeFloatsFFT3D(FFT3DR2CPlans[d.q])
-	return [3]int{int(NxOP / 2), NyOP, NzOP}
+	if d.NegativeKX {
+		return [3]int{NxOP, NyOP, NzOP}
+	} else {
+		return [3]int{int(NxOP / 2), NyOP, NzOP}
+	}
 }
 
 func (d *fftOperation3DAbs) Axis() ([3]int, [3]float64, [3]float64, []string) {
 	c := Mesh().CellSize()
 	s := d.fftOutputSize()
-	return s, [3]float64{0., -1 / (2 * c[Y]), -1 / (2 * c[Z])}, [3]float64{1 / (2 * c[Y]), 1 / (2 * c[Y]), 1 / (2 * c[Z])}, []string{"x", "y", "z"}
+	if d.NegativeKX {
+		return s, [3]float64{-1 / (2 * c[X]), -1 / (2 * c[Y]), -1 / (2 * c[Z])}, [3]float64{1 / (2 * c[X]), 1 / (2 * c[Y]), 1 / (2 * c[Z])}, []string{"x", "y", "z"}
+	} else {
+		return s, [3]float64{0., -1 / (2 * c[Y]), -1 / (2 * c[Z])}, [3]float64{1 / (2 * c[X]), 1 / (2 * c[Y]), 1 / (2 * c[Z])}, []string{"x", "y", "z"}
+	}
 }
 
 func (d *fftOperation3DAbs) SymmetricX() bool {

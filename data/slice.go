@@ -370,7 +370,6 @@ func CopyPart(dst, src *Slice,
 	yCount := yEnd_src - yStart_src
 	zCount := zEnd_src - zStart_src
 	fCount := fEnd_src - fStart_src
-
 	if d && !s || !d && s || !d && !s {
 		for f := 0; f < fCount; f++ {
 			for z := 0; z < zCount; z++ {
@@ -486,7 +485,6 @@ func CopyPart(dst, src *Slice,
 			destroyStream(fmt.Sprintf("copy_%v", i))
 		}
 	}
-
 }
 
 /*

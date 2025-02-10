@@ -57,3 +57,12 @@ func ComplexConjugate(dst, src *data.Slice) {
 		k_complexConjugate_async(dst.DevPtr(c), src.DevPtr(c), dst.LengthF*N/2, cfg)
 	}
 }
+
+func ReverseX(dst, src *data.Slice) {
+	size := dst.Size()
+	size[0] /= 4
+	cfg := make3DConf(size)
+	for c := range dst.NComp() {
+		k_reverseX_async(dst.DevPtr(c), src.DevPtr(c), size[X], size[Y], size[Z], cfg)
+	}
+}
