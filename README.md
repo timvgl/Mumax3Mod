@@ -132,7 +132,7 @@ Comment: Loading strains is highly experimental - if you want to use the strain 
         - __.Real()__
         - __.Imag()__
         - e.g.: ```Save(FFT3D(m).Abs())```
-    + __FFT4D__ - performs FFT in 3D (x, y, z) and fouriertransform incremental in time. The data is saved to file when the simulation is finished (performance). The period passed to the function defines how often the fourier coefficiens are updated. Args: __Quantity__, __float__ (timeperiod)
+    + __FFT4D__/__FFT_T__ - performs FFT in 3D (x, y, z) (only for FFT4D - FFT_T uses real space data - only fouriertransform in time) and fouriertransforms incremental in time. The data is saved to file when the simulation is finished (performance). The period passed to the function defines how often the fourier coefficiens are updated. Args: __Quantity__, __float__ (timeperiod)
         - __FFT_T_IN_MEM__ - set to false the needed data is stored in ovf files that are read and written continously - lower GPU memory consumption, but slower
         - __minFrequency__ - __float__ frequency from which the fouriertransform in time is supposed to be calculated from (default 0)
         - __maxFrequency__ - __float__ frequency to which the fouriertransform in time is supposed to be calculated from (default 1/timeperiod)
