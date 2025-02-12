@@ -475,7 +475,7 @@ func NewExprEvaluator(expressionStr string) (*ExprEvaluator, error) {
 			return nil, fmt.Errorf("invalid argument for sinc(): %v", args[0])
 		},
 
-		// Functions with two arguments (left unchanged)
+		// Functions with two arguments (left unchanged) -> changed manually
 		"yn": func(args ...interface{}) (interface{}, error) {
 			if len(args) != 2 {
 				return nil, fmt.Errorf("yn() expects exactly two arguments")
@@ -483,7 +483,12 @@ func NewExprEvaluator(expressionStr string) (*ExprEvaluator, error) {
 			n, ok1 := toInt(args[0])
 			x, ok2 := toFloat64(args[1])
 			if !ok1 || !ok2 {
-				return nil, fmt.Errorf("invalid arguments for yn(): %v, %v", args[0], args[1])
+				d1, ok3 := toDataSlice(args[0])
+				d2, ok4 := toDataSlice(args[1])
+				if !ok1 && !ok2 && !ok3 && !ok4 {
+					return nil, fmt.Errorf("invalid arguments for yn(): %v, %v", args[0], args[1])
+				}
+				return govaluate.GPUCalc(d1, d2, float64(n), x, ok3, ok4, cuda.YnGovaluate3X3, cuda.YnGovaluate3X1, cuda.YnGovaluate1X3), nil
 			}
 			return math.Yn(n, x), nil
 		},
@@ -494,7 +499,12 @@ func NewExprEvaluator(expressionStr string) (*ExprEvaluator, error) {
 			y, ok1 := toFloat64(args[0])
 			x, ok2 := toFloat64(args[1])
 			if !ok1 || !ok2 {
-				return nil, fmt.Errorf("invalid arguments for atan2(): %v, %v", args[0], args[1])
+				d2, ok4 := toDataSlice(args[0])
+				d1, ok3 := toDataSlice(args[1])
+				if !ok1 && !ok2 && !ok3 && !ok4 {
+					return nil, fmt.Errorf("invalid arguments for atan2(): %v, %v", args[0], args[1])
+				}
+				return govaluate.GPUCalc(d1, d2, x, y, ok3, ok4, cuda.Atan2Govaluate3X3, cuda.Atan2Govaluate3X1, cuda.Atan2Govaluate1X3), nil
 			}
 			return math.Atan2(y, x), nil
 		},
@@ -505,7 +515,12 @@ func NewExprEvaluator(expressionStr string) (*ExprEvaluator, error) {
 			x, ok1 := toFloat64(args[0])
 			y, ok2 := toFloat64(args[1])
 			if !ok1 || !ok2 {
-				return nil, fmt.Errorf("invalid arguments for hypot(): %v, %v", args[0], args[1])
+				d1, ok3 := toDataSlice(args[0])
+				d2, ok4 := toDataSlice(args[1])
+				if !ok1 && !ok2 && !ok3 && !ok4 {
+					return nil, fmt.Errorf("invalid arguments for hypot(): %v, %v", args[0], args[1])
+				}
+				return govaluate.GPUCalc(d1, d2, x, y, ok3, ok4, cuda.HypotGovaluate3X3, cuda.HypotGovaluate3X1, cuda.HypotGovaluate1X3), nil
 			}
 			return math.Hypot(x, y), nil
 		},
@@ -516,7 +531,12 @@ func NewExprEvaluator(expressionStr string) (*ExprEvaluator, error) {
 			x, ok1 := toFloat64(args[0])
 			y, ok2 := toFloat64(args[1])
 			if !ok1 || !ok2 {
-				return nil, fmt.Errorf("invalid arguments for remainder(): %v, %v", args[0], args[1])
+				d1, ok3 := toDataSlice(args[0])
+				d2, ok4 := toDataSlice(args[1])
+				if !ok1 && !ok2 && !ok3 && !ok4 {
+					return nil, fmt.Errorf("invalid arguments for remainder(): %v, %v", args[0], args[1])
+				}
+				return govaluate.GPUCalc(d1, d2, x, y, ok3, ok4, cuda.RemainderGovaluate3X3, cuda.RemainderGovaluate3X1, cuda.RemainderGovaluate1X3), nil
 			}
 			return math.Remainder(x, y), nil
 		},
@@ -570,7 +590,7 @@ func NewExprEvaluator(expressionStr string) (*ExprEvaluator, error) {
 				d1, ok3 := toDataSlice(args[0])
 				d2, ok4 := toDataSlice(args[1])
 				if !ok1 && !ok2 && !ok3 && !ok4 {
-					return nil, fmt.Errorf("invalid arguments for pow(): %v, %v", args[0], args[1])
+					return nil, fmt.Errorf("invalid arguments for mod(): %v, %v", args[0], args[1])
 				}
 				return govaluate.GPUCalc(d1, d2, x, y, ok3, ok4, cuda.ModGovaluate3X3, cuda.ModGovaluate3X1, cuda.ModGovaluate1X3), nil
 			}
@@ -599,7 +619,12 @@ func NewExprEvaluator(expressionStr string) (*ExprEvaluator, error) {
 			x, ok1 := toFloat64(args[0])
 			exp, ok2 := toInt(args[1])
 			if !ok1 || !ok2 {
-				return nil, fmt.Errorf("invalid arguments for ldexp(): %v, %v", args[0], args[1])
+				d1, ok3 := toDataSlice(args[0])
+				d2, ok4 := toDataSlice(args[1])
+				if !ok1 && !ok2 && !ok3 && !ok4 {
+					return nil, fmt.Errorf("invalid arguments for ldexp(): %v, %v", args[0], args[1])
+				}
+				return govaluate.GPUCalc(d1, d2, x, float64(exp), ok3, ok4, cuda.LdexpGovaluate3X3, cuda.LdexpGovaluate3X1, cuda.LdexpGovaluate1X3), nil
 			}
 			return math.Ldexp(x, exp), nil
 		},
@@ -607,11 +632,13 @@ func NewExprEvaluator(expressionStr string) (*ExprEvaluator, error) {
 			if len(args) != 1 {
 				return nil, fmt.Errorf("pow10() expects exactly one argument")
 			}
-			x, ok := toInt(args[0])
-			if !ok {
-				return nil, fmt.Errorf("invalid argument for pow10(): %v", args[0])
+			if x, ok := toInt(args[0]); ok {
+				return math.Pow10(x), nil
+			} else if d, ok := toDataSlice(args[0]); ok {
+				cuda.Pow10Govaluate(d)
+				return d, nil
 			}
-			return math.Pow10(x), nil
+			return nil, fmt.Errorf("invalid argument for pow10(): %v", args[0])
 		},
 
 		// Random functions (unchanged)

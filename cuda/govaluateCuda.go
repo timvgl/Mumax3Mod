@@ -174,6 +174,126 @@ func ModGovaluate1X3(dst *data.Slice, a interface{}, b *data.Slice) {
 	}
 }
 
+func Atan2Govaluate3X3(dst, a, b *data.Slice) {
+	size := dst.Size()
+	cfg := make3DConf(size)
+	for c := range dst.NComp() {
+		k_atan2Govaluate3X3_async(dst.DevPtr(c), a.DevPtr(c), b.DevPtr(c), size[X], size[Y], size[Z], getAxis(a.Size()), getAxis(b.Size()), cfg)
+	}
+}
+
+func Atan2Govaluate3X1(dst, a *data.Slice, b interface{}) {
+	size := dst.Size()
+	cfg := make1DConf(prod(size))
+	for c := range dst.NComp() {
+		k_atan2Govaluate3X1_async(dst.DevPtr(c), a.DevPtr(c), b.(float32), prod(size), cfg)
+	}
+}
+
+func Atan2Govaluate1X3(dst *data.Slice, a interface{}, b *data.Slice) {
+	size := dst.Size()
+	cfg := make1DConf(prod(size))
+	for c := range dst.NComp() {
+		k_atan2Govaluate1X3_async(dst.DevPtr(c), a.(float32), b.DevPtr(c), prod(size), cfg)
+	}
+}
+
+func HypotGovaluate3X3(dst, a, b *data.Slice) {
+	size := dst.Size()
+	cfg := make3DConf(size)
+	for c := range dst.NComp() {
+		k_hypotGovaluate3X3_async(dst.DevPtr(c), a.DevPtr(c), b.DevPtr(c), size[X], size[Y], size[Z], getAxis(a.Size()), getAxis(b.Size()), cfg)
+	}
+}
+
+func HypotGovaluate3X1(dst, a *data.Slice, b interface{}) {
+	size := dst.Size()
+	cfg := make1DConf(prod(size))
+	for c := range dst.NComp() {
+		k_hypotGovaluate3X1_async(dst.DevPtr(c), a.DevPtr(c), b.(float32), prod(size), cfg)
+	}
+}
+
+func HypotGovaluate1X3(dst *data.Slice, a interface{}, b *data.Slice) {
+	size := dst.Size()
+	cfg := make1DConf(prod(size))
+	for c := range dst.NComp() {
+		k_hypotGovaluate1X3_async(dst.DevPtr(c), a.(float32), b.DevPtr(c), prod(size), cfg)
+	}
+}
+
+func RemainderGovaluate3X3(dst, a, b *data.Slice) {
+	size := dst.Size()
+	cfg := make3DConf(size)
+	for c := range dst.NComp() {
+		k_remainderGovaluate3X3_async(dst.DevPtr(c), a.DevPtr(c), b.DevPtr(c), size[X], size[Y], size[Z], getAxis(a.Size()), getAxis(b.Size()), cfg)
+	}
+}
+
+func RemainderGovaluate3X1(dst, a *data.Slice, b interface{}) {
+	size := dst.Size()
+	cfg := make1DConf(prod(size))
+	for c := range dst.NComp() {
+		k_remainderGovaluate3X1_async(dst.DevPtr(c), a.DevPtr(c), b.(float32), prod(size), cfg)
+	}
+}
+
+func RemainderGovaluate1X3(dst *data.Slice, a interface{}, b *data.Slice) {
+	size := dst.Size()
+	cfg := make1DConf(prod(size))
+	for c := range dst.NComp() {
+		k_remainderGovaluate1X3_async(dst.DevPtr(c), a.(float32), b.DevPtr(c), prod(size), cfg)
+	}
+}
+
+func YnGovaluate3X3(dst, a, b *data.Slice) {
+	size := dst.Size()
+	cfg := make3DConf(size)
+	for c := range dst.NComp() {
+		k_YnGovaluate3X3_async(dst.DevPtr(c), a.DevPtr(c), b.DevPtr(c), size[X], size[Y], size[Z], getAxis(a.Size()), getAxis(b.Size()), cfg)
+	}
+}
+
+func YnGovaluate3X1(dst, a *data.Slice, b interface{}) {
+	size := dst.Size()
+	cfg := make1DConf(prod(size))
+	for c := range dst.NComp() {
+		k_YnGovaluate3X1_async(dst.DevPtr(c), a.DevPtr(c), b.(float32), prod(size), cfg)
+	}
+}
+
+func YnGovaluate1X3(dst *data.Slice, a interface{}, b *data.Slice) {
+	size := dst.Size()
+	cfg := make1DConf(prod(size))
+	for c := range dst.NComp() {
+		k_YnGovaluate1X3_async(dst.DevPtr(c), a.(float32), b.DevPtr(c), prod(size), cfg)
+	}
+}
+
+func LdexpGovaluate3X3(dst, a, b *data.Slice) {
+	size := dst.Size()
+	cfg := make3DConf(size)
+	for c := range dst.NComp() {
+		k_ldexpGovaluate3X3_async(dst.DevPtr(c), a.DevPtr(c), b.DevPtr(c), size[X], size[Y], size[Z], getAxis(a.Size()), getAxis(b.Size()), cfg)
+	}
+}
+
+func LdexpGovaluate3X1(dst, a *data.Slice, b interface{}) {
+	size := dst.Size()
+	cfg := make1DConf(prod(size))
+	for c := range dst.NComp() {
+		k_ldexpGovaluate3X1_async(dst.DevPtr(c), a.DevPtr(c), b.(float32), prod(size), cfg)
+	}
+}
+
+func LdexpGovaluate1X3(dst *data.Slice, a interface{}, b *data.Slice) {
+	size := dst.Size()
+	cfg := make1DConf(prod(size))
+	for c := range dst.NComp() {
+		k_ldexpGovaluate1X3_async(dst.DevPtr(c), a.(float32), b.DevPtr(c), prod(size), cfg)
+	}
+}
+
 // These functions assume that the following helper functions are defined elsewhere:
 // - func prod(size [3]int) int            // returns the total number of elements
 // - func make1DConf(n int) int             // returns the kernel launch configuration for a 1D kernel
@@ -509,6 +629,15 @@ func SincGovaluate(val *data.Slice) {
 	cfg := make1DConf(prod(size))
 	for c := range val.NComp() {
 		k_sincGovaluate_async(val.DevPtr(c), prod(size), cfg)
+	}
+}
+
+// SincGovaluate calls the asynchronous sinc kernel.
+func Pow10Govaluate(val *data.Slice) {
+	size := val.Size()
+	cfg := make1DConf(prod(size))
+	for c := range val.NComp() {
+		k_pow10Govaluate_async(val.DevPtr(c), prod(size), cfg)
 	}
 }
 
