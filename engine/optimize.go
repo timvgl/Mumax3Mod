@@ -129,13 +129,6 @@ func (d dummyQuantity) Free() {
 	cuda.Recycle(d.storage)
 }
 
-func cloneVars(original map[string]interface{}) map[string]interface{} {
-	cloned := make(map[string]interface{}, len(original))
-	for key, value := range original {
-		cloned[key] = value
-	}
-	return cloned
-}
 func (s optimize) generate_array_from_function(xDep, yDep, zDep bool, vars map[string]interface{}, cellsize [3]float64, j int, function *Function) *data.Slice {
 	size := [3]int{s.areaEnd[j][X] - s.areaStart[j][X], s.areaEnd[j][Y] - s.areaStart[j][Y], s.areaEnd[j][Z] - s.areaStart[j][Z]}
 	if zDep {
@@ -190,6 +183,9 @@ func (s optimize) generate_vector_from_string(trial goptuna.Trial, q Quantity, j
 	s.parsedFunctions[j][comp] = function
 
 	vars, err := InitializeVars(function.required)
+	if err != nil {
+		return nil, err
+	}
 
 	for key, value := range constants {
 		_, ok := vars[key]
@@ -417,6 +413,9 @@ func OptimizeQuantity(output Quantity, target dummyQuantity, variables []Quantit
 	}
 
 	bestValue, err := study.GetBestValue()
+	if err != nil {
+		panic(err)
+	}
 	bestParams, err := study.GetBestParams()
 	if err != nil {
 		log.Fatalf("Error getting best result: %v", err)

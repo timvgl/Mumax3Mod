@@ -339,7 +339,7 @@ func Copy(dst, src *Slice, args ...string) {
 
 func CopyComp(dst, src *Slice, comp int, args ...string) {
 	if dst.NComp() != 1 || dst.Len() != src.Len() && comp > 2 || comp < 0 {
-		panic(fmt.Sprintf("slice copy: illegal sizes: dst: %vx%v, src: %vx%v with %v being selected", dst.NComp(), dst.Len(), src.Len(), comp))
+		panic(fmt.Sprintf("slice copy: illegal sizes: dst: %vx%v, src: %vx%v with %v being selected", dst.NComp(), dst.Len(), src.NComp(), src.Len(), comp))
 	}
 	d, s := dst.GPUAccess(), src.GPUAccess()
 	bytes := SIZEOF_FLOAT32 * int64(dst.Len())
