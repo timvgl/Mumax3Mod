@@ -126,13 +126,24 @@ Comment: Loading strains is highly experimental - if you want to use the strain 
 
 * FFT:
     + __FFT3D__ - calculate FFT in 3D (x, y, z) and e.g. save to ovf file. When this command is runned the real and imag part the FFT is visible in the Web-UI. The data in the WebUI is being updated, when this command is called again, so in case of AutoSave every dt s. Args: __Quantity__
-    + __FFT4D__ - performs FFT in 3D (x, y, z) and fouriertransform incremental in time. The data is saved to file when the simulation is finished (performance). The period passed to the function defines how often the fourier coefficiens are updated. Args: __Quantity__, __float__ (timeperiod)
+        - __.Abs()__ Get the length of the complex FFT value
+        - __.Phi()__ Get the angle of the complex FFT value
+        - __.ToPolar()__ Export length and angle of FFT value in single ovf file. Alternating length and angle in x. If ToPolar() is being called and on the resulting object .Abs() and .Phi() computational time is saved compared to not using ToPolar()
+        - __.Real()__
+        - __.Imag()__
+        - e.g.: ```Save(FFT3D(m).Abs())```
+    + __FFT4D__/__FFT_T__ - performs FFT in 3D (x, y, z) (only for FFT4D - FFT_T uses real space data - only fouriertransform in time) and fouriertransforms incremental in time. The data is saved to file when the simulation is finished (performance). The period passed to the function defines how often the fourier coefficiens are updated. Args: __Quantity__, __float__ (timeperiod)
         - __FFT_T_IN_MEM__ - set to false the needed data is stored in ovf files that are read and written continously - lower GPU memory consumption, but slower
         - __minFrequency__ - __float__ frequency from which the fouriertransform in time is supposed to be calculated from (default 0)
         - __maxFrequency__ - __float__ frequency to which the fouriertransform in time is supposed to be calculated from (default 1/timeperiod)
         - __dFrequency__ - __float__ frequency steps - has to be set if Mumax is stepping or running while (for Run the default is 1/(time provided in running))
         - __FFT4D_Label__ - __string__ use this string instead of the name of the quantity
-        - Comment: the code is written as async as possible from what I know. For me the sims with the FFT4D didn't need longer compared to without - however this highly depends on the amount of frequencies that have to be calculated and the FixDt parameter
+        - __.SaveAbs()__ - Save length of complex FFT value
+        - __.SavePhi()__ - Save angle of complex FFT value
+        - __.ToPolar()__ - Save complex number as length and angle (alternating along x)
+        - e.g.: ```FFT4D(m, 10e-10).SaveAbs().SavePhi() //creates two different ovf files, one containing FFT angle and the other one the length```
+        - e.g.: ```FFT4D(m, 10e-10).ToPolar() //stores length and angle alternating along x in single ovf file (for each frequency a single ovf file)```
+        - Comment: the code is written as async as possible from what I know. For me the sims with the FFT4D didn't need longer compared to without - however this highly depends on the amount of frequencies that have to be calculated and the FixDt parameter. The functions to store the FFT data in polar coordinates are only supported for                     in memory calculations so far.
       
 
     Created OVF file has twice the amount of values calculated for kx for holding imag and real value.
