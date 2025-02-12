@@ -139,65 +139,23 @@ func cloneVars(original map[string]interface{}) map[string]interface{} {
 func (s optimize) generate_array_from_function(xDep, yDep, zDep bool, vars map[string]interface{}, cellsize [3]float64, j int, function *Function) []float32 {
 	size := [3]int{s.areaEnd[j][X] - s.areaStart[j][X], s.areaEnd[j][Y] - s.areaStart[j][Y], s.areaEnd[j][Z] - s.areaStart[j][Z]}
 	vector := make([]float32, size[X]*size[Y]*size[Z])
-	if s.areaEnd[j][Z]-s.areaStart[j][Z] > 1 {
-		var wg sync.WaitGroup
-		for iii := 0; iii < size[Z]; iii++ {
-			if zDep {
-				vars["z"] = float64(iii) * cellsize[Z]
-			}
-			wg.Add(1)
-			go func(iii int, vars map[string]interface{}) {
-				for ii := 0; ii < size[Y]; ii++ {
-					if yDep {
-						vars["y"] = float64(ii) * cellsize[Y]
-					}
-					wg.Add(1)
-					go func(iii, ii int, vars map[string]interface{}) {
-						for i := 0; i < size[X]; i++ {
-							if xDep {
-								vars["x"] = float64(i) * cellsize[X]
-							}
-							result, err := function.Call(vars)
-							if err != nil {
-								panic(fmt.Sprintf("Failed to call function: %v", err))
-							}
-							vector[(iii*size[Y]+ii)*size[X]+i] = float32(result)
-						}
-						wg.Done()
-					}(iii, ii, cloneVars(vars))
-				}
-				wg.Done()
-			}(iii, cloneVars(vars))
-		}
-		wg.Wait()
-	} else {
-		var wg sync.WaitGroup
-		for iii := 0; iii < size[Z]; iii++ {
-			if zDep {
-				vars["z"] = float64(iii) * cellsize[Z]
-			}
-			for ii := 0; ii < size[Y]; ii++ {
-				if yDep {
-					vars["y"] = float64(ii) * cellsize[Y]
-				}
-				wg.Add(1)
-				go func(iii, ii int, vars map[string]interface{}) {
-					for i := 0; i < size[X]; i++ {
-						if xDep {
-							vars["x"] = float64(i) * cellsize[X]
-						}
-						result, err := function.Call(vars)
-						if err != nil {
-							panic(fmt.Sprintf("Failed to call function: %v", err))
-						}
-						vector[(iii*size[Y]+ii)*size[X]+i] = float32(result)
-					}
-					wg.Done()
-				}(iii, ii, cloneVars(vars))
-			}
-		}
-		wg.Wait()
+	if zDep {
+		vars["z_length"] = size[Z]
+		vars["z_factor"] = cellsize[Z]
 	}
+	if yDep {
+		vars["y_length"] = size[Y]
+		vars["y_factor"] = cellsize[Y]
+	}
+	if xDep {
+		vars["x_length"] = size[X]
+		vars["x_factor"] = cellsize[X]
+	}
+	result, err := function.Call(vars)
+	if err != nil {
+		panic(fmt.Sprintf("Failed to call function: %v", err))
+	}
+	fmt.Println(result)
 
 	return vector
 }
@@ -226,7 +184,7 @@ func (s optimize) generate_vector_from_string(trial goptuna.Trial, q Quantity, j
 	zDep := false
 
 	for key := range vars {
-		if key != "x" && key != "y" && key != "z" && key != "t" && math.IsNaN(vars[key].(float64)) {
+		if key != "x_length" && key != "y_length" && key != "z_length" && key != "x_factor" && key != "y_factor" && key != "z_factor" && key != "t" && math.IsNaN(vars[key].(float64)) {
 			//fmt.Println(key, s.variablesStart[j][key].vector[comp], s.variablesEnd[j][key].vector[comp])
 			value, err := trial.SuggestFloat(fmt.Sprintf("%s_%s_%d", NameOf(q), key, comp), s.variablesStart[j][key].vector[comp], s.variablesEnd[j][key].vector[comp])
 			if err != nil {
@@ -235,15 +193,14 @@ func (s optimize) generate_vector_from_string(trial goptuna.Trial, q Quantity, j
 			vars[key] = value
 		} else if strings.ToLower(key) == "t" {
 			panic("Time as a variable is not allowed in the function.")
-		} else if key == "x" {
+		} else if key == "x_factor" {
 			xDep = true
-		} else if key == "y" {
+		} else if key == "y_factor" {
 			yDep = true
-		} else if key == "z" {
+		} else if key == "z_factor" {
 			zDep = true
 		}
 	}
-
 	vector := s.generate_array_from_function(xDep, yDep, zDep, vars, cellsize, j, function)
 
 	return vector, nil
@@ -255,7 +212,6 @@ func (s optimize) generate_vector_suggest_function(trial goptuna.Trial, q Quanti
 		vector1 []float32
 		vector2 []float32
 	)
-
 	cellsize := MeshOf(q).CellSize()
 	var err error
 	vector0, err = s.generate_vector_from_string(trial, q, j, cellsize, 0)
@@ -383,6 +339,7 @@ func MergeFitFunctions(a ...fitFunction) []fitFunction {
 
 func OptimizeQuantity(output Quantity, target dummyQuantity, variables []Quantity, functions []fitFunction, parametersStart, parametersEnd []map[string]vectorScalar, studyName string, trials int, keep_bar bool, reduceTime float64) {
 	util.AssertMsg(len(variables) == len(parametersStart) && len(variables) == len(parametersEnd), "variables, parametersStart and parametersEnd must have the same length")
+	fmt.Println(NameOf(variables[0]))
 	//util.AssertMsg(len(areaStart) == len(areaEnd) && len(areaStart) == len(variables), "areaStart and areaEnd must have the same length like variables")
 	util.AssertMsg(len(functions) == len(variables), "need as many functions as variables.")
 	areaStart := make([][3]int, 0)

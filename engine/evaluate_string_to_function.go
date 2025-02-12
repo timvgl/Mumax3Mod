@@ -7,7 +7,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Knetic/govaluate"
+	"github.com/mumax/3/cuda"
+	"github.com/mumax/3/data"
+	"github.com/mumax/3/govaluate"
 )
 
 type ExprEvaluator struct {
@@ -25,337 +27,455 @@ func NewExprEvaluator(expressionStr string) (*ExprEvaluator, error) {
 
 	// Define custom functions
 	functions := map[string]govaluate.ExpressionFunction{
-		// Basic math functions from the math package
+		// One-argument functions (using float or DataSlice)
 		"abs": func(args ...interface{}) (interface{}, error) {
 			if len(args) != 1 {
 				return nil, fmt.Errorf("abs() expects exactly one argument")
 			}
-			x, ok := toFloat64(args[0])
-			if !ok {
-				return nil, fmt.Errorf("invalid argument for abs(): %v", args[0])
+			if x, ok := toFloat64(args[0]); ok {
+				return math.Abs(x), nil
+			} else if d, ok := toDataSlice(args[0]); ok {
+				cuda.AbsGovaluate(d)
+				return d, nil
 			}
-			return math.Abs(x), nil
+			return nil, fmt.Errorf("invalid argument for abs(): %v", args[0])
 		},
 		"acos": func(args ...interface{}) (interface{}, error) {
 			if len(args) != 1 {
 				return nil, fmt.Errorf("acos() expects exactly one argument")
 			}
-			x, ok := toFloat64(args[0])
-			if !ok {
-				return nil, fmt.Errorf("invalid argument for acos(): %v", args[0])
+			if x, ok := toFloat64(args[0]); ok {
+				return math.Acos(x), nil
+			} else if d, ok := toDataSlice(args[0]); ok {
+				cuda.AcosGovaluate(d)
+				return d, nil
 			}
-			return math.Acos(x), nil
+			return nil, fmt.Errorf("invalid argument for acos(): %v", args[0])
 		},
 		"acosh": func(args ...interface{}) (interface{}, error) {
 			if len(args) != 1 {
 				return nil, fmt.Errorf("acosh() expects exactly one argument")
 			}
-			x, ok := toFloat64(args[0])
-			if !ok {
-				return nil, fmt.Errorf("invalid argument for acosh(): %v", args[0])
+			if x, ok := toFloat64(args[0]); ok {
+				return math.Acosh(x), nil
+			} else if d, ok := toDataSlice(args[0]); ok {
+				cuda.AcoshGovaluate(d)
+				return d, nil
 			}
-			return math.Acosh(x), nil
+			return nil, fmt.Errorf("invalid argument for acosh(): %v", args[0])
 		},
 		"asin": func(args ...interface{}) (interface{}, error) {
 			if len(args) != 1 {
 				return nil, fmt.Errorf("asin() expects exactly one argument")
 			}
-			x, ok := toFloat64(args[0])
-			if !ok {
-				return nil, fmt.Errorf("invalid argument for asin(): %v", args[0])
+			if x, ok := toFloat64(args[0]); ok {
+				return math.Asin(x), nil
+			} else if d, ok := toDataSlice(args[0]); ok {
+				cuda.AsinGovaluate(d)
+				return d, nil
 			}
-			return math.Asin(x), nil
+			return nil, fmt.Errorf("invalid argument for asin(): %v", args[0])
 		},
 		"asinh": func(args ...interface{}) (interface{}, error) {
 			if len(args) != 1 {
 				return nil, fmt.Errorf("asinh() expects exactly one argument")
 			}
-			x, ok := toFloat64(args[0])
-			if !ok {
-				return nil, fmt.Errorf("invalid argument for asinh(): %v", args[0])
+			if x, ok := toFloat64(args[0]); ok {
+				return math.Asinh(x), nil
+			} else if d, ok := toDataSlice(args[0]); ok {
+				cuda.AsinhGovaluate(d)
+				return d, nil
 			}
-			return math.Asinh(x), nil
+			return nil, fmt.Errorf("invalid argument for asinh(): %v", args[0])
 		},
 		"atan": func(args ...interface{}) (interface{}, error) {
 			if len(args) != 1 {
 				return nil, fmt.Errorf("atan() expects exactly one argument")
 			}
-			x, ok := toFloat64(args[0])
-			if !ok {
-				return nil, fmt.Errorf("invalid argument for atan(): %v", args[0])
+			if x, ok := toFloat64(args[0]); ok {
+				return math.Atan(x), nil
+			} else if d, ok := toDataSlice(args[0]); ok {
+				cuda.AtanGovaluate(d)
+				return d, nil
 			}
-			return math.Atan(x), nil
+			return nil, fmt.Errorf("invalid argument for atan(): %v", args[0])
 		},
 		"atanh": func(args ...interface{}) (interface{}, error) {
 			if len(args) != 1 {
 				return nil, fmt.Errorf("atanh() expects exactly one argument")
 			}
-			x, ok := toFloat64(args[0])
-			if !ok {
-				return nil, fmt.Errorf("invalid argument for atanh(): %v", args[0])
+			if x, ok := toFloat64(args[0]); ok {
+				return math.Atanh(x), nil
+			} else if d, ok := toDataSlice(args[0]); ok {
+				cuda.AtanhGovaluate(d)
+				return d, nil
 			}
-			return math.Atanh(x), nil
+			return nil, fmt.Errorf("invalid argument for atanh(): %v", args[0])
 		},
 		"cbrt": func(args ...interface{}) (interface{}, error) {
 			if len(args) != 1 {
 				return nil, fmt.Errorf("cbrt() expects exactly one argument")
 			}
-			x, ok := toFloat64(args[0])
-			if !ok {
-				return nil, fmt.Errorf("invalid argument for cbrt(): %v", args[0])
+			if x, ok := toFloat64(args[0]); ok {
+				return math.Cbrt(x), nil
+			} else if d, ok := toDataSlice(args[0]); ok {
+				cuda.CbrtGovaluate(d)
+				return d, nil
 			}
-			return math.Cbrt(x), nil
+			return nil, fmt.Errorf("invalid argument for cbrt(): %v", args[0])
 		},
 		"ceil": func(args ...interface{}) (interface{}, error) {
 			if len(args) != 1 {
 				return nil, fmt.Errorf("ceil() expects exactly one argument")
 			}
-			x, ok := toFloat64(args[0])
-			if !ok {
-				return nil, fmt.Errorf("invalid argument for ceil(): %v", args[0])
+			if x, ok := toFloat64(args[0]); ok {
+				return math.Ceil(x), nil
+			} else if d, ok := toDataSlice(args[0]); ok {
+				cuda.CeilGovaluate(d)
+				return d, nil
 			}
-			return math.Ceil(x), nil
+			return nil, fmt.Errorf("invalid argument for ceil(): %v", args[0])
 		},
 		"cos": func(args ...interface{}) (interface{}, error) {
 			if len(args) != 1 {
 				return nil, fmt.Errorf("cos() expects exactly one argument")
 			}
-			x, ok := toFloat64(args[0])
-			if !ok {
-				return nil, fmt.Errorf("invalid argument for cos(): %v", args[0])
+			if x, ok := toFloat64(args[0]); ok {
+				return math.Cos(x), nil
+			} else if d, ok := toDataSlice(args[0]); ok {
+				cuda.CosGovaluate(d)
+				return d, nil
 			}
-			return math.Cos(x), nil
+			return nil, fmt.Errorf("invalid argument for cos(): %v", args[0])
 		},
 		"cosh": func(args ...interface{}) (interface{}, error) {
 			if len(args) != 1 {
 				return nil, fmt.Errorf("cosh() expects exactly one argument")
 			}
-			x, ok := toFloat64(args[0])
-			if !ok {
-				return nil, fmt.Errorf("invalid argument for cosh(): %v", args[0])
+			if x, ok := toFloat64(args[0]); ok {
+				return math.Cosh(x), nil
+			} else if d, ok := toDataSlice(args[0]); ok {
+				cuda.CoshGovaluate(d)
+				return d, nil
 			}
-			return math.Cosh(x), nil
+			return nil, fmt.Errorf("invalid argument for cosh(): %v", args[0])
 		},
 		"erf": func(args ...interface{}) (interface{}, error) {
 			if len(args) != 1 {
 				return nil, fmt.Errorf("erf() expects exactly one argument")
 			}
-			x, ok := toFloat64(args[0])
-			if !ok {
-				return nil, fmt.Errorf("invalid argument for erf(): %v", args[0])
+			if x, ok := toFloat64(args[0]); ok {
+				return math.Erf(x), nil
+			} else if d, ok := toDataSlice(args[0]); ok {
+				cuda.ErfGovaluate(d)
+				return d, nil
 			}
-			return math.Erf(x), nil
+			return nil, fmt.Errorf("invalid argument for erf(): %v", args[0])
 		},
 		"erfc": func(args ...interface{}) (interface{}, error) {
 			if len(args) != 1 {
 				return nil, fmt.Errorf("erfc() expects exactly one argument")
 			}
-			x, ok := toFloat64(args[0])
-			if !ok {
-				return nil, fmt.Errorf("invalid argument for erfc(): %v", args[0])
+			if x, ok := toFloat64(args[0]); ok {
+				return math.Erfc(x), nil
+			} else if d, ok := toDataSlice(args[0]); ok {
+				cuda.ErfcGovaluate(d)
+				return d, nil
 			}
-			return math.Erfc(x), nil
+			return nil, fmt.Errorf("invalid argument for erfc(): %v", args[0])
 		},
 		"exp": func(args ...interface{}) (interface{}, error) {
 			if len(args) != 1 {
 				return nil, fmt.Errorf("exp() expects exactly one argument")
 			}
-			x, ok := toFloat64(args[0])
-			if !ok {
-				return nil, fmt.Errorf("invalid argument for exp(): %v", args[0])
+			if x, ok := toFloat64(args[0]); ok {
+				return math.Exp(x), nil
+			} else if d, ok := toDataSlice(args[0]); ok {
+				cuda.ExpGovaluate(d)
+				return d, nil
 			}
-			return math.Exp(x), nil
+			return nil, fmt.Errorf("invalid argument for exp(): %v", args[0])
 		},
 		"exp2": func(args ...interface{}) (interface{}, error) {
 			if len(args) != 1 {
 				return nil, fmt.Errorf("exp2() expects exactly one argument")
 			}
-			x, ok := toFloat64(args[0])
-			if !ok {
-				return nil, fmt.Errorf("invalid argument for exp2(): %v", args[0])
+			if x, ok := toFloat64(args[0]); ok {
+				return math.Exp2(x), nil
+			} else if d, ok := toDataSlice(args[0]); ok {
+				cuda.Exp2Govaluate(d)
+				return d, nil
 			}
-			return math.Exp2(x), nil
+			return nil, fmt.Errorf("invalid argument for exp2(): %v", args[0])
 		},
 		"expm1": func(args ...interface{}) (interface{}, error) {
 			if len(args) != 1 {
 				return nil, fmt.Errorf("expm1() expects exactly one argument")
 			}
-			x, ok := toFloat64(args[0])
-			if !ok {
-				return nil, fmt.Errorf("invalid argument for expm1(): %v", args[0])
+			if x, ok := toFloat64(args[0]); ok {
+				return math.Expm1(x), nil
+			} else if d, ok := toDataSlice(args[0]); ok {
+				cuda.Expm1Govaluate(d)
+				return d, nil
 			}
-			return math.Expm1(x), nil
+			return nil, fmt.Errorf("invalid argument for expm1(): %v", args[0])
 		},
 		"floor": func(args ...interface{}) (interface{}, error) {
 			if len(args) != 1 {
 				return nil, fmt.Errorf("floor() expects exactly one argument")
 			}
-			x, ok := toFloat64(args[0])
-			if !ok {
-				return nil, fmt.Errorf("invalid argument for floor(): %v", args[0])
+			if x, ok := toFloat64(args[0]); ok {
+				return math.Floor(x), nil
+			} else if d, ok := toDataSlice(args[0]); ok {
+				cuda.FloorGovaluate(d)
+				return d, nil
 			}
-			return math.Floor(x), nil
+			return nil, fmt.Errorf("invalid argument for floor(): %v", args[0])
 		},
 		"gamma": func(args ...interface{}) (interface{}, error) {
 			if len(args) != 1 {
 				return nil, fmt.Errorf("gamma() expects exactly one argument")
 			}
-			x, ok := toFloat64(args[0])
-			if !ok {
-				return nil, fmt.Errorf("invalid argument for gamma(): %v", args[0])
+			if x, ok := toFloat64(args[0]); ok {
+				return math.Gamma(x), nil
+			} else if d, ok := toDataSlice(args[0]); ok {
+				cuda.GammaGovaluate(d)
+				return d, nil
 			}
-			return math.Gamma(x), nil
+			return nil, fmt.Errorf("invalid argument for gamma(): %v", args[0])
 		},
 		"j0": func(args ...interface{}) (interface{}, error) {
 			if len(args) != 1 {
 				return nil, fmt.Errorf("j0() expects exactly one argument")
 			}
-			x, ok := toFloat64(args[0])
-			if !ok {
-				return nil, fmt.Errorf("invalid argument for j0(): %v", args[0])
+			if x, ok := toFloat64(args[0]); ok {
+				return math.J0(x), nil
+			} else if d, ok := toDataSlice(args[0]); ok {
+				cuda.J0Govaluate(d)
+				return d, nil
 			}
-			return math.J0(x), nil
+			return nil, fmt.Errorf("invalid argument for j0(): %v", args[0])
 		},
 		"j1": func(args ...interface{}) (interface{}, error) {
 			if len(args) != 1 {
 				return nil, fmt.Errorf("j1() expects exactly one argument")
 			}
-			x, ok := toFloat64(args[0])
-			if !ok {
-				return nil, fmt.Errorf("invalid argument for j1(): %v", args[0])
+			if x, ok := toFloat64(args[0]); ok {
+				return math.J1(x), nil
+			} else if d, ok := toDataSlice(args[0]); ok {
+				cuda.J1Govaluate(d)
+				return d, nil
 			}
-			return math.J1(x), nil
+			return nil, fmt.Errorf("invalid argument for j1(): %v", args[0])
 		},
 		"log": func(args ...interface{}) (interface{}, error) {
 			if len(args) != 1 {
 				return nil, fmt.Errorf("log() expects exactly one argument")
 			}
-			x, ok := toFloat64(args[0])
-			if !ok {
-				return nil, fmt.Errorf("invalid argument for log(): %v", args[0])
+			if x, ok := toFloat64(args[0]); ok {
+				return math.Log(x), nil
+			} else if d, ok := toDataSlice(args[0]); ok {
+				cuda.LogGovaluate(d)
+				return d, nil
 			}
-			return math.Log(x), nil
+			return nil, fmt.Errorf("invalid argument for log(): %v", args[0])
 		},
 		"log10": func(args ...interface{}) (interface{}, error) {
 			if len(args) != 1 {
 				return nil, fmt.Errorf("log10() expects exactly one argument")
 			}
-			x, ok := toFloat64(args[0])
-			if !ok {
-				return nil, fmt.Errorf("invalid argument for log10(): %v", args[0])
+			if x, ok := toFloat64(args[0]); ok {
+				return math.Log10(x), nil
+			} else if d, ok := toDataSlice(args[0]); ok {
+				cuda.Log10Govaluate(d)
+				return d, nil
 			}
-			return math.Log10(x), nil
+			return nil, fmt.Errorf("invalid argument for log10(): %v", args[0])
 		},
 		"log1p": func(args ...interface{}) (interface{}, error) {
 			if len(args) != 1 {
 				return nil, fmt.Errorf("log1p() expects exactly one argument")
 			}
-			x, ok := toFloat64(args[0])
-			if !ok {
-				return nil, fmt.Errorf("invalid argument for log1p(): %v", args[0])
+			if x, ok := toFloat64(args[0]); ok {
+				return math.Log1p(x), nil
+			} else if d, ok := toDataSlice(args[0]); ok {
+				cuda.Log1pGovaluate(d)
+				return d, nil
 			}
-			return math.Log1p(x), nil
+			return nil, fmt.Errorf("invalid argument for log1p(): %v", args[0])
 		},
 		"log2": func(args ...interface{}) (interface{}, error) {
 			if len(args) != 1 {
 				return nil, fmt.Errorf("log2() expects exactly one argument")
 			}
-			x, ok := toFloat64(args[0])
-			if !ok {
-				return nil, fmt.Errorf("invalid argument for log2(): %v", args[0])
+			if x, ok := toFloat64(args[0]); ok {
+				return math.Log2(x), nil
+			} else if d, ok := toDataSlice(args[0]); ok {
+				cuda.Log2Govaluate(d)
+				return d, nil
 			}
-			return math.Log2(x), nil
+			return nil, fmt.Errorf("invalid argument for log2(): %v", args[0])
 		},
 		"logb": func(args ...interface{}) (interface{}, error) {
 			if len(args) != 1 {
 				return nil, fmt.Errorf("logb() expects exactly one argument")
 			}
-			x, ok := toFloat64(args[0])
-			if !ok {
-				return nil, fmt.Errorf("invalid argument for logb(): %v", args[0])
+			if x, ok := toFloat64(args[0]); ok {
+				return math.Logb(x), nil
+			} else if d, ok := toDataSlice(args[0]); ok {
+				cuda.LogbGovaluate(d)
+				return d, nil
 			}
-			return math.Logb(x), nil
+			return nil, fmt.Errorf("invalid argument for logb(): %v", args[0])
 		},
 		"sin": func(args ...interface{}) (interface{}, error) {
 			if len(args) != 1 {
 				return nil, fmt.Errorf("sin() expects exactly one argument")
 			}
-			x, ok := toFloat64(args[0])
-			if !ok {
-				return nil, fmt.Errorf("invalid argument for sin(): %v", args[0])
+			if x, ok := toFloat64(args[0]); ok {
+				return math.Sin(x), nil
+			} else if d, ok := toDataSlice(args[0]); ok {
+				cuda.SinGovaluate(d)
+				return d, nil
 			}
-			return math.Sin(x), nil
+			return nil, fmt.Errorf("invalid argument for sin(): %v", args[0])
 		},
 		"sinh": func(args ...interface{}) (interface{}, error) {
 			if len(args) != 1 {
 				return nil, fmt.Errorf("sinh() expects exactly one argument")
 			}
-			x, ok := toFloat64(args[0])
-			if !ok {
-				return nil, fmt.Errorf("invalid argument for sinh(): %v", args[0])
+			if x, ok := toFloat64(args[0]); ok {
+				return math.Sinh(x), nil
+			} else if d, ok := toDataSlice(args[0]); ok {
+				cuda.SinhGovaluate(d)
+				return d, nil
 			}
-			return math.Sinh(x), nil
+			return nil, fmt.Errorf("invalid argument for sinh(): %v", args[0])
 		},
 		"sqrt": func(args ...interface{}) (interface{}, error) {
 			if len(args) != 1 {
 				return nil, fmt.Errorf("sqrt() expects exactly one argument")
 			}
-			x, ok := toFloat64(args[0])
-			if !ok {
-				return nil, fmt.Errorf("invalid argument for sqrt(): %v", args[0])
+			if x, ok := toFloat64(args[0]); ok {
+				return math.Sqrt(x), nil
+			} else if d, ok := toDataSlice(args[0]); ok {
+				cuda.SqrtGovaluate(d)
+				return d, nil
 			}
-			return math.Sqrt(x), nil
+			return nil, fmt.Errorf("invalid argument for sqrt(): %v", args[0])
 		},
 		"tan": func(args ...interface{}) (interface{}, error) {
 			if len(args) != 1 {
 				return nil, fmt.Errorf("tan() expects exactly one argument")
 			}
-			x, ok := toFloat64(args[0])
-			if !ok {
-				return nil, fmt.Errorf("invalid argument for tan(): %v", args[0])
+			if x, ok := toFloat64(args[0]); ok {
+				return math.Tan(x), nil
+			} else if d, ok := toDataSlice(args[0]); ok {
+				cuda.TanGovaluate(d)
+				return d, nil
 			}
-			return math.Tan(x), nil
+			return nil, fmt.Errorf("invalid argument for tan(): %v", args[0])
 		},
 		"tanh": func(args ...interface{}) (interface{}, error) {
 			if len(args) != 1 {
 				return nil, fmt.Errorf("tanh() expects exactly one argument")
 			}
-			x, ok := toFloat64(args[0])
-			if !ok {
-				return nil, fmt.Errorf("invalid argument for tanh(): %v", args[0])
+			if x, ok := toFloat64(args[0]); ok {
+				return math.Tanh(x), nil
+			} else if d, ok := toDataSlice(args[0]); ok {
+				cuda.TanhGovaluate(d)
+				return d, nil
 			}
-			return math.Tanh(x), nil
+			return nil, fmt.Errorf("invalid argument for tanh(): %v", args[0])
 		},
 		"trunc": func(args ...interface{}) (interface{}, error) {
 			if len(args) != 1 {
 				return nil, fmt.Errorf("trunc() expects exactly one argument")
 			}
-			x, ok := toFloat64(args[0])
-			if !ok {
-				return nil, fmt.Errorf("invalid argument for trunc(): %v", args[0])
+			if x, ok := toFloat64(args[0]); ok {
+				return math.Trunc(x), nil
+			} else if d, ok := toDataSlice(args[0]); ok {
+				cuda.TruncGovaluate(d)
+				return d, nil
 			}
-			return math.Trunc(x), nil
+			return nil, fmt.Errorf("invalid argument for trunc(): %v", args[0])
 		},
 		"y0": func(args ...interface{}) (interface{}, error) {
 			if len(args) != 1 {
 				return nil, fmt.Errorf("y0() expects exactly one argument")
 			}
-			x, ok := toFloat64(args[0])
-			if !ok {
-				return nil, fmt.Errorf("invalid argument for y0(): %v", args[0])
+			if x, ok := toFloat64(args[0]); ok {
+				return math.Y0(x), nil
+			} else if d, ok := toDataSlice(args[0]); ok {
+				cuda.Y0Govaluate(d)
+				return d, nil
 			}
-			return math.Y0(x), nil
+			return nil, fmt.Errorf("invalid argument for y0(): %v", args[0])
 		},
 		"y1": func(args ...interface{}) (interface{}, error) {
 			if len(args) != 1 {
 				return nil, fmt.Errorf("y1() expects exactly one argument")
 			}
-			x, ok := toFloat64(args[0])
-			if !ok {
-				return nil, fmt.Errorf("invalid argument for y1(): %v", args[0])
+			if x, ok := toFloat64(args[0]); ok {
+				return math.Y1(x), nil
+			} else if d, ok := toDataSlice(args[0]); ok {
+				cuda.Y1Govaluate(d)
+				return d, nil
 			}
-			return math.Y1(x), nil
+			return nil, fmt.Errorf("invalid argument for y1(): %v", args[0])
 		},
+		"ilogb": func(args ...interface{}) (interface{}, error) {
+			if len(args) != 1 {
+				return nil, fmt.Errorf("ilogb() expects exactly one argument")
+			}
+			if x, ok := toFloat64(args[0]); ok {
+				return math.Ilogb(x), nil
+			} else if d, ok := toDataSlice(args[0]); ok {
+				cuda.IlogbGovaluate(d)
+				return d, nil
+			}
+			return nil, fmt.Errorf("invalid argument for ilogb(): %v", args[0])
+		},
+
+		// Custom one-argument functions
+		"heaviside": func(args ...interface{}) (interface{}, error) {
+			if len(args) != 1 {
+				return nil, fmt.Errorf("heaviside() expects exactly one argument")
+			}
+			if x, ok := toFloat64(args[0]); ok {
+				return heaviside(x), nil
+			} else if d, ok := toDataSlice(args[0]); ok {
+				cuda.HeavisideGovaluate(d)
+				return d, nil
+			}
+			return nil, fmt.Errorf("invalid argument for heaviside(): %v", args[0])
+		},
+		"norm": func(args ...interface{}) (interface{}, error) {
+			if len(args) != 1 {
+				return nil, fmt.Errorf("norm() expects exactly one argument")
+			}
+			if x, ok := toFloat64(args[0]); ok {
+				return norm(x), nil
+			} else if d, ok := toDataSlice(args[0]); ok {
+				cuda.NormGovaluate(d)
+				return d, nil
+			}
+			return nil, fmt.Errorf("invalid argument for norm(): %v", args[0])
+		},
+		"sinc": func(args ...interface{}) (interface{}, error) {
+			if len(args) != 1 {
+				return nil, fmt.Errorf("sinc() expects exactly one argument")
+			}
+			if x, ok := toFloat64(args[0]); ok {
+				return sinc(x), nil
+			} else if d, ok := toDataSlice(args[0]); ok {
+				cuda.SincGovaluate(d)
+				return d, nil
+			}
+			return nil, fmt.Errorf("invalid argument for sinc(): %v", args[0])
+		},
+
+		// Functions with two arguments (left unchanged)
 		"yn": func(args ...interface{}) (interface{}, error) {
 			if len(args) != 2 {
 				return nil, fmt.Errorf("yn() expects exactly two arguments")
@@ -366,26 +486,6 @@ func NewExprEvaluator(expressionStr string) (*ExprEvaluator, error) {
 				return nil, fmt.Errorf("invalid arguments for yn(): %v, %v", args[0], args[1])
 			}
 			return math.Yn(n, x), nil
-		},
-		"ilogb": func(args ...interface{}) (interface{}, error) {
-			if len(args) != 1 {
-				return nil, fmt.Errorf("ilogb() expects exactly one argument")
-			}
-			x, ok := toFloat64(args[0])
-			if !ok {
-				return nil, fmt.Errorf("invalid argument for ilogb(): %v", args[0])
-			}
-			return math.Ilogb(x), nil
-		},
-		"pow10": func(args ...interface{}) (interface{}, error) {
-			if len(args) != 1 {
-				return nil, fmt.Errorf("pow10() expects exactly one argument")
-			}
-			x, ok := toInt(args[0])
-			if !ok {
-				return nil, fmt.Errorf("invalid argument for pow10(): %v", args[0])
-			}
-			return math.Pow10(x), nil
 		},
 		"atan2": func(args ...interface{}) (interface{}, error) {
 			if len(args) != 2 {
@@ -421,26 +521,44 @@ func NewExprEvaluator(expressionStr string) (*ExprEvaluator, error) {
 			return math.Remainder(x, y), nil
 		},
 		"max": func(args ...interface{}) (interface{}, error) {
-			if len(args) != 2 {
-				return nil, fmt.Errorf("max() expects exactly two arguments")
+			if len(args) != 2 && len(args) != 1 {
+				return nil, fmt.Errorf("max() expects two or one argument(s)")
 			}
-			x, ok1 := toFloat64(args[0])
-			y, ok2 := toFloat64(args[1])
-			if !ok1 || !ok2 {
-				return nil, fmt.Errorf("invalid arguments for max(): %v, %v", args[0], args[1])
+			if len(args) == 2 {
+				x, ok1 := toFloat64(args[0])
+				y, ok2 := toFloat64(args[1])
+				if !ok1 || !ok2 {
+					return nil, fmt.Errorf("invalid arguments for max(): %v, %v", args[0], args[1])
+				}
+				return math.Max(x, y), nil
+			} else {
+				d, ok3 := toDataSlice(args[0])
+				if ok3 {
+					return cuda.MaxGovaluate(d), nil
+				} else {
+					return nil, fmt.Errorf("invalid argument for max(): %v", args[0])
+				}
 			}
-			return math.Max(x, y), nil
 		},
 		"min": func(args ...interface{}) (interface{}, error) {
-			if len(args) != 2 {
-				return nil, fmt.Errorf("min() expects exactly two arguments")
+			if len(args) != 2 && len(args) != 1 {
+				return nil, fmt.Errorf("min() expects two or one argument(s)")
 			}
-			x, ok1 := toFloat64(args[0])
-			y, ok2 := toFloat64(args[1])
-			if !ok1 || !ok2 {
-				return nil, fmt.Errorf("invalid arguments for min(): %v, %v", args[0], args[1])
+			if len(args) == 2 {
+				x, ok1 := toFloat64(args[0])
+				y, ok2 := toFloat64(args[1])
+				if !ok1 || !ok2 {
+					return nil, fmt.Errorf("invalid arguments for min(): %v, %v", args[0], args[1])
+				}
+				return math.Min(x, y), nil
+			} else {
+				d, ok3 := toDataSlice(args[0])
+				if ok3 {
+					return cuda.MinGovaluate(d), nil
+				} else {
+					return nil, fmt.Errorf("invalid argument for min(): %v", args[0])
+				}
 			}
-			return math.Min(x, y), nil
 		},
 		"mod": func(args ...interface{}) (interface{}, error) {
 			if len(args) != 2 {
@@ -449,7 +567,12 @@ func NewExprEvaluator(expressionStr string) (*ExprEvaluator, error) {
 			x, ok1 := toFloat64(args[0])
 			y, ok2 := toFloat64(args[1])
 			if !ok1 || !ok2 {
-				return nil, fmt.Errorf("invalid arguments for mod(): %v, %v", args[0], args[1])
+				d1, ok3 := toDataSlice(args[0])
+				d2, ok4 := toDataSlice(args[1])
+				if !ok1 && !ok2 && !ok3 && !ok4 {
+					return nil, fmt.Errorf("invalid arguments for pow(): %v, %v", args[0], args[1])
+				}
+				return govaluate.GPUCalc(d1, d2, x, y, ok3, ok4, cuda.ModGovaluate3X3, cuda.ModGovaluate3X1, cuda.ModGovaluate1X3), nil
 			}
 			return math.Mod(x, y), nil
 		},
@@ -460,7 +583,12 @@ func NewExprEvaluator(expressionStr string) (*ExprEvaluator, error) {
 			x, ok1 := toFloat64(args[0])
 			y, ok2 := toFloat64(args[1])
 			if !ok1 || !ok2 {
-				return nil, fmt.Errorf("invalid arguments for pow(): %v, %v", args[0], args[1])
+				d1, ok3 := toDataSlice(args[0])
+				d2, ok4 := toDataSlice(args[1])
+				if !ok1 && !ok2 && !ok3 && !ok4 {
+					return nil, fmt.Errorf("invalid arguments for pow(): %v, %v", args[0], args[1])
+				}
+				return govaluate.GPUCalc(d1, d2, x, y, ok3, ok4, cuda.PowGovaluate3X3, cuda.PowGovaluate3X1, cuda.PowGovaluate1X3), nil
 			}
 			return math.Pow(x, y), nil
 		},
@@ -475,38 +603,18 @@ func NewExprEvaluator(expressionStr string) (*ExprEvaluator, error) {
 			}
 			return math.Ldexp(x, exp), nil
 		},
+		"pow10": func(args ...interface{}) (interface{}, error) {
+			if len(args) != 1 {
+				return nil, fmt.Errorf("pow10() expects exactly one argument")
+			}
+			x, ok := toInt(args[0])
+			if !ok {
+				return nil, fmt.Errorf("invalid argument for pow10(): %v", args[0])
+			}
+			return math.Pow10(x), nil
+		},
 
-		// Custom functions
-		"heaviside": func(args ...interface{}) (interface{}, error) {
-			if len(args) != 1 {
-				return nil, fmt.Errorf("heaviside() expects exactly one argument")
-			}
-			x, ok := toFloat64(args[0])
-			if !ok {
-				return nil, fmt.Errorf("invalid argument for heaviside(): %v", args[0])
-			}
-			return heaviside(x), nil
-		},
-		"norm": func(args ...interface{}) (interface{}, error) {
-			if len(args) != 1 {
-				return nil, fmt.Errorf("norm() expects exactly one argument")
-			}
-			x, ok := toFloat64(args[0])
-			if !ok {
-				return nil, fmt.Errorf("invalid argument for norm(): %v", args[0])
-			}
-			return norm(x), nil
-		},
-		"sinc": func(args ...interface{}) (interface{}, error) {
-			if len(args) != 1 {
-				return nil, fmt.Errorf("sinc() expects exactly one argument")
-			}
-			x, ok := toFloat64(args[0])
-			if !ok {
-				return nil, fmt.Errorf("invalid argument for sinc(): %v", args[0])
-			}
-			return sinc(x), nil
-		},
+		// Random functions (unchanged)
 		"randSeed": func(args ...interface{}) (interface{}, error) {
 			if len(args) != 1 {
 				return nil, fmt.Errorf("randSeed() expects exactly one argument")
@@ -558,7 +666,7 @@ func NewExprEvaluator(expressionStr string) (*ExprEvaluator, error) {
 			evaluator.mu.Lock()
 			val := evaluator.rng.Intn(upper)
 			evaluator.mu.Unlock()
-			return float64(val), nil // Cast to float64
+			return float64(val), nil // cast to float64
 		},
 	}
 
@@ -574,18 +682,13 @@ func NewExprEvaluator(expressionStr string) (*ExprEvaluator, error) {
 }
 
 // Evaluate computes the result of the expression given a map of variables
-func (e *ExprEvaluator) Evaluate(vars map[string]interface{}) (float64, error) {
+func (e *ExprEvaluator) Evaluate(vars map[string]interface{}) (interface{}, error) {
 	result, err := e.expression.Evaluate(vars)
 	if err != nil {
 		return 0, fmt.Errorf("error evaluating expression: %w", err)
 	}
 
-	floatResult, ok := toFloat64(result)
-	if !ok {
-		return 0, fmt.Errorf("result is not a float64: %v", result)
-	}
-
-	return floatResult, nil
+	return result, nil
 }
 
 // toFloat64 safely converts various numeric types to float64
@@ -604,6 +707,12 @@ func toFloat64(arg interface{}) (float64, bool) {
 	default:
 		return 0, false
 	}
+}
+
+func toDataSlice(arg interface{}) (*data.Slice, bool) {
+	v, ok := arg.(*data.Slice)
+	return v, ok
+
 }
 
 // toInt safely converts various numeric types to int
@@ -673,7 +782,7 @@ func NewFunction(expressionStr string) (*Function, error) {
 }
 
 // Call evaluates the function with the provided variables
-func (f *Function) Call(vars map[string]interface{}) (float64, error) {
+func (f *Function) Call(vars map[string]interface{}) (interface{}, error) {
 	// Validate variables
 	if err := validateVariables(f.required, vars); err != nil {
 		return 0, err
