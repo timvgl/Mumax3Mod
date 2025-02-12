@@ -136,9 +136,8 @@ func cloneVars(original map[string]interface{}) map[string]interface{} {
 	}
 	return cloned
 }
-func (s optimize) generate_array_from_function(xDep, yDep, zDep bool, vars map[string]interface{}, cellsize [3]float64, j int, function *Function) []float32 {
+func (s optimize) generate_array_from_function(xDep, yDep, zDep bool, vars map[string]interface{}, cellsize [3]float64, j int, function *Function) *data.Slice {
 	size := [3]int{s.areaEnd[j][X] - s.areaStart[j][X], s.areaEnd[j][Y] - s.areaStart[j][Y], s.areaEnd[j][Z] - s.areaStart[j][Z]}
-	vector := make([]float32, size[X]*size[Y]*size[Z])
 	if zDep {
 		vars["z_length"] = size[Z]
 		vars["z_factor"] = cellsize[Z]
@@ -155,12 +154,31 @@ func (s optimize) generate_array_from_function(xDep, yDep, zDep bool, vars map[s
 	if err != nil {
 		panic(fmt.Sprintf("Failed to call function: %v", err))
 	}
-	fmt.Println(result)
+	resultDataSlice, ok1 := result.(*data.Slice)
+	resultFloat, ok2 := result.(float64)
+	if ok1 {
+		if resultDataSlice.Size() != size {
+			buf := cuda.Buffer(resultDataSlice.NComp(), size)
+			cuda.Zero(buf)
+			cuda.AddGovaluate3X3(buf, buf, resultDataSlice)
+			cuda.Recycle(resultDataSlice)
+			return buf
+		} else {
+			return resultDataSlice
+		}
+	}
+	if ok2 {
+		buf := cuda.Buffer(1, size)
+		cuda.Zero(buf)
+		cuda.AddGovaluate3X1(buf, buf, float32(resultFloat))
+		return buf
+	} else {
+		panic("Function does not return a data.Slice or float64")
+	}
 
-	return vector
 }
 
-func (s optimize) generate_vector_from_string(trial goptuna.Trial, q Quantity, j int, cellsize [3]float64, comp int) ([]float32, error) {
+func (s optimize) generate_vector_from_string(trial goptuna.Trial, q Quantity, j int, cellsize [3]float64, comp int) (*data.Slice, error) {
 	constants := map[string]interface{}{
 		"pi":  math.Pi,
 		"inf": math.Inf(1),
@@ -206,11 +224,11 @@ func (s optimize) generate_vector_from_string(trial goptuna.Trial, q Quantity, j
 	return vector, nil
 }
 
-func (s optimize) generate_vector_suggest_function(trial goptuna.Trial, q Quantity, j int) ([]float32, []float32, []float32, error) {
+func (s optimize) generate_vector_suggest_function(trial goptuna.Trial, q Quantity, j int) (*data.Slice, *data.Slice, *data.Slice, error) {
 	var (
-		vector0 []float32
-		vector1 []float32
-		vector2 []float32
+		vector0 *data.Slice
+		vector1 *data.Slice
+		vector2 *data.Slice
 	)
 	cellsize := MeshOf(q).CellSize()
 	var err error
@@ -244,25 +262,19 @@ func (s optimize) objective(trial goptuna.Trial) (float64, error) {
 			return 0, err
 		}
 		if q.NComp() == 3 {
-			suggestData := make([][]float32, 3)
+			suggestData := make([]*data.Slice, 3)
 			suggestData[0] = vector0
 			suggestData[1] = vector1
 			suggestData[2] = vector2
-			buf := data.SliceFromArray(suggestData, size)
-			bufGPU := cuda.Buffer(buf.NComp(), buf.Size())
+			bufGPU := data.SliceFromSlices(suggestData, size)
 			defer cuda.Recycle(bufGPU)
-			data.Copy(bufGPU, buf)
 			SetExcitation(NameOf(q), ExcitationSlice{NameOf(q), s.areaStart[ii], s.areaEnd[ii], bufGPU, q.NComp()})
-			buf.Free()
 		} else {
-			suggestData := make([][]float32, 1)
+			suggestData := make([]*data.Slice, 1)
 			suggestData[0] = vector0
-			buf := data.SliceFromArray(suggestData, size)
-			bufGPU := cuda.Buffer(buf.NComp(), buf.Size())
+			bufGPU := data.SliceFromSlices(suggestData, size)
 			defer cuda.Recycle(bufGPU)
-			data.Copy(bufGPU, buf)
 			SetScalarExcitation(NameOf(q), ScalarExcitationSlice{NameOf(q), s.areaStart[ii], s.areaEnd[ii], bufGPU})
-			buf.Free()
 		}
 	}
 	//t := time.Now()
@@ -459,7 +471,7 @@ func OptimizeQuantity(output Quantity, target dummyQuantity, variables []Quantit
 	fprint(optiTable, target.time-reduceTime)
 	for k := range variables {
 		size := [3]int{areaEnd[k][X] - areaStart[k][X], areaEnd[k][Y] - areaStart[k][Y], areaEnd[k][Z] - areaStart[k][Z]}
-		varData := make([][]float32, variables[k].NComp())
+		varData := make([]*data.Slice, variables[k].NComp())
 		cellsize := MeshOf(variables[k]).CellSize()
 		for c := range variables[k].NComp() {
 			xDep := false
@@ -472,36 +484,33 @@ func OptimizeQuantity(output Quantity, target dummyQuantity, variables []Quantit
 			}
 			sort.Strings(varsSlice)
 			for _, par := range varsSlice {
-				if par != "x" && par != "y" && par != "z" && par != "t" {
+				if par != "x_length" && par != "y_length" && par != "z_length" && par != "x_factor" && par != "y_factor" && par != "z_factor" && par != "t" {
 					val := bestParams[fmt.Sprintf("%s_%s_%d", NameOf(variables[k]), par, c)].(float64)
 					vars[par] = val
 					fprint(optiTable, "\t", val)
-				} else if par == "x" {
+				} else if par == "x_length" {
 					xDep = true
-				} else if par == "y" {
+				} else if par == "y_length" {
 					yDep = true
-				} else if par == "z" {
+				} else if par == "z_length" {
 					zDep = true
 				}
 			}
 			varData[c] = optim.generate_array_from_function(xDep, yDep, zDep, vars, cellsize, k, optim.parsedFunctions[k][c])
 		}
-		buf := data.SliceFromArray(varData, size)
+		bufGPU := data.SliceFromSlices(varData, size)
+		defer cuda.Recycle(bufGPU)
 		info := data.Meta{Time: target.time - reduceTime, Name: NameOf(variables[k]), Unit: UnitOf(variables[k]), CellSize: cellsize}
 		idx, ok := SaveCounter[NameOf(variables[k])]
 		if !ok {
 			idx = 0
 		}
-		saveAs_sync(OD()+fmt.Sprintf(FilenameFormat, NameOf(variables[k]), idx)+".ovf", buf, info, outputFormat)
+		saveAs_sync(OD()+fmt.Sprintf(FilenameFormat, NameOf(variables[k]), idx)+".ovf", bufGPU.HostCopy(), info, outputFormat)
 		SaveCounter[NameOf(variables[k])] = idx + 1
-		bufGPU := cuda.Buffer(buf.NComp(), buf.Size())
-		data.Copy(bufGPU, buf)
-		buf.Free()
 		if variables[k].NComp() == 3 {
 			SetExcitation(NameOf(variables[k]), ExcitationSlice{NameOf(variables[k]), optim.areaStart[k], optim.areaEnd[k], bufGPU, variables[k].NComp()})
 		} else {
 			SetScalarExcitation(NameOf(variables[k]), ScalarExcitationSlice{NameOf(variables[k]), optim.areaStart[k], optim.areaEnd[k], bufGPU})
-			//buf.Free()
 		}
 	}
 	fprint(optiTable, "\t", bestValue)
