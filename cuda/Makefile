@@ -79,7 +79,7 @@ AWRAPPERS := $(ACUDAFILES:.a.cu=_wrapper.a.go)
 .PHONY: all split_cuda_functions wrappers awrappers clean realclean
 
 
-all: split_cuda_functions wrappers awrappers
+all: wrappers awrappers
 	@echo "Built with CUDA version ${CUDA_VERSION}"
 	go install -v
 

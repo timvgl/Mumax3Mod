@@ -74,7 +74,7 @@ var expGovaluate_map = map[int]string{0: "",
 // expGovaluate PTX code for various compute capabilities.
 const (
 	expGovaluate_ptx_50 = `
-.version 8.2
+.version 8.4
 .target sm_50
 .address_size 64
 
@@ -110,17 +110,17 @@ const (
 	mov.f32 	%f2, 0f3F000000;
 	mov.f32 	%f3, 0f3BBB989D;
 	fma.rn.f32 	%f4, %f1, %f3, %f2;
-	mov.f32 	%f5, 0f3FB8AA3B;
-	mov.f32 	%f6, 0f437C0000;
-	cvt.sat.f32.f32 	%f7, %f4;
-	mov.f32 	%f8, 0f4B400001;
-	fma.rm.f32 	%f9, %f7, %f6, %f8;
-	add.f32 	%f10, %f9, 0fCB40007F;
-	neg.f32 	%f11, %f10;
-	fma.rn.f32 	%f12, %f1, %f5, %f11;
+	cvt.sat.f32.f32 	%f5, %f4;
+	mov.f32 	%f6, 0f4B400001;
+	mov.f32 	%f7, 0f437C0000;
+	fma.rm.f32 	%f8, %f5, %f7, %f6;
+	add.f32 	%f9, %f8, 0fCB40007F;
+	neg.f32 	%f10, %f9;
+	mov.f32 	%f11, 0f3FB8AA3B;
+	fma.rn.f32 	%f12, %f1, %f11, %f10;
 	mov.f32 	%f13, 0f32A57060;
 	fma.rn.f32 	%f14, %f1, %f13, %f12;
-	mov.b32 	%r9, %f9;
+	mov.b32 	%r9, %f8;
 	shl.b32 	%r10, %r9, 23;
 	mov.b32 	%f15, %r10;
 	ex2.approx.ftz.f32 	%f16, %f14;
@@ -134,7 +134,7 @@ $L__BB0_2:
 
 `
 	expGovaluate_ptx_52 = `
-.version 8.2
+.version 8.4
 .target sm_52
 .address_size 64
 
@@ -170,17 +170,17 @@ $L__BB0_2:
 	mov.f32 	%f2, 0f3F000000;
 	mov.f32 	%f3, 0f3BBB989D;
 	fma.rn.f32 	%f4, %f1, %f3, %f2;
-	mov.f32 	%f5, 0f3FB8AA3B;
-	mov.f32 	%f6, 0f437C0000;
-	cvt.sat.f32.f32 	%f7, %f4;
-	mov.f32 	%f8, 0f4B400001;
-	fma.rm.f32 	%f9, %f7, %f6, %f8;
-	add.f32 	%f10, %f9, 0fCB40007F;
-	neg.f32 	%f11, %f10;
-	fma.rn.f32 	%f12, %f1, %f5, %f11;
+	cvt.sat.f32.f32 	%f5, %f4;
+	mov.f32 	%f6, 0f4B400001;
+	mov.f32 	%f7, 0f437C0000;
+	fma.rm.f32 	%f8, %f5, %f7, %f6;
+	add.f32 	%f9, %f8, 0fCB40007F;
+	neg.f32 	%f10, %f9;
+	mov.f32 	%f11, 0f3FB8AA3B;
+	fma.rn.f32 	%f12, %f1, %f11, %f10;
 	mov.f32 	%f13, 0f32A57060;
 	fma.rn.f32 	%f14, %f1, %f13, %f12;
-	mov.b32 	%r9, %f9;
+	mov.b32 	%r9, %f8;
 	shl.b32 	%r10, %r9, 23;
 	mov.b32 	%f15, %r10;
 	ex2.approx.ftz.f32 	%f16, %f14;
@@ -194,7 +194,7 @@ $L__BB0_2:
 
 `
 	expGovaluate_ptx_53 = `
-.version 8.2
+.version 8.4
 .target sm_53
 .address_size 64
 
@@ -230,17 +230,17 @@ $L__BB0_2:
 	mov.f32 	%f2, 0f3F000000;
 	mov.f32 	%f3, 0f3BBB989D;
 	fma.rn.f32 	%f4, %f1, %f3, %f2;
-	mov.f32 	%f5, 0f3FB8AA3B;
-	mov.f32 	%f6, 0f437C0000;
-	cvt.sat.f32.f32 	%f7, %f4;
-	mov.f32 	%f8, 0f4B400001;
-	fma.rm.f32 	%f9, %f7, %f6, %f8;
-	add.f32 	%f10, %f9, 0fCB40007F;
-	neg.f32 	%f11, %f10;
-	fma.rn.f32 	%f12, %f1, %f5, %f11;
+	cvt.sat.f32.f32 	%f5, %f4;
+	mov.f32 	%f6, 0f4B400001;
+	mov.f32 	%f7, 0f437C0000;
+	fma.rm.f32 	%f8, %f5, %f7, %f6;
+	add.f32 	%f9, %f8, 0fCB40007F;
+	neg.f32 	%f10, %f9;
+	mov.f32 	%f11, 0f3FB8AA3B;
+	fma.rn.f32 	%f12, %f1, %f11, %f10;
 	mov.f32 	%f13, 0f32A57060;
 	fma.rn.f32 	%f14, %f1, %f13, %f12;
-	mov.b32 	%r9, %f9;
+	mov.b32 	%r9, %f8;
 	shl.b32 	%r10, %r9, 23;
 	mov.b32 	%f15, %r10;
 	ex2.approx.ftz.f32 	%f16, %f14;
@@ -254,7 +254,7 @@ $L__BB0_2:
 
 `
 	expGovaluate_ptx_60 = `
-.version 8.2
+.version 8.4
 .target sm_60
 .address_size 64
 
@@ -290,17 +290,17 @@ $L__BB0_2:
 	mov.f32 	%f2, 0f3F000000;
 	mov.f32 	%f3, 0f3BBB989D;
 	fma.rn.f32 	%f4, %f1, %f3, %f2;
-	mov.f32 	%f5, 0f3FB8AA3B;
-	mov.f32 	%f6, 0f437C0000;
-	cvt.sat.f32.f32 	%f7, %f4;
-	mov.f32 	%f8, 0f4B400001;
-	fma.rm.f32 	%f9, %f7, %f6, %f8;
-	add.f32 	%f10, %f9, 0fCB40007F;
-	neg.f32 	%f11, %f10;
-	fma.rn.f32 	%f12, %f1, %f5, %f11;
+	cvt.sat.f32.f32 	%f5, %f4;
+	mov.f32 	%f6, 0f4B400001;
+	mov.f32 	%f7, 0f437C0000;
+	fma.rm.f32 	%f8, %f5, %f7, %f6;
+	add.f32 	%f9, %f8, 0fCB40007F;
+	neg.f32 	%f10, %f9;
+	mov.f32 	%f11, 0f3FB8AA3B;
+	fma.rn.f32 	%f12, %f1, %f11, %f10;
 	mov.f32 	%f13, 0f32A57060;
 	fma.rn.f32 	%f14, %f1, %f13, %f12;
-	mov.b32 	%r9, %f9;
+	mov.b32 	%r9, %f8;
 	shl.b32 	%r10, %r9, 23;
 	mov.b32 	%f15, %r10;
 	ex2.approx.ftz.f32 	%f16, %f14;
@@ -314,7 +314,7 @@ $L__BB0_2:
 
 `
 	expGovaluate_ptx_61 = `
-.version 8.2
+.version 8.4
 .target sm_61
 .address_size 64
 
@@ -350,17 +350,17 @@ $L__BB0_2:
 	mov.f32 	%f2, 0f3F000000;
 	mov.f32 	%f3, 0f3BBB989D;
 	fma.rn.f32 	%f4, %f1, %f3, %f2;
-	mov.f32 	%f5, 0f3FB8AA3B;
-	mov.f32 	%f6, 0f437C0000;
-	cvt.sat.f32.f32 	%f7, %f4;
-	mov.f32 	%f8, 0f4B400001;
-	fma.rm.f32 	%f9, %f7, %f6, %f8;
-	add.f32 	%f10, %f9, 0fCB40007F;
-	neg.f32 	%f11, %f10;
-	fma.rn.f32 	%f12, %f1, %f5, %f11;
+	cvt.sat.f32.f32 	%f5, %f4;
+	mov.f32 	%f6, 0f4B400001;
+	mov.f32 	%f7, 0f437C0000;
+	fma.rm.f32 	%f8, %f5, %f7, %f6;
+	add.f32 	%f9, %f8, 0fCB40007F;
+	neg.f32 	%f10, %f9;
+	mov.f32 	%f11, 0f3FB8AA3B;
+	fma.rn.f32 	%f12, %f1, %f11, %f10;
 	mov.f32 	%f13, 0f32A57060;
 	fma.rn.f32 	%f14, %f1, %f13, %f12;
-	mov.b32 	%r9, %f9;
+	mov.b32 	%r9, %f8;
 	shl.b32 	%r10, %r9, 23;
 	mov.b32 	%f15, %r10;
 	ex2.approx.ftz.f32 	%f16, %f14;
@@ -374,7 +374,7 @@ $L__BB0_2:
 
 `
 	expGovaluate_ptx_62 = `
-.version 8.2
+.version 8.4
 .target sm_62
 .address_size 64
 
@@ -410,17 +410,17 @@ $L__BB0_2:
 	mov.f32 	%f2, 0f3F000000;
 	mov.f32 	%f3, 0f3BBB989D;
 	fma.rn.f32 	%f4, %f1, %f3, %f2;
-	mov.f32 	%f5, 0f3FB8AA3B;
-	mov.f32 	%f6, 0f437C0000;
-	cvt.sat.f32.f32 	%f7, %f4;
-	mov.f32 	%f8, 0f4B400001;
-	fma.rm.f32 	%f9, %f7, %f6, %f8;
-	add.f32 	%f10, %f9, 0fCB40007F;
-	neg.f32 	%f11, %f10;
-	fma.rn.f32 	%f12, %f1, %f5, %f11;
+	cvt.sat.f32.f32 	%f5, %f4;
+	mov.f32 	%f6, 0f4B400001;
+	mov.f32 	%f7, 0f437C0000;
+	fma.rm.f32 	%f8, %f5, %f7, %f6;
+	add.f32 	%f9, %f8, 0fCB40007F;
+	neg.f32 	%f10, %f9;
+	mov.f32 	%f11, 0f3FB8AA3B;
+	fma.rn.f32 	%f12, %f1, %f11, %f10;
 	mov.f32 	%f13, 0f32A57060;
 	fma.rn.f32 	%f14, %f1, %f13, %f12;
-	mov.b32 	%r9, %f9;
+	mov.b32 	%r9, %f8;
 	shl.b32 	%r10, %r9, 23;
 	mov.b32 	%f15, %r10;
 	ex2.approx.ftz.f32 	%f16, %f14;
@@ -434,7 +434,7 @@ $L__BB0_2:
 
 `
 	expGovaluate_ptx_70 = `
-.version 8.2
+.version 8.4
 .target sm_70
 .address_size 64
 
@@ -470,17 +470,17 @@ $L__BB0_2:
 	mov.f32 	%f2, 0f3F000000;
 	mov.f32 	%f3, 0f3BBB989D;
 	fma.rn.f32 	%f4, %f1, %f3, %f2;
-	mov.f32 	%f5, 0f3FB8AA3B;
-	mov.f32 	%f6, 0f437C0000;
-	cvt.sat.f32.f32 	%f7, %f4;
-	mov.f32 	%f8, 0f4B400001;
-	fma.rm.f32 	%f9, %f7, %f6, %f8;
-	add.f32 	%f10, %f9, 0fCB40007F;
-	neg.f32 	%f11, %f10;
-	fma.rn.f32 	%f12, %f1, %f5, %f11;
+	cvt.sat.f32.f32 	%f5, %f4;
+	mov.f32 	%f6, 0f4B400001;
+	mov.f32 	%f7, 0f437C0000;
+	fma.rm.f32 	%f8, %f5, %f7, %f6;
+	add.f32 	%f9, %f8, 0fCB40007F;
+	neg.f32 	%f10, %f9;
+	mov.f32 	%f11, 0f3FB8AA3B;
+	fma.rn.f32 	%f12, %f1, %f11, %f10;
 	mov.f32 	%f13, 0f32A57060;
 	fma.rn.f32 	%f14, %f1, %f13, %f12;
-	mov.b32 	%r9, %f9;
+	mov.b32 	%r9, %f8;
 	shl.b32 	%r10, %r9, 23;
 	mov.b32 	%f15, %r10;
 	ex2.approx.ftz.f32 	%f16, %f14;
@@ -494,7 +494,7 @@ $L__BB0_2:
 
 `
 	expGovaluate_ptx_72 = `
-.version 8.2
+.version 8.4
 .target sm_72
 .address_size 64
 
@@ -530,17 +530,17 @@ $L__BB0_2:
 	mov.f32 	%f2, 0f3F000000;
 	mov.f32 	%f3, 0f3BBB989D;
 	fma.rn.f32 	%f4, %f1, %f3, %f2;
-	mov.f32 	%f5, 0f3FB8AA3B;
-	mov.f32 	%f6, 0f437C0000;
-	cvt.sat.f32.f32 	%f7, %f4;
-	mov.f32 	%f8, 0f4B400001;
-	fma.rm.f32 	%f9, %f7, %f6, %f8;
-	add.f32 	%f10, %f9, 0fCB40007F;
-	neg.f32 	%f11, %f10;
-	fma.rn.f32 	%f12, %f1, %f5, %f11;
+	cvt.sat.f32.f32 	%f5, %f4;
+	mov.f32 	%f6, 0f4B400001;
+	mov.f32 	%f7, 0f437C0000;
+	fma.rm.f32 	%f8, %f5, %f7, %f6;
+	add.f32 	%f9, %f8, 0fCB40007F;
+	neg.f32 	%f10, %f9;
+	mov.f32 	%f11, 0f3FB8AA3B;
+	fma.rn.f32 	%f12, %f1, %f11, %f10;
 	mov.f32 	%f13, 0f32A57060;
 	fma.rn.f32 	%f14, %f1, %f13, %f12;
-	mov.b32 	%r9, %f9;
+	mov.b32 	%r9, %f8;
 	shl.b32 	%r10, %r9, 23;
 	mov.b32 	%f15, %r10;
 	ex2.approx.ftz.f32 	%f16, %f14;
@@ -554,7 +554,7 @@ $L__BB0_2:
 
 `
 	expGovaluate_ptx_75 = `
-.version 8.2
+.version 8.4
 .target sm_75
 .address_size 64
 
@@ -590,17 +590,17 @@ $L__BB0_2:
 	mov.f32 	%f2, 0f3F000000;
 	mov.f32 	%f3, 0f3BBB989D;
 	fma.rn.f32 	%f4, %f1, %f3, %f2;
-	mov.f32 	%f5, 0f3FB8AA3B;
-	mov.f32 	%f6, 0f437C0000;
-	cvt.sat.f32.f32 	%f7, %f4;
-	mov.f32 	%f8, 0f4B400001;
-	fma.rm.f32 	%f9, %f7, %f6, %f8;
-	add.f32 	%f10, %f9, 0fCB40007F;
-	neg.f32 	%f11, %f10;
-	fma.rn.f32 	%f12, %f1, %f5, %f11;
+	cvt.sat.f32.f32 	%f5, %f4;
+	mov.f32 	%f6, 0f4B400001;
+	mov.f32 	%f7, 0f437C0000;
+	fma.rm.f32 	%f8, %f5, %f7, %f6;
+	add.f32 	%f9, %f8, 0fCB40007F;
+	neg.f32 	%f10, %f9;
+	mov.f32 	%f11, 0f3FB8AA3B;
+	fma.rn.f32 	%f12, %f1, %f11, %f10;
 	mov.f32 	%f13, 0f32A57060;
 	fma.rn.f32 	%f14, %f1, %f13, %f12;
-	mov.b32 	%r9, %f9;
+	mov.b32 	%r9, %f8;
 	shl.b32 	%r10, %r9, 23;
 	mov.b32 	%f15, %r10;
 	ex2.approx.ftz.f32 	%f16, %f14;
@@ -614,7 +614,7 @@ $L__BB0_2:
 
 `
 	expGovaluate_ptx_80 = `
-.version 8.2
+.version 8.4
 .target sm_80
 .address_size 64
 
@@ -650,17 +650,17 @@ $L__BB0_2:
 	mov.f32 	%f2, 0f3F000000;
 	mov.f32 	%f3, 0f3BBB989D;
 	fma.rn.f32 	%f4, %f1, %f3, %f2;
-	mov.f32 	%f5, 0f3FB8AA3B;
-	mov.f32 	%f6, 0f437C0000;
-	cvt.sat.f32.f32 	%f7, %f4;
-	mov.f32 	%f8, 0f4B400001;
-	fma.rm.f32 	%f9, %f7, %f6, %f8;
-	add.f32 	%f10, %f9, 0fCB40007F;
-	neg.f32 	%f11, %f10;
-	fma.rn.f32 	%f12, %f1, %f5, %f11;
+	cvt.sat.f32.f32 	%f5, %f4;
+	mov.f32 	%f6, 0f4B400001;
+	mov.f32 	%f7, 0f437C0000;
+	fma.rm.f32 	%f8, %f5, %f7, %f6;
+	add.f32 	%f9, %f8, 0fCB40007F;
+	neg.f32 	%f10, %f9;
+	mov.f32 	%f11, 0f3FB8AA3B;
+	fma.rn.f32 	%f12, %f1, %f11, %f10;
 	mov.f32 	%f13, 0f32A57060;
 	fma.rn.f32 	%f14, %f1, %f13, %f12;
-	mov.b32 	%r9, %f9;
+	mov.b32 	%r9, %f8;
 	shl.b32 	%r10, %r9, 23;
 	mov.b32 	%f15, %r10;
 	ex2.approx.ftz.f32 	%f16, %f14;

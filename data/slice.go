@@ -107,7 +107,10 @@ func SliceFromSlices(data []*Slice, size [3]int) *Slice {
 		if data[i].memType != memType {
 			panic("memType mismatch")
 		}
-		ptrs[i] = data[i].DevPtr(i)
+		if data[i].NComp() != 1 {
+			panic("slice merge only with one comp slices possible")
+		}
+		ptrs[i] = data[i].DevPtr(0)
 	}
 	slc := SliceFromPtrs(size, CPUMemory, ptrs)
 	slc.LengthF = data[0].LengthF

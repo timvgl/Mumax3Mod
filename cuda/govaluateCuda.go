@@ -24,17 +24,19 @@ func getAxis(shape [3]int) int {
 
 func Fill1DWithCoords(dst *data.Slice, factor float32) {
 	size := dst.Size()
-	cfg := make3DConf(size)
+	cfg := make1DConf(prod(size))
 	for c := range dst.NComp() {
-		k_fill1DWithCoords_async(dst.DevPtr(c), factor, size[X], size[Y], size[Z], cfg)
+		k_fill1DWithCoords_async(dst.DevPtr(c), factor, prod(size), cfg)
 	}
 }
 
 func AddGovaluate3X3(dst, a, b *data.Slice) {
 	size := dst.Size()
+	sizeA := a.Size()
+	sizeB := b.Size()
 	cfg := make3DConf(size)
 	for c := range dst.NComp() {
-		k_addGovaluate3X3_async(dst.DevPtr(c), a.DevPtr(c), b.DevPtr(c), size[X], size[Y], size[Z], getAxis(a.Size()), getAxis(b.Size()), cfg)
+		k_addGovaluate3X3_async(dst.DevPtr(c), a.DevPtr(c), b.DevPtr(c), size[X], size[Y], size[Z], sizeA[X], sizeA[Y], sizeA[Z], sizeB[X], sizeB[Y], sizeB[Z], cfg)
 	}
 }
 
