@@ -19,10 +19,8 @@ var fill1DWithCoords_code cu.Function
 type fill1DWithCoords_args_t struct {
 	arg_dst    unsafe.Pointer
 	arg_factor float32
-	arg_Nx     int
-	arg_Ny     int
-	arg_Nz     int
-	argptr     [5]unsafe.Pointer
+	arg_N      int
+	argptr     [3]unsafe.Pointer
 	sync.Mutex
 }
 
@@ -33,13 +31,11 @@ func init() {
 	// CUDA driver kernel call wants pointers to arguments, set them up once.
 	fill1DWithCoords_args.argptr[0] = unsafe.Pointer(&fill1DWithCoords_args.arg_dst)
 	fill1DWithCoords_args.argptr[1] = unsafe.Pointer(&fill1DWithCoords_args.arg_factor)
-	fill1DWithCoords_args.argptr[2] = unsafe.Pointer(&fill1DWithCoords_args.arg_Nx)
-	fill1DWithCoords_args.argptr[3] = unsafe.Pointer(&fill1DWithCoords_args.arg_Ny)
-	fill1DWithCoords_args.argptr[4] = unsafe.Pointer(&fill1DWithCoords_args.arg_Nz)
+	fill1DWithCoords_args.argptr[2] = unsafe.Pointer(&fill1DWithCoords_args.arg_N)
 }
 
 // Wrapper for fill1DWithCoords CUDA kernel, asynchronous.
-func k_fill1DWithCoords_async(dst unsafe.Pointer, factor float32, Nx int, Ny int, Nz int, cfg *config) {
+func k_fill1DWithCoords_async(dst unsafe.Pointer, factor float32, N int, cfg *config) {
 	if Synchronous { // debug
 		Sync()
 		timer.Start("fill1DWithCoords")
@@ -54,9 +50,7 @@ func k_fill1DWithCoords_async(dst unsafe.Pointer, factor float32, Nx int, Ny int
 
 	fill1DWithCoords_args.arg_dst = dst
 	fill1DWithCoords_args.arg_factor = factor
-	fill1DWithCoords_args.arg_Nx = Nx
-	fill1DWithCoords_args.arg_Ny = Ny
-	fill1DWithCoords_args.arg_Nz = Nz
+	fill1DWithCoords_args.arg_N = N
 
 	args := fill1DWithCoords_args.argptr[:]
 	cu.LaunchKernel(fill1DWithCoords_code, cfg.Grid.X, cfg.Grid.Y, cfg.Grid.Z, cfg.Block.X, cfg.Block.Y, cfg.Block.Z, 0, stream0, args)
@@ -83,7 +77,7 @@ var fill1DWithCoords_map = map[int]string{0: "",
 // fill1DWithCoords PTX code for various compute capabilities.
 const (
 	fill1DWithCoords_ptx_50 = `
-.version 8.2
+.version 8.4
 .target sm_50
 .address_size 64
 
@@ -92,53 +86,34 @@ const (
 .visible .entry fill1DWithCoords(
 	.param .u64 fill1DWithCoords_param_0,
 	.param .f32 fill1DWithCoords_param_1,
-	.param .u32 fill1DWithCoords_param_2,
-	.param .u32 fill1DWithCoords_param_3,
-	.param .u32 fill1DWithCoords_param_4
+	.param .u32 fill1DWithCoords_param_2
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<8>;
-	.reg .b32 	%r<18>;
+	.reg .pred 	%p<2>;
+	.reg .f32 	%f<4>;
+	.reg .b32 	%r<9>;
 	.reg .b64 	%rd<5>;
 
 
 	ld.param.u64 	%rd1, [fill1DWithCoords_param_0];
 	ld.param.f32 	%f1, [fill1DWithCoords_param_1];
-	ld.param.u32 	%r4, [fill1DWithCoords_param_2];
-	ld.param.u32 	%r5, [fill1DWithCoords_param_3];
-	ld.param.u32 	%r6, [fill1DWithCoords_param_4];
-	mov.u32 	%r7, %ctaid.x;
-	mov.u32 	%r8, %ntid.x;
-	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r7, %r8, %r9;
-	mov.u32 	%r10, %ntid.y;
-	mov.u32 	%r11, %ctaid.y;
-	mov.u32 	%r12, %tid.y;
-	mad.lo.s32 	%r2, %r11, %r10, %r12;
-	mov.u32 	%r13, %ntid.z;
-	mov.u32 	%r14, %ctaid.z;
-	mov.u32 	%r15, %tid.z;
-	mad.lo.s32 	%r3, %r14, %r13, %r15;
-	setp.ge.s32 	%p1, %r1, %r4;
-	setp.ge.s32 	%p2, %r2, %r5;
-	or.pred  	%p3, %p1, %p2;
-	setp.ge.s32 	%p4, %r3, %r6;
-	or.pred  	%p5, %p3, %p4;
-	@%p5 bra 	$L__BB0_2;
+	ld.param.u32 	%r2, [fill1DWithCoords_param_2];
+	mov.u32 	%r3, %ctaid.y;
+	mov.u32 	%r4, %nctaid.x;
+	mov.u32 	%r5, %ctaid.x;
+	mad.lo.s32 	%r6, %r3, %r4, %r5;
+	mov.u32 	%r7, %ntid.x;
+	mov.u32 	%r8, %tid.x;
+	mad.lo.s32 	%r1, %r6, %r7, %r8;
+	setp.ge.s32 	%p1, %r1, %r2;
+	@%p1 bra 	$L__BB0_2;
 
 	cvta.to.global.u64 	%rd2, %rd1;
-	cvt.rn.f32.s32 	%f2, %r2;
-	cvt.rn.f32.s32 	%f3, %r1;
-	add.f32 	%f4, %f3, %f2;
-	cvt.rn.f32.s32 	%f5, %r3;
-	add.f32 	%f6, %f4, %f5;
-	mul.f32 	%f7, %f6, %f1;
-	mad.lo.s32 	%r16, %r3, %r5, %r2;
-	mad.lo.s32 	%r17, %r16, %r4, %r1;
-	mul.wide.s32 	%rd3, %r17, 4;
+	cvt.rn.f32.s32 	%f2, %r1;
+	mul.f32 	%f3, %f2, %f1;
+	mul.wide.s32 	%rd3, %r1, 4;
 	add.s64 	%rd4, %rd2, %rd3;
-	st.global.f32 	[%rd4], %f7;
+	st.global.f32 	[%rd4], %f3;
 
 $L__BB0_2:
 	ret;
@@ -147,7 +122,7 @@ $L__BB0_2:
 
 `
 	fill1DWithCoords_ptx_52 = `
-.version 8.2
+.version 8.4
 .target sm_52
 .address_size 64
 
@@ -156,53 +131,34 @@ $L__BB0_2:
 .visible .entry fill1DWithCoords(
 	.param .u64 fill1DWithCoords_param_0,
 	.param .f32 fill1DWithCoords_param_1,
-	.param .u32 fill1DWithCoords_param_2,
-	.param .u32 fill1DWithCoords_param_3,
-	.param .u32 fill1DWithCoords_param_4
+	.param .u32 fill1DWithCoords_param_2
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<8>;
-	.reg .b32 	%r<18>;
+	.reg .pred 	%p<2>;
+	.reg .f32 	%f<4>;
+	.reg .b32 	%r<9>;
 	.reg .b64 	%rd<5>;
 
 
 	ld.param.u64 	%rd1, [fill1DWithCoords_param_0];
 	ld.param.f32 	%f1, [fill1DWithCoords_param_1];
-	ld.param.u32 	%r4, [fill1DWithCoords_param_2];
-	ld.param.u32 	%r5, [fill1DWithCoords_param_3];
-	ld.param.u32 	%r6, [fill1DWithCoords_param_4];
-	mov.u32 	%r7, %ctaid.x;
-	mov.u32 	%r8, %ntid.x;
-	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r7, %r8, %r9;
-	mov.u32 	%r10, %ntid.y;
-	mov.u32 	%r11, %ctaid.y;
-	mov.u32 	%r12, %tid.y;
-	mad.lo.s32 	%r2, %r11, %r10, %r12;
-	mov.u32 	%r13, %ntid.z;
-	mov.u32 	%r14, %ctaid.z;
-	mov.u32 	%r15, %tid.z;
-	mad.lo.s32 	%r3, %r14, %r13, %r15;
-	setp.ge.s32 	%p1, %r1, %r4;
-	setp.ge.s32 	%p2, %r2, %r5;
-	or.pred  	%p3, %p1, %p2;
-	setp.ge.s32 	%p4, %r3, %r6;
-	or.pred  	%p5, %p3, %p4;
-	@%p5 bra 	$L__BB0_2;
+	ld.param.u32 	%r2, [fill1DWithCoords_param_2];
+	mov.u32 	%r3, %ctaid.y;
+	mov.u32 	%r4, %nctaid.x;
+	mov.u32 	%r5, %ctaid.x;
+	mad.lo.s32 	%r6, %r3, %r4, %r5;
+	mov.u32 	%r7, %ntid.x;
+	mov.u32 	%r8, %tid.x;
+	mad.lo.s32 	%r1, %r6, %r7, %r8;
+	setp.ge.s32 	%p1, %r1, %r2;
+	@%p1 bra 	$L__BB0_2;
 
 	cvta.to.global.u64 	%rd2, %rd1;
-	cvt.rn.f32.s32 	%f2, %r2;
-	cvt.rn.f32.s32 	%f3, %r1;
-	add.f32 	%f4, %f3, %f2;
-	cvt.rn.f32.s32 	%f5, %r3;
-	add.f32 	%f6, %f4, %f5;
-	mul.f32 	%f7, %f6, %f1;
-	mad.lo.s32 	%r16, %r3, %r5, %r2;
-	mad.lo.s32 	%r17, %r16, %r4, %r1;
-	mul.wide.s32 	%rd3, %r17, 4;
+	cvt.rn.f32.s32 	%f2, %r1;
+	mul.f32 	%f3, %f2, %f1;
+	mul.wide.s32 	%rd3, %r1, 4;
 	add.s64 	%rd4, %rd2, %rd3;
-	st.global.f32 	[%rd4], %f7;
+	st.global.f32 	[%rd4], %f3;
 
 $L__BB0_2:
 	ret;
@@ -211,7 +167,7 @@ $L__BB0_2:
 
 `
 	fill1DWithCoords_ptx_53 = `
-.version 8.2
+.version 8.4
 .target sm_53
 .address_size 64
 
@@ -220,53 +176,34 @@ $L__BB0_2:
 .visible .entry fill1DWithCoords(
 	.param .u64 fill1DWithCoords_param_0,
 	.param .f32 fill1DWithCoords_param_1,
-	.param .u32 fill1DWithCoords_param_2,
-	.param .u32 fill1DWithCoords_param_3,
-	.param .u32 fill1DWithCoords_param_4
+	.param .u32 fill1DWithCoords_param_2
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<8>;
-	.reg .b32 	%r<18>;
+	.reg .pred 	%p<2>;
+	.reg .f32 	%f<4>;
+	.reg .b32 	%r<9>;
 	.reg .b64 	%rd<5>;
 
 
 	ld.param.u64 	%rd1, [fill1DWithCoords_param_0];
 	ld.param.f32 	%f1, [fill1DWithCoords_param_1];
-	ld.param.u32 	%r4, [fill1DWithCoords_param_2];
-	ld.param.u32 	%r5, [fill1DWithCoords_param_3];
-	ld.param.u32 	%r6, [fill1DWithCoords_param_4];
-	mov.u32 	%r7, %ctaid.x;
-	mov.u32 	%r8, %ntid.x;
-	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r7, %r8, %r9;
-	mov.u32 	%r10, %ntid.y;
-	mov.u32 	%r11, %ctaid.y;
-	mov.u32 	%r12, %tid.y;
-	mad.lo.s32 	%r2, %r11, %r10, %r12;
-	mov.u32 	%r13, %ntid.z;
-	mov.u32 	%r14, %ctaid.z;
-	mov.u32 	%r15, %tid.z;
-	mad.lo.s32 	%r3, %r14, %r13, %r15;
-	setp.ge.s32 	%p1, %r1, %r4;
-	setp.ge.s32 	%p2, %r2, %r5;
-	or.pred  	%p3, %p1, %p2;
-	setp.ge.s32 	%p4, %r3, %r6;
-	or.pred  	%p5, %p3, %p4;
-	@%p5 bra 	$L__BB0_2;
+	ld.param.u32 	%r2, [fill1DWithCoords_param_2];
+	mov.u32 	%r3, %ctaid.y;
+	mov.u32 	%r4, %nctaid.x;
+	mov.u32 	%r5, %ctaid.x;
+	mad.lo.s32 	%r6, %r3, %r4, %r5;
+	mov.u32 	%r7, %ntid.x;
+	mov.u32 	%r8, %tid.x;
+	mad.lo.s32 	%r1, %r6, %r7, %r8;
+	setp.ge.s32 	%p1, %r1, %r2;
+	@%p1 bra 	$L__BB0_2;
 
 	cvta.to.global.u64 	%rd2, %rd1;
-	cvt.rn.f32.s32 	%f2, %r2;
-	cvt.rn.f32.s32 	%f3, %r1;
-	add.f32 	%f4, %f3, %f2;
-	cvt.rn.f32.s32 	%f5, %r3;
-	add.f32 	%f6, %f4, %f5;
-	mul.f32 	%f7, %f6, %f1;
-	mad.lo.s32 	%r16, %r3, %r5, %r2;
-	mad.lo.s32 	%r17, %r16, %r4, %r1;
-	mul.wide.s32 	%rd3, %r17, 4;
+	cvt.rn.f32.s32 	%f2, %r1;
+	mul.f32 	%f3, %f2, %f1;
+	mul.wide.s32 	%rd3, %r1, 4;
 	add.s64 	%rd4, %rd2, %rd3;
-	st.global.f32 	[%rd4], %f7;
+	st.global.f32 	[%rd4], %f3;
 
 $L__BB0_2:
 	ret;
@@ -275,7 +212,7 @@ $L__BB0_2:
 
 `
 	fill1DWithCoords_ptx_60 = `
-.version 8.2
+.version 8.4
 .target sm_60
 .address_size 64
 
@@ -284,53 +221,34 @@ $L__BB0_2:
 .visible .entry fill1DWithCoords(
 	.param .u64 fill1DWithCoords_param_0,
 	.param .f32 fill1DWithCoords_param_1,
-	.param .u32 fill1DWithCoords_param_2,
-	.param .u32 fill1DWithCoords_param_3,
-	.param .u32 fill1DWithCoords_param_4
+	.param .u32 fill1DWithCoords_param_2
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<8>;
-	.reg .b32 	%r<18>;
+	.reg .pred 	%p<2>;
+	.reg .f32 	%f<4>;
+	.reg .b32 	%r<9>;
 	.reg .b64 	%rd<5>;
 
 
 	ld.param.u64 	%rd1, [fill1DWithCoords_param_0];
 	ld.param.f32 	%f1, [fill1DWithCoords_param_1];
-	ld.param.u32 	%r4, [fill1DWithCoords_param_2];
-	ld.param.u32 	%r5, [fill1DWithCoords_param_3];
-	ld.param.u32 	%r6, [fill1DWithCoords_param_4];
-	mov.u32 	%r7, %ctaid.x;
-	mov.u32 	%r8, %ntid.x;
-	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r7, %r8, %r9;
-	mov.u32 	%r10, %ntid.y;
-	mov.u32 	%r11, %ctaid.y;
-	mov.u32 	%r12, %tid.y;
-	mad.lo.s32 	%r2, %r11, %r10, %r12;
-	mov.u32 	%r13, %ntid.z;
-	mov.u32 	%r14, %ctaid.z;
-	mov.u32 	%r15, %tid.z;
-	mad.lo.s32 	%r3, %r14, %r13, %r15;
-	setp.ge.s32 	%p1, %r1, %r4;
-	setp.ge.s32 	%p2, %r2, %r5;
-	or.pred  	%p3, %p1, %p2;
-	setp.ge.s32 	%p4, %r3, %r6;
-	or.pred  	%p5, %p3, %p4;
-	@%p5 bra 	$L__BB0_2;
+	ld.param.u32 	%r2, [fill1DWithCoords_param_2];
+	mov.u32 	%r3, %ctaid.y;
+	mov.u32 	%r4, %nctaid.x;
+	mov.u32 	%r5, %ctaid.x;
+	mad.lo.s32 	%r6, %r3, %r4, %r5;
+	mov.u32 	%r7, %ntid.x;
+	mov.u32 	%r8, %tid.x;
+	mad.lo.s32 	%r1, %r6, %r7, %r8;
+	setp.ge.s32 	%p1, %r1, %r2;
+	@%p1 bra 	$L__BB0_2;
 
 	cvta.to.global.u64 	%rd2, %rd1;
-	cvt.rn.f32.s32 	%f2, %r2;
-	cvt.rn.f32.s32 	%f3, %r1;
-	add.f32 	%f4, %f3, %f2;
-	cvt.rn.f32.s32 	%f5, %r3;
-	add.f32 	%f6, %f4, %f5;
-	mul.f32 	%f7, %f6, %f1;
-	mad.lo.s32 	%r16, %r3, %r5, %r2;
-	mad.lo.s32 	%r17, %r16, %r4, %r1;
-	mul.wide.s32 	%rd3, %r17, 4;
+	cvt.rn.f32.s32 	%f2, %r1;
+	mul.f32 	%f3, %f2, %f1;
+	mul.wide.s32 	%rd3, %r1, 4;
 	add.s64 	%rd4, %rd2, %rd3;
-	st.global.f32 	[%rd4], %f7;
+	st.global.f32 	[%rd4], %f3;
 
 $L__BB0_2:
 	ret;
@@ -339,7 +257,7 @@ $L__BB0_2:
 
 `
 	fill1DWithCoords_ptx_61 = `
-.version 8.2
+.version 8.4
 .target sm_61
 .address_size 64
 
@@ -348,53 +266,34 @@ $L__BB0_2:
 .visible .entry fill1DWithCoords(
 	.param .u64 fill1DWithCoords_param_0,
 	.param .f32 fill1DWithCoords_param_1,
-	.param .u32 fill1DWithCoords_param_2,
-	.param .u32 fill1DWithCoords_param_3,
-	.param .u32 fill1DWithCoords_param_4
+	.param .u32 fill1DWithCoords_param_2
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<8>;
-	.reg .b32 	%r<18>;
+	.reg .pred 	%p<2>;
+	.reg .f32 	%f<4>;
+	.reg .b32 	%r<9>;
 	.reg .b64 	%rd<5>;
 
 
 	ld.param.u64 	%rd1, [fill1DWithCoords_param_0];
 	ld.param.f32 	%f1, [fill1DWithCoords_param_1];
-	ld.param.u32 	%r4, [fill1DWithCoords_param_2];
-	ld.param.u32 	%r5, [fill1DWithCoords_param_3];
-	ld.param.u32 	%r6, [fill1DWithCoords_param_4];
-	mov.u32 	%r7, %ctaid.x;
-	mov.u32 	%r8, %ntid.x;
-	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r7, %r8, %r9;
-	mov.u32 	%r10, %ntid.y;
-	mov.u32 	%r11, %ctaid.y;
-	mov.u32 	%r12, %tid.y;
-	mad.lo.s32 	%r2, %r11, %r10, %r12;
-	mov.u32 	%r13, %ntid.z;
-	mov.u32 	%r14, %ctaid.z;
-	mov.u32 	%r15, %tid.z;
-	mad.lo.s32 	%r3, %r14, %r13, %r15;
-	setp.ge.s32 	%p1, %r1, %r4;
-	setp.ge.s32 	%p2, %r2, %r5;
-	or.pred  	%p3, %p1, %p2;
-	setp.ge.s32 	%p4, %r3, %r6;
-	or.pred  	%p5, %p3, %p4;
-	@%p5 bra 	$L__BB0_2;
+	ld.param.u32 	%r2, [fill1DWithCoords_param_2];
+	mov.u32 	%r3, %ctaid.y;
+	mov.u32 	%r4, %nctaid.x;
+	mov.u32 	%r5, %ctaid.x;
+	mad.lo.s32 	%r6, %r3, %r4, %r5;
+	mov.u32 	%r7, %ntid.x;
+	mov.u32 	%r8, %tid.x;
+	mad.lo.s32 	%r1, %r6, %r7, %r8;
+	setp.ge.s32 	%p1, %r1, %r2;
+	@%p1 bra 	$L__BB0_2;
 
 	cvta.to.global.u64 	%rd2, %rd1;
-	cvt.rn.f32.s32 	%f2, %r2;
-	cvt.rn.f32.s32 	%f3, %r1;
-	add.f32 	%f4, %f3, %f2;
-	cvt.rn.f32.s32 	%f5, %r3;
-	add.f32 	%f6, %f4, %f5;
-	mul.f32 	%f7, %f6, %f1;
-	mad.lo.s32 	%r16, %r3, %r5, %r2;
-	mad.lo.s32 	%r17, %r16, %r4, %r1;
-	mul.wide.s32 	%rd3, %r17, 4;
+	cvt.rn.f32.s32 	%f2, %r1;
+	mul.f32 	%f3, %f2, %f1;
+	mul.wide.s32 	%rd3, %r1, 4;
 	add.s64 	%rd4, %rd2, %rd3;
-	st.global.f32 	[%rd4], %f7;
+	st.global.f32 	[%rd4], %f3;
 
 $L__BB0_2:
 	ret;
@@ -403,7 +302,7 @@ $L__BB0_2:
 
 `
 	fill1DWithCoords_ptx_62 = `
-.version 8.2
+.version 8.4
 .target sm_62
 .address_size 64
 
@@ -412,53 +311,34 @@ $L__BB0_2:
 .visible .entry fill1DWithCoords(
 	.param .u64 fill1DWithCoords_param_0,
 	.param .f32 fill1DWithCoords_param_1,
-	.param .u32 fill1DWithCoords_param_2,
-	.param .u32 fill1DWithCoords_param_3,
-	.param .u32 fill1DWithCoords_param_4
+	.param .u32 fill1DWithCoords_param_2
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<8>;
-	.reg .b32 	%r<18>;
+	.reg .pred 	%p<2>;
+	.reg .f32 	%f<4>;
+	.reg .b32 	%r<9>;
 	.reg .b64 	%rd<5>;
 
 
 	ld.param.u64 	%rd1, [fill1DWithCoords_param_0];
 	ld.param.f32 	%f1, [fill1DWithCoords_param_1];
-	ld.param.u32 	%r4, [fill1DWithCoords_param_2];
-	ld.param.u32 	%r5, [fill1DWithCoords_param_3];
-	ld.param.u32 	%r6, [fill1DWithCoords_param_4];
-	mov.u32 	%r7, %ctaid.x;
-	mov.u32 	%r8, %ntid.x;
-	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r7, %r8, %r9;
-	mov.u32 	%r10, %ntid.y;
-	mov.u32 	%r11, %ctaid.y;
-	mov.u32 	%r12, %tid.y;
-	mad.lo.s32 	%r2, %r11, %r10, %r12;
-	mov.u32 	%r13, %ntid.z;
-	mov.u32 	%r14, %ctaid.z;
-	mov.u32 	%r15, %tid.z;
-	mad.lo.s32 	%r3, %r14, %r13, %r15;
-	setp.ge.s32 	%p1, %r1, %r4;
-	setp.ge.s32 	%p2, %r2, %r5;
-	or.pred  	%p3, %p1, %p2;
-	setp.ge.s32 	%p4, %r3, %r6;
-	or.pred  	%p5, %p3, %p4;
-	@%p5 bra 	$L__BB0_2;
+	ld.param.u32 	%r2, [fill1DWithCoords_param_2];
+	mov.u32 	%r3, %ctaid.y;
+	mov.u32 	%r4, %nctaid.x;
+	mov.u32 	%r5, %ctaid.x;
+	mad.lo.s32 	%r6, %r3, %r4, %r5;
+	mov.u32 	%r7, %ntid.x;
+	mov.u32 	%r8, %tid.x;
+	mad.lo.s32 	%r1, %r6, %r7, %r8;
+	setp.ge.s32 	%p1, %r1, %r2;
+	@%p1 bra 	$L__BB0_2;
 
 	cvta.to.global.u64 	%rd2, %rd1;
-	cvt.rn.f32.s32 	%f2, %r2;
-	cvt.rn.f32.s32 	%f3, %r1;
-	add.f32 	%f4, %f3, %f2;
-	cvt.rn.f32.s32 	%f5, %r3;
-	add.f32 	%f6, %f4, %f5;
-	mul.f32 	%f7, %f6, %f1;
-	mad.lo.s32 	%r16, %r3, %r5, %r2;
-	mad.lo.s32 	%r17, %r16, %r4, %r1;
-	mul.wide.s32 	%rd3, %r17, 4;
+	cvt.rn.f32.s32 	%f2, %r1;
+	mul.f32 	%f3, %f2, %f1;
+	mul.wide.s32 	%rd3, %r1, 4;
 	add.s64 	%rd4, %rd2, %rd3;
-	st.global.f32 	[%rd4], %f7;
+	st.global.f32 	[%rd4], %f3;
 
 $L__BB0_2:
 	ret;
@@ -467,7 +347,7 @@ $L__BB0_2:
 
 `
 	fill1DWithCoords_ptx_70 = `
-.version 8.2
+.version 8.4
 .target sm_70
 .address_size 64
 
@@ -476,53 +356,34 @@ $L__BB0_2:
 .visible .entry fill1DWithCoords(
 	.param .u64 fill1DWithCoords_param_0,
 	.param .f32 fill1DWithCoords_param_1,
-	.param .u32 fill1DWithCoords_param_2,
-	.param .u32 fill1DWithCoords_param_3,
-	.param .u32 fill1DWithCoords_param_4
+	.param .u32 fill1DWithCoords_param_2
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<8>;
-	.reg .b32 	%r<18>;
+	.reg .pred 	%p<2>;
+	.reg .f32 	%f<4>;
+	.reg .b32 	%r<9>;
 	.reg .b64 	%rd<5>;
 
 
 	ld.param.u64 	%rd1, [fill1DWithCoords_param_0];
 	ld.param.f32 	%f1, [fill1DWithCoords_param_1];
-	ld.param.u32 	%r4, [fill1DWithCoords_param_2];
-	ld.param.u32 	%r5, [fill1DWithCoords_param_3];
-	ld.param.u32 	%r6, [fill1DWithCoords_param_4];
-	mov.u32 	%r7, %ctaid.x;
-	mov.u32 	%r8, %ntid.x;
-	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r7, %r8, %r9;
-	mov.u32 	%r10, %ntid.y;
-	mov.u32 	%r11, %ctaid.y;
-	mov.u32 	%r12, %tid.y;
-	mad.lo.s32 	%r2, %r11, %r10, %r12;
-	mov.u32 	%r13, %ntid.z;
-	mov.u32 	%r14, %ctaid.z;
-	mov.u32 	%r15, %tid.z;
-	mad.lo.s32 	%r3, %r14, %r13, %r15;
-	setp.ge.s32 	%p1, %r1, %r4;
-	setp.ge.s32 	%p2, %r2, %r5;
-	or.pred  	%p3, %p1, %p2;
-	setp.ge.s32 	%p4, %r3, %r6;
-	or.pred  	%p5, %p3, %p4;
-	@%p5 bra 	$L__BB0_2;
+	ld.param.u32 	%r2, [fill1DWithCoords_param_2];
+	mov.u32 	%r3, %ctaid.y;
+	mov.u32 	%r4, %nctaid.x;
+	mov.u32 	%r5, %ctaid.x;
+	mad.lo.s32 	%r6, %r3, %r4, %r5;
+	mov.u32 	%r7, %ntid.x;
+	mov.u32 	%r8, %tid.x;
+	mad.lo.s32 	%r1, %r6, %r7, %r8;
+	setp.ge.s32 	%p1, %r1, %r2;
+	@%p1 bra 	$L__BB0_2;
 
 	cvta.to.global.u64 	%rd2, %rd1;
-	cvt.rn.f32.s32 	%f2, %r2;
-	cvt.rn.f32.s32 	%f3, %r1;
-	add.f32 	%f4, %f3, %f2;
-	cvt.rn.f32.s32 	%f5, %r3;
-	add.f32 	%f6, %f4, %f5;
-	mul.f32 	%f7, %f6, %f1;
-	mad.lo.s32 	%r16, %r3, %r5, %r2;
-	mad.lo.s32 	%r17, %r16, %r4, %r1;
-	mul.wide.s32 	%rd3, %r17, 4;
+	cvt.rn.f32.s32 	%f2, %r1;
+	mul.f32 	%f3, %f2, %f1;
+	mul.wide.s32 	%rd3, %r1, 4;
 	add.s64 	%rd4, %rd2, %rd3;
-	st.global.f32 	[%rd4], %f7;
+	st.global.f32 	[%rd4], %f3;
 
 $L__BB0_2:
 	ret;
@@ -531,7 +392,7 @@ $L__BB0_2:
 
 `
 	fill1DWithCoords_ptx_72 = `
-.version 8.2
+.version 8.4
 .target sm_72
 .address_size 64
 
@@ -540,53 +401,34 @@ $L__BB0_2:
 .visible .entry fill1DWithCoords(
 	.param .u64 fill1DWithCoords_param_0,
 	.param .f32 fill1DWithCoords_param_1,
-	.param .u32 fill1DWithCoords_param_2,
-	.param .u32 fill1DWithCoords_param_3,
-	.param .u32 fill1DWithCoords_param_4
+	.param .u32 fill1DWithCoords_param_2
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<8>;
-	.reg .b32 	%r<18>;
+	.reg .pred 	%p<2>;
+	.reg .f32 	%f<4>;
+	.reg .b32 	%r<9>;
 	.reg .b64 	%rd<5>;
 
 
 	ld.param.u64 	%rd1, [fill1DWithCoords_param_0];
 	ld.param.f32 	%f1, [fill1DWithCoords_param_1];
-	ld.param.u32 	%r4, [fill1DWithCoords_param_2];
-	ld.param.u32 	%r5, [fill1DWithCoords_param_3];
-	ld.param.u32 	%r6, [fill1DWithCoords_param_4];
-	mov.u32 	%r7, %ctaid.x;
-	mov.u32 	%r8, %ntid.x;
-	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r7, %r8, %r9;
-	mov.u32 	%r10, %ntid.y;
-	mov.u32 	%r11, %ctaid.y;
-	mov.u32 	%r12, %tid.y;
-	mad.lo.s32 	%r2, %r11, %r10, %r12;
-	mov.u32 	%r13, %ntid.z;
-	mov.u32 	%r14, %ctaid.z;
-	mov.u32 	%r15, %tid.z;
-	mad.lo.s32 	%r3, %r14, %r13, %r15;
-	setp.ge.s32 	%p1, %r1, %r4;
-	setp.ge.s32 	%p2, %r2, %r5;
-	or.pred  	%p3, %p1, %p2;
-	setp.ge.s32 	%p4, %r3, %r6;
-	or.pred  	%p5, %p3, %p4;
-	@%p5 bra 	$L__BB0_2;
+	ld.param.u32 	%r2, [fill1DWithCoords_param_2];
+	mov.u32 	%r3, %ctaid.y;
+	mov.u32 	%r4, %nctaid.x;
+	mov.u32 	%r5, %ctaid.x;
+	mad.lo.s32 	%r6, %r3, %r4, %r5;
+	mov.u32 	%r7, %ntid.x;
+	mov.u32 	%r8, %tid.x;
+	mad.lo.s32 	%r1, %r6, %r7, %r8;
+	setp.ge.s32 	%p1, %r1, %r2;
+	@%p1 bra 	$L__BB0_2;
 
 	cvta.to.global.u64 	%rd2, %rd1;
-	cvt.rn.f32.s32 	%f2, %r2;
-	cvt.rn.f32.s32 	%f3, %r1;
-	add.f32 	%f4, %f3, %f2;
-	cvt.rn.f32.s32 	%f5, %r3;
-	add.f32 	%f6, %f4, %f5;
-	mul.f32 	%f7, %f6, %f1;
-	mad.lo.s32 	%r16, %r3, %r5, %r2;
-	mad.lo.s32 	%r17, %r16, %r4, %r1;
-	mul.wide.s32 	%rd3, %r17, 4;
+	cvt.rn.f32.s32 	%f2, %r1;
+	mul.f32 	%f3, %f2, %f1;
+	mul.wide.s32 	%rd3, %r1, 4;
 	add.s64 	%rd4, %rd2, %rd3;
-	st.global.f32 	[%rd4], %f7;
+	st.global.f32 	[%rd4], %f3;
 
 $L__BB0_2:
 	ret;
@@ -595,7 +437,7 @@ $L__BB0_2:
 
 `
 	fill1DWithCoords_ptx_75 = `
-.version 8.2
+.version 8.4
 .target sm_75
 .address_size 64
 
@@ -604,53 +446,34 @@ $L__BB0_2:
 .visible .entry fill1DWithCoords(
 	.param .u64 fill1DWithCoords_param_0,
 	.param .f32 fill1DWithCoords_param_1,
-	.param .u32 fill1DWithCoords_param_2,
-	.param .u32 fill1DWithCoords_param_3,
-	.param .u32 fill1DWithCoords_param_4
+	.param .u32 fill1DWithCoords_param_2
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<8>;
-	.reg .b32 	%r<18>;
+	.reg .pred 	%p<2>;
+	.reg .f32 	%f<4>;
+	.reg .b32 	%r<9>;
 	.reg .b64 	%rd<5>;
 
 
 	ld.param.u64 	%rd1, [fill1DWithCoords_param_0];
 	ld.param.f32 	%f1, [fill1DWithCoords_param_1];
-	ld.param.u32 	%r4, [fill1DWithCoords_param_2];
-	ld.param.u32 	%r5, [fill1DWithCoords_param_3];
-	ld.param.u32 	%r6, [fill1DWithCoords_param_4];
-	mov.u32 	%r7, %ctaid.x;
-	mov.u32 	%r8, %ntid.x;
-	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r7, %r8, %r9;
-	mov.u32 	%r10, %ntid.y;
-	mov.u32 	%r11, %ctaid.y;
-	mov.u32 	%r12, %tid.y;
-	mad.lo.s32 	%r2, %r11, %r10, %r12;
-	mov.u32 	%r13, %ntid.z;
-	mov.u32 	%r14, %ctaid.z;
-	mov.u32 	%r15, %tid.z;
-	mad.lo.s32 	%r3, %r14, %r13, %r15;
-	setp.ge.s32 	%p1, %r1, %r4;
-	setp.ge.s32 	%p2, %r2, %r5;
-	or.pred  	%p3, %p1, %p2;
-	setp.ge.s32 	%p4, %r3, %r6;
-	or.pred  	%p5, %p3, %p4;
-	@%p5 bra 	$L__BB0_2;
+	ld.param.u32 	%r2, [fill1DWithCoords_param_2];
+	mov.u32 	%r3, %ctaid.y;
+	mov.u32 	%r4, %nctaid.x;
+	mov.u32 	%r5, %ctaid.x;
+	mad.lo.s32 	%r6, %r3, %r4, %r5;
+	mov.u32 	%r7, %ntid.x;
+	mov.u32 	%r8, %tid.x;
+	mad.lo.s32 	%r1, %r6, %r7, %r8;
+	setp.ge.s32 	%p1, %r1, %r2;
+	@%p1 bra 	$L__BB0_2;
 
 	cvta.to.global.u64 	%rd2, %rd1;
-	cvt.rn.f32.s32 	%f2, %r2;
-	cvt.rn.f32.s32 	%f3, %r1;
-	add.f32 	%f4, %f3, %f2;
-	cvt.rn.f32.s32 	%f5, %r3;
-	add.f32 	%f6, %f4, %f5;
-	mul.f32 	%f7, %f6, %f1;
-	mad.lo.s32 	%r16, %r3, %r5, %r2;
-	mad.lo.s32 	%r17, %r16, %r4, %r1;
-	mul.wide.s32 	%rd3, %r17, 4;
+	cvt.rn.f32.s32 	%f2, %r1;
+	mul.f32 	%f3, %f2, %f1;
+	mul.wide.s32 	%rd3, %r1, 4;
 	add.s64 	%rd4, %rd2, %rd3;
-	st.global.f32 	[%rd4], %f7;
+	st.global.f32 	[%rd4], %f3;
 
 $L__BB0_2:
 	ret;
@@ -659,7 +482,7 @@ $L__BB0_2:
 
 `
 	fill1DWithCoords_ptx_80 = `
-.version 8.2
+.version 8.4
 .target sm_80
 .address_size 64
 
@@ -668,53 +491,34 @@ $L__BB0_2:
 .visible .entry fill1DWithCoords(
 	.param .u64 fill1DWithCoords_param_0,
 	.param .f32 fill1DWithCoords_param_1,
-	.param .u32 fill1DWithCoords_param_2,
-	.param .u32 fill1DWithCoords_param_3,
-	.param .u32 fill1DWithCoords_param_4
+	.param .u32 fill1DWithCoords_param_2
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<8>;
-	.reg .b32 	%r<18>;
+	.reg .pred 	%p<2>;
+	.reg .f32 	%f<4>;
+	.reg .b32 	%r<9>;
 	.reg .b64 	%rd<5>;
 
 
 	ld.param.u64 	%rd1, [fill1DWithCoords_param_0];
 	ld.param.f32 	%f1, [fill1DWithCoords_param_1];
-	ld.param.u32 	%r4, [fill1DWithCoords_param_2];
-	ld.param.u32 	%r5, [fill1DWithCoords_param_3];
-	ld.param.u32 	%r6, [fill1DWithCoords_param_4];
-	mov.u32 	%r7, %ctaid.x;
-	mov.u32 	%r8, %ntid.x;
-	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r7, %r8, %r9;
-	mov.u32 	%r10, %ntid.y;
-	mov.u32 	%r11, %ctaid.y;
-	mov.u32 	%r12, %tid.y;
-	mad.lo.s32 	%r2, %r11, %r10, %r12;
-	mov.u32 	%r13, %ntid.z;
-	mov.u32 	%r14, %ctaid.z;
-	mov.u32 	%r15, %tid.z;
-	mad.lo.s32 	%r3, %r14, %r13, %r15;
-	setp.ge.s32 	%p1, %r1, %r4;
-	setp.ge.s32 	%p2, %r2, %r5;
-	or.pred  	%p3, %p1, %p2;
-	setp.ge.s32 	%p4, %r3, %r6;
-	or.pred  	%p5, %p3, %p4;
-	@%p5 bra 	$L__BB0_2;
+	ld.param.u32 	%r2, [fill1DWithCoords_param_2];
+	mov.u32 	%r3, %ctaid.y;
+	mov.u32 	%r4, %nctaid.x;
+	mov.u32 	%r5, %ctaid.x;
+	mad.lo.s32 	%r6, %r3, %r4, %r5;
+	mov.u32 	%r7, %ntid.x;
+	mov.u32 	%r8, %tid.x;
+	mad.lo.s32 	%r1, %r6, %r7, %r8;
+	setp.ge.s32 	%p1, %r1, %r2;
+	@%p1 bra 	$L__BB0_2;
 
 	cvta.to.global.u64 	%rd2, %rd1;
-	cvt.rn.f32.s32 	%f2, %r2;
-	cvt.rn.f32.s32 	%f3, %r1;
-	add.f32 	%f4, %f3, %f2;
-	cvt.rn.f32.s32 	%f5, %r3;
-	add.f32 	%f6, %f4, %f5;
-	mul.f32 	%f7, %f6, %f1;
-	mad.lo.s32 	%r16, %r3, %r5, %r2;
-	mad.lo.s32 	%r17, %r16, %r4, %r1;
-	mul.wide.s32 	%rd3, %r17, 4;
+	cvt.rn.f32.s32 	%f2, %r1;
+	mul.f32 	%f3, %f2, %f1;
+	mul.wide.s32 	%rd3, %r1, 4;
 	add.s64 	%rd4, %rd2, %rd3;
-	st.global.f32 	[%rd4], %f7;
+	st.global.f32 	[%rd4], %f3;
 
 $L__BB0_2:
 	ret;
