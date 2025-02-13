@@ -16,8 +16,7 @@ extern "C" __global__ void
 addGovaluate3X3(float *out, float *a, float *b, 
                  int Nx, int Ny, int Nz,
                  int aNx, int aNy, int aNz,
-                 int bNx, int bNy, int bNz)
-{
+                 int bNx, int bNy, int bNz) {
     // Compute the 3D coordinates for this thread.
     int ix = blockIdx.x * blockDim.x + threadIdx.x; // x-coordinate [0, Nx)
     int iy = blockIdx.y * blockDim.y + threadIdx.y; // y-coordinate [0, Ny)
@@ -39,7 +38,10 @@ addGovaluate3X3(float *out, float *a, float *b,
         int b_iy = (bNy == 1 ? 0 : iy);
         int b_iz = (bNz == 1 ? 0 : iz);
         int bIndex = index(b_ix, b_iy, b_iz, bNx, bNy, bNz);
+
+        float a_val = a[aIndex];
+        float b_val = b[bIndex];
         // Write the elementwise sum to the output.
-        out[outIndex] = a[aIndex] + b[bIndex];
+        out[outIndex] = a_val + b_val;
     }
 }

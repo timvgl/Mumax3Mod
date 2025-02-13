@@ -6,22 +6,6 @@ import (
 	"github.com/mumax/3/data"
 )
 
-func getAxis(shape [3]int) int {
-	nonSingletonCount := 0
-	axis := -1
-	for i, dim := range shape {
-		if dim != 1 {
-			nonSingletonCount++
-			axis = i
-		}
-	}
-	if nonSingletonCount == 1 {
-		return axis
-	}
-	// If the array is full-size or if more than one dimension is non-singleton, return -1.
-	return -1
-}
-
 func Fill1DWithCoords(dst *data.Slice, factor float32) {
 	size := dst.Size()
 	cfg := make1DConf(prod(size))
@@ -30,10 +14,19 @@ func Fill1DWithCoords(dst *data.Slice, factor float32) {
 	}
 }
 
+func checkSizeGovaluate(aSize, bSize [3]int) {
+	for val, _ := range aSize {
+		if aSize[val] != bSize[val] && (aSize[val] != 1 && bSize[val] != 1) {
+			panic("Size mismatch")
+		}
+	}
+}
+
 func AddGovaluate3X3(dst, a, b *data.Slice) {
 	size := dst.Size()
 	sizeA := a.Size()
 	sizeB := b.Size()
+	checkSizeGovaluate(sizeA, sizeB)
 	cfg := make3DConf(size)
 	for c := range dst.NComp() {
 		k_addGovaluate3X3_async(dst.DevPtr(c), a.DevPtr(c), b.DevPtr(c), size[X], size[Y], size[Z], sizeA[X], sizeA[Y], sizeA[Z], sizeB[X], sizeB[Y], sizeB[Z], cfg)
@@ -58,9 +51,12 @@ func AddGovaluate1X3(dst *data.Slice, b interface{}, a *data.Slice) {
 
 func SubGovaluate3X3(dst, a, b *data.Slice) {
 	size := dst.Size()
+	sizeA := a.Size()
+	sizeB := b.Size()
+	checkSizeGovaluate(sizeA, sizeB)
 	cfg := make3DConf(size)
 	for c := range dst.NComp() {
-		k_subGovaluate3X3_async(dst.DevPtr(c), a.DevPtr(c), b.DevPtr(c), size[X], size[Y], size[Z], getAxis(a.Size()), getAxis(b.Size()), cfg)
+		k_subGovaluate3X3_async(dst.DevPtr(c), a.DevPtr(c), b.DevPtr(c), size[X], size[Y], size[Z], sizeA[X], sizeA[Y], sizeA[Z], sizeB[X], sizeB[Y], sizeB[Z], cfg)
 	}
 }
 
@@ -82,9 +78,12 @@ func SubGovaluate1X3(dst *data.Slice, a interface{}, b *data.Slice) {
 
 func MulGovaluate3X3(dst, a, b *data.Slice) {
 	size := dst.Size()
+	sizeA := a.Size()
+	sizeB := b.Size()
+	checkSizeGovaluate(sizeA, sizeB)
 	cfg := make3DConf(size)
 	for c := range dst.NComp() {
-		k_mulGovaluate3X3_async(dst.DevPtr(c), a.DevPtr(c), b.DevPtr(c), size[X], size[Y], size[Z], getAxis(a.Size()), getAxis(b.Size()), cfg)
+		k_mulGovaluate3X3_async(dst.DevPtr(c), a.DevPtr(c), b.DevPtr(c), size[X], size[Y], size[Z], sizeA[X], sizeA[Y], sizeA[Z], sizeB[X], sizeB[Y], sizeB[Z], cfg)
 	}
 }
 
@@ -106,9 +105,12 @@ func MulGovaluate1X3(dst *data.Slice, a interface{}, b *data.Slice) {
 
 func DivGovaluate3X3(dst, a, b *data.Slice) {
 	size := dst.Size()
+	sizeA := a.Size()
+	sizeB := b.Size()
+	checkSizeGovaluate(sizeA, sizeB)
 	cfg := make3DConf(size)
 	for c := range dst.NComp() {
-		k_divGovaluate3X3_async(dst.DevPtr(c), a.DevPtr(c), b.DevPtr(c), size[X], size[Y], size[Z], getAxis(a.Size()), getAxis(b.Size()), cfg)
+		k_divGovaluate3X3_async(dst.DevPtr(c), a.DevPtr(c), b.DevPtr(c), size[X], size[Y], size[Z], sizeA[X], sizeA[Y], sizeA[Z], sizeB[X], sizeB[Y], sizeB[Z], cfg)
 	}
 }
 
@@ -130,9 +132,12 @@ func DivGovaluate1X3(dst *data.Slice, a interface{}, b *data.Slice) {
 
 func PowGovaluate3X3(dst, a, b *data.Slice) {
 	size := dst.Size()
+	sizeA := a.Size()
+	sizeB := b.Size()
+	checkSizeGovaluate(sizeA, sizeB)
 	cfg := make3DConf(size)
 	for c := range dst.NComp() {
-		k_powGovaluate3X3_async(dst.DevPtr(c), a.DevPtr(c), b.DevPtr(c), size[X], size[Y], size[Z], getAxis(a.Size()), getAxis(b.Size()), cfg)
+		k_powGovaluate3X3_async(dst.DevPtr(c), a.DevPtr(c), b.DevPtr(c), size[X], size[Y], size[Z], sizeA[X], sizeA[Y], sizeA[Z], sizeB[X], sizeB[Y], sizeB[Z], cfg)
 	}
 }
 
@@ -154,9 +159,12 @@ func PowGovaluate1X3(dst *data.Slice, a interface{}, b *data.Slice) {
 
 func ModGovaluate3X3(dst, a, b *data.Slice) {
 	size := dst.Size()
+	sizeA := a.Size()
+	sizeB := b.Size()
+	checkSizeGovaluate(sizeA, sizeB)
 	cfg := make3DConf(size)
 	for c := range dst.NComp() {
-		k_modGovaluate3X3_async(dst.DevPtr(c), a.DevPtr(c), b.DevPtr(c), size[X], size[Y], size[Z], getAxis(a.Size()), getAxis(b.Size()), cfg)
+		k_modGovaluate3X3_async(dst.DevPtr(c), a.DevPtr(c), b.DevPtr(c), size[X], size[Y], size[Z], sizeA[X], sizeA[Y], sizeA[Z], sizeB[X], sizeB[Y], sizeB[Z], cfg)
 	}
 }
 
@@ -178,9 +186,12 @@ func ModGovaluate1X3(dst *data.Slice, a interface{}, b *data.Slice) {
 
 func Atan2Govaluate3X3(dst, a, b *data.Slice) {
 	size := dst.Size()
+	sizeA := a.Size()
+	sizeB := b.Size()
+	checkSizeGovaluate(sizeA, sizeB)
 	cfg := make3DConf(size)
 	for c := range dst.NComp() {
-		k_atan2Govaluate3X3_async(dst.DevPtr(c), a.DevPtr(c), b.DevPtr(c), size[X], size[Y], size[Z], getAxis(a.Size()), getAxis(b.Size()), cfg)
+		k_atan2Govaluate3X3_async(dst.DevPtr(c), a.DevPtr(c), b.DevPtr(c), size[X], size[Y], size[Z], sizeA[X], sizeA[Y], sizeA[Z], sizeB[X], sizeB[Y], sizeB[Z], cfg)
 	}
 }
 
@@ -202,9 +213,12 @@ func Atan2Govaluate1X3(dst *data.Slice, a interface{}, b *data.Slice) {
 
 func HypotGovaluate3X3(dst, a, b *data.Slice) {
 	size := dst.Size()
+	sizeA := a.Size()
+	sizeB := b.Size()
+	checkSizeGovaluate(sizeA, sizeB)
 	cfg := make3DConf(size)
 	for c := range dst.NComp() {
-		k_hypotGovaluate3X3_async(dst.DevPtr(c), a.DevPtr(c), b.DevPtr(c), size[X], size[Y], size[Z], getAxis(a.Size()), getAxis(b.Size()), cfg)
+		k_hypotGovaluate3X3_async(dst.DevPtr(c), a.DevPtr(c), b.DevPtr(c), size[X], size[Y], size[Z], sizeA[X], sizeA[Y], sizeA[Z], sizeB[X], sizeB[Y], sizeB[Z], cfg)
 	}
 }
 
@@ -226,9 +240,12 @@ func HypotGovaluate1X3(dst *data.Slice, a interface{}, b *data.Slice) {
 
 func RemainderGovaluate3X3(dst, a, b *data.Slice) {
 	size := dst.Size()
+	sizeA := a.Size()
+	sizeB := b.Size()
+	checkSizeGovaluate(sizeA, sizeB)
 	cfg := make3DConf(size)
 	for c := range dst.NComp() {
-		k_remainderGovaluate3X3_async(dst.DevPtr(c), a.DevPtr(c), b.DevPtr(c), size[X], size[Y], size[Z], getAxis(a.Size()), getAxis(b.Size()), cfg)
+		k_remainderGovaluate3X3_async(dst.DevPtr(c), a.DevPtr(c), b.DevPtr(c), size[X], size[Y], size[Z], sizeA[X], sizeA[Y], sizeA[Z], sizeB[X], sizeB[Y], sizeB[Z], cfg)
 	}
 }
 
@@ -250,9 +267,12 @@ func RemainderGovaluate1X3(dst *data.Slice, a interface{}, b *data.Slice) {
 
 func YnGovaluate3X3(dst, a, b *data.Slice) {
 	size := dst.Size()
+	sizeA := a.Size()
+	sizeB := b.Size()
+	checkSizeGovaluate(sizeA, sizeB)
 	cfg := make3DConf(size)
 	for c := range dst.NComp() {
-		k_YnGovaluate3X3_async(dst.DevPtr(c), a.DevPtr(c), b.DevPtr(c), size[X], size[Y], size[Z], getAxis(a.Size()), getAxis(b.Size()), cfg)
+		k_YnGovaluate3X3_async(dst.DevPtr(c), a.DevPtr(c), b.DevPtr(c), size[X], size[Y], size[Z], sizeA[X], sizeA[Y], sizeA[Z], sizeB[X], sizeB[Y], sizeB[Z], cfg)
 	}
 }
 
@@ -274,9 +294,12 @@ func YnGovaluate1X3(dst *data.Slice, a interface{}, b *data.Slice) {
 
 func LdexpGovaluate3X3(dst, a, b *data.Slice) {
 	size := dst.Size()
+	sizeA := a.Size()
+	sizeB := b.Size()
+	checkSizeGovaluate(sizeA, sizeB)
 	cfg := make3DConf(size)
 	for c := range dst.NComp() {
-		k_ldexpGovaluate3X3_async(dst.DevPtr(c), a.DevPtr(c), b.DevPtr(c), size[X], size[Y], size[Z], getAxis(a.Size()), getAxis(b.Size()), cfg)
+		k_ldexpGovaluate3X3_async(dst.DevPtr(c), a.DevPtr(c), b.DevPtr(c), size[X], size[Y], size[Z], sizeA[X], sizeA[Y], sizeA[Z], sizeB[X], sizeB[Y], sizeB[Z], cfg)
 	}
 }
 

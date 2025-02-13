@@ -11,8 +11,8 @@
 extern "C" __global__ void
 mulGovaluate3X3(float *out, float *a, float *b, 
     int Nx, int Ny, int Nz,
-    int a_axis, int b_axis)
-{
+    int aNx, int aNy, int aNz,
+    int bNx, int bNy, int bNz) {
     // Compute the 3D coordinates for this thread.
     int ix = blockIdx.x * blockDim.x + threadIdx.x; // x-coordinate (0 <= ix < Nx)
     int iy = blockIdx.y * blockDim.y + threadIdx.y; // y-coordinate (0 <= iy < Ny)
@@ -21,47 +21,22 @@ mulGovaluate3X3(float *out, float *a, float *b,
     // Check bounds.
     if (ix < Nx && iy < Ny && iz < Nz) {
         // Compute the flattened index into the output array.
-        int outIndex = ix * (Ny * Nz) + iy * Nz + iz;
+        int outIndex = idx(ix, iy, iz);
 
-        float a_val, b_val;
+        // For A, if the dimension is 1 then broadcast (always index 0); otherwise, use the output coordinate.
+        int a_ix = (aNx == 1 ? 0 : ix);
+        int a_iy = (aNy == 1 ? 0 : iy);
+        int a_iz = (aNz == 1 ? 0 : iz);
+        int aIndex = index(a_ix, a_iy, a_iz, aNx, aNy, aNz);
 
-        // Determine the corresponding value from A.
-        if (a_axis == -1) {
-        // A is full-size (Nx, Ny, Nz)
-            a_val = a[idx(ix, iy, iz)];
-        }
-        else if (a_axis == 0) {
-        // A is broadcast along x: shape (Nx, 1, 1)
-            a_val = a[ix];
-        }
-        else if (a_axis == 1) {
-        // A is broadcast along y: shape (1, Ny, 1)
-            a_val = a[iy];
-        }
-        else if (a_axis == 2) {
-        // A is broadcast along z: shape (1, 1, Nz)
-            a_val = a[iz];
-        }
+        // For B, do the same.
+        int b_ix = (bNx == 1 ? 0 : ix);
+        int b_iy = (bNy == 1 ? 0 : iy);
+        int b_iz = (bNz == 1 ? 0 : iz);
+        int bIndex = index(b_ix, b_iy, b_iz, bNx, bNy, bNz);
 
-        // Determine the corresponding value from B.
-        if (b_axis == -1) {
-        // B is full-size (Nx, Ny, Nz)
-            b_val = b[idx(ix, iy, iz)];
-        }
-        else if (b_axis == 0) {
-        // B is broadcast along x: shape (Nx, 1, 1)
-            b_val = b[ix];
-        }
-        else if (b_axis == 1) {
-        // B is broadcast along y: shape (1, Ny, 1)
-            b_val = b[iy];
-        }
-        else if (b_axis == 2) {
-        // B is broadcast along z: shape (1, 1, Nz)
-            b_val = b[iz];
-        }
-
-        // Write the sum to the output array.
+        float a_val = a[aIndex];
+        float b_val = b[bIndex];
         out[outIndex] = a_val * b_val;
     }
 }
