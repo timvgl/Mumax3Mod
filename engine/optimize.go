@@ -484,7 +484,10 @@ func OptimizeQuantity(output Quantity, target dummyQuantity, variables []Quantit
 			sort.Strings(varsSlice)
 			for _, par := range varsSlice {
 				if par != "x_length" && par != "y_length" && par != "z_length" && par != "x_factor" && par != "y_factor" && par != "z_factor" && par != "t" {
-					val := bestParams[fmt.Sprintf("%s_%s_%d", NameOf(variables[k]), par, c)].(float64)
+					val, ok := bestParams[fmt.Sprintf("%s_%s_%d", NameOf(variables[k]), par, c)].(float64)
+					if !ok {
+						panic(fmt.Sprintf("Parameter %s_%s_%d not found in bestParams", NameOf(variables[k]), par, c))
+					}
 					vars[par] = val
 					fprint(optiTable, "\t", val)
 				} else if par == "x_length" {
