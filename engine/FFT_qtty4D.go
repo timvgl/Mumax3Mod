@@ -13,11 +13,6 @@ import (
 	"github.com/mumax/3/oommf"
 )
 
-/*
-	bufsCPU := make([]*data.Slice, 0)
-	bufsGPUIP := make([]*data.Slice, 0)
-	bufsGPUOP := make([]*data.Slice, 0)*/
-
 var (
 	FFT_T_OP           = []*fftOperation4D{}
 	FFT_T_OPRunning    = make(map[*fftOperation4D]bool)
@@ -39,6 +34,7 @@ var (
 	kx             float64 = math.NaN()
 	ky             float64 = math.NaN()
 	kz             float64 = math.NaN()
+	cropKSpace             = func(q Quantity) Quantity { return q }
 )
 
 func init() {
@@ -50,33 +46,77 @@ func init() {
 	DeclVar("dFrequency", &dFrequency, "")
 	DeclVar("FFT4D_Label", &fft4DLabel, "")
 	DeclFunc("Tidy_up_FFT_4D", WaitFFTs4DDone, "Waits until all FFTs are done and clears buffers")
-	//DeclVar("kx", &kx, "")
-	//DeclVar("ky", &ky, "")
-	//DeclVar("kz", &kz, "")
-	//DeclFunc("FFT2D", FFT2D, "performs FFT in x, y and z")
+	DeclVar("cropKSpace", &cropKSpace, "")
 }
 
 type fftOperation4D struct {
 	fieldOp
-	name     string
-	q        Quantity
-	dF       float64
-	maxF     float64
-	minF     float64
-	start    float64
-	period   float64
-	count    int
-	fDataSet bool
-	fft3D    *fftOperation3D
-	label    string
-	ikx      float64
-	iky      float64
-	ikz      float64
-	kspace   bool
-	dataT    *data.Slice
-	polar    bool
-	phi      bool
-	abs      bool
+	name       string
+	q          Quantity
+	dF         float64
+	maxF       float64
+	minF       float64
+	start      float64
+	period     float64
+	count      int
+	fDataSet   bool
+	qOP        Quantity
+	label      string
+	kspace     bool
+	dataT      *data.Slice
+	polar      bool
+	phi        bool
+	abs        bool
+	cropKSpace func(q Quantity) Quantity
+}
+
+func UnpackUntilFFT3D(q Quantity) *fftOperation3D {
+	if s, ok := q.(*fftOperation3D); ok {
+		return s
+	} else if s, ok := q.(*cropped); ok {
+		return UnpackUntilFFT3D(s.parent)
+	} else if s, ok := q.(*expanded); ok {
+		return UnpackUntilFFT3D(s.parent)
+	} else if s, ok := q.(*component); ok {
+		return UnpackUntilFFT3D(s.parent)
+	} else if s, ok := q.(ScalarField); ok {
+		return UnpackUntilFFT3D(s.Quantity)
+	} else {
+		panic("UnpackUntilFFT3D: unknown type")
+	}
+}
+
+func operatorAxis(size [3]int, startK, endK [3]float64, transformedAxis []string, operator func(q Quantity) Quantity, q Quantity) ([3]int, [3]float64, [3]float64, []string) {
+	if s, ok := q.(*fftOperation3D); ok {
+		return s.Axis()
+	} else if operator(q) == q {
+		return size, startK, endK, transformedAxis
+	} else {
+		size := SizeOf(q)
+		newSize := [3]int{0, 0, 0}
+		newStartK := [3]float64{math.NaN(), math.NaN(), math.NaN()}
+		newEndK := [3]float64{math.NaN(), math.NaN(), math.NaN()}
+		if s, ok := q.(*cropped); ok {
+			newSize = s.Mesh().Size()
+			newStartK[0] = startK[0] + float64(s.x1)*float64(size[0])*MeshOf(q).CellSize()[0]
+			newStartK[1] = startK[1] + float64(s.y1)*float64(size[1])*MeshOf(q).CellSize()[1]
+			newStartK[2] = startK[2] + float64(s.z1)*float64(size[2])*MeshOf(q).CellSize()[2]
+			newEndK[0] = endK[0] - float64(size[0]-s.x2)*float64(size[0])*MeshOf(q).CellSize()[0]
+			newEndK[1] = endK[1] - float64(size[1]-s.y2)*float64(size[1])*MeshOf(q).CellSize()[1]
+			newEndK[2] = endK[2] - float64(size[2]-s.z2)*float64(size[2])*MeshOf(q).CellSize()[2]
+
+		} else if s, ok := q.(*expanded); ok {
+			return UnpackUntilFFT3D(s.parent)
+		} else if s, ok := q.(*component); ok {
+			return UnpackUntilFFT3D(s.parent)
+		} else if s, ok := q.(ScalarField); ok {
+			return UnpackUntilFFT3D(s.Quantity)
+		} else {
+			panic("UnpackUntilFFT3D: unknown type")
+		}
+
+		return operatorAxis(newSize, newStartK, newEndK, transformedAxis, operator, q)
+	}
 }
 
 func (s *fftOperation4D) ToPolar() *fftOperation4D {
@@ -115,35 +155,10 @@ func FFT4D(q Quantity, period float64) *fftOperation4D {
 	} else {
 		QTTYName = NameOf(q)
 	}
-	ikx := math.NaN()
-	iky := math.NaN()
-	ikz := math.NaN()
-	fft3D := FFT3D_FFT_T(q)
-	/*
-		s, _, KXYZEnd, _ := fft3D.Axis()
-		if !math.IsNaN(kx) {
-			ikx = KXYZEnd[0] / kx
-			if int(ikx) > s[0] {
-				panic("kx is too large for the given mesh. ")
-			}
-		}
-		if !math.IsNaN(ky) {
-			iky = (1 + ky/KXYZEnd[1]) * float64(s[1]) / 2
-			if int(iky) > s[1] {
-				panic("ky is too large for the given mesh. ")
-			}
-		}
-		if !math.IsNaN(kz) {
-			ikz = (1 + kz/KXYZEnd[2]) * float64(s[2]) / 2
-			if int(ikz) > s[2] {
-				panic("kz is too large for the given mesh. ")
-			}
-		}
-		if !kx_ky_kz_prop_defined(q, ikx, iky, ikz) {
-			panic("kx, ky, kz are not properly defined.")
-		}*/
+	fft3D := cropKSpace(FFT3D_FFT_T(q))
+
 	var dataT *data.Slice
-	FFT_T_OP_Obj := fftOperation4D{fieldOp{q, q, q.NComp()}, "k_x_y_z_f_" + NameOf(q), q, dFrequency, maxFrequency, minFrequency, Time, period, -1, false, fft3D, QTTYName, ikx, iky, ikz, true, dataT, false, false, false}
+	FFT_T_OP_Obj := fftOperation4D{fieldOp{q, q, q.NComp()}, "k_x_y_z_f_" + NameOf(q), q, dFrequency, maxFrequency, minFrequency, Time, period, -1, false, fft3D, QTTYName, true, dataT, false, false, false, cropKSpace}
 	FFT_T_OP = append(FFT_T_OP, &FFT_T_OP_Obj)
 	FFT_T_OPRunning[&FFT_T_OP_Obj] = false
 	FFT_T_OPDataCopied[&FFT_T_OP_Obj] = false
@@ -157,126 +172,13 @@ func FFT_T(q Quantity, period float64) *fftOperation4D {
 	} else {
 		QTTYName = NameOf(q)
 	}
-	ikx := math.NaN()
-	iky := math.NaN()
-	ikz := math.NaN()
 	fft3D := FFT3D_FFT_T(q)
-	/*
-		s, _, KXYZEnd, _ := fft3D.Axis()
-		if !math.IsNaN(kx) {
-			ikx = KXYZEnd[0] / kx
-			if int(ikx) > s[0] {
-				panic("kx is too large for the given mesh. ")
-			}
-		}
-		if !math.IsNaN(ky) {
-			iky = (1 + ky/KXYZEnd[1]) * float64(s[1]) / 2
-			if int(iky) > s[1] {
-				panic("ky is too large for the given mesh. ")
-			}
-		}
-		if !math.IsNaN(kz) {
-			ikz = (1 + kz/KXYZEnd[2]) * float64(s[2]) / 2
-			if int(ikz) > s[2] {
-				panic("kz is too large for the given mesh. ")
-			}
-		}
-		if !kx_ky_kz_prop_defined(q, ikx, iky, ikz) {
-			panic("kx, ky, kz are not properly defined.")
-		}*/
 	var dataT *data.Slice
-	FFT_T_OP_Obj := fftOperation4D{fieldOp{q, q, q.NComp()}, "f_" + NameOf(q), q, dFrequency, maxFrequency, minFrequency, Time, period, -1, false, fft3D, QTTYName, ikx, iky, ikz, false, dataT, false, false, false}
+	FFT_T_OP_Obj := fftOperation4D{fieldOp{q, q, q.NComp()}, "f_" + NameOf(q), q, dFrequency, maxFrequency, minFrequency, Time, period, -1, false, fft3D, QTTYName, false, dataT, false, false, false, cropKSpace}
 	FFT_T_OP = append(FFT_T_OP, &FFT_T_OP_Obj)
 	FFT_T_OPRunning[&FFT_T_OP_Obj] = false
 	FFT_T_OPDataCopied[&FFT_T_OP_Obj] = false
 	return &FFT_T_OP_Obj
-}
-
-func XOR3(a, b, c bool) bool {
-	return (a != b) != c
-}
-
-func XOR3_2True(a, b, c bool) bool {
-	// Count the number of true inputs
-	count := 0
-	if a {
-		count++
-	}
-	if b {
-		count++
-	}
-	if c {
-		count++
-	}
-
-	// Return true if count is 1 or 2
-	return count == 2
-}
-
-func kx_ky_kz_prop_defined(q Quantity, ikx, iky, ikz float64) bool {
-	// Determine if kx, ky, kz are NaN (undefined)
-	isNaN_kx := math.IsNaN(ikx)
-	isNaN_ky := math.IsNaN(iky)
-	isNaN_kz := math.IsNaN(ikz)
-
-	// Count NaNs
-	numNaNs := 0
-	if isNaN_kx {
-		numNaNs++
-	}
-	if isNaN_ky {
-		numNaNs++
-	}
-	if isNaN_kz {
-		numNaNs++
-	}
-	// Count dimensions equal to 1
-	dim1 := SizeOf(q)[0] == 1
-	dim2 := SizeOf(q)[1] == 1
-	dim3 := SizeOf(q)[2] == 1
-
-	numDims1 := 0
-	if dim1 {
-		numDims1++
-	}
-	if dim2 {
-		numDims1++
-	}
-	if dim3 {
-		numDims1++
-	}
-
-	// Define the two cases
-	// Case 1: Exactly 1 NaN (two k values defined) and all dimensions > 1
-	case1 := (numNaNs == 1) && (numDims1 == 0)
-
-	// Case 2: Exactly 2 NaNs (one k value defined) and exactly 1 dimension == 1
-	case2 := (numNaNs == 2) && (numDims1 == 1)
-
-	// Ensure that the NaNs correspond to the dimensions that are not 1
-	// For Case 2, if a dimension is 1, its corresponding k should be NaN
-	// Example: If dim1 == 1, then isNaN_kx should be true
-	// We need to verify that exactly one of the mappings matches
-
-	// Count correct mappings
-	correctMappings := 0
-	if (dim1 && isNaN_kx) || (!dim1 && !isNaN_kx) {
-		correctMappings++
-	}
-	if (dim2 && isNaN_ky) || (!dim2 && !isNaN_ky) {
-		correctMappings++
-	}
-	if (dim3 && isNaN_kz) || (!dim3 && !isNaN_kz) {
-		correctMappings++
-	}
-
-	// For Case 1: All mappings should be correct
-	correctCase1 := (numNaNs == 1) && (correctMappings == 3)
-
-	// For Case 2: Exactly one mapping should be mismatched (since one dim is 1 and two k's are NaN)
-	correctCase2 := (numNaNs == 2) && (numDims1 == 1) && (correctMappings == 2)
-
-	return (case1 && correctCase1) || (case2 && correctCase2)
 }
 
 func (s *fftOperation4D) Eval() {
@@ -322,7 +224,8 @@ func (s *fftOperation4D) Eval() {
 	var dataT *data.Slice
 	var FFTOP *fftOperation3D
 	if s.kspace {
-		FFTOP = s.fft3D
+		qOP := s.qOP
+		FFTOP = UnpackUntilFFT3D(qOP)
 		FFTOP.evalIntern()
 		dataT = FFT3DData[s.q]
 	} else {
