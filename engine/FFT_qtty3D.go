@@ -88,7 +88,7 @@ func FFT3D(q Quantity) *fftOperation3D {
 	s := MeshOf(q).Size()
 	//fmt.Println(fmt.Sprintf("Initializing with %d, %d and %d", s[X], s[Y], s[Z]))
 	FFT3DR2CPlans[q] = cuda.Initialize3DR2CFFT(s[X], s[Y], s[Z])
-	fftOP3D := &fftOperation3D{fieldOp{q, q, q.NComp()}, "k_x_y_z_" + NameOf(q), q, false, false, NegativeKX}
+	fftOP3D := &fftOperation3D{fieldOp{q, q, q.NComp()}, NameOf(q) + "_k_x_y_z", q, false, false, NegativeKX}
 	FFTEvaluated[q] = false
 	FFTEvaluatedReal[q] = false
 	FFTEvaluatedImag[q] = false
@@ -131,10 +131,9 @@ func FFT3D(q Quantity) *fftOperation3D {
 func FFT3D_FFT_T(q Quantity) *fftOperation3D {
 
 	s := MeshOf(q).Size()
-	cuda.Create_Stream(NameOf(q))
 	//fmt.Println(fmt.Sprintf("Initializing with %d, %d and %d", s[X], s[Y], s[Z]))
-	FFT3DR2CPlans[q] = cuda.Initialize3DR2CFFT_FFT_T(s[X], s[Y], s[Z], cuda.Get_Stream(NameOf(q)))
-	fftOP3D := &fftOperation3D{fieldOp{q, q, q.NComp()}, "k_x_y_z_" + NameOf(q), q, true, false, NegativeKX}
+	FFT3DR2CPlans[q] = cuda.Initialize3DR2CFFT(s[X], s[Y], s[Z])
+	fftOP3D := &fftOperation3D{fieldOp{q, q, q.NComp()}, NameOf(q) + "_k_x_y_z", q, true, false, NegativeKX}
 	FFTEvaluated[q] = false
 	FFTEvaluatedReal[q] = false
 	FFTEvaluatedImag[q] = false
@@ -142,8 +141,8 @@ func FFT3D_FFT_T(q Quantity) *fftOperation3D {
 	FFTEvaluatedAbs[q] = false
 	if !slices.Contains(DeclVarFFTDyn, q) {
 		if q.NComp() == 3 || q.NComp() == 1 {
-			FFT3DData[q] = cuda.BufferFFT_T(q.NComp(), fftOP3D.FFTOutputSize(), NameOf(q))
-			cuda.ZeroFFT_T(FFT3DData[q], NameOf(q))
+			FFT3DData[q] = cuda.Buffer(q.NComp(), fftOP3D.FFTOutputSize())
+			cuda.Zero(FFT3DData[q])
 			//fmt.Println(FFT3DData[q].HostCopy().Tensors())
 		} else {
 			panic("FFT_T only works for 1 or 3 components")
@@ -156,7 +155,7 @@ func FFT3D_FFT_T(q Quantity) *fftOperation3D {
 func FFT3DAs(q Quantity, name string) *fftOperation3D {
 	s := MeshOf(q).Size()
 	FFT3DR2CPlans[q] = cuda.Initialize3DR2CFFT(s[X], s[Y], s[Z])
-	fftOP3D := &fftOperation3D{fieldOp{q, q, q.NComp()}, "k_x_y_z_" + NameOf(q), q, false, false, NegativeKX}
+	fftOP3D := &fftOperation3D{fieldOp{q, q, q.NComp()}, NameOf(q) + "_k_x_y_z", q, false, false, NegativeKX}
 	FFTEvaluated[q] = false
 	FFTEvaluatedReal[q] = false
 	FFTEvaluatedImag[q] = false
@@ -211,69 +210,38 @@ func (d *fftOperation3D) IsPolar() bool {
 }
 
 func (d *fftOperation3D) evalIntern() {
-	if !d.FFT_T {
-		input := ValueOf(d.a)
-		defer cuda.Recycle(input)
-		var buf *data.Slice
-		if d.NegativeKX {
-			redSize := d.FFTOutputSize()
-			redSize[0] /= 2
-			buf = cuda.Buffer(d.nComp, redSize)
-		} else {
-			buf = cuda.Buffer(d.nComp, d.FFTOutputSize())
-		}
-		cuda.Zero(buf)
-		defer cuda.Recycle(buf)
-		for i := range d.nComp {
-			cuda.Perform3DR2CFFT(input.Comp(i), buf.Comp(i), FFT3DR2CPlans[d.q])
-		}
-		bufReOrd := cuda.Buffer(buf.NComp(), buf.Size())
-		defer cuda.Recycle(bufReOrd)
-		cuda.ReorderCufftData(bufReOrd, buf)
-		if d.polar {
-			cuda.ComplexToPolar(bufReOrd, bufReOrd)
-		}
-		if d.NegativeKX {
-			ccBuf := cuda.Buffer(bufReOrd.NComp(), bufReOrd.Size())
-			defer cuda.Recycle(ccBuf)
-			cuda.ComplexConjugate(ccBuf, bufReOrd)
-			cuda.ReverseX(ccBuf, ccBuf)
-			data.CopyPart(FFT3DData[d.q], ccBuf, 0, ccBuf.Size()[X], 0, ccBuf.Size()[Y], 0, ccBuf.Size()[Z], 0, 1, 0, 0, 0, 0)
-			data.CopyPart(FFT3DData[d.q], bufReOrd, 0, bufReOrd.Size()[X], 0, bufReOrd.Size()[Y], 0, bufReOrd.Size()[Z], 0, 1, ccBuf.Size()[X], 0, 0, 0)
-		} else {
-			data.Copy(FFT3DData[d.q], bufReOrd)
-		}
+	input := ValueOf(d.a)
+	defer cuda.Recycle(input)
+	var buf *data.Slice
+	if d.NegativeKX {
+		redSize := d.FFTOutputSize()
+		redSize[0] /= 2
+		buf = cuda.Buffer(d.nComp, redSize)
 	} else {
-		input := ValueOf(d.a)
-		defer cuda.Recycle(input)
-		var buf *data.Slice
-		if d.NegativeKX {
-			redSize := d.FFTOutputSize()
-			redSize[0] /= 2
-			buf = cuda.BufferFFT_T(d.nComp, redSize, NameOf(d.q))
-		} else {
-			buf = cuda.BufferFFT_T(d.nComp, d.FFTOutputSize(), NameOf(d.q))
-		}
-		cuda.ZeroFFT_T(buf, NameOf(d.q))
-		defer cuda.Recycle(buf)
-		for i := range d.nComp {
-			cuda.Perform3DR2CFFT_T(input.Comp(i), buf.Comp(i), FFT3DR2CPlans[d.q], NameOf(d.q))
-			//cuda.Perform3DR2CFFT_T(input.Comp(i), FFT3DData[d.q].Comp(i), FFT3DR2CPlans[d.q], NameOf(d.q))
-		}
-		bufReOrd := cuda.BufferFFT_T(buf.NComp(), buf.Size(), NameOf(d.q))
-		defer cuda.Recycle(bufReOrd)
-		cuda.ReorderCufftData(bufReOrd, buf)
-		if d.NegativeKX {
-			ccBuf := cuda.BufferFFT_T(bufReOrd.NComp(), bufReOrd.Size(), NameOf(d.q))
-			defer cuda.Recycle(ccBuf)
-			cuda.ComplexConjugate(ccBuf, bufReOrd)
-			cuda.ReverseX(ccBuf, ccBuf)
-			data.CopyPart(FFT3DData[d.q], ccBuf, 0, ccBuf.Size()[X], 0, ccBuf.Size()[Y], 0, ccBuf.Size()[Z], 0, 1, 0, 0, 0, 0)
-			data.CopyPart(FFT3DData[d.q], bufReOrd, 0, bufReOrd.Size()[X], 0, bufReOrd.Size()[Y], 0, bufReOrd.Size()[Z], 0, 1, ccBuf.Size()[X], 0, 0, 0)
-		} else {
-			data.Copy(FFT3DData[d.q], bufReOrd)
-		}
+		buf = cuda.Buffer(d.nComp, d.FFTOutputSize())
 	}
+	cuda.Zero(buf)
+	defer cuda.Recycle(buf)
+	for i := range d.nComp {
+		cuda.Perform3DR2CFFT(input.Comp(i), buf.Comp(i), FFT3DR2CPlans[d.q])
+	}
+	bufReOrd := cuda.Buffer(buf.NComp(), buf.Size())
+	defer cuda.Recycle(bufReOrd)
+	cuda.ReorderCufftData(bufReOrd, buf)
+	if d.polar && !d.FFT_T {
+		cuda.ComplexToPolar(bufReOrd, bufReOrd)
+	}
+	if d.NegativeKX {
+		ccBuf := cuda.Buffer(bufReOrd.NComp(), bufReOrd.Size())
+		defer cuda.Recycle(ccBuf)
+		cuda.ComplexConjugate(ccBuf, bufReOrd)
+		cuda.ReverseX(ccBuf, ccBuf)
+		data.CopyPart(FFT3DData[d.q], ccBuf, 0, ccBuf.Size()[X], 0, ccBuf.Size()[Y], 0, ccBuf.Size()[Z], 0, 1, 0, 0, 0, 0)
+		data.CopyPart(FFT3DData[d.q], bufReOrd, 0, bufReOrd.Size()[X], 0, bufReOrd.Size()[Y], 0, bufReOrd.Size()[Z], 0, 1, ccBuf.Size()[X], 0, 0, 0)
+	} else {
+		data.Copy(FFT3DData[d.q], bufReOrd)
+	}
+
 }
 
 func (d *fftOperation3D) Mesh() *data.Mesh {
@@ -312,22 +280,22 @@ func (d *fftOperation3D) Real() *fftOperation3DReal {
 	if d.polar {
 		panic("Cannot be polar and take real value.")
 	}
-	return &fftOperation3DReal{fieldOp{d.q, d.q, d.q.NComp()}, "k_x_y_z_" + NameOf(d.q) + "_real", d.q, *d, false, NegativeKX, d.polar}
+	return &fftOperation3DReal{fieldOp{d.q, d.q, d.q.NComp()}, NameOf(d.q) + "_k_x_y_z_real", d.q, *d, false, NegativeKX, d.polar}
 }
 
 func (d *fftOperation3D) Imag() *fftOperation3DImag {
 	if d.polar {
 		panic("Cannot be polar and take imag value.")
 	}
-	return &fftOperation3DImag{fieldOp{d.q, d.q, d.q.NComp()}, "k_x_y_z_" + NameOf(d.q) + "_imag", d.q, *d, false, NegativeKX, d.polar}
+	return &fftOperation3DImag{fieldOp{d.q, d.q, d.q.NComp()}, NameOf(d.q) + "_k_x_y_z_imag", d.q, *d, false, NegativeKX, d.polar}
 }
 
 func (d *fftOperation3D) Phi() *fftOperation3DPhi {
-	return &fftOperation3DPhi{fieldOp{d.q, d.q, d.q.NComp()}, "k_x_y_z_" + NameOf(d.q) + "_phi", d.q, *d, false, NegativeKX, d.polar}
+	return &fftOperation3DPhi{fieldOp{d.q, d.q, d.q.NComp()}, NameOf(d.q) + "_k_x_y_z_phi", d.q, *d, false, NegativeKX, d.polar}
 }
 
 func (d *fftOperation3D) Abs() *fftOperation3DAbs {
-	return &fftOperation3DAbs{fieldOp{d.q, d.q, d.q.NComp()}, "k_x_y_z_" + NameOf(d.q) + "_abs", d.q, *d, false, NegativeKX, d.polar}
+	return &fftOperation3DAbs{fieldOp{d.q, d.q, d.q.NComp()}, NameOf(d.q) + "_k_x_y_z_abs", d.q, *d, false, NegativeKX, d.polar}
 }
 
 func (d *fftOperation3D) SymmetricX() bool {
@@ -540,40 +508,29 @@ func (d *fftOperation3DAbs) SymmetricY() bool {
 	return true
 }
 
-/*
-func FFT2D(q Quantity, axis1, axis2 string) *fftOperation2D {
-	if !cuda.FFT3DR2CPlanInitialized {
-		s := Mesh().Size()
-		//fmt.Println(fmt.Sprintf("Initializing with %d, %d and %d", s[X], s[Y], s[Z]))
-		cuda.InitializeR2CFFT(s[X], s[Y], s[Z])
-	}
-	return &fftOperation2D{fieldOp{q, q, q.NComp()}, "k_" + axis1 + "_" + axis2 + "_" + NameOf(q), [2]string{axis1, axis2}}
-
-}
-
-func (d *fftOperation2D) EvalTo(dst *data.Slice) {
-	data := ValueOf(d.a)
-	defer cuda.Recycle(data)
-	cuda.Zero(dst)
-	for i := range d.nComp {
-		cuda.PerformR2CFFT(data.Comp(i), dst.Comp(i))
+func UnpackUntilFFT3D(q Quantity) *fftOperation3D {
+	if s, ok := q.(*fftOperation3D); ok {
+		return s
+	} else if s, ok := q.(*cropped); ok {
+		return UnpackUntilFFT3D(s.parent)
+	} else if s, ok := q.(*expanded); ok {
+		return UnpackUntilFFT3D(s.parent)
+	} else if s, ok := q.(*component); ok {
+		return UnpackUntilFFT3D(s.parent)
+	} else if s, ok := q.(ScalarField); ok {
+		return UnpackUntilFFT3D(s.Quantity)
+	} else {
+		panic("UnpackUntilFFT3D: unknown type")
 	}
 }
 
-func (d *fftOperation2D) Mesh() *data.Mesh {
-	s := d.FFTOutputSize()
-	c := Mesh().CellSize()
-	return data.NewMesh(s[X]/2, s[Y], s[Z], 2*math.Pi/c[X], 2*math.Pi/c[Y], 2*math.Pi/c[Z])
-}
+func IsFFT3D(q Quantity) (ok bool) {
+	defer func() {
+		if r := recover(); r != nil {
+			ok = false // If a panic occurred, return false
+		}
+	}()
 
-func (d *fftOperation2D) Name() string {
-	return d.name
+	_ = UnpackUntilFFT3D(q) // Call the function to check if it panics
+	return true             // If no panic occurred, return true
 }
-
-func (d *fftOperation2D) Unit() string { return "a.u." }
-
-func (d *fftOperation2D) FFTOutputSize() [3]int {
-	var NxOP, NyOP, NzOP = cuda.FFT2DR2CPlan.OutputSizeFloats()
-	return [3]int{NxOP, NyOP, NzOP}
-}
-*/

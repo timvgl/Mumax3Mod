@@ -40,4 +40,23 @@ func (q *component) EvalTo(dst *data.Slice) {
 	data.Copy(dst, src.Comp(q.comp))
 }
 
+func (q *component) AxisFFT() (newSize [3]int, newStartK, newEndK [3]float64, newTransformedAxis []string) {
+	parent := q.parent
+	if s, ok := parent.(interface {
+		AxisFFT() ([3]int, [3]float64, [3]float64, []string)
+	}); ok {
+		return s.AxisFFT()
+	} else if s, ok := parent.(interface {
+		Axis() ([3]int, [3]float64, [3]float64, []string)
+	}); ok {
+		if l, ok2 := s.(*fftOperation3D); ok2 {
+			return l.Axis()
+		} else {
+			panic("Axis functions not found for " + NameOf(parent))
+		}
+	} else {
+		panic("Axis functions not found for " + NameOf(parent))
+	}
+}
+
 var compname = map[int]string{0: "x", 1: "y", 2: "z"}

@@ -194,6 +194,25 @@ func (s ScalarField) SymmetricY() bool {
 	return SymmetricYOf(s.Quantity)
 }
 
+func (q ScalarField) AxisFFT() (newSize [3]int, newStartK, newEndK [3]float64, newTransformedAxis []string) {
+	parent := q.Quantity
+	if s, ok := parent.(interface {
+		AxisFFT() ([3]int, [3]float64, [3]float64, []string)
+	}); ok {
+		return s.AxisFFT()
+	} else if s, ok := parent.(interface {
+		Axis() ([3]int, [3]float64, [3]float64, []string)
+	}); ok {
+		if l, ok2 := s.(*fftOperation3D); ok2 {
+			return l.Axis()
+		} else {
+			panic("Axis functions not found for " + NameOf(parent))
+		}
+	} else {
+		panic("Axis functions not found for " + NameOf(parent))
+	}
+}
+
 // VectorField enhances an outputField with methods specific to
 // a space-dependent vector quantity.
 type VectorField struct {

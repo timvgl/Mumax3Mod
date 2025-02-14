@@ -2,7 +2,10 @@ package engine
 
 // Bookkeeping for auto-saving quantities at given intervals.
 
-import "fmt"
+import (
+	"fmt"
+	"unicode"
+)
 
 var (
 	output                   = make(map[Quantity]*autosave) // when to save quantities
@@ -214,7 +217,20 @@ func autoSaveAs(q Quantity, period float64, save func(Quantity), savePrefix, Sav
 // generate auto file name based on save count and FilenameFormat. E.g.:
 //
 //	m000001.ovf
+func appendUnderscoreIfLastCharIsDigit(s string) string {
+	if len(s) == 0 {
+		return s // Return unchanged if empty
+	}
+
+	// Check if the last character is a digit
+	if unicode.IsDigit(rune(s[len(s)-1])) {
+		return s + "_"
+	}
+
+	return s
+}
 func autoFname(name string, format OutputFormat, num int) string {
+	name = appendUnderscoreIfLastCharIsDigit(name)
 	return fmt.Sprintf(OD()+FilenameFormat+"."+StringFromOutputFormat[format], name, num)
 }
 
