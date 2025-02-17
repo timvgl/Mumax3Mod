@@ -116,6 +116,7 @@ func CropZ(parent Quantity, z1, z2 int) *cropped {
 }
 
 func Crop(parent Quantity, x1, x2, y1, y2, z1, z2 int) *cropped {
+	fmt.Println("crop")
 	n := MeshOf(parent).Size()
 	util.Argument(x1 < x2 && y1 < y2 && z1 < z2)
 	util.Argument(x1 >= 0 && y1 >= 0 && z1 >= 0)

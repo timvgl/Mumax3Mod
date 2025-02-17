@@ -70,13 +70,15 @@ type fftOperation4D struct {
 }
 
 func MergeOperators(fs ...func(q Quantity) Quantity) [](func(q Quantity) Quantity) {
-	slices.Reverse(fs)
+	//slices.Reverse(fs)
 	return fs
 }
 
 func ApplyOperators(q Quantity, funcs []func(q Quantity) Quantity) Quantity {
 	for _, f := range funcs {
 		q = f(q)
+		fmt.Println(NameOf(q))
+		fmt.Println(MeshOf(q).Size())
 	}
 	return q
 }
@@ -110,7 +112,7 @@ func GetKeys[T any](m *sync.Map) []T {
 }
 
 func FFT4D(q Quantity, period float64) *fftOperation4D {
-
+	fmt.Println("FFT4D")
 	qOP := ApplyOperators(FFT3D_FFT_T(q), operatorsKSpace)
 
 	QTTYName := ""
@@ -190,7 +192,7 @@ func (s *fftOperation4D) Eval() {
 	sizeDataT := SizeOf(s.qOP)
 	if s.kspace {
 		sizeDataT[0] *= 2
-		fmt.Println(sizeDataT)
+		//fmt.Println(sizeDataT)
 	}
 	var (
 		dataT           *data.Slice = cuda.BufferFFT_T(s.qOP.NComp(), sizeDataT, fmt.Sprintf("%s_%s", NameOf(s.qOP), FFTType))
