@@ -31,6 +31,10 @@ func (du *firstDerivative) Type() reflect.Type      { return reflect.TypeOf(new(
 func (du *firstDerivative) Eval() interface{}       { return du }
 func (du *firstDerivative) average() []float64      { return sAverageMagnet(du.Buffer()) }
 func (du *firstDerivative) Average() data.Vector    { return unslice(du.average()) }
+func (du *firstDerivative) EvalRegionTo(dst *data.Slice) {
+	cuda.Crop(dst, du.buffer_, dst.StartX, dst.StartY, dst.StartZ)
+}
+func (du *firstDerivative) LimitToGeometry() { cuda.LimitToGeometry(du.buffer_, Geometry.Buffer) }
 
 //func (du *firstDerivative) normalize()              { cuda.Normalize(du.Buffer(), Geometry.Gpu()) }
 

@@ -86,6 +86,7 @@ func init() {
 // Time stepper like Euler, Heun, RK23
 type Stepper interface {
 	Step() // take time step using solver globals
+	StepRegion(region SolverRegion)
 	Free() // free resources, if any (e.g.: RK23 previous torque)
 }
 
@@ -147,6 +148,11 @@ func SetSolver(typ int) {
 // write torque to dst and increment NEvals
 func torqueFn(dst *data.Slice) {
 	SetTorque(dst)
+	NEvals++
+}
+
+func torqueFnRegion(dst *data.Slice) {
+	SetTorqueRegion(dst)
 	NEvals++
 }
 

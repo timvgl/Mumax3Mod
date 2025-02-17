@@ -1,11 +1,12 @@
 package engine
 
 import (
+	"unsafe"
+
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/cuda/cu"
 	"github.com/mumax/3/data"
 	"github.com/mumax/3/util"
-	"unsafe"
 )
 
 // look-up table for region based parameters
@@ -84,6 +85,15 @@ func (p *lut) Slice() (*data.Slice, bool) {
 	b := cuda.Buffer(p.NComp(), Mesh().Size())
 	p.EvalTo(b)
 	return b, true
+}
+
+func (p *lut) SliceRegion(size [3]int, offsetX, offsetY, offsetZ int) (*data.Slice, bool) {
+	b := cuda.Buffer(p.NComp(), Mesh().Size())
+	p.EvalTo(b)
+	c := cuda.Buffer(p.NComp(), size)
+	cuda.Crop(c, b, offsetX, offsetY, offsetZ)
+	cuda.Recycle(b)
+	return c, true
 }
 
 // uncompress the table to a full array in the dst Slice with parameter values per cell.

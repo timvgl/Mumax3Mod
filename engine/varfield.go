@@ -21,6 +21,9 @@ func (m *varVectorField) NComp() int          { return 3 }
 func (m *varVectorField) Name() string        { return m.name }
 func (m *varVectorField) Unit() string        { return m.unit }
 func (m *varVectorField) Buffer() *data.Slice { return m.buffer_ } // todo: rename Gpu()?
+func (m *varVectorField) EvalRegionTo(dst *data.Slice) {
+	cuda.Crop(dst, m.buffer_, dst.StartX, dst.StartY, dst.StartZ)
+}
 
 func (m *varVectorField) Comp(c int) ScalarField  { return Comp(m, c) }
 func (m *varVectorField) SetValue(v interface{})  { m.SetInShape(nil, v.(Config)) }

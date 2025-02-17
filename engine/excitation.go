@@ -73,6 +73,15 @@ func (p *Excitation) MSlice() cuda.MSlice {
 	return cuda.ToMSlice(buf)
 }
 
+func (p *Excitation) MSliceRegion(size [3]int, offsetX, offsetY, offsetZ int) cuda.MSlice {
+	buf, r := p.Slice()
+	bufRed := cuda.Buffer(buf.NComp(), size)
+	cuda.Crop(bufRed, buf, offsetX, offsetY, offsetZ)
+	cuda.Recycle(buf)
+	util.Assert(r == true)
+	return cuda.ToMSlice(bufRed)
+}
+
 func (e *Excitation) AddTo(dst *data.Slice) {
 	if !e.perRegion.isZero() {
 		cuda.RegionAddV(dst, e.perRegion.gpuLUT(), regions.Gpu())
@@ -96,6 +105,32 @@ func (e *Excitation) AddTo(dst *data.Slice) {
 	}
 }
 
+func (e *Excitation) AddToRegion(dst *data.Slice) {
+	if !e.perRegion.isZero() {
+		cuda.RegionAddV(dst, e.perRegion.gpuLUT(), regions.Gpu())
+	}
+
+	for _, t := range e.extraTerms {
+		MulSlice := make([]float32, len(t.mul))
+		for i := range MulSlice {
+			if t.mul[i] != nil {
+				MulSlice[i] = float32(t.mul[i]())
+			} else {
+				MulSlice[i] = 0
+			}
+		}
+
+		OneSlice := make([]float32, dst.NComp())
+		for i := range OneSlice {
+			OneSlice[i] = 1.
+		}
+		maskRed := cuda.Buffer(t.mask.NComp(), dst.RegionSize())
+		cuda.Crop(maskRed, t.mask, dst.StartX, dst.StartY, dst.StartZ)
+		cuda.Madd2Comp(dst, dst, maskRed, OneSlice, MulSlice)
+		cuda.Recycle(maskRed)
+	}
+}
+
 func (e *Excitation) isZero() bool {
 	return e.perRegion.isZero() && len(e.extraTerms) == 0
 }
@@ -114,6 +149,14 @@ func (e *Excitation) Slice() (*data.Slice, bool) {
 
 	}
 	return buf, true
+}
+
+func (e *Excitation) SliceRegion(size [3]int, offsetX, offsetY, offsetZ int) (*data.Slice, bool) {
+	buf, ok := e.Slice()
+	bufRed := cuda.Buffer(buf.NComp(), size)
+	cuda.Crop(bufRed, buf, offsetX, offsetY, offsetZ)
+	cuda.Recycle(buf)
+	return bufRed, ok
 }
 
 // After resizing the mesh, the extra terms don't fit the grid anymore
@@ -229,6 +272,11 @@ func (e *Excitation) Eval() interface{}       { return e }
 func (e *Excitation) Type() reflect.Type      { return reflect.TypeOf(new(Excitation)) }
 func (e *Excitation) InputType() reflect.Type { return script.VectorFunction_t }
 func (e *Excitation) EvalTo(dst *data.Slice)  { EvalTo(e, dst) }
+func (e *Excitation) EvalRegionTo(dst *data.Slice) {
+	buf := cuda.Buffer(e.NComp(), e.Mesh().Size())
+	e.EvalTo(buf)
+	cuda.Crop(dst, buf, dst.StartX, dst.StartY, dst.StartZ)
+}
 
 func checkNaN(s *data.Slice, name string) {
 	h := s.Host()

@@ -93,6 +93,19 @@ func (p *regionwise) MSlice() cuda.MSlice {
 	}
 }
 
+func (p *regionwise) MSliceRegion(size [3]int, offsetX, offsetY, offsetZ int) cuda.MSlice {
+	if p.IsUniform() {
+		return cuda.MakeMSlice(data.NilSlice(p.NComp(), size), p.getRegion(0))
+	} else {
+		buf, r := p.Slice()
+		redBuf := cuda.Buffer(p.NComp(), size)
+		cuda.Crop(redBuf, buf, offsetX, offsetY, offsetZ)
+		cuda.Recycle(buf)
+		util.Assert(r == true)
+		return cuda.ToMSlice(redBuf)
+	}
+}
+
 func (p *regionwise) Name() string     { return p.name }
 func (p *regionwise) Unit() string     { return p.unit }
 func (p *regionwise) Mesh() *data.Mesh { return Mesh() }
