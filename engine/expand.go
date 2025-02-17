@@ -3,8 +3,6 @@ package engine
 // expanded quantity refers to a cut-out piece of a large quantity
 
 import (
-	"fmt"
-
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/data"
 	"github.com/mumax/3/util"
@@ -76,7 +74,6 @@ func createSliceFloat64(n int, l float64) []float64 {
 }
 
 func Expand(parent Quantity, x1, x2, y1, y2, z1, z2 int, args ...float64) *expanded {
-	fmt.Println("expand")
 	n := MeshOf(parent).Size()
 	util.Argument(x1 < x2 && y1 < y2 && z1 < z2)
 	util.Argument(x1 >= 0 && y1 >= 0 && z1 >= 0)

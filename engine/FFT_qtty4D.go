@@ -112,7 +112,6 @@ func GetKeys[T any](m *sync.Map) []T {
 }
 
 func FFT4D(q Quantity, period float64) *fftOperation4D {
-	fmt.Println("FFT4D")
 	qOP := ApplyOperators(FFT3D_FFT_T(q), operatorsKSpace)
 
 	QTTYName := ""
