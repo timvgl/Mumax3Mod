@@ -77,8 +77,6 @@ func MergeOperators(fs ...func(q Quantity) Quantity) [](func(q Quantity) Quantit
 func ApplyOperators(q Quantity, funcs []func(q Quantity) Quantity) Quantity {
 	for _, f := range funcs {
 		q = f(q)
-		fmt.Println(NameOf(q))
-		fmt.Println(MeshOf(q).Size())
 	}
 	return q
 }
