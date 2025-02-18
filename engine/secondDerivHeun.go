@@ -151,7 +151,7 @@ func (_ *secondHeun) Step() {
 	}
 }
 
-func (_ *secondHeun) StepRegion(region SolverRegion) {
+func (_ *secondHeun) StepRegion(region *SolverRegion) {
 	fmt.Println("#########################")
 	fmt.Println("Start of solver")
 	fmt.Println("Number of steps:", NSteps+NUndone)

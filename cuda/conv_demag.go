@@ -199,3 +199,7 @@ func (c *DemagConvolution) Free() {
 		cudaCtx.SetCurrent()
 	}
 }
+
+func (c *DemagConvolution) Size() [3]int {
+	return c.inputSize
+}

@@ -61,7 +61,7 @@ func (s *BackwardEuler) Step() {
 	setMaxTorque(dy1)
 }
 
-func (s *BackwardEuler) StepRegion(region SolverRegion) {
+func (s *BackwardEuler) StepRegion(region *SolverRegion) {
 	util.AssertMsg(MaxErr > 0, "Backward euler solver requires MaxErr > 0")
 
 	t0 := Time
@@ -107,13 +107,13 @@ func (s *BackwardEuler) StepRegion(region SolverRegion) {
 		cuda.Normalize(y, geom)
 	}
 	dy0.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
-	torqueFnRegion(dy0)
+	torqueFnRegion(dy0, region.PBCx, region.PBCy, region.PBCz)
 	cuda.Madd2(y, y0, dy0, 1, dt) // y = y0 + dt * dy
 	cuda.Normalize(y, geom)
 
 	// One iteration
 	dy1.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
-	torqueFnRegion(dy1)
+	torqueFnRegion(dy1, region.PBCx, region.PBCy, region.PBCz)
 	cuda.Madd2(y, y0, dy1, 1, dt) // y = y0 + dt * dy1
 	cuda.Normalize(y, geom)
 	if FixDt != 0 {

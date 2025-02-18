@@ -45,21 +45,29 @@ func addUniaxialAnisotropyFrom(dst *data.Slice, M magnetization, Msat, Ku1, Ku2 
 	}
 }
 
-func addUniaxialAnisotropyFromRegion(dst *data.Slice, M magnetization, Msat, Ku1, Ku2 *RegionwiseScalar, AnisU *RegionwiseVector) {
-	if Ku1.nonZero() || Ku2.nonZero() {
-		ms := Msat.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
-		defer ms.Recycle()
-		ku1 := Ku1.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
-		defer ku1.Recycle()
-		ku2 := Ku2.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
-		defer ku2.Recycle()
-		u := AnisU.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
-		defer u.Recycle()
+func addUniaxialAnisotropyFromRegion(dst, m *data.Slice, Msat, Ku1, Ku2 *RegionwiseScalar, AnisU *RegionwiseVector, useFullSample bool) {
+	if !useFullSample {
+		if Ku1.nonZero() || Ku2.nonZero() {
+			ms := Msat.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+			defer ms.Recycle()
+			ku1 := Ku1.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+			defer ku1.Recycle()
+			ku2 := Ku2.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+			defer ku2.Recycle()
+			u := AnisU.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+			defer u.Recycle()
 
-		m := cuda.Buffer(M.NComp(), dst.RegionSize())
-		defer cuda.Recycle(m)
-		cuda.Crop(m, M.Buffer(), dst.StartX, dst.StartY, dst.StartZ)
-		cuda.AddUniaxialAnisotropy2(dst, m, ms, ku1, ku2, u)
+			cuda.AddUniaxialAnisotropy2(dst, m, ms, ku1, ku2, u)
+		}
+	} else {
+		B := cuda.Buffer(M.NComp(), M.Buffer().Size())
+		cuda.Zero(B)
+		addUniaxialAnisotropyFrom(B, M, Msat, Ku1, Ku2, AnisU)
+		BCropped := cuda.Buffer(dst.NComp(), dst.Size())
+		cuda.Crop(BCropped, B, dst.StartX, dst.StartY, dst.StartZ)
+		cuda.Add(dst, dst, BCropped)
+		cuda.Recycle(BCropped)
+		cuda.Recycle(B)
 	}
 }
 
@@ -86,30 +94,38 @@ func addCubicAnisotropyFrom(dst *data.Slice, M magnetization, Msat, Kc1, Kc2, Kc
 	}
 }
 
-func addCubicAnisotropyFromRegion(dst *data.Slice, M magnetization, Msat, Kc1, Kc2, Kc3 *RegionwiseScalar, AnisC1, AnisC2 *RegionwiseVector) {
-	if Kc1.nonZero() || Kc2.nonZero() || Kc3.nonZero() {
-		ms := Msat.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
-		defer ms.Recycle()
+func addCubicAnisotropyFromRegion(dst, m *data.Slice, Msat, Kc1, Kc2, Kc3 *RegionwiseScalar, AnisC1, AnisC2 *RegionwiseVector, useFullSample bool) {
+	if !useFullSample {
+		if Kc1.nonZero() || Kc2.nonZero() || Kc3.nonZero() {
+			ms := Msat.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+			defer ms.Recycle()
 
-		kc1 := Kc1.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
-		defer kc1.Recycle()
+			kc1 := Kc1.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+			defer kc1.Recycle()
 
-		kc2 := Kc2.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
-		defer kc2.Recycle()
+			kc2 := Kc2.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+			defer kc2.Recycle()
 
-		kc3 := Kc3.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
-		defer kc3.Recycle()
+			kc3 := Kc3.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+			defer kc3.Recycle()
 
-		c1 := AnisC1.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
-		defer c1.Recycle()
+			c1 := AnisC1.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+			defer c1.Recycle()
 
-		c2 := AnisC2.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
-		defer c2.Recycle()
+			c2 := AnisC2.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+			defer c2.Recycle()
 
-		m := cuda.Buffer(M.NComp(), dst.RegionSize())
-		defer cuda.Recycle(m)
-		cuda.Crop(m, M.Buffer(), dst.StartX, dst.StartY, dst.StartZ)
-		cuda.AddCubicAnisotropy2(dst, m, ms, kc1, kc2, kc3, c1, c2)
+			cuda.AddCubicAnisotropy2(dst, m, ms, kc1, kc2, kc3, c1, c2)
+		}
+	} else {
+		B := cuda.Buffer(M.NComp(), M.Buffer().Size())
+		cuda.Zero(B)
+		addCubicAnisotropyFrom(B, M, Msat, Kc1, Kc2, Kc3, AnisC1, AnisC2)
+		BCropped := cuda.Buffer(dst.NComp(), dst.Size())
+		cuda.Crop(BCropped, B, dst.StartX, dst.StartY, dst.StartZ)
+		cuda.Add(dst, dst, BCropped)
+		cuda.Recycle(BCropped)
+		cuda.Recycle(B)
 	}
 }
 
@@ -119,9 +135,9 @@ func AddAnisotropyField(dst *data.Slice) {
 	addCubicAnisotropyFrom(dst, M, Msat, Kc1, Kc2, Kc3, AnisC1, AnisC2)
 }
 
-func AddAnisotropyFieldRegion(dst *data.Slice) {
-	addUniaxialAnisotropyFromRegion(dst, M, Msat, Ku1, Ku2, AnisU)
-	addCubicAnisotropyFromRegion(dst, M, Msat, Kc1, Kc2, Kc3, AnisC1, AnisC2)
+func AddAnisotropyFieldRegion(dst, m *data.Slice, useFullSample bool) {
+	addUniaxialAnisotropyFromRegion(dst, m, Msat, Ku1, Ku2, AnisU, useFullSample)
+	addCubicAnisotropyFromRegion(dst, m, Msat, Kc1, Kc2, Kc3, AnisC1, AnisC2, useFullSample)
 }
 
 // Add the anisotropy energy density to dst

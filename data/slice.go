@@ -100,7 +100,9 @@ func SliceFromArray(data [][]float32, size [3]int) *Slice {
 
 // Return a slice without underlying storage. Used to represent a mask containing all 1's.
 func NilSlice(nComp int, size [3]int) *Slice {
-	return SliceFromPtrs(size, GPUMemory, make([]unsafe.Pointer, nComp))
+	slc := SliceFromPtrs(size, GPUMemory, make([]unsafe.Pointer, nComp))
+	DataSliceSlice = append(DataSliceSlice, slc)
+	return slc
 }
 
 // Internal: construct a Slice using bare memory pointers.

@@ -67,35 +67,43 @@ func AddMagnetoelasticField(dst *data.Slice) {
 		b1, b2, ms)
 }
 
-func AddMagnetoelasticFieldRegion(dst *data.Slice) {
-	haveMel := B1.nonZero() || B2.nonZero()
-	if !haveMel {
-		return
+func AddMagnetoelasticFieldRegion(dst, m *data.Slice, useFullSample bool) {
+	if !useFullSample {
+		haveMel := B1.nonZero() || B2.nonZero()
+		if !haveMel {
+			return
+		}
+
+		enorm := cuda.Buffer(dst.NComp(), dst.RegionSize())
+		ValueOfRegion(norm_strain.Quantity, enorm, dst.StartX, dst.StartY, dst.StartZ)
+		defer cuda.Recycle(enorm)
+
+		eshear := cuda.Buffer(dst.NComp(), dst.RegionSize())
+		ValueOfRegion(shear_strain.Quantity, eshear, dst.StartX, dst.StartY, dst.StartZ)
+		defer cuda.Recycle(eshear)
+
+		b1 := B1.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+		defer b1.Recycle()
+
+		b2 := B2.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+		defer b2.Recycle()
+
+		ms := Msat.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+		defer ms.Recycle()
+
+		cuda.AddMagnetoelasticField(dst, m,
+			enorm, eshear,
+			b1, b2, ms)
+	} else {
+		B := cuda.Buffer(M.NComp(), M.Buffer().Size())
+		cuda.Zero(B)
+		AddMagnetoelasticField(B)
+		BCropped := cuda.Buffer(dst.NComp(), dst.Size())
+		cuda.Crop(BCropped, B, dst.StartX, dst.StartY, dst.StartZ)
+		cuda.Add(dst, dst, BCropped)
+		cuda.Recycle(BCropped)
+		cuda.Recycle(B)
 	}
-
-	enorm := cuda.Buffer(dst.NComp(), dst.RegionSize())
-	ValueOfRegion(norm_strain.Quantity, enorm, dst.StartX, dst.StartY, dst.StartZ)
-	defer cuda.Recycle(enorm)
-
-	eshear := cuda.Buffer(dst.NComp(), dst.RegionSize())
-	ValueOfRegion(shear_strain.Quantity, eshear, dst.StartX, dst.StartY, dst.StartZ)
-	defer cuda.Recycle(eshear)
-
-	b1 := B1.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
-	defer b1.Recycle()
-
-	b2 := B2.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
-	defer b2.Recycle()
-
-	ms := Msat.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
-	defer ms.Recycle()
-
-	m := cuda.Buffer(M.NComp(), dst.RegionSize())
-	defer cuda.Recycle(m)
-	cuda.Crop(m, M.Buffer(), dst.StartX, dst.StartY, dst.StartZ)
-	cuda.AddMagnetoelasticField(dst, m,
-		enorm, eshear,
-		b1, b2, ms)
 }
 
 func GetMagnetoelasticForceDensity(dst *data.Slice) {

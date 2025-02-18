@@ -46,6 +46,7 @@ var (
 	stepping                         bool    = false
 	runningWhile                     bool    = false
 	currentRunningTime               float64 = 0.
+	useFullSample                    bool    = true
 	//InsertTimeDepDisplacement 			int		= 0					 //1 for True, 0 for False
 	//InsertTimeDepDisplacementFunc 		func(arg1, arg2, arg3, arg4, arg5 float64) Config //func for calc displacement that is supposed to be added
 	//InsertTimeDepDisplacementFuncArgs	[]func(t float64) float64	 //slices of funcs that are going to be used as args for InsertTimeDepDisplacementFunc
@@ -72,6 +73,7 @@ func init() {
 	DeclVar("overwriteUndoBackup", &overwriteUndoBackup, "")
 	DeclVar("MoreStepsM", &MoreStepsM, "")
 	DeclVar("FactorTimeMvsU", &FactorTimeMvsU, "")
+	DeclVar("useFullSample", &useFullSample, "")
 
 	DeclFunc("Exit", Exit, "Exit from the program")
 	//DeclVar("BoolAllowInhomogeniousMECoupling", BoolAllowInhomogeniousMECoupling, "Bypasses an error that is going to be raised if B1 or B2 is inhomogenious, bool")
@@ -86,7 +88,7 @@ func init() {
 // Time stepper like Euler, Heun, RK23
 type Stepper interface {
 	Step() // take time step using solver globals
-	StepRegion(region SolverRegion)
+	StepRegion(region *SolverRegion)
 	Free() // free resources, if any (e.g.: RK23 previous torque)
 }
 
@@ -151,8 +153,29 @@ func torqueFn(dst *data.Slice) {
 	NEvals++
 }
 
-func torqueFnRegion(dst *data.Slice) {
-	SetTorqueRegion(dst)
+func torqueFnRegion(dst *data.Slice, pbcX, pbcY, pbcZ int, export ...bool) {
+	var m *data.Slice
+	SetTorqueRegion(dst, m, useFullSample, pbcX, pbcY, pbcZ)
+	if len(export) == 1 {
+		if export[0] {
+			info := data.Meta{Time: Time, Name: "debug_t", Unit: "a.u.", CellSize: [3]float64{4e-9, 4e-9, 4e-9}}
+			dstHost := dst.HostCopy()
+			val, ok := autonumSnapshotsAs["torque_debug"]
+			if !ok {
+				autonumSnapshotsAs["torque_debug"] = 0
+				val = 0
+			}
+			queOutput(func() {
+				saveAs_sync(fmt.Sprintf(OD()+"/torque_debug_%06d.ovf", val), dstHost, info, outputFormat)
+			})
+			autonumSnapshotsAs["torque_debug"]++
+		}
+	}
+	NEvals++
+}
+
+func torqueFnRegionNEW(dst, m *data.Slice, pbcX, pbcY, pbcZ int) {
+	SetTorqueRegion(dst, m, useFullSample, pbcX, pbcY, pbcZ)
 	NEvals++
 }
 

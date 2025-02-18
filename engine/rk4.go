@@ -56,7 +56,6 @@ func (rk *RK4) Step() {
 	torqueFn(k4)
 
 	err := cuda.MaxVecDiff(k1, k4) * float64(h)
-
 	// adjust next time step
 	if err < MaxErr || Dt_si <= MinDt || FixDt != 0 { // mindt check to avoid infinite loop
 		// step OK
@@ -77,7 +76,7 @@ func (rk *RK4) Step() {
 	}
 }
 
-func (rk *RK4) StepRegion(region SolverRegion) {
+func (rk *RK4) StepRegion(region *SolverRegion) {
 	//m := M.Buffer()
 	m := cuda.Buffer(M.NComp(), region.Size())
 	m.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
@@ -86,12 +85,14 @@ func (rk *RK4) StepRegion(region SolverRegion) {
 	size := m.Size()
 
 	geom := cuda.Buffer(Geometry.Gpu().NComp(), region.Size())
-	cuda.Crop(geom, Geometry.Gpu(), region.StartX, region.StartY, region.StartZ)
+	GeomBig, _ := Geometry.Slice()
+	cuda.Crop(geom, GeomBig, region.StartX, region.StartY, region.StartZ)
 	defer cuda.Recycle(geom)
+	cuda.Recycle(GeomBig)
 
 	if FixDt != 0 {
 		Dt_si = FixDt
-	} else {
+	} else if region.Dt_si != 0 {
 		Dt_si = region.Dt_si
 	}
 
@@ -116,24 +117,24 @@ func (rk *RK4) StepRegion(region SolverRegion) {
 	h := float32(Dt_si * GammaLL) // internal time step = Dt * gammaLL
 
 	// stage 1
-	torqueFnRegion(k1)
+	torqueFnRegionNEW(k1, m, region.PBCx, region.PBCy, region.PBCz)
 
 	// stage 2
 	Time = t0 + (1./2.)*Dt_si
 	cuda.Madd2(m, m, k1, 1, (1./2.)*h) // m = m*1 + k1*h/2
 	cuda.Normalize(m, geom)
-	torqueFnRegion(k2)
+	torqueFnRegionNEW(k2, m, region.PBCx, region.PBCy, region.PBCz)
 
 	// stage 3
 	cuda.Madd2(m, m0, k2, 1, (1./2.)*h) // m = m0*1 + k2*1/2
 	cuda.Normalize(m, geom)
-	torqueFnRegion(k3)
+	torqueFnRegionNEW(k3, m, region.PBCx, region.PBCy, region.PBCz)
 
 	// stage 4
 	Time = t0 + Dt_si
 	cuda.Madd2(m, m0, k3, 1, 1.*h) // m = m0*1 + k3*1
 	cuda.Normalize(m, geom)
-	torqueFnRegion(k4)
+	torqueFnRegionNEW(k4, m, region.PBCx, region.PBCy, region.PBCz)
 
 	err := cuda.MaxVecDiff(k1, k4) * float64(h)
 
@@ -154,7 +155,7 @@ func (rk *RK4) StepRegion(region SolverRegion) {
 		region.LastTorque = LastTorque
 	} else {
 		// undo bad step
-		util.Assert(FixDt == 0)
+		util.Assert(Dt_si == 0)
 		Time = t0
 		//data.Copy(m, m0)
 		NUndone++

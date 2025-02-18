@@ -118,7 +118,7 @@ func (rk *RK56) Step() {
 	}
 }
 
-func (rk *RK56) StepRegion(region SolverRegion) {
+func (rk *RK56) StepRegion(region *SolverRegion) {
 
 	m := cuda.Buffer(M.NComp(), region.Size())
 	m.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
@@ -164,56 +164,56 @@ func (rk *RK56) StepRegion(region SolverRegion) {
 	h := float32(Dt_si * GammaLL) // internal time step = Dt * gammaLL
 
 	// stage 1
-	torqueFnRegion(k1)
+	torqueFnRegion(k1, region.PBCx, region.PBCy, region.PBCz)
 
 	// stage 2
 	Time = t0 + (1./6.)*Dt_si
 	cuda.Madd2(m, m, k1, 1, (1./6.)*h) // m = m*1 + k1*h/6
 	cuda.Normalize(m, geom)
-	torqueFnRegion(k2)
+	torqueFnRegion(k2, region.PBCx, region.PBCy, region.PBCz)
 
 	// stage 3
 	Time = t0 + (4./15.)*Dt_si
 	cuda.Madd3(m, m0, k1, k2, 1, (4./75.)*h, (16./75.)*h)
 	cuda.Normalize(m, geom)
-	torqueFnRegion(k3)
+	torqueFnRegion(k3, region.PBCx, region.PBCy, region.PBCz)
 
 	// stage 4
 	Time = t0 + (2./3.)*Dt_si
 	cuda.Madd4(m, m0, k1, k2, k3, 1, (5./6.)*h, (-8./3.)*h, (5./2.)*h)
 	cuda.Normalize(m, geom)
-	torqueFnRegion(k4)
+	torqueFnRegion(k4, region.PBCx, region.PBCy, region.PBCz)
 
 	// stage 5
 	Time = t0 + (4./5.)*Dt_si
 	cuda.Madd5(m, m0, k1, k2, k3, k4, 1, (-8./5.)*h, (144./25.)*h, (-4.)*h, (16./25.)*h)
 	cuda.Normalize(m, geom)
-	torqueFnRegion(k5)
+	torqueFnRegion(k5, region.PBCx, region.PBCy, region.PBCz)
 
 	// stage 6
 	Time = t0 + (1.)*Dt_si
 	cuda.Madd6(m, m0, k1, k2, k3, k4, k5, 1, (361./320.)*h, (-18./5.)*h, (407./128.)*h, (-11./80.)*h, (55./128.)*h)
 	cuda.Normalize(m, geom)
-	torqueFnRegion(k6)
+	torqueFnRegion(k6, region.PBCx, region.PBCy, region.PBCz)
 
 	// stage 7
 	Time = t0
 	cuda.Madd5(m, m0, k1, k3, k4, k5, 1, (-11./640.)*h, (11./256.)*h, (-11/160.)*h, (11./256.)*h)
 	cuda.Normalize(m, geom)
-	torqueFnRegion(k7)
+	torqueFnRegion(k7, region.PBCx, region.PBCy, region.PBCz)
 
 	// stage 8
 	Time = t0 + (1.)*Dt_si
 	cuda.Madd7(m, m0, k1, k2, k3, k4, k5, k7, 1, (93./640.)*h, (-18./5.)*h, (803./256.)*h, (-11./160.)*h, (99./256.)*h, (1.)*h)
 	cuda.Normalize(m, geom)
-	torqueFnRegion(k8)
+	torqueFnRegion(k8, region.PBCx, region.PBCy, region.PBCz)
 
 	// stage 9: 6th order solution
 	Time = t0 + (1.)*Dt_si
 	//madd6(m, m0, k1, k3, k4, k5, k6, 1, (31./384.)*h, (1125./2816.)*h, (9./32.)*h, (125./768.)*h, (5./66.)*h)
 	cuda.Madd7(m, m0, k1, k3, k4, k5, k7, k8, 1, (7./1408.)*h, (1125./2816.)*h, (9./32.)*h, (125./768.)*h, (5./66.)*h, (5./66.)*h)
 	cuda.Normalize(m, geom)
-	torqueFnRegion(k2) // re-use k2
+	torqueFnRegion(k2, region.PBCx, region.PBCy, region.PBCz) // re-use k2
 
 	// error estimate
 	Err := cuda.Buffer(3, size)
