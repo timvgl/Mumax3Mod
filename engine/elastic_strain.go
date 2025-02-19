@@ -24,22 +24,21 @@ func setNormStrain(dst *data.Slice) {
 	if Solvertype < 7 {
 		Exx := exx.MSlice()
 		defer Exx.Recycle()
-	
+
 		Eyy := eyy.MSlice()
 		defer Eyy.Recycle()
-	
+
 		Ezz := ezz.MSlice()
 		defer Ezz.Recycle()
 		cuda.ScalarToVec(dst, Exx, Eyy, Ezz, Mesh())
-	} else if loadNormStrain == false && loadNormStrainConfig == false {
+	} else if !loadNormStrain && !loadNormStrainConfig {
 		NormStrain(dst, U, C11)
-	} else if loadNormStrain == true && loadNormStrainConfig == false {
-		var d *data.Slice
-		d = LoadFileDSlice(loadNormStrainPath)
+	} else if loadNormStrain && !loadNormStrainConfig {
+		d := LoadFileDSlice(loadNormStrainPath)
 		SetArray(dst, d)
 		loadNormStrain = false
 		loadNormStrainPath = ""
-	} else if loadNormStrain == false && loadNormStrainConfig == true {
+	} else if !loadNormStrain && loadNormStrainConfig {
 		SetInShape(dst, nil, normStrainConfig)
 		loadNormStrainConfig = false
 	} else {
@@ -51,23 +50,22 @@ func setShearStrain(dst *data.Slice) {
 	if Solvertype < 7 {
 		Exy := exy.MSlice()
 		defer Exy.Recycle()
-	
+
 		Exz := exz.MSlice()
 		defer Exz.Recycle()
-	
+
 		Eyz := eyz.MSlice()
 		defer Eyz.Recycle()
 
 		cuda.ScalarToVec(dst, Exy, Eyz, Exz, Mesh())
-	} else if loadShearStrain == false && loadShearStrainConfig == false {
+	} else if !loadShearStrain && !loadShearStrainConfig {
 		ShearStrain(dst, U, C11)
-	} else if loadShearStrain == true && loadShearStrainConfig == false {
-		var d *data.Slice
-		d = LoadFileDSlice(loadShearStrainPath)
+	} else if loadShearStrain && !loadShearStrainConfig {
+		d := LoadFileDSlice(loadShearStrainPath)
 		SetArray(dst, d)
 		loadShearStrain = false
 		loadShearStrainPath = ""
-	} else if loadShearStrain == false && loadShearStrainConfig == true {
+	} else if !loadShearStrain && loadShearStrainConfig {
 		SetInShape(dst, nil, shearStrainConfig)
 		loadShearStrainConfig = false
 	} else {

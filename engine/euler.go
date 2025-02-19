@@ -47,7 +47,7 @@ func (_ *Euler) StepRegion(region *SolverRegion) {
 	defer cuda.Recycle(dy0)
 
 	dy0.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
-	torqueFnRegion(dy0, region.PBCx, region.PBCy, region.PBCz)
+	torqueFnRegionNEW(dy0, y, region.PBCx, region.PBCy, region.PBCz)
 	setMaxTorque(dy0)
 	region.LastTorque = LastTorque
 
@@ -66,9 +66,13 @@ func (_ *Euler) StepRegion(region *SolverRegion) {
 	region.LastErr = LastErr
 
 	cuda.Madd2(y, y, dy0, 1, dt) // y = y + dt * dy
+
 	geom := cuda.Buffer(Geometry.Gpu().NComp(), region.Size())
-	cuda.Crop(geom, Geometry.Gpu(), region.StartX, region.StartY, region.StartZ)
+	GeomBig, _ := Geometry.Slice()
+	cuda.Crop(geom, GeomBig, region.StartX, region.StartY, region.StartZ)
 	defer cuda.Recycle(geom)
+	cuda.Recycle(GeomBig)
+
 	cuda.Normalize(y, geom)
 	if FixDt != 0 {
 		size := y.Size()

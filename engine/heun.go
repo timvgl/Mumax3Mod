@@ -67,6 +67,8 @@ func (_ *Heun) StepRegion(region *SolverRegion) {
 
 	if FixDt != 0 {
 		Dt_si = FixDt
+	} else if region.Dt_si != 0 {
+		Dt_si = region.Dt_si
 	}
 
 	dt := float32(Dt_si * GammaLL)
@@ -74,7 +76,7 @@ func (_ *Heun) StepRegion(region *SolverRegion) {
 
 	// stage 1
 	dy0.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
-	torqueFnRegion(dy0, region.PBCx, region.PBCy, region.PBCz)
+	torqueFnRegionNEW(dy0, y, region.PBCx, region.PBCy, region.PBCz)
 	cuda.Madd2(y, y, dy0, 1, dt) // y = y + dt * dy
 
 	// stage 2
@@ -82,7 +84,7 @@ func (_ *Heun) StepRegion(region *SolverRegion) {
 	defer cuda.Recycle(dy)
 	Time += Dt_si
 	dy.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
-	torqueFnRegion(dy, region.PBCx, region.PBCy, region.PBCz)
+	torqueFnRegionNEW(dy, y, region.PBCx, region.PBCy, region.PBCz)
 
 	err := cuda.MaxVecDiff(dy0, dy) * float64(dt)
 
@@ -90,9 +92,13 @@ func (_ *Heun) StepRegion(region *SolverRegion) {
 	if err < MaxErr || Dt_si <= MinDt || FixDt != 0 { // mindt check to avoid infinite loop
 		// step OK
 		cuda.Madd3(y, y, dy, dy0, 1, 0.5*dt, -0.5*dt)
+
 		geom := cuda.Buffer(Geometry.Gpu().NComp(), region.Size())
-		cuda.Crop(geom, Geometry.Gpu(), region.StartX, region.StartY, region.StartZ)
+		GeomBig, _ := Geometry.Slice()
+		cuda.Crop(geom, GeomBig, region.StartX, region.StartY, region.StartZ)
 		defer cuda.Recycle(geom)
+		cuda.Recycle(GeomBig)
+
 		cuda.Normalize(y, geom)
 		if FixDt != 0 {
 			size := y.Size()

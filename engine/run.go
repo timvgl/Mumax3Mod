@@ -156,6 +156,7 @@ func torqueFn(dst *data.Slice) {
 
 func torqueFnRegion(dst *data.Slice, pbcX, pbcY, pbcZ int, export ...bool) {
 	var m *data.Slice
+	panic("Noooooooooooooooooooooo")
 	SetTorqueRegion(dst, m, useFullSample, pbcX, pbcY, pbcZ)
 	if len(export) == 1 {
 		if export[0] {

@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/mumax/3/cuda"
+	"github.com/mumax/3/data"
 	"github.com/mumax/3/util"
 )
 
@@ -42,22 +44,24 @@ type SolverRegion struct {
 }
 
 func DefSolverRegion(startX, endX, startY, endY, startZ, endZ, solver int) SolverRegion {
+	util.AssertMsg(startX >= 0 && endX <= Nx && startY >= 0 && endY <= Ny && startZ >= 0 && endZ <= Nz, "Regions dimensions have to be inside of the mesh.")
 	return SolverRegion{startX, endX, startY, endY, startZ, endZ, solver, 0, 0, 0, 0, 0, 0}
 }
 
 func DefSolverRegionX(startX, endX, solver int) SolverRegion {
-	return SolverRegion{startX, endX, 0, Ny, 0, Nz, solver, 0, 0, 0, 0, 0, 0}
+	return DefSolverRegion(startX, endX, 0, Ny, 0, Nz, solver)
 }
 
 func DefSolverRegionY(startY, endY, startZ, endZ, solver int) SolverRegion {
-	return SolverRegion{0, Ny, startY, endY, 0, Ny, solver, 0, 0, 0, 0, 0, 0}
+	return DefSolverRegion(0, Ny, startY, endY, 0, Ny, solver)
 }
 
 func DefSolverRegionZ(startZ, endZ, solver int) SolverRegion {
-	return SolverRegion{0, Nx, 0, Ny, startZ, endZ, solver, 0, 0, 0, 0, 0, 0}
+	return DefSolverRegion(0, Nx, 0, Ny, startZ, endZ, solver)
 }
 
-func (s *SolverRegionsStruct) GetStepperSlice() (stepperSlice []Stepper) {
+func (s *SolverRegionsStruct) GetStepperSlice() (stepperSlice []Stepper, regionsData [][3]*data.Slice) {
+	//var regionsData = make([][3]*data.Slice, 0)
 	for _, regionSolver := range s.reg {
 		var regStepper Stepper
 		switch regionSolver.Solver {
@@ -65,17 +69,15 @@ func (s *SolverRegionsStruct) GetStepperSlice() (stepperSlice []Stepper) {
 			util.Fatalf("SetSolver: unknown solver type: %v", regionSolver.Solver)
 		case BACKWARD_EULER:
 			regStepper = new(BackwardEuler)
-		/*
-			case EULER:
-				regStepper = new(Euler)
-			case HEUN:
-				regStepper = new(Heun)
-			case BOGAKISHAMPINE:
-				regStepper = new(RK23)*/
+		case EULER:
+			regStepper = new(Euler)
+		case HEUN:
+			regStepper = new(Heun)
+		case BOGAKISHAMPINE:
+			regStepper = new(RK23)
 		case RUNGEKUTTA:
 			regStepper = new(RK4)
-		}
-		/*case DORMANDPRINCE:
+		case DORMANDPRINCE:
 			regStepper = new(RK45DP)
 		case FEHLBERG:
 			regStepper = new(RK56)
@@ -91,10 +93,15 @@ func (s *SolverRegionsStruct) GetStepperSlice() (stepperSlice []Stepper) {
 			regStepper = new(elasYOSH)
 		case MAGELAS_RUNGEKUTTA_VARY_TIME:
 			regStepper = new(magelasRK4_vary_time)
-		}*/
+		}
 		stepperSlice = append(stepperSlice, regStepper)
+		mBuf := cuda.Buffer(VECTOR, regionSolver.Size())
+		uBuf := cuda.Buffer(VECTOR, regionSolver.Size())
+		duBuf := cuda.Buffer(VECTOR, regionSolver.Size())
+		regionData := [3]*data.Slice{mBuf, uBuf, duBuf}
+		regionsData = append(regionsData, regionData)
 	}
-	return stepperSlice
+	return stepperSlice, regionsData
 }
 
 func (s *SolverRegionsStruct) Run(seconds float64) {
@@ -102,7 +109,7 @@ func (s *SolverRegionsStruct) Run(seconds float64) {
 		panic("No solver region defined.")
 	}
 	Pause = false
-	stepperSlice := s.GetStepperSlice()
+	stepperSlice, regionsData := s.GetStepperSlice()
 	start := Time
 	stop := Time + seconds
 	FixDtPre := FixDt
@@ -120,8 +127,14 @@ func (s *SolverRegionsStruct) Run(seconds float64) {
 	ProgressBar := NewProgressBar(start, stop, "🧲", hideProgressBarBool)
 	DoOutput()
 	DoFFT4D()
+	mBuf := cuda.Buffer(VECTOR, M.Buffer().Size())
+	uBuf := cuda.Buffer(VECTOR, U.Buffer().Size())
+	duBuf := cuda.Buffer(VECTOR, DU.Buffer().Size())
 	for (Time < stop) && !Pause {
 		ProgressBar.Update(Time)
+		data.Copy(mBuf, M.Buffer())
+		data.Copy(uBuf, U.Buffer())
+		data.Copy(duBuf, DU.Buffer())
 		if FixDtPre == 0 {
 			Time0 := Time
 			for i := range stepperSlice {
@@ -138,8 +151,20 @@ func (s *SolverRegionsStruct) Run(seconds float64) {
 			}
 			FixDt = minSiDt
 		}
+		//Do step for region, set store result of region, reset back to state from before, evolve next region, etc
 		for i := range stepperSlice {
 			stepperSlice[i].StepRegion(&s.reg[i])
+			cuda.Crop(regionsData[i][0], M.Buffer(), s.reg[i].StartX, s.reg[i].StartY, s.reg[i].StartZ)
+			cuda.Crop(regionsData[i][1], U.Buffer(), s.reg[i].StartX, s.reg[i].StartY, s.reg[i].StartZ)
+			cuda.Crop(regionsData[i][2], DU.Buffer(), s.reg[i].StartX, s.reg[i].StartY, s.reg[i].StartZ)
+			data.Copy(M.Buffer(), mBuf)
+			data.Copy(U.Buffer(), uBuf)
+			data.Copy(DU.Buffer(), duBuf)
+		}
+		for i := range stepperSlice {
+			data.CopyPart(M.Buffer(), regionsData[i][0], 0, regionsData[i][0].Size()[X], 0, regionsData[i][0].Size()[Y], 0, regionsData[i][0].Size()[Z], 0, 1, s.reg[i].StartX, s.reg[i].StartY, s.reg[i].StartZ, 0)
+			data.CopyPart(U.Buffer(), regionsData[i][1], 0, regionsData[i][0].Size()[X], 0, regionsData[i][0].Size()[Y], 0, regionsData[i][0].Size()[Z], 0, 1, s.reg[i].StartX, s.reg[i].StartY, s.reg[i].StartZ, 0)
+			data.CopyPart(DU.Buffer(), regionsData[i][2], 0, regionsData[i][0].Size()[X], 0, regionsData[i][0].Size()[Y], 0, regionsData[i][0].Size()[Z], 0, 1, s.reg[i].StartX, s.reg[i].StartY, s.reg[i].StartZ, 0)
 		}
 		FixDt = FixDtPre
 		DoOutput()

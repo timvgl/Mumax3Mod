@@ -102,7 +102,7 @@ func (_ *magelasRK4) Step() {
 	//Stage 1:
 	calcRhs(kv1, f, v)
 	ku1 = v0
-	if fixM == false {
+	if !fixM {
 		torqueFn(km1)
 	}
 
@@ -111,36 +111,36 @@ func (_ *magelasRK4) Step() {
 	Time = t0 + (1./2.)*Dt_si
 
 	cuda.Madd2(u, u0, ku1, 1, (1./2.)*dt)
-	if useBoundaries == true {
+	if useBoundaries {
 		calcBndry()
 	}
 	cuda.Madd2(v, v0, kv1, 1, (1./2.)*dt)
-	if fixM == false {
+	if !fixM {
 		cuda.Madd2(m, m, km1, 1, (1./2.)*dt*float32(GammaLL))
 		M.normalize()
 	}
 
 	calcRhs(kv2, f, v)
 	cuda.Madd2(ku2, v0, kv1, 1, (1./2.)*dt)
-	if fixM == false {
+	if !fixM {
 		torqueFn(km2)
 	}
 
 	//Stage 3:
 	//u = u0*1 + k2*dt/2
 	cuda.Madd2(u, u0, ku2, 1, (1./2.)*dt)
-	if useBoundaries == true {
+	if useBoundaries {
 		calcBndry()
 	}
 	cuda.Madd2(v, v0, kv2, 1, (1./2.)*dt)
-	if fixM == false {
+	if !fixM {
 		cuda.Madd2(m, m0, km2, 1, (1./2.)*dt*float32(GammaLL))
 		M.normalize()
 	}
 
 	calcRhs(kv3, f, v)
 	cuda.Madd2(ku3, v0, kv2, 1, (1./2.)*dt)
-	if fixM == false {
+	if !fixM {
 		torqueFn(km3)
 	}
 
@@ -148,18 +148,18 @@ func (_ *magelasRK4) Step() {
 	//u = u0*1 + k3*dt
 	Time = t0 + Dt_si
 	cuda.Madd2(u, u0, ku3, 1, 1.*dt)
-	if useBoundaries == true {
+	if useBoundaries {
 		calcBndry()
 	}
 	cuda.Madd2(v, v0, kv3, 1, 1.*dt)
-	if fixM == false {
+	if !fixM {
 		cuda.Madd2(m, m0, km3, 1, 1.*dt*float32(GammaLL))
 		M.normalize()
 	}
 
 	calcRhs(kv4, f, v)
 	cuda.Madd2(ku4, v0, kv3, 1, 1.*dt)
-	if fixM == false {
+	if !fixM {
 		torqueFn(km4)
 	}
 
@@ -197,11 +197,11 @@ func (_ *magelasRK4) Step() {
 		// 4th order solution
 
 		cuda.Madd5(u, u0, ku1, ku2, ku3, ku4, 1, (1./6.)*dt, (1./3.)*dt, (1./3.)*dt, (1./6.)*dt)
-		if useBoundaries == true {
+		if useBoundaries {
 			calcBndry()
 		}
 		cuda.Madd5(v, v0, kv1, kv2, kv3, kv4, 1, (1./6.)*dt, (1./3.)*dt, (1./3.)*dt, (1./6.)*dt)
-		if fixM == false {
+		if !fixM {
 			cuda.Madd5(m, m0, km1, km2, km3, km4, 1, (1./6.)*dt*float32(GammaLL), (1./3.)*dt*float32(GammaLL), (1./3.)*dt*float32(GammaLL), (1./6.)*dt*float32(GammaLL))
 			//Post handlings
 			M.normalize()
@@ -241,7 +241,6 @@ func (_ *magelasRK4) Step() {
 }
 
 func (_ *magelasRK4) StepRegion(region *SolverRegion) {
-	panic("Not implimented yet")
 	//################
 	// Differential equation:
 	// du/dt = v(t)
@@ -255,12 +254,17 @@ func (_ *magelasRK4) StepRegion(region *SolverRegion) {
 		if InsertTimeDepDisplacement == 1 {
 			U.Set(Uniform(0, 0, 0))
 		}*/
-	u := U.Buffer()
+	//u := U.Buffer()
+	u := cuda.Buffer(U.NComp(), region.Size())
+	u.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
+	defer cuda.Recycle(u)
+	U.EvalRegionTo(u)
 	size := u.Size()
 
 	//Set fixed displacement
 	SetFreezeDisp()
 	u0 := cuda.Buffer(3, size)
+	u0.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
 	defer cuda.Recycle(u0)
 	data.Copy(u0, u)
 
@@ -274,16 +278,33 @@ func (_ *magelasRK4) StepRegion(region *SolverRegion) {
 		cuda.Add(u0, u0, UOVERLAY.Buffer())
 	}*/
 
-	m := M.Buffer()
+	//m := M.Buffer()
+	m := cuda.Buffer(M.NComp(), region.Size())
+	m.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
+	defer cuda.Recycle(m)
+	M.EvalRegionTo(m)
+
 	m0 := cuda.Buffer(3, size)
+	m0.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
 	defer cuda.Recycle(m0)
 	data.Copy(m0, m)
 
-	v := DU.Buffer()
+	//v := DU.Buffer()
+	v := cuda.Buffer(DU.NComp(), region.Size())
+	v.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
+	defer cuda.Recycle(v)
+	DU.EvalRegionTo(v)
 
 	v0 := cuda.Buffer(3, size)
+	v0.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
 	defer cuda.Recycle(v0)
 	data.Copy(v0, v)
+
+	geom := cuda.Buffer(Geometry.Gpu().NComp(), region.Size())
+	GeomBig, _ := Geometry.Slice()
+	cuda.Crop(geom, GeomBig, region.StartX, region.StartY, region.StartZ)
+	defer cuda.Recycle(geom)
+	cuda.Recycle(GeomBig)
 
 	ku1, ku2, ku3, ku4 := cuda.Buffer(3, size), cuda.Buffer(3, size), cuda.Buffer(3, size), cuda.Buffer(3, size)
 	kv1, kv2, kv3, kv4 := cuda.Buffer(3, size), cuda.Buffer(3, size), cuda.Buffer(3, size), cuda.Buffer(3, size)
@@ -302,17 +323,34 @@ func (_ *magelasRK4) StepRegion(region *SolverRegion) {
 	defer cuda.Recycle(km3)
 	defer cuda.Recycle(km4)
 
+	ku1.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
+	ku2.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
+	ku3.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
+	ku4.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
+	kv1.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
+	kv2.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
+	kv3.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
+	kv4.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
+	km1.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
+	km2.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
+	km3.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
+	km4.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
+
 	//f(t) = nabla sigma
 	f := cuda.Buffer(3, size)
+	f.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
 	defer cuda.Recycle(f)
 
 	right := cuda.Buffer(3, size)
+	right.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
 	defer cuda.Recycle(right)
 
 	//#############################
 	//Time
 	if FixDt != 0 {
 		Dt_si = FixDt
+	} else if region.Dt_si != 0 {
+		Dt_si = region.Dt_si
 	}
 	t0 := Time
 	dt := float32(Dt_si)
@@ -324,10 +362,10 @@ func (_ *magelasRK4) StepRegion(region *SolverRegion) {
 	// du/dt = v(t) ~ ku
 	// dv/dt = right(t) ~ kv
 	//Stage 1:
-	calcRhs(kv1, f, v)
+	calcRhsRegion(kv1, u, v, f, v)
 	ku1 = v0
-	if fixM == false {
-		torqueFn(km1)
+	if !fixM {
+		torqueFnRegionNEW(km1, m, region.PBCx, region.PBCy, region.PBCz)
 	}
 
 	//Stage 2:
@@ -335,56 +373,59 @@ func (_ *magelasRK4) StepRegion(region *SolverRegion) {
 	Time = t0 + (1./2.)*Dt_si
 
 	cuda.Madd2(u, u0, ku1, 1, (1./2.)*dt)
-	if useBoundaries == true {
-		calcBndry()
+	if useBoundaries {
+		calcBndryRegion(u, region.PBCx, region.PBCy, region.PBCz)
 	}
 	cuda.Madd2(v, v0, kv1, 1, (1./2.)*dt)
-	if fixM == false {
+	if !fixM {
 		cuda.Madd2(m, m, km1, 1, (1./2.)*dt*float32(GammaLL))
-		M.normalize()
+		cuda.Normalize(m, geom)
+
 	}
 
-	calcRhs(kv2, f, v)
+	calcRhsRegion(kv2, u, v, f, v)
 	cuda.Madd2(ku2, v0, kv1, 1, (1./2.)*dt)
-	if fixM == false {
-		torqueFn(km2)
+	if !fixM {
+		torqueFnRegionNEW(km2, m, region.PBCx, region.PBCy, region.PBCz)
 	}
 
 	//Stage 3:
 	//u = u0*1 + k2*dt/2
 	cuda.Madd2(u, u0, ku2, 1, (1./2.)*dt)
-	if useBoundaries == true {
-		calcBndry()
+	if useBoundaries {
+		calcBndryRegion(u, region.PBCx, region.PBCy, region.PBCz)
 	}
 	cuda.Madd2(v, v0, kv2, 1, (1./2.)*dt)
-	if fixM == false {
+	if !fixM {
 		cuda.Madd2(m, m0, km2, 1, (1./2.)*dt*float32(GammaLL))
-		M.normalize()
+		cuda.Normalize(m, geom)
+
 	}
 
-	calcRhs(kv3, f, v)
+	calcRhsRegion(kv3, u, v, f, v)
 	cuda.Madd2(ku3, v0, kv2, 1, (1./2.)*dt)
-	if fixM == false {
-		torqueFn(km3)
+	if !fixM {
+		torqueFnRegionNEW(km3, m, region.PBCx, region.PBCy, region.PBCz)
 	}
 
 	//Stage 4:
 	//u = u0*1 + k3*dt
 	Time = t0 + Dt_si
 	cuda.Madd2(u, u0, ku3, 1, 1.*dt)
-	if useBoundaries == true {
-		calcBndry()
+	if useBoundaries {
+		calcBndryRegion(u, region.PBCx, region.PBCy, region.PBCz)
 	}
 	cuda.Madd2(v, v0, kv3, 1, 1.*dt)
-	if fixM == false {
+	if !fixM {
 		cuda.Madd2(m, m0, km3, 1, 1.*dt*float32(GammaLL))
-		M.normalize()
+		cuda.Normalize(m, geom)
+
 	}
 
-	calcRhs(kv4, f, v)
+	calcRhsRegion(kv4, u, v, f, v)
 	cuda.Madd2(ku4, v0, kv3, 1, 1.*dt)
-	if fixM == false {
-		torqueFn(km4)
+	if !fixM {
+		torqueFnRegionNEW(km4, m, region.PBCx, region.PBCy, region.PBCz)
 	}
 
 	//###############################
@@ -421,20 +462,28 @@ func (_ *magelasRK4) StepRegion(region *SolverRegion) {
 		// 4th order solution
 
 		cuda.Madd5(u, u0, ku1, ku2, ku3, ku4, 1, (1./6.)*dt, (1./3.)*dt, (1./3.)*dt, (1./6.)*dt)
-		if useBoundaries == true {
-			calcBndry()
+		if useBoundaries {
+			calcBndryRegion(u, region.PBCx, region.PBCy, region.PBCz)
 		}
 		cuda.Madd5(v, v0, kv1, kv2, kv3, kv4, 1, (1./6.)*dt, (1./3.)*dt, (1./3.)*dt, (1./6.)*dt)
-		if fixM == false {
+		if !fixM {
 			cuda.Madd5(m, m0, km1, km2, km3, km4, 1, (1./6.)*dt*float32(GammaLL), (1./3.)*dt*float32(GammaLL), (1./3.)*dt*float32(GammaLL), (1./6.)*dt*float32(GammaLL))
 			//Post handlings
-			M.normalize()
+			cuda.Normalize(m, geom)
+
 		} else {
 			data.Copy(m, m0)
-			M.normalize()
+			cuda.Normalize(m, geom)
 		}
 		for i := 0; i < 3; i++ {
 			cuda.Scale(u, 1, U.average())
+		}
+
+		if FixDt != 0 {
+			size := m.Size()
+			data.CopyPart(M.Buffer(), m, 0, size[X], 0, size[Y], 0, size[Z], 0, 1, region.StartX, region.StartY, region.StartZ, 0)
+			data.CopyPart(U.Buffer(), u, 0, size[X], 0, size[Y], 0, size[Z], 0, 1, region.StartX, region.StartY, region.StartZ, 0)
+			data.CopyPart(DU.Buffer(), v, 0, size[X], 0, size[Y], 0, size[Z], 0, 1, region.StartX, region.StartY, region.StartZ, 0)
 		}
 
 		//If you run second derivative together with LLG, then remove NSteps++
@@ -447,6 +496,7 @@ func (_ *magelasRK4) StepRegion(region *SolverRegion) {
 			adaptDt(math.Pow(MaxErr/err2, 1./2.))
 			setLastErr(err2)
 		}
+		region.LastErr = LastErr
 
 	} else {
 		// undo bad step
@@ -462,6 +512,7 @@ func (_ *magelasRK4) StepRegion(region *SolverRegion) {
 			adaptDt(math.Pow(MaxErr/err2, 1./3.))
 		}
 	}
+	region.Dt_si = Dt_si
 }
 
 func (magelasRK4 *magelasRK4) Free() {

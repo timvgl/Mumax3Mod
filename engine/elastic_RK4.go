@@ -169,7 +169,6 @@ func (_ *elasRK4) Step() {
 }
 
 func (_ *elasRK4) StepRegion(region *SolverRegion) {
-	panic("Not implimented yet")
 	//################
 	// Differential equation:
 	// du/dt = v(t)
@@ -179,19 +178,29 @@ func (_ *elasRK4) StepRegion(region *SolverRegion) {
 	//#################################
 
 	//Initialisation:
-	u := U.Buffer()
+	//u := U.Buffer()
+	u := cuda.Buffer(U.NComp(), region.Size())
+	u.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
+	defer cuda.Recycle(u)
+	U.EvalRegionTo(u)
 	size := u.Size()
 
 	//Set fixed displacement
 	SetFreezeDisp()
 	u0 := cuda.Buffer(3, size)
 	defer cuda.Recycle(u0)
+	u0.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
 	data.Copy(u0, u)
 
-	v := DU.Buffer()
+	//v := DU.Buffer()
+	v := cuda.Buffer(DU.NComp(), region.Size())
+	v.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
+	defer cuda.Recycle(v)
+	DU.EvalRegionTo(v)
 
 	v0 := cuda.Buffer(3, size)
 	defer cuda.Recycle(v0)
+	v0.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
 	data.Copy(v0, v)
 
 	ku1, ku2, ku3, ku4 := cuda.Buffer(3, size), cuda.Buffer(3, size), cuda.Buffer(3, size), cuda.Buffer(3, size)
@@ -206,17 +215,30 @@ func (_ *elasRK4) StepRegion(region *SolverRegion) {
 	defer cuda.Recycle(kv3)
 	defer cuda.Recycle(kv4)
 
+	ku1.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
+	ku2.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
+	ku3.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
+	ku4.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
+	kv1.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
+	kv2.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
+	kv3.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
+	kv4.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
+
 	//f(t) = nabla sigma
 	f := cuda.Buffer(3, size)
+	f.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
 	defer cuda.Recycle(f)
 
 	right := cuda.Buffer(3, size)
+	right.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
 	defer cuda.Recycle(right)
 
 	//#############################
 	//Time
 	if FixDt != 0 {
 		Dt_si = FixDt
+	} else if region.Dt_si != 0 {
+		Dt_si = region.Dt_si
 	}
 	t0 := Time
 	dt := float32(Dt_si)
@@ -227,7 +249,7 @@ func (_ *elasRK4) StepRegion(region *SolverRegion) {
 	// dv/dt = right(t) ~ kv
 
 	//Stage 1:
-	calcRhs(kv1, f, v)
+	calcRhsRegion(kv1, u, v, f, v)
 	ku1 = v0
 
 	//Stage 2:
@@ -236,7 +258,7 @@ func (_ *elasRK4) StepRegion(region *SolverRegion) {
 	cuda.Madd2(u, u0, ku1, 1, (1./2.)*dt)
 	cuda.Madd2(v, v0, kv1, 1, (1./2.)*dt)
 	//calcBndry()
-	calcRhs(kv2, f, v)
+	calcRhsRegion(kv2, u, v, f, v)
 	cuda.Madd2(ku2, v0, kv1, 1, (1./2.)*dt)
 
 	//Stage 3:
@@ -244,7 +266,7 @@ func (_ *elasRK4) StepRegion(region *SolverRegion) {
 	cuda.Madd2(u, u0, ku2, 1, (1./2.)*dt)
 	cuda.Madd2(v, v0, kv2, 1, (1./2.)*dt)
 	//calcBndry()
-	calcRhs(kv3, f, v)
+	calcRhsRegion(kv3, u, v, f, v)
 	cuda.Madd2(ku3, v0, kv2, 1, (1./2.)*dt)
 
 	//Stage 4:
@@ -253,7 +275,7 @@ func (_ *elasRK4) StepRegion(region *SolverRegion) {
 	cuda.Madd2(u, u0, ku3, 1, 1.*dt)
 	cuda.Madd2(v, v0, kv3, 1, 1.*dt)
 	//calcBndry()
-	calcRhs(kv4, f, v)
+	calcRhsRegion(kv4, u, v, f, v)
 	cuda.Madd2(ku4, v0, kv3, 1, 1.*dt)
 
 	//###############################
@@ -293,6 +315,12 @@ func (_ *elasRK4) StepRegion(region *SolverRegion) {
 		//If you run second derivative together with LLG, then remove NSteps++
 		NSteps++
 
+		if FixDt != 0 {
+			size := u.Size()
+			data.CopyPart(U.Buffer(), u, 0, size[X], 0, size[Y], 0, size[Z], 0, 1, region.StartX, region.StartY, region.StartZ, 0)
+			data.CopyPart(DU.Buffer(), v, 0, size[X], 0, size[Y], 0, size[Z], 0, 1, region.StartX, region.StartY, region.StartZ, 0)
+		}
+
 		if err > err2 {
 			adaptDt(math.Pow(MaxErr/err, 1./2.))
 			setLastErr(err)
@@ -300,6 +328,7 @@ func (_ *elasRK4) StepRegion(region *SolverRegion) {
 			adaptDt(math.Pow(MaxErr/err2, 1./2.))
 			setLastErr(err2)
 		}
+		region.LastErr = LastErr
 
 	} else {
 		// undo bad step
@@ -314,6 +343,7 @@ func (_ *elasRK4) StepRegion(region *SolverRegion) {
 			adaptDt(math.Pow(MaxErr/err2, 1./3.))
 		}
 	}
+	region.Dt_si = Dt_si
 }
 
 func (elas *elasRK4) Free() {
