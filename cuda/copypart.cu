@@ -14,10 +14,10 @@ extern "C" __global__ void CopyPartKernel(
 {
     // Gesamtzahl der zu kopierenden Elemente (über alle Dimensionen)
     int total = fCount * zCount * yCount * xCount;
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    int idx = (blockIdx.y * gridDim.x + blockIdx.x) * blockDim.x + threadIdx.x;
     
     // Jeder Thread kopiert (über einen Grid-stride Loop) mehrere Elemente
-    while (idx < total) {
+    if (idx < total) {
         // Bestimme die 4D-Koordinaten (relativ zum kopierten Block)
         int temp = idx;
         int x = temp % xCount;        // x-Index im Block
@@ -42,7 +42,5 @@ extern "C" __global__ void CopyPartKernel(
 
         // Kopiere das Element
         dst[dst_index] = src[src_index];
-
-        idx += blockDim.x * gridDim.x;
     }
 }

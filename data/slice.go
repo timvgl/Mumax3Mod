@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"log"
 	"reflect"
-	"sync"
 	"unsafe"
 
 	"github.com/mumax/3/util"
@@ -43,11 +42,18 @@ var (
 	destroyStream                  func(key string)
 	setCurrentCtx                  func()
 	MAX_STREAMS                    = 5
+	cudaCopyPart                   func(dst, src *Slice,
+		xStart_src, xEnd_src,
+		yStart_src, yEnd_src,
+		zStart_src, zEnd_src,
+		fStart_src, fEnd_src,
+		xStart_dst, yStart_dst,
+		zStart_dst, fStart_dst int)
 )
 
 // Internal: enables slices on GPU. Called upon cuda init.
 func EnableGPU(free, freeHost func(unsafe.Pointer),
-	cpyDtoH, cpyHtoD func(dst, src unsafe.Pointer, bytes int64), cpy func(dst, src unsafe.Pointer, bytes int64, args ...string), cpyDtoHPart, cpyHtoDPart func(dst, src unsafe.Pointer, offset_dst, offset_src, bytes int64), cpyPart func(dst, src unsafe.Pointer, offset_dst, offset_src, bytes int64, args ...string), CreateStream, DestroyStream func(key string), SetCurrentCtx func()) {
+	cpyDtoH, cpyHtoD func(dst, src unsafe.Pointer, bytes int64), cpy func(dst, src unsafe.Pointer, bytes int64, args ...string), cpyDtoHPart, cpyHtoDPart func(dst, src unsafe.Pointer, offset_dst, offset_src, bytes int64), cpyPart func(dst, src unsafe.Pointer, offset_dst, offset_src, bytes int64, args ...string), CreateStream, DestroyStream func(key string), SetCurrentCtx func(), CudaCopyPart func(dst, src *Slice, xStart_src, xEnd_src, yStart_src, yEnd_src, zStart_src, zEnd_src, fStart_src, fEnd_src, xStart_dst, yStart_dst, zStart_dst, fStart_dst int)) {
 	memFree = free
 	memFreeHost = freeHost
 	memCpy = cpy
@@ -59,6 +65,7 @@ func EnableGPU(free, freeHost func(unsafe.Pointer),
 	createStream = CreateStream
 	destroyStream = DestroyStream
 	setCurrentCtx = SetCurrentCtx
+	cudaCopyPart = CudaCopyPart
 }
 
 func Zero(data *Slice) {
@@ -490,63 +497,7 @@ func CopyPart(dst, src *Slice,
 			}
 		}
 	} else {
-		taskChan := make(chan func(int), MAX_STREAMS)
-		for i := 0; i < MAX_STREAMS; i++ {
-			createStream(fmt.Sprintf("copy_%v", i))
-		}
-		for i := 0; i < MAX_STREAMS; i++ {
-			go func(workerID int) {
-				for task := range taskChan {
-					task(workerID)
-				}
-			}(i)
-		}
-		var wg sync.WaitGroup
-		for f := 0; f < fCount; f++ {
-			for z := 0; z < zCount; z++ {
-				wg.Add(1)
-				taskChan <- func(f, z int) func(workerID int) {
-					return func(workerID int) {
-						defer wg.Done()
-						setCurrentCtx()
-						for y := 0; y < yCount; y++ {
-							// Calculate the source and destination offsets for this slice
-							offsetSrc := int64(
-								xStart_src*strideXSrc+
-									(yStart_src+y)*strideYSrc+
-									(zStart_src+z)*strideZSrc+
-									(fStart_src+f)*strideFSrc,
-							) * int64(SIZEOF_FLOAT32)
-
-							offsetDst := int64(
-								xStart_dst*strideXDst+
-									(yStart_dst+y)*strideYDst+
-									(zStart_dst+z)*strideZDst+
-									(fStart_dst+f)*strideFDst,
-							) * int64(SIZEOF_FLOAT32)
-
-							// Calculate the number of bytes to copy for the x dimension
-							bytes := int64(xCount) * int64(SIZEOF_FLOAT32)
-							for c := 0; c < dst.NComp(); c++ {
-								memCpyPart(
-									dst.DevPtr(c),
-									src.DevPtr(c),
-									offsetDst,
-									offsetSrc,
-									bytes,
-									fmt.Sprintf("copy_%v", workerID),
-								)
-							}
-						}
-					}
-				}(f, z)
-			}
-		}
-		close(taskChan)
-		wg.Wait()
-		for i := 0; i < MAX_STREAMS; i++ {
-			destroyStream(fmt.Sprintf("copy_%v", i))
-		}
+		cudaCopyPart(dst, src, xStart_src, xEnd_src, yStart_src, yEnd_src, zStart_src, zEnd_src, fStart_src, fEnd_src, xStart_dst, yStart_dst, zStart_dst, fStart_dst)
 	}
 
 }

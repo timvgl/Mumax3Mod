@@ -73,8 +73,10 @@ func (s *BackwardEuler) StepRegion(region *SolverRegion) {
 	M.EvalRegionTo(y)
 
 	geom := cuda.Buffer(Geometry.Gpu().NComp(), region.Size())
-	cuda.Crop(geom, Geometry.Gpu(), region.StartX, region.StartY, region.StartZ)
+	GeomBig, _ := Geometry.Slice()
+	cuda.Crop(geom, GeomBig, region.StartX, region.StartY, region.StartZ)
 	defer cuda.Recycle(geom)
+	cuda.Recycle(GeomBig)
 
 	y0 := cuda.Buffer(VECTOR, y.Size())
 	defer cuda.Recycle(y0)
@@ -107,13 +109,13 @@ func (s *BackwardEuler) StepRegion(region *SolverRegion) {
 		cuda.Normalize(y, geom)
 	}
 	dy0.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
-	torqueFnRegion(dy0, region.PBCx, region.PBCy, region.PBCz)
+	torqueFnRegionNEW(dy0, y, region.PBCx, region.PBCy, region.PBCz)
 	cuda.Madd2(y, y0, dy0, 1, dt) // y = y0 + dt * dy
 	cuda.Normalize(y, geom)
 
 	// One iteration
 	dy1.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
-	torqueFnRegion(dy1, region.PBCx, region.PBCy, region.PBCz)
+	torqueFnRegionNEW(dy1, y, region.PBCx, region.PBCy, region.PBCz)
 	cuda.Madd2(y, y0, dy1, 1, dt) // y = y0 + dt * dy1
 	cuda.Normalize(y, geom)
 	if FixDt != 0 {

@@ -63,14 +63,15 @@ func (s *SolverRegionsStruct) GetStepperSlice() (stepperSlice []Stepper) {
 		switch regionSolver.Solver {
 		default:
 			util.Fatalf("SetSolver: unknown solver type: %v", regionSolver.Solver)
-		/*case BACKWARD_EULER:
+		case BACKWARD_EULER:
 			regStepper = new(BackwardEuler)
-		case EULER:
-			regStepper = new(Euler)
-		case HEUN:
-			regStepper = new(Heun)
-		case BOGAKISHAMPINE:
-			regStepper = new(RK23)*/
+		/*
+			case EULER:
+				regStepper = new(Euler)
+			case HEUN:
+				regStepper = new(Heun)
+			case BOGAKISHAMPINE:
+				regStepper = new(RK23)*/
 		case RUNGEKUTTA:
 			regStepper = new(RK4)
 		}

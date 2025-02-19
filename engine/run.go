@@ -74,6 +74,7 @@ func init() {
 	DeclVar("MoreStepsM", &MoreStepsM, "")
 	DeclVar("FactorTimeMvsU", &FactorTimeMvsU, "")
 	DeclVar("useFullSample", &useFullSample, "")
+	DeclROnly("Solvertype", Solvertype, "")
 
 	DeclFunc("Exit", Exit, "Exit from the program")
 	//DeclVar("BoolAllowInhomogeniousMECoupling", BoolAllowInhomogeniousMECoupling, "Bypasses an error that is going to be raised if B1 or B2 is inhomogenious, bool")
