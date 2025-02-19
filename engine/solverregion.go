@@ -83,16 +83,22 @@ func (s *SolverRegionsStruct) GetStepperSlice() (stepperSlice []Stepper, regions
 			regStepper = new(RK56)
 		case SECONDDERIV:
 			regStepper = new(secondHeun)
+			UseExcitation = false
 		case ELAS_RUNGEKUTTA:
 			regStepper = new(elasRK4)
+			UseExcitation = false
 		case MAGELAS_RUNGEKUTTA:
 			regStepper = new(magelasRK4)
+			UseExcitation = false
 		case ELAS_LEAPFROG:
 			regStepper = new(elasLF)
+			UseExcitation = false
 		case ELAS_YOSH:
 			regStepper = new(elasYOSH)
+			UseExcitation = false
 		case MAGELAS_RUNGEKUTTA_VARY_TIME:
 			regStepper = new(magelasRK4_vary_time)
+			UseExcitation = false
 		}
 		stepperSlice = append(stepperSlice, regStepper)
 		mBuf := cuda.Buffer(VECTOR, regionSolver.Size())

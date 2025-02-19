@@ -47,6 +47,7 @@ var (
 	runningWhile                     bool    = false
 	currentRunningTime               float64 = 0.
 	useFullSample                    bool    = true
+	UseExcitation                    bool    = true
 	//InsertTimeDepDisplacement 			int		= 0					 //1 for True, 0 for False
 	//InsertTimeDepDisplacementFunc 		func(arg1, arg2, arg3, arg4, arg5 float64) Config //func for calc displacement that is supposed to be added
 	//InsertTimeDepDisplacementFuncArgs	[]func(t float64) float64	 //slices of funcs that are going to be used as args for InsertTimeDepDisplacementFunc
@@ -134,16 +135,22 @@ func SetSolver(typ int) {
 		stepper = new(RK56)
 	case SECONDDERIV:
 		stepper = new(secondHeun)
+		UseExcitation = false
 	case ELAS_RUNGEKUTTA:
 		stepper = new(elasRK4)
+		UseExcitation = false
 	case MAGELAS_RUNGEKUTTA:
 		stepper = new(magelasRK4)
+		UseExcitation = false
 	case ELAS_LEAPFROG:
 		stepper = new(elasLF)
+		UseExcitation = false
 	case ELAS_YOSH:
 		stepper = new(elasYOSH)
+		UseExcitation = false
 	case MAGELAS_RUNGEKUTTA_VARY_TIME:
 		stepper = new(magelasRK4_vary_time)
+		UseExcitation = false
 	}
 	Solvertype = typ
 }

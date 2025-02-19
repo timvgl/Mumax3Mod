@@ -21,7 +21,7 @@ var (
 // ###################
 // Strain
 func setNormStrain(dst *data.Slice) {
-	if Solvertype < 7 {
+	if UseExcitation {
 		Exx := exx.MSlice()
 		defer Exx.Recycle()
 
@@ -47,7 +47,7 @@ func setNormStrain(dst *data.Slice) {
 }
 
 func setShearStrain(dst *data.Slice) {
-	if Solvertype < 7 {
+	if UseExcitation {
 		Exy := exy.MSlice()
 		defer Exy.Recycle()
 
