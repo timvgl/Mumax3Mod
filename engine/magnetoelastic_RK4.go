@@ -364,6 +364,7 @@ func (_ *magelasRK4) StepRegion(region *SolverRegion) {
 	//Stage 1:
 	calcRhsRegion(kv1, m, u, v, f, v)
 	ku1 = v0
+
 	if !fixM {
 		torqueFnRegion(km1, m, u, region.PBCx, region.PBCy, region.PBCz)
 	}
@@ -384,6 +385,7 @@ func (_ *magelasRK4) StepRegion(region *SolverRegion) {
 	}
 
 	calcRhsRegion(kv2, m, u, v, f, v)
+
 	cuda.Madd2(ku2, v0, kv1, 1, (1./2.)*dt)
 	if !fixM {
 		torqueFnRegion(km2, m, u, region.PBCx, region.PBCy, region.PBCz)

@@ -70,56 +70,45 @@ func RightSide(dst, f, g *data.Slice, Eta, Rho *RegionwiseScalar, Bf *Excitation
 }
 
 func RightSideRegion(dst, m, u, f, g *data.Slice, Eta, Rho *RegionwiseScalar, Bf *Excitation) {
-	if !useFullSample {
-		//No elastodynamics is calculated if density is zero
-		if Rho.nonZero() {
-			rho, _ := Rho.SliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
-			defer cuda.Recycle(rho)
+	//No elastodynamics is calculated if density is zero
+	if Rho.nonZero() {
+		rho, _ := Rho.SliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+		defer cuda.Recycle(rho)
 
-			eta, _ := Eta.SliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
-			defer cuda.Recycle(eta)
+		eta, _ := Eta.SliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+		defer cuda.Recycle(eta)
 
-			bf, _ := Bf.SliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
-			defer cuda.Recycle(bf)
+		bf, _ := Bf.SliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+		defer cuda.Recycle(bf)
 
-			//Elastic part of wave equation
-			calcSecondDerivDispRegion(f, u)
+		//Elastic part of wave equation
+		calcSecondDerivDispRegion(f, u)
 
-			size := f.Size()
-			melForce := cuda.Buffer(3, size)
-			defer cuda.Recycle(melForce)
-			// cuda.Zero(melForce)
-			GetMagnetoelasticForceDensityRegion(melForce, m, useFullSample)
-			thermalElasticNoise := cuda.Buffer(melForce.NComp(), melForce.Size())
-			defer cuda.Recycle(thermalElasticNoise)
-			cuda.Zero(thermalElasticNoise)
-			F_therm.AddToRegion(thermalElasticNoise)
-			cuda.RightSide(dst, f, g, eta, rho, bf, melForce, thermalElasticNoise)
-			/*UDebug := dst.HostCopy()
-			val, ok := autonum["debug"]
-			if !ok {
-				autonum["debug"] = 0
-				val = 0
-			}
-			meta := *new(data.Meta)
-			meta.Time = Time
-			meta.CellSize = Mesh().CellSize()
-			meta.Name = "debug"
-			queOutput(func() { saveAs_sync(fmt.Sprintf(OD()+"/debug_%d.ovf", val), UDebug, meta, outputFormat) })
-			autonum["debug"]++*/
-			//Sufficient to only set right to zero because udot2 = udot+right
-			//If initial udot!=0, then do also FreezeDisp(udot2)
-			FreezeDispRegion(dst, u)
-
+		size := f.Size()
+		melForce := cuda.Buffer(3, size)
+		defer cuda.Recycle(melForce)
+		// cuda.Zero(melForce)
+		GetMagnetoelasticForceDensityRegion(melForce, m, useFullSample)
+		thermalElasticNoise := cuda.Buffer(melForce.NComp(), melForce.Size())
+		defer cuda.Recycle(thermalElasticNoise)
+		cuda.Zero(thermalElasticNoise)
+		F_therm.AddToRegion(thermalElasticNoise)
+		cuda.RightSide(dst, f, g, eta, rho, bf, melForce, thermalElasticNoise)
+		/*UDebug := dst.HostCopy()
+		val, ok := autonum["debug"]
+		if !ok {
+			autonum["debug"] = 0
+			val = 0
 		}
-	} else {
-		ddU := cuda.Buffer(M.NComp(), M.Buffer().Size())
-		cuda.Zero(ddU)
-		RightSide(ddU, f, g, Eta, Rho, Bf)
-		ddUCropped := cuda.Buffer(dst.NComp(), dst.Size())
-		cuda.Crop(ddUCropped, ddU, dst.StartX, dst.StartY, dst.StartZ)
-		cuda.Add(dst, dst, ddUCropped)
-		cuda.Recycle(ddUCropped)
-		cuda.Recycle(ddU)
+		meta := *new(data.Meta)
+		meta.Time = Time
+		meta.CellSize = Mesh().CellSize()
+		meta.Name = "debug"
+		queOutput(func() { saveAs_sync(fmt.Sprintf(OD()+"/debug_%d.ovf", val), UDebug, meta, outputFormat) })
+		autonum["debug"]++*/
+		//Sufficient to only set right to zero because udot2 = udot+right
+		//If initial udot!=0, then do also FreezeDisp(udot2)
+		FreezeDispRegion(dst, u)
+
 	}
 }
