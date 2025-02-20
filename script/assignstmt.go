@@ -4,6 +4,7 @@ import (
 	"go/ast"
 	"go/token"
 	"reflect"
+	"strings"
 )
 
 // compiles a (single) assign statement lhs = rhs
@@ -43,7 +44,9 @@ func (w *World) compileDefine(a *ast.AssignStmt, lhs ast.Expr, r Expr) Expr {
 	addr := reflect.New(r.Type())
 	ok = w.safeDeclare(ident.Name, &reflectLvalue{addr.Elem()})
 	if !ok {
-		panic(err(a.Pos(), "already defined: "+ident.Name))
+		if strings.ToLower(ident.Name) != "nx" && strings.ToLower(ident.Name) != "ny" && strings.ToLower(ident.Name) != "nz" && strings.ToLower(ident.Name) != "dx" && strings.ToLower(ident.Name) != "dy" && strings.ToLower(ident.Name) != "dz" && strings.ToLower(ident.Name) != "tx" && strings.ToLower(ident.Name) != "ty" && strings.ToLower(ident.Name) != "tz" {
+			panic(err(a.Pos(), "already defined: "+ident.Name))
+		}
 	}
 	return w.compileAssign(a, lhs, r)
 }

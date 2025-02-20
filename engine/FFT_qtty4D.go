@@ -77,8 +77,6 @@ func MergeOperators(fs ...func(q Quantity) Quantity) [](func(q Quantity) Quantit
 func ApplyOperators(q Quantity, funcs []func(q Quantity) Quantity) Quantity {
 	for _, f := range funcs {
 		q = f(q)
-		fmt.Println(NameOf(q))
-		fmt.Println(MeshOf(q).Size())
 	}
 	return q
 }
@@ -112,7 +110,6 @@ func GetKeys[T any](m *sync.Map) []T {
 }
 
 func FFT4D(q Quantity, period float64) *fftOperation4D {
-	fmt.Println("FFT4D")
 	qOP := ApplyOperators(FFT3D_FFT_T(q), operatorsKSpace)
 
 	QTTYName := ""

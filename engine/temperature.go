@@ -46,6 +46,7 @@ func init() {
 	F_therm.step = -1
 	DeclROnly("B_therm", &B_therm, "Thermal field (T)")
 	DeclROnly("F_therm", &F_therm, "Thermal field (T)")
+	DeclVar("useTempElastic", &useTempElastic, "")
 }
 
 func (b *thermField) AddTo(dst *data.Slice) {
