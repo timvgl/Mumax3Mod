@@ -1,0 +1,18 @@
+//mumax 3.10 [linux_amd64 go1.23.6(gc) CUDA-12.4]
+//GPU info: NVIDIA GeForce GT 1030(1970MB), CUDA Driver 12.4, cc=6.1, using cc=61 PTX
+//Running on GPU 0
+//(c) Arne Vansteenkiste, Dynamat LAB, Ghent University, Belgium
+//This is free software without any warranty. See license.txt
+//********************************************************************//
+//  If you use mumax in any work or publication,                      //
+//  we kindly ask you to cite the references in references.bib        //
+//********************************************************************//
+//output directory: script.out/
+SetMesh(128, 128, 1, 4e-9, 4e-9, 4e-9, 0, 0, 0)
+Run(1e-9)
+Error parsing power draw: strconv.ParseFloat: parsing "[N/A]": invalid syntax
+//********************************************************************//
+//Please cite the following references, relevant for your simulation. //
+//See bibtex file in output folder for justification.                 //
+//********************************************************************//
+//   * Vansteenkiste et al., AIP Adv. 4, 107133 (2014).

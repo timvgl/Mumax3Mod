@@ -18,7 +18,7 @@ func NewSlice(nComp int, size [3]int) *data.Slice {
 }
 
 func newSlice(nComp int, size [3]int, alloc func(int64) unsafe.Pointer, memType int8) *data.Slice {
-	data.EnableGPU(memFree, cu.MemFreeHost, MemCpyDtoH, MemCpyHtoD, MemCpy, MemCpyDtoHPart, MemCpyHtoDPart, MemCpyPart, Create_Stream, Destroy_Stream, SetCurrent_Ctx)
+	data.EnableGPU(memFree, cu.MemFreeHost, MemCpyDtoH, MemCpyHtoD, MemCpy, MemCpyDtoHPart, MemCpyHtoDPart, MemCpyPart, Create_Stream, Destroy_Stream, SetCurrent_Ctx, CopyPart)
 	length := prod(size)
 	bytes := int64(length) * cu.SIZEOF_FLOAT32
 	ptrs := make([]unsafe.Pointer, nComp)
@@ -36,7 +36,7 @@ func NewSliceInt(nComp int, size [3]int) *data.Slice {
 }
 
 func newSliceInt(nComp int, size [3]int, alloc func(int64) unsafe.Pointer, memType int8) *data.Slice {
-	data.EnableGPU(memFree, cu.MemFreeHost, MemCpyDtoH, MemCpyHtoD, MemCpy, MemCpyDtoHPart, MemCpyHtoDPart, MemCpyPart, Create_Stream, Destroy_Stream, SetCurrent_Ctx)
+	data.EnableGPU(memFree, cu.MemFreeHost, MemCpyDtoH, MemCpyHtoD, MemCpy, MemCpyDtoHPart, MemCpyHtoDPart, MemCpyPart, Create_Stream, Destroy_Stream, SetCurrent_Ctx, CopyPart)
 	length := prod(size)
 	bytes := int64(length) * cu.SIZEOF_INT
 	ptrs := make([]unsafe.Pointer, nComp)

@@ -50,9 +50,18 @@ func SetTorque(dst *data.Slice) {
 	FreezeSpins(dst)
 }
 
-func SetTorqueRegion(dst *data.Slice) {
-	SetLLTorqueRegion(dst)
-	AddSTTorqueRegion(dst)
+func SetTorqueRegion(dst, m, u *data.Slice, useFullSample bool, pbcX, pbcY, pbcZ int) {
+	if useFullSample {
+		backupM := cuda.Buffer(M.Buffer().NComp(), M.Buffer().Size())
+		data.Copy(backupM, M.Buffer())
+		data.CopyPart(M.Buffer(), m, 0, m.Size()[X], 0, m.Size()[Y], 0, m.Size()[Z], 0, 1, dst.StartX, dst.StartY, dst.StartZ, 0)
+		defer func() {
+			data.Copy(M.Buffer(), backupM)
+			cuda.Recycle(backupM)
+		}()
+	}
+	SetLLTorqueRegion(dst, m, u, useFullSample, pbcX, pbcY, pbcZ)
+	AddSTTorqueRegion(dst, m, useFullSample)
 	FreezeSpinsRegion(dst)
 }
 
@@ -68,18 +77,15 @@ func SetLLTorque(dst *data.Slice) {
 	}
 }
 
-func SetLLTorqueRegion(dst *data.Slice) {
-	SetEffectiveFieldRegion(dst) // calc and store B_eff
+func SetLLTorqueRegion(dst, m, u *data.Slice, useFullSample bool, pbcX, pbcY, pbcZ int) {
+	SetEffectiveFieldRegion(dst, m, u, useFullSample, pbcX, pbcY, pbcZ) // calc and store B_eff
 	alpha := Alpha.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
 	defer alpha.Recycle()
-	m := cuda.Buffer(dst.NComp(), dst.RegionSize())
-	cuda.Crop(m, M.Buffer(), dst.StartX, dst.StartY, dst.StartZ)
 	if Precess {
 		cuda.LLTorque(dst, m, dst, alpha) // overwrite dst with torque
 	} else {
 		cuda.LLNoPrecess(dst, m, dst)
 	}
-	cuda.Recycle(m)
 }
 
 // Adds the current spin transfer torque to dst
@@ -134,60 +140,67 @@ func AddSTTorque(dst *data.Slice) {
 	}
 }
 
-func AddSTTorqueRegion(dst *data.Slice) {
-	if J.isZero() {
-		return
-	}
-	util.AssertMsg(!Pol.isZero(), "spin polarization should not be 0")
-	jspin, rec := J.SliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
-	if rec {
-		defer cuda.Recycle(jspin)
-	}
-	fl, rec := FixedLayer.SliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
-	if rec {
-		defer cuda.Recycle(fl)
-	}
-	if !DisableZhangLiTorque {
-		msat := Msat.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
-		defer msat.Recycle()
-		j := J.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
-		defer j.Recycle()
-		alpha := Alpha.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
-		defer alpha.Recycle()
-		xi := Xi.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
-		defer xi.Recycle()
-		pol := Pol.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
-		defer pol.Recycle()
-		m := cuda.Buffer(dst.NComp(), dst.RegionSize())
-		cuda.Crop(m, M.Buffer(), dst.StartX, dst.StartY, dst.StartZ)
-		cuda.AddZhangLiTorque(dst, m, msat, j, alpha, xi, pol, Crop(&M.varVectorField, dst.StartX, dst.EndX, dst.StartY, dst.EndY, dst.StartZ, dst.EndZ).Mesh())
-		cuda.Recycle(m)
-	}
-	if !DisableSlonczewskiTorque && !FixedLayer.isZero() {
-		msat := Msat.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
-		defer msat.Recycle()
-		j := J.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
-		defer j.Recycle()
-		fixedP := FixedLayer.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
-		defer fixedP.Recycle()
-		alpha := Alpha.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
-		defer alpha.Recycle()
-		pol := Pol.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
-		defer pol.Recycle()
-		lambda := Lambda.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
-		defer lambda.Recycle()
-		epsPrime := EpsilonPrime.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
-		defer epsPrime.Recycle()
-		thickness := FreeLayerThickness.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
-		defer thickness.Recycle()
-		m := cuda.Buffer(dst.NComp(), dst.RegionSize())
-		cuda.Crop(m, M.Buffer(), dst.StartX, dst.StartY, dst.StartZ)
-		cuda.AddSlonczewskiTorque2(dst, m,
-			msat, j, fixedP, alpha, pol, lambda, epsPrime,
-			thickness,
-			CurrentSignFromFixedLayerPosition[fixedLayerPosition],
-			Crop(&M.varVectorField, dst.StartX, dst.EndX, dst.StartY, dst.EndY, dst.StartZ, dst.EndZ).Mesh())
-		cuda.Recycle(m)
+func AddSTTorqueRegion(dst, m *data.Slice, useFullSample bool) {
+	if !useFullSample {
+		if J.isZero() {
+			return
+		}
+		util.AssertMsg(!Pol.isZero(), "spin polarization should not be 0")
+		jspin, rec := J.SliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+		if rec {
+			defer cuda.Recycle(jspin)
+		}
+		fl, rec := FixedLayer.SliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+		if rec {
+			defer cuda.Recycle(fl)
+		}
+		if !DisableZhangLiTorque {
+			msat := Msat.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+			defer msat.Recycle()
+			j := J.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+			defer j.Recycle()
+			alpha := Alpha.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+			defer alpha.Recycle()
+			xi := Xi.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+			defer xi.Recycle()
+			pol := Pol.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+			defer pol.Recycle()
+			cuda.AddZhangLiTorque(dst, m, msat, j, alpha, xi, pol, Crop(&M.varVectorField, dst.StartX, dst.EndX, dst.StartY, dst.EndY, dst.StartZ, dst.EndZ).Mesh())
+			cuda.Recycle(m)
+		}
+		if !DisableSlonczewskiTorque && !FixedLayer.isZero() {
+			msat := Msat.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+			defer msat.Recycle()
+			j := J.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+			defer j.Recycle()
+			fixedP := FixedLayer.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+			defer fixedP.Recycle()
+			alpha := Alpha.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+			defer alpha.Recycle()
+			pol := Pol.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+			defer pol.Recycle()
+			lambda := Lambda.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+			defer lambda.Recycle()
+			epsPrime := EpsilonPrime.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+			defer epsPrime.Recycle()
+			thickness := FreeLayerThickness.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+			defer thickness.Recycle()
+			cuda.AddSlonczewskiTorque2(dst, m,
+				msat, j, fixedP, alpha, pol, lambda, epsPrime,
+				thickness,
+				CurrentSignFromFixedLayerPosition[fixedLayerPosition],
+				Crop(&M.varVectorField, dst.StartX, dst.EndX, dst.StartY, dst.EndY, dst.StartZ, dst.EndZ).Mesh())
+			cuda.Recycle(m)
+		}
+	} else {
+		B := cuda.Buffer(M.NComp(), M.Buffer().Size())
+		cuda.Zero(B)
+		AddSTTorque(B)
+		BCropped := cuda.Buffer(dst.NComp(), dst.Size())
+		cuda.Crop(BCropped, B, dst.StartX, dst.StartY, dst.StartZ)
+		cuda.Add(dst, dst, BCropped)
+		cuda.Recycle(BCropped)
+		cuda.Recycle(B)
 	}
 }
 

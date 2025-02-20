@@ -5,6 +5,7 @@ import (
 	"math"
 
 	"github.com/mumax/3/cuda"
+	"github.com/mumax/3/data"
 	"github.com/mumax/3/util"
 )
 
@@ -151,11 +152,11 @@ func (_ *secondHeun) Step() {
 	}
 }
 
-func (_ *secondHeun) StepRegion(region SolverRegion) {
-	fmt.Println("#########################")
-	fmt.Println("Start of solver")
-	fmt.Println("Number of steps:", NSteps+NUndone)
-	fmt.Println("#########################")
+func (_ *secondHeun) StepRegion(region *SolverRegion) {
+	//fmt.Println("#########################")
+	//fmt.Println("Start of solver")
+	//fmt.Println("Number of steps:", NSteps+NUndone)
+	//fmt.Println("#########################")
 
 	//################
 	// Differential equation:
@@ -167,12 +168,16 @@ func (_ *secondHeun) StepRegion(region SolverRegion) {
 	//#################################
 	//Set initial states and initialisations:
 	//displacement
+	m := cuda.Buffer(M.NComp(), region.Size())
+	m.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
+	defer cuda.Recycle(m)
+	M.EvalRegionTo(m)
 	//y := U.Buffer()
 	y := cuda.Buffer(U.NComp(), region.Size())
 	y.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
 	defer cuda.Recycle(y)
 	U.EvalRegionTo(y)
-	fmt.Println("Max vector norm y:", cuda.MaxVecNorm(y))
+	//fmt.Println("Max vector norm y:", cuda.MaxVecNorm(y))
 
 	//First derivative of displacement du/dt = g(t) = udot
 	//udot := DU.Buffer()
@@ -180,44 +185,49 @@ func (_ *secondHeun) StepRegion(region SolverRegion) {
 	udot.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
 	defer cuda.Recycle(udot)
 	DU.EvalRegionTo(udot)
-	fmt.Println("Max vector norm udot:", cuda.MaxVecNorm(udot))
+	//fmt.Println("Max vector norm udot:", cuda.MaxVecNorm(udot))
 
 	//Necessary to calculate error
 	udot2 := cuda.Buffer(VECTOR, udot.Size())
+	udot2.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
 	defer cuda.Recycle(udot2)
 
 	//f(t) = nabla sigma = dudot0
 	dudot0 := cuda.Buffer(VECTOR, y.Size())
 	defer cuda.Recycle(dudot0)
 	dudot0.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
-	calcSecondDerivDispRegion(dudot0)
+	calcSecondDerivDispRegion(dudot0, y)
 
 	//f(t+dt)
 	//dudot := cuda.Buffer(3, y.Size())
 	//defer cuda.Recycle(dudot)
 
 	right := cuda.Buffer(VECTOR, y.Size())
+	right.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
 	defer cuda.Recycle(right)
-	calcRhsRegion(right, dudot0, udot)
+	calcRhsRegion(right, m, y, udot, dudot0, udot)
 
 	right2 := cuda.Buffer(VECTOR, y.Size())
+	right2.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
 	defer cuda.Recycle(right2)
 
 	//#############################
 	//Time
 	if FixDt != 0 {
 		Dt_si = FixDt
+	} else if region.Dt_si != 0 {
+		Dt_si = region.Dt_si
 	}
 	dt := float32(Dt_si)
 	util.Assert(dt > 0)
 	Time += Dt_si
-	fmt.Println("dt = ", Dt_si)
+	//fmt.Println("dt = ", Dt_si)
 
 	//#####################
 	//Stage 1: predictor
 	//y1(t+dt) = y(t) + dt*g(t)
 	cuda.Madd2(y, y, udot, 1, dt)
-	calcSecondDerivDispRegion(dudot0)
+	calcSecondDerivDispRegion(dudot0, y)
 
 	//Without damping:
 	//g1(t+dt) = g(t) + dt*f(t)
@@ -226,7 +236,7 @@ func (_ *secondHeun) StepRegion(region SolverRegion) {
 	//With damping: g1(t+dt) = g(t) + dt*[f(t)-n*g(t)]/rho
 	//With damping: g1(t+dt) = g(t) + dt*right
 	cuda.Madd2(udot2, udot, right, 1, dt)
-	calcRhsRegion(right2, dudot0, udot2)
+	calcRhsRegion(right2, m, y, udot, dudot0, udot2)
 
 	//###############################
 	//Error calculation
@@ -242,18 +252,18 @@ func (_ *secondHeun) StepRegion(region SolverRegion) {
 
 	//################################
 	//Prints
-	fmt.Println("Max vector norm y2:", cuda.MaxVecNorm(y))
+	//fmt.Println("Max vector norm y2:", cuda.MaxVecNorm(y))
 
-	fmt.Println("Max vector norm dudot0", cuda.MaxVecNorm(dudot0))
+	//fmt.Println("Max vector norm dudot0", cuda.MaxVecNorm(dudot0))
 	//fmt.Println("Max vector norm dudot:", cuda.MaxVecNorm(dudot))
 	//fmt.Println("Max vector diff dudot & dudot0:", cuda.MaxVecDiff(dudot, dudot0))
 
-	fmt.Println("Max vector norm udot:", cuda.MaxVecNorm(udot))
-	fmt.Println("Max vector norm udot2", cuda.MaxVecNorm(udot2))
-	fmt.Println("Max vector diff udot & udot2:", cuda.MaxVecDiff(udot, udot2))
+	//fmt.Println("Max vector norm udot:", cuda.MaxVecNorm(udot))
+	//fmt.Println("Max vector norm udot2", cuda.MaxVecNorm(udot2))
+	//fmt.Println("Max vector diff udot & udot2:", cuda.MaxVecDiff(udot, udot2))
 
-	fmt.Println("err = maxVecDiff * dt /MaxVexNorm", err)
-	fmt.Println("err2 = maxVecDiff * dt /MaxVexNorm", err2)
+	//fmt.Println("err = maxVecDiff * dt /MaxVexNorm", err)
+	//fmt.Println("err2 = maxVecDiff * dt /MaxVexNorm", err2)
 
 	//##########################
 	// adjust next time step
@@ -274,6 +284,12 @@ func (_ *secondHeun) StepRegion(region SolverRegion) {
 		// g(t+dt) = g1(t+dt) + 0.5*dt*[f(t+dt) - f(t)]
 		cuda.Madd3(udot, udot, right, right2, 1, dt/2, dt/2)
 
+		if FixDt != 0 {
+			size := y.Size()
+			data.CopyPart(U.Buffer(), y, 0, size[X], 0, size[Y], 0, size[Z], 0, 1, region.StartX, region.StartY, region.StartZ, 0)
+			data.CopyPart(DU.Buffer(), udot, 0, size[X], 0, size[Y], 0, size[Z], 0, 1, region.StartX, region.StartY, region.StartZ, 0)
+		}
+
 		//If you run second derivative together with LLG, then remove NSteps++
 		NSteps++
 
@@ -284,6 +300,7 @@ func (_ *secondHeun) StepRegion(region SolverRegion) {
 			adaptDt(math.Pow(MaxErr/err2, 1./2.))
 			setLastErr(err2)
 		}
+		region.LastErr = LastErr
 
 	} else {
 		// undo bad step
@@ -297,6 +314,8 @@ func (_ *secondHeun) StepRegion(region SolverRegion) {
 			adaptDt(math.Pow(MaxErr/err2, 1./3.))
 		}
 	}
+	region.Dt_si = Dt_si
+
 }
 
 func (_ *secondHeun) Free() {}

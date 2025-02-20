@@ -29,6 +29,9 @@ type expanded struct {
 	name                   string
 	x1, x2, y1, y2, z1, z2 int
 	values                 []float64
+	shiftX                 int
+	shiftY                 int
+	shiftZ                 int
 }
 
 // Expand quantity to a box enclosing the given region.
@@ -52,17 +55,17 @@ func ExpandOperator(x1, x2, y1, y2, z1, z2 int, args ...float64) func(parent Qua
 
 func ExpandX(parent Quantity, x1, x2 int, args ...float64) *expanded {
 	n := MeshOf(parent).Size()
-	return Expand(parent, x1, x2, 0, n[Y], 0, n[Z], args...)
+	return Expand(parent, x1, x2, 0, n[Y], 0, n[Z], shiftX, 0, 0, args...)
 }
 
-func ExpandY(parent Quantity, y1, y2 int, args ...float64) *expanded {
+func ExpandY(parent Quantity, y1, y2, shiftY int, args ...float64) *expanded {
 	n := MeshOf(parent).Size()
-	return Expand(parent, 0, n[X], y1, y2, 0, n[Z], args...)
+	return Expand(parent, 0, n[X], y1, y2, 0, n[Z], 0, shiftY, 0, args...)
 }
 
-func ExpandZ(parent Quantity, z1, z2 int, args ...float64) *expanded {
+func ExpandZ(parent Quantity, z1, z2, shiftZ int, args ...float64) *expanded {
 	n := MeshOf(parent).Size()
-	return Expand(parent, 0, n[X], 0, n[Y], z1, z2, args...)
+	return Expand(parent, 0, n[X], 0, n[Y], z1, z2, 0, 0, shiftZ, args...)
 }
 
 func createSliceFloat64(n int, l float64) []float64 {
@@ -73,7 +76,7 @@ func createSliceFloat64(n int, l float64) []float64 {
 	return slice
 }
 
-func Expand(parent Quantity, x1, x2, y1, y2, z1, z2 int, args ...float64) *expanded {
+func Expand(parent Quantity, x1, x2, y1, y2, z1, z2, shiftX, shifty, shiftZ int, args ...float64) *expanded {
 	n := MeshOf(parent).Size()
 	util.Argument(x1 < x2 && y1 < y2 && z1 < z2)
 	util.Argument(x1 >= 0 && y1 >= 0 && z1 >= 0)
@@ -96,11 +99,11 @@ func Expand(parent Quantity, x1, x2, y1, y2, z1, z2 int, args ...float64) *expan
 		panic("Either 0, 1 or as many as components available for the quantity allowed for Expand.")
 	}
 	if len(args) == parent.NComp() {
-		return &expanded{parent, name, x1, x2, y1, y2, z1, z2, args}
+		return &expanded{parent, name, x1, x2, y1, y2, z1, z2, args, shiftX, shifty, shiftZ}
 	} else if len(args) == 1 {
-		return &expanded{parent, name, x1, x2, y1, y2, z1, z2, createSliceFloat64(parent.NComp(), args[0])}
+		return &expanded{parent, name, x1, x2, y1, y2, z1, z2, createSliceFloat64(parent.NComp(), args[0]), shiftX, shifty, shiftZ}
 	} else {
-		return &expanded{parent, name, x1, x2, y1, y2, z1, z2, createSliceFloat64(parent.NComp(), 0)}
+		return &expanded{parent, name, x1, x2, y1, y2, z1, z2, createSliceFloat64(parent.NComp(), 0), shiftX, shifty, shiftZ}
 	}
 }
 

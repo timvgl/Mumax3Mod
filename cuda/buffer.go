@@ -22,7 +22,7 @@ var (
 	buf_check = make(map[unsafe.Pointer]struct{}) // checks if pointer originates here to avoid unintended recycle
 )
 
-var buf_max = 100 // maximum number of buffers to allocate (detect memory leak early)
+var buf_max = 120 // maximum number of buffers to allocate (detect memory leak early)
 
 func IncreaseBufMax(val int) {
 	buf_max += val
