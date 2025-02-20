@@ -68,7 +68,6 @@ func (_ *elasLF) Step() {
 }
 
 func (_ *elasLF) StepRegion(region *SolverRegion) {
-	panic("Not implimented yet")
 	//################
 	// Differential equation:
 	// du/dt = v(t)
@@ -77,28 +76,46 @@ func (_ *elasLF) StepRegion(region *SolverRegion) {
 	// with f(t) = nabla sigma
 	//#################################
 	//Initialisation:
-	u := U.Buffer()
+	//u := U.Buffer()
+	u := cuda.Buffer(U.NComp(), region.Size())
+	u.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
+	defer cuda.Recycle(u)
+	U.EvalRegionTo(u)
 	size := u.Size()
+
+	m := cuda.Buffer(M.NComp(), region.Size())
+	m.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
+	defer cuda.Recycle(m)
+	M.EvalRegionTo(m)
 
 	//Set fixed displacement
 	//SetFreezeDisp()
 	u0 := cuda.Buffer(3, size)
+	u0.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
 	defer cuda.Recycle(u0)
 	data.Copy(u0, u)
 
-	v := DU.Buffer()
+	//v := DU.Buffer()
+	v := cuda.Buffer(DU.NComp(), region.Size())
+	v.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
+	defer cuda.Recycle(v)
+	DU.EvalRegionTo(v)
 	v0 := cuda.Buffer(3, size)
+	v0.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
 	defer cuda.Recycle(v0)
 	data.Copy(v0, v)
 
 	//ai = nabla sigma
 	ai := cuda.Buffer(3, size)
+	ai.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
 	defer cuda.Recycle(ai)
 
 	aii := cuda.Buffer(3, size)
+	aii.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
 	defer cuda.Recycle(aii)
 
 	f := cuda.Buffer(3, size)
+	f.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
 	defer cuda.Recycle(f)
 
 	//#############################
@@ -115,10 +132,10 @@ func (_ *elasLF) StepRegion(region *SolverRegion) {
 	// du/dt = v(t) ~ ku
 	// dv/dt = right(t) ~ kv
 	//Stage 1:
-	calcRhs(ai, f, v)
+	calcRhsRegion(ai, m, u, v, f, v)
 	cuda.Madd3(u, u0, v0, ai, 1, dt, 0.5*dt*dt)
 	//calcBndry()
-	calcRhs(aii, f, v)
+	calcRhsRegion(aii, m, u, v, f, v)
 	cuda.Madd3(v, v0, ai, aii, 1, 0.5*dt, 0.5*dt)
 
 	NSteps++

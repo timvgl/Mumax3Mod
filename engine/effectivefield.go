@@ -21,11 +21,11 @@ func SetEffectiveField(dst *data.Slice) {
 	AddCustomField(dst)
 }
 
-func SetEffectiveFieldRegion(dst, m *data.Slice, useFullSample bool, pbcX, pbcY, pbcZ int) {
+func SetEffectiveFieldRegion(dst, m, u *data.Slice, useFullSample bool, pbcX, pbcY, pbcZ int) {
 	SetDemagFieldRegion(dst, m, useFullSample, pbcX, pbcY, pbcZ) // set to B_demag...
 	AddExchangeFieldRegion(dst, m, useFullSample)                // ...then add other terms
 	AddAnisotropyFieldRegion(dst, m, useFullSample)
-	AddMagnetoelasticFieldRegion(dst, m, useFullSample)
+	AddMagnetoelasticFieldRegion(dst, m, u, pbcX, pbcY, pbcZ, useFullSample)
 	B_ext.AddToRegion(dst)
 	if !relaxing {
 		B_therm.AddToRegion(dst)

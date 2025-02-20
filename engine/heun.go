@@ -56,6 +56,9 @@ func (_ *Heun) Step() {
 }
 
 func (_ *Heun) StepRegion(region *SolverRegion) {
+	u := cuda.Buffer(M.NComp(), region.Size())
+	cuda.Zero(u)
+	cuda.Recycle(u)
 	//y := M.Buffer()
 	y := cuda.Buffer(M.NComp(), region.Size())
 	y.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
@@ -76,7 +79,7 @@ func (_ *Heun) StepRegion(region *SolverRegion) {
 
 	// stage 1
 	dy0.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
-	torqueFnRegionNEW(dy0, y, region.PBCx, region.PBCy, region.PBCz)
+	torqueFnRegion(dy0, y, u, region.PBCx, region.PBCy, region.PBCz)
 	cuda.Madd2(y, y, dy0, 1, dt) // y = y + dt * dy
 
 	// stage 2
@@ -84,7 +87,7 @@ func (_ *Heun) StepRegion(region *SolverRegion) {
 	defer cuda.Recycle(dy)
 	Time += Dt_si
 	dy.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
-	torqueFnRegionNEW(dy, y, region.PBCx, region.PBCy, region.PBCz)
+	torqueFnRegion(dy, y, u, region.PBCx, region.PBCy, region.PBCz)
 
 	err := cuda.MaxVecDiff(dy0, dy) * float64(dt)
 

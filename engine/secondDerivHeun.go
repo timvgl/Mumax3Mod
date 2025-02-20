@@ -168,6 +168,10 @@ func (_ *secondHeun) StepRegion(region *SolverRegion) {
 	//#################################
 	//Set initial states and initialisations:
 	//displacement
+	m := cuda.Buffer(M.NComp(), region.Size())
+	m.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
+	defer cuda.Recycle(m)
+	M.EvalRegionTo(m)
 	//y := U.Buffer()
 	y := cuda.Buffer(U.NComp(), region.Size())
 	y.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
@@ -201,7 +205,7 @@ func (_ *secondHeun) StepRegion(region *SolverRegion) {
 	right := cuda.Buffer(VECTOR, y.Size())
 	right.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
 	defer cuda.Recycle(right)
-	calcRhsRegion(right, y, udot, dudot0, udot)
+	calcRhsRegion(right, m, y, udot, dudot0, udot)
 
 	right2 := cuda.Buffer(VECTOR, y.Size())
 	right2.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
@@ -232,7 +236,7 @@ func (_ *secondHeun) StepRegion(region *SolverRegion) {
 	//With damping: g1(t+dt) = g(t) + dt*[f(t)-n*g(t)]/rho
 	//With damping: g1(t+dt) = g(t) + dt*right
 	cuda.Madd2(udot2, udot, right, 1, dt)
-	calcRhsRegion(right2, y, udot, dudot0, udot2)
+	calcRhsRegion(right2, m, y, udot, dudot0, udot2)
 
 	//###############################
 	//Error calculation

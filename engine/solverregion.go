@@ -60,8 +60,9 @@ func DefSolverRegionZ(startZ, endZ, solver int) SolverRegion {
 	return DefSolverRegion(0, Nx, 0, Ny, startZ, endZ, solver)
 }
 
-func (s *SolverRegionsStruct) GetStepperSlice() (stepperSlice []Stepper, regionsData [][3]*data.Slice) {
+func (s *SolverRegionsStruct) GetStepperSlice() (stepperSlice []Stepper, regionsData [][3]*data.Slice, overlappingElastic []bool) {
 	//var regionsData = make([][3]*data.Slice, 0)
+	overlappingElastic = s.CompareAllOverlapsElastic()
 	for _, regionSolver := range s.reg {
 		var regStepper Stepper
 		switch regionSolver.Solver {
@@ -83,22 +84,16 @@ func (s *SolverRegionsStruct) GetStepperSlice() (stepperSlice []Stepper, regions
 			regStepper = new(RK56)
 		case SECONDDERIV:
 			regStepper = new(secondHeun)
-			UseExcitation = false
 		case ELAS_RUNGEKUTTA:
 			regStepper = new(elasRK4)
-			UseExcitation = false
 		case MAGELAS_RUNGEKUTTA:
 			regStepper = new(magelasRK4)
-			UseExcitation = false
 		case ELAS_LEAPFROG:
 			regStepper = new(elasLF)
-			UseExcitation = false
 		case ELAS_YOSH:
 			regStepper = new(elasYOSH)
-			UseExcitation = false
 		case MAGELAS_RUNGEKUTTA_VARY_TIME:
 			regStepper = new(magelasRK4_vary_time)
-			UseExcitation = false
 		}
 		stepperSlice = append(stepperSlice, regStepper)
 		mBuf := cuda.Buffer(VECTOR, regionSolver.Size())
@@ -107,7 +102,7 @@ func (s *SolverRegionsStruct) GetStepperSlice() (stepperSlice []Stepper, regions
 		regionData := [3]*data.Slice{mBuf, uBuf, duBuf}
 		regionsData = append(regionsData, regionData)
 	}
-	return stepperSlice, regionsData
+	return stepperSlice, regionsData, overlappingElastic
 }
 
 func (s *SolverRegionsStruct) Run(seconds float64) {
@@ -115,11 +110,12 @@ func (s *SolverRegionsStruct) Run(seconds float64) {
 		panic("No solver region defined.")
 	}
 	Pause = false
-	stepperSlice, regionsData := s.GetStepperSlice()
+	stepperSlice, regionsData, overlappingElastic := s.GetStepperSlice()
 	start := Time
 	stop := Time + seconds
 	FixDtPre := FixDt
 	hideProgressBarBool := true
+	UseExcitationPre := UseExcitation
 	if !HideProgressBarManualSet {
 		hideProgressBarBoolTmp, err := strconv.ParseBool(strings.ToLower(HideProgressBar))
 		if err != nil {
@@ -144,6 +140,7 @@ func (s *SolverRegionsStruct) Run(seconds float64) {
 		if FixDtPre == 0 {
 			Time0 := Time
 			for i := range stepperSlice {
+				UseExcitation = overlappingElastic[i]
 				for Time == Time0 {
 					stepperSlice[i].StepRegion(&s.reg[i])
 				}
@@ -159,6 +156,7 @@ func (s *SolverRegionsStruct) Run(seconds float64) {
 		}
 		//Do step for region, set store result of region, reset back to state from before, evolve next region, etc
 		for i := range stepperSlice {
+			UseExcitation = overlappingElastic[i]
 			stepperSlice[i].StepRegion(&s.reg[i])
 			cuda.Crop(regionsData[i][0], M.Buffer(), s.reg[i].StartX, s.reg[i].StartY, s.reg[i].StartZ)
 			cuda.Crop(regionsData[i][1], U.Buffer(), s.reg[i].StartX, s.reg[i].StartY, s.reg[i].StartZ)
@@ -176,6 +174,7 @@ func (s *SolverRegionsStruct) Run(seconds float64) {
 		DoOutput()
 		DoFFT4D()
 	}
+	UseExcitation = UseExcitationPre
 	ProgressBar.Finish()
 	Pause = true
 }
@@ -191,4 +190,71 @@ func (s *SolverRegion) PBC(x, y, z int) {
 	s.PBCx = x
 	s.PBCy = y
 	s.PBCz = z
+}
+
+func (r *SolverRegion) Overlaps(other *SolverRegion) bool {
+	// Check for separation along each axis.
+	if r.EndX < other.StartX || r.StartX > other.EndX {
+		return false
+	}
+	if r.EndY < other.StartY || r.StartY > other.EndY {
+		return false
+	}
+	if r.EndZ < other.StartZ || r.StartZ > other.EndZ {
+		return false
+	}
+	return true
+}
+
+func IsElasticSolver(solv int) bool {
+	switch solv {
+	default:
+		util.Fatalf("SetSolver: unknown solver type: %v", solv)
+	case BACKWARD_EULER:
+		return false
+	case EULER:
+		return false
+	case HEUN:
+		return false
+	case BOGAKISHAMPINE:
+		return false
+	case RUNGEKUTTA:
+		return false
+	case DORMANDPRINCE:
+		return false
+	case FEHLBERG:
+		return false
+	case SECONDDERIV:
+		return true
+	case ELAS_RUNGEKUTTA:
+		return true
+	case MAGELAS_RUNGEKUTTA:
+		return true
+	case ELAS_LEAPFROG:
+		return true
+	case ELAS_YOSH:
+		return true
+	case MAGELAS_RUNGEKUTTA_VARY_TIME:
+		return true
+	}
+	panic("Error during check if solver contains elastic solver.")
+}
+
+func (s *SolverRegionsStruct) CompareAllOverlapsElastic() []bool {
+	var comparisons []bool
+	for i := 0; i < len(s.reg); i++ {
+		var overlapping = false
+		if !IsElasticSolver(s.reg[i].Solver) {
+			for j := i + 1; j < len(s.reg); j++ {
+				if s.reg[i].Overlaps(&s.reg[j]) && !IsElasticSolver(s.reg[j].Solver) {
+					overlapping = true
+					break
+				}
+			}
+		} else {
+			overlapping = false
+		}
+		comparisons = append(comparisons, overlapping)
+	}
+	return comparisons
 }

@@ -43,11 +43,15 @@ func (_ *Euler) StepRegion(region *SolverRegion) {
 	defer cuda.Recycle(y)
 	M.EvalRegionTo(y)
 
+	u := cuda.Buffer(M.NComp(), region.Size())
+	cuda.Zero(u)
+	cuda.Recycle(u)
+
 	dy0 := cuda.Buffer(VECTOR, y.Size())
 	defer cuda.Recycle(dy0)
 
 	dy0.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
-	torqueFnRegionNEW(dy0, y, region.PBCx, region.PBCy, region.PBCz)
+	torqueFnRegion(dy0, y, u, region.PBCx, region.PBCy, region.PBCz)
 	setMaxTorque(dy0)
 	region.LastTorque = LastTorque
 

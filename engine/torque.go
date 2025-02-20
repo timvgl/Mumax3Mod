@@ -50,7 +50,7 @@ func SetTorque(dst *data.Slice) {
 	FreezeSpins(dst)
 }
 
-func SetTorqueRegion(dst, m *data.Slice, useFullSample bool, pbcX, pbcY, pbcZ int) {
+func SetTorqueRegion(dst, m, u *data.Slice, useFullSample bool, pbcX, pbcY, pbcZ int) {
 	if useFullSample {
 		backupM := cuda.Buffer(M.Buffer().NComp(), M.Buffer().Size())
 		data.Copy(backupM, M.Buffer())
@@ -60,7 +60,7 @@ func SetTorqueRegion(dst, m *data.Slice, useFullSample bool, pbcX, pbcY, pbcZ in
 			cuda.Recycle(backupM)
 		}()
 	}
-	SetLLTorqueRegion(dst, m, useFullSample, pbcX, pbcY, pbcZ)
+	SetLLTorqueRegion(dst, m, u, useFullSample, pbcX, pbcY, pbcZ)
 	AddSTTorqueRegion(dst, m, useFullSample)
 	FreezeSpinsRegion(dst)
 }
@@ -77,8 +77,8 @@ func SetLLTorque(dst *data.Slice) {
 	}
 }
 
-func SetLLTorqueRegion(dst, m *data.Slice, useFullSample bool, pbcX, pbcY, pbcZ int) {
-	SetEffectiveFieldRegion(dst, m, useFullSample, pbcX, pbcY, pbcZ) // calc and store B_eff
+func SetLLTorqueRegion(dst, m, u *data.Slice, useFullSample bool, pbcX, pbcY, pbcZ int) {
+	SetEffectiveFieldRegion(dst, m, u, useFullSample, pbcX, pbcY, pbcZ) // calc and store B_eff
 	alpha := Alpha.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
 	defer alpha.Recycle()
 	if Precess {

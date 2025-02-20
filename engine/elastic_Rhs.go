@@ -15,22 +15,27 @@ func calcRhs(dst, f, g *data.Slice) {
 	RightSide(dst, f, g, Eta, Rho, Bf)
 }
 
-func calcRhsRegion(dst, u, du, f, g *data.Slice) {
+func calcRhsRegion(dst, m, u, du, f, g *data.Slice) {
 	if useFullSample {
+		backupM := cuda.Buffer(M.Buffer().NComp(), M.Buffer().Size())
 		backupU := cuda.Buffer(U.Buffer().NComp(), U.Buffer().Size())
 		backupDU := cuda.Buffer(DU.Buffer().NComp(), DU.Buffer().Size())
+		data.Copy(backupM, M.Buffer())
 		data.Copy(backupU, U.Buffer())
 		data.Copy(backupDU, DU.Buffer())
+		data.CopyPart(M.Buffer(), m, 0, m.Size()[X], 0, m.Size()[Y], 0, m.Size()[Z], 0, 1, dst.StartX, dst.StartY, dst.StartZ, 0)
 		data.CopyPart(U.Buffer(), u, 0, u.Size()[X], 0, u.Size()[Y], 0, u.Size()[Z], 0, 1, dst.StartX, dst.StartY, dst.StartZ, 0)
 		data.CopyPart(DU.Buffer(), du, 0, du.Size()[X], 0, du.Size()[Y], 0, du.Size()[Z], 0, 1, dst.StartX, dst.StartY, dst.StartZ, 0)
 		defer func() {
+			data.Copy(M.Buffer(), backupM)
+			cuda.Recycle(backupM)
 			data.Copy(U.Buffer(), backupU)
 			cuda.Recycle(backupU)
 			data.Copy(DU.Buffer(), backupDU)
 			cuda.Recycle(backupDU)
 		}()
 	}
-	RightSideRegion(dst, u, f, g, Eta, Rho, Bf)
+	RightSideRegion(dst, m, u, f, g, Eta, Rho, Bf)
 }
 
 func RightSide(dst, f, g *data.Slice, Eta, Rho *RegionwiseScalar, Bf *Excitation) {
@@ -64,7 +69,7 @@ func RightSide(dst, f, g *data.Slice, Eta, Rho *RegionwiseScalar, Bf *Excitation
 	}
 }
 
-func RightSideRegion(dst, u, f, g *data.Slice, Eta, Rho *RegionwiseScalar, Bf *Excitation) {
+func RightSideRegion(dst, m, u, f, g *data.Slice, Eta, Rho *RegionwiseScalar, Bf *Excitation) {
 	if !useFullSample {
 		//No elastodynamics is calculated if density is zero
 		if Rho.nonZero() {
@@ -84,12 +89,11 @@ func RightSideRegion(dst, u, f, g *data.Slice, Eta, Rho *RegionwiseScalar, Bf *E
 			melForce := cuda.Buffer(3, size)
 			defer cuda.Recycle(melForce)
 			// cuda.Zero(melForce)
-			GetMagnetoelasticForceDensityRegion(melForce)
+			GetMagnetoelasticForceDensityRegion(melForce, m, useFullSample)
 			thermalElasticNoise := cuda.Buffer(melForce.NComp(), melForce.Size())
 			defer cuda.Recycle(thermalElasticNoise)
 			cuda.Zero(thermalElasticNoise)
 			F_therm.AddToRegion(thermalElasticNoise)
-
 			cuda.RightSide(dst, f, g, eta, rho, bf, melForce, thermalElasticNoise)
 			/*UDebug := dst.HostCopy()
 			val, ok := autonum["debug"]
@@ -106,6 +110,7 @@ func RightSideRegion(dst, u, f, g *data.Slice, Eta, Rho *RegionwiseScalar, Bf *E
 			//Sufficient to only set right to zero because udot2 = udot+right
 			//If initial udot!=0, then do also FreezeDisp(udot2)
 			FreezeDispRegion(dst, u)
+
 		}
 	} else {
 		ddU := cuda.Buffer(M.NComp(), M.Buffer().Size())

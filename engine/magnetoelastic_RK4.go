@@ -362,10 +362,10 @@ func (_ *magelasRK4) StepRegion(region *SolverRegion) {
 	// du/dt = v(t) ~ ku
 	// dv/dt = right(t) ~ kv
 	//Stage 1:
-	calcRhsRegion(kv1, u, v, f, v)
+	calcRhsRegion(kv1, m, u, v, f, v)
 	ku1 = v0
 	if !fixM {
-		torqueFnRegionNEW(km1, m, region.PBCx, region.PBCy, region.PBCz)
+		torqueFnRegion(km1, m, u, region.PBCx, region.PBCy, region.PBCz)
 	}
 
 	//Stage 2:
@@ -383,10 +383,10 @@ func (_ *magelasRK4) StepRegion(region *SolverRegion) {
 
 	}
 
-	calcRhsRegion(kv2, u, v, f, v)
+	calcRhsRegion(kv2, m, u, v, f, v)
 	cuda.Madd2(ku2, v0, kv1, 1, (1./2.)*dt)
 	if !fixM {
-		torqueFnRegionNEW(km2, m, region.PBCx, region.PBCy, region.PBCz)
+		torqueFnRegion(km2, m, u, region.PBCx, region.PBCy, region.PBCz)
 	}
 
 	//Stage 3:
@@ -402,10 +402,10 @@ func (_ *magelasRK4) StepRegion(region *SolverRegion) {
 
 	}
 
-	calcRhsRegion(kv3, u, v, f, v)
+	calcRhsRegion(kv3, m, u, v, f, v)
 	cuda.Madd2(ku3, v0, kv2, 1, (1./2.)*dt)
 	if !fixM {
-		torqueFnRegionNEW(km3, m, region.PBCx, region.PBCy, region.PBCz)
+		torqueFnRegion(km3, m, u, region.PBCx, region.PBCy, region.PBCz)
 	}
 
 	//Stage 4:
@@ -422,10 +422,10 @@ func (_ *magelasRK4) StepRegion(region *SolverRegion) {
 
 	}
 
-	calcRhsRegion(kv4, u, v, f, v)
+	calcRhsRegion(kv4, m, u, v, f, v)
 	cuda.Madd2(ku4, v0, kv3, 1, 1.*dt)
 	if !fixM {
-		torqueFnRegionNEW(km4, m, region.PBCx, region.PBCy, region.PBCz)
+		torqueFnRegion(km4, m, u, region.PBCx, region.PBCy, region.PBCz)
 	}
 
 	//###############################

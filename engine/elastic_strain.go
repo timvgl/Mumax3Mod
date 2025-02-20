@@ -21,7 +21,15 @@ var (
 // ###################
 // Strain
 func setNormStrain(dst *data.Slice) {
-	if UseExcitation {
+	if loadNormStrain && !loadNormStrainConfig {
+		d := LoadFileDSlice(loadNormStrainPath)
+		SetArray(dst, d)
+		loadNormStrain = false
+		loadNormStrainPath = ""
+	} else if !loadNormStrain && loadNormStrainConfig {
+		SetInShape(dst, nil, normStrainConfig)
+		loadNormStrainConfig = false
+	} else if UseExcitation {
 		Exx := exx.MSlice()
 		defer Exx.Recycle()
 
@@ -33,21 +41,21 @@ func setNormStrain(dst *data.Slice) {
 		cuda.ScalarToVec(dst, Exx, Eyy, Ezz, Mesh())
 	} else if !loadNormStrain && !loadNormStrainConfig {
 		NormStrain(dst, U, C11)
-	} else if loadNormStrain && !loadNormStrainConfig {
-		d := LoadFileDSlice(loadNormStrainPath)
-		SetArray(dst, d)
-		loadNormStrain = false
-		loadNormStrainPath = ""
-	} else if !loadNormStrain && loadNormStrainConfig {
-		SetInShape(dst, nil, normStrainConfig)
-		loadNormStrainConfig = false
 	} else {
 		panic("Cannot load file for normStrain and set configuration for normStrain in parallel.")
 	}
 }
 
 func setShearStrain(dst *data.Slice) {
-	if UseExcitation {
+	if loadShearStrain && !loadShearStrainConfig {
+		d := LoadFileDSlice(loadShearStrainPath)
+		SetArray(dst, d)
+		loadShearStrain = false
+		loadShearStrainPath = ""
+	} else if !loadShearStrain && loadShearStrainConfig {
+		SetInShape(dst, nil, shearStrainConfig)
+		loadShearStrainConfig = false
+	} else if UseExcitation {
 		Exy := exy.MSlice()
 		defer Exy.Recycle()
 
@@ -60,21 +68,13 @@ func setShearStrain(dst *data.Slice) {
 		cuda.ScalarToVec(dst, Exy, Eyz, Exz, Mesh())
 	} else if !loadShearStrain && !loadShearStrainConfig {
 		ShearStrain(dst, U, C11)
-	} else if loadShearStrain && !loadShearStrainConfig {
-		d := LoadFileDSlice(loadShearStrainPath)
-		SetArray(dst, d)
-		loadShearStrain = false
-		loadShearStrainPath = ""
-	} else if !loadShearStrain && loadShearStrainConfig {
-		SetInShape(dst, nil, shearStrainConfig)
-		loadShearStrainConfig = false
 	} else {
 		panic("Cannot load file for shearStrain and set configuration for shearStrain in parallel.")
 	}
 }
 
 func NormStrain(dst *data.Slice, u displacement, C11 *RegionwiseScalar) {
-	//C11 is necessary to check if we are at edges of free boundary regions
+	// C11 is used for checking edges of free-boundary regions.
 	c1 := C11.MSlice()
 	defer c1.Recycle()
 	cuda.NormStrain(dst, u.Buffer(), U.Mesh(), c1)
@@ -98,4 +98,83 @@ func SetArray(dst, src *data.Slice) {
 	}
 	data.Copy(dst, src)
 	//b.normalize()
+}
+
+// --- Additional functions for region-solver support for strain ---
+
+// setNormStrainRegion is analogous to setNormStressRegion.
+// It dispatches to the region version of the normal strain calculation.
+func setNormStrainRegion(dst, u *data.Slice, pbcX, pbcY, pbcZ int, useFullSample bool) {
+	if !loadNormStrain && !loadNormStrainConfig {
+		NormStrainRegion(dst, u, C11, pbcX, pbcY, pbcZ, useFullSample)
+	} else if loadNormStrain && !loadNormStrainConfig {
+		panic("Loading ovf files for NormStrain not supported for RegionSolver yet")
+		// (Optional: include code to load and crop the file if support is added later.)
+	} else if !loadNormStrain && loadNormStrainConfig {
+		panic("Loading config for NormStrain not supported for RegionSolver yet")
+		// (Optional: include code to apply a configuration if support is added later.)
+	} else {
+		panic("Cannot load file for normStrain and set configuration for normStrain in parallel.")
+	}
+}
+
+// setShearStrainRegion is analogous to setShearStressRegion.
+func setShearStrainRegion(dst, u *data.Slice, pbcX, pbcY, pbcZ int, useFullSample bool) {
+	if !loadShearStrain && !loadShearStrainConfig {
+		ShearStrainRegion(dst, u, C11, pbcX, pbcY, pbcZ, useFullSample)
+	} else if loadShearStrain && !loadShearStrainConfig {
+		panic("Loading ovf files for ShearStrain not supported for RegionSolver yet")
+	} else if !loadShearStrain && loadShearStrainConfig {
+		panic("Loading config for ShearStrain not supported for RegionSolver yet")
+	} else {
+		panic("Cannot load file for shearStrain and set configuration for shearStrain in parallel.")
+	}
+}
+
+// NormStrainRegion computes the normal strain on a region.
+// If useFullSample is false, it crops the displacement field and computes strain on the region mesh;
+// otherwise it computes strain on the full mesh and crops the result.
+func NormStrainRegion(dst, u *data.Slice, C11 *RegionwiseScalar, pbcX, pbcY, pbcZ int, useFullSample bool) {
+	if !useFullSample {
+		// Obtain the region version of the regionwise scalar.
+		c1 := C11.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+		defer c1.Recycle()
+
+		// Crop the displacement buffer to the region.
+
+		// Create a region mesh from the region size and cell sizes.
+		regionMesh := data.NewMesh(
+			dst.RegionSize()[X], dst.RegionSize()[Y], dst.RegionSize()[Z],
+			MeshOf(&U).CellSize()[X], MeshOf(&U).CellSize()[Y], MeshOf(&U).CellSize()[Z],
+			pbcX, pbcY, pbcZ)
+		cuda.NormStrain(dst, u, regionMesh, c1)
+	} else {
+		// Compute the strain on the full sample, then crop.
+		full := cuda.Buffer(U.Buffer().NComp(), U.Buffer().Size())
+		cuda.Zero(full)
+		NormStrain(full, U, C11)
+		cuda.Crop(dst, full, dst.StartX, dst.StartY, dst.StartZ)
+		cuda.Recycle(full)
+	}
+}
+
+// ShearStrainRegion computes the shear strain on a region.
+// It follows the same pattern as NormStrainRegion.
+func ShearStrainRegion(dst, u *data.Slice, C11 *RegionwiseScalar, pbcX, pbcY, pbcZ int, useFullSample bool) {
+	if !useFullSample {
+		c1 := C11.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+		defer c1.Recycle()
+
+		regionMesh := data.NewMesh(
+			dst.RegionSize()[X], dst.RegionSize()[Y], dst.RegionSize()[Z],
+			MeshOf(&U).CellSize()[X], MeshOf(&U).CellSize()[Y], MeshOf(&U).CellSize()[Z],
+			pbcX, pbcY, pbcZ)
+		cuda.ShearStrain(dst, u, regionMesh, c1)
+	} else {
+		full := cuda.Buffer(U.Buffer().NComp(), U.Buffer().Size())
+		cuda.Zero(full)
+		ShearStrain(full, U, C11)
+		cuda.Crop(dst, full, dst.StartX, dst.StartY, dst.StartZ)
+		cuda.Recycle(full)
+	}
 }

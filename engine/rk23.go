@@ -108,6 +108,11 @@ func (rk *RK23) Step() {
 }
 
 func (rk *RK23) StepRegion(region *SolverRegion) {
+
+	u := cuda.Buffer(M.NComp(), region.Size())
+	cuda.Zero(u)
+	cuda.Recycle(u)
+
 	m := cuda.Buffer(M.NComp(), region.Size())
 	m.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
 	defer cuda.Recycle(m)
@@ -129,13 +134,13 @@ func (rk *RK23) StepRegion(region *SolverRegion) {
 	if rk.k1 == nil {
 		rk.k1 = cuda.NewSlice(3, size)
 		rk.k1.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
-		torqueFnRegionNEW(rk.k1, m, region.PBCx, region.PBCy, region.PBCz)
+		torqueFnRegion(rk.k1, m, u, region.PBCx, region.PBCy, region.PBCz)
 	}
 
 	// FSAL cannot be used with temperature
 	if !Temp.isZero() {
 		rk.k1.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
-		torqueFnRegionNEW(rk.k1, m, region.PBCx, region.PBCy, region.PBCz)
+		torqueFnRegion(rk.k1, m, u, region.PBCx, region.PBCy, region.PBCz)
 	}
 
 	t0 := Time
@@ -168,13 +173,13 @@ func (rk *RK23) StepRegion(region *SolverRegion) {
 	Time = t0 + (1./2.)*Dt_si
 	cuda.Madd2(m, m, rk.k1, 1, (1./2.)*h) // m = m*1 + k1*h/2
 	cuda.Normalize(m, geom)
-	torqueFnRegionNEW(k2, m, region.PBCx, region.PBCy, region.PBCz)
+	torqueFnRegion(k2, m, u, region.PBCx, region.PBCy, region.PBCz)
 
 	// stage 3
 	Time = t0 + (3./4.)*Dt_si
 	cuda.Madd2(m, m0, k2, 1, (3./4.)*h) // m = m0*1 + k2*3/4
 	cuda.Normalize(m, geom)
-	torqueFnRegionNEW(k3, m, region.PBCx, region.PBCy, region.PBCz)
+	torqueFnRegion(k3, m, u, region.PBCx, region.PBCy, region.PBCz)
 
 	// 3rd order solution
 	cuda.Madd4(m, m0, rk.k1, k2, k3, 1, (2./9.)*h, (1./3.)*h, (4./9.)*h)
@@ -182,7 +187,7 @@ func (rk *RK23) StepRegion(region *SolverRegion) {
 
 	// error estimate
 	Time = t0 + Dt_si
-	torqueFnRegionNEW(k4, m, region.PBCx, region.PBCy, region.PBCz)
+	torqueFnRegion(k4, m, u, region.PBCx, region.PBCy, region.PBCz)
 	Err := k2 // re-use k2 as error
 	// difference of 3rd and 2nd order torque without explicitly storing them first
 	cuda.Madd4(Err, rk.k1, k2, k3, k4, (7./24.)-(2./9.), (1./4.)-(1./3.), (1./3.)-(4./9.), (1. / 8.))

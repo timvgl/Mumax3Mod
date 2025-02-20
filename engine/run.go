@@ -161,30 +161,8 @@ func torqueFn(dst *data.Slice) {
 	NEvals++
 }
 
-func torqueFnRegion(dst *data.Slice, pbcX, pbcY, pbcZ int, export ...bool) {
-	var m *data.Slice
-	panic("Noooooooooooooooooooooo")
-	SetTorqueRegion(dst, m, useFullSample, pbcX, pbcY, pbcZ)
-	if len(export) == 1 {
-		if export[0] {
-			info := data.Meta{Time: Time, Name: "debug_t", Unit: "a.u.", CellSize: [3]float64{4e-9, 4e-9, 4e-9}}
-			dstHost := dst.HostCopy()
-			val, ok := autonumSnapshotsAs["torque_debug"]
-			if !ok {
-				autonumSnapshotsAs["torque_debug"] = 0
-				val = 0
-			}
-			queOutput(func() {
-				saveAs_sync(fmt.Sprintf(OD()+"/torque_debug_%06d.ovf", val), dstHost, info, outputFormat)
-			})
-			autonumSnapshotsAs["torque_debug"]++
-		}
-	}
-	NEvals++
-}
-
-func torqueFnRegionNEW(dst, m *data.Slice, pbcX, pbcY, pbcZ int) {
-	SetTorqueRegion(dst, m, useFullSample, pbcX, pbcY, pbcZ)
+func torqueFnRegion(dst, m, u *data.Slice, pbcX, pbcY, pbcZ int) {
+	SetTorqueRegion(dst, m, u, useFullSample, pbcX, pbcY, pbcZ)
 	NEvals++
 }
 

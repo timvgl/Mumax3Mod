@@ -176,7 +176,10 @@ func (_ *elasRK4) StepRegion(region *SolverRegion) {
 	// dv(t)/dt = right
 	// with f(t) = nabla sigma
 	//#################################
-
+	m := cuda.Buffer(M.NComp(), region.Size())
+	m.SetSolverRegion(region.StartX, region.EndX, region.StartY, region.EndY, region.StartZ, region.EndZ)
+	defer cuda.Recycle(m)
+	M.EvalRegionTo(m)
 	//Initialisation:
 	//u := U.Buffer()
 	u := cuda.Buffer(U.NComp(), region.Size())
@@ -249,7 +252,7 @@ func (_ *elasRK4) StepRegion(region *SolverRegion) {
 	// dv/dt = right(t) ~ kv
 
 	//Stage 1:
-	calcRhsRegion(kv1, u, v, f, v)
+	calcRhsRegion(kv1, m, u, v, f, v)
 	ku1 = v0
 
 	//Stage 2:
@@ -258,7 +261,7 @@ func (_ *elasRK4) StepRegion(region *SolverRegion) {
 	cuda.Madd2(u, u0, ku1, 1, (1./2.)*dt)
 	cuda.Madd2(v, v0, kv1, 1, (1./2.)*dt)
 	//calcBndry()
-	calcRhsRegion(kv2, u, v, f, v)
+	calcRhsRegion(kv2, m, u, v, f, v)
 	cuda.Madd2(ku2, v0, kv1, 1, (1./2.)*dt)
 
 	//Stage 3:
@@ -266,7 +269,7 @@ func (_ *elasRK4) StepRegion(region *SolverRegion) {
 	cuda.Madd2(u, u0, ku2, 1, (1./2.)*dt)
 	cuda.Madd2(v, v0, kv2, 1, (1./2.)*dt)
 	//calcBndry()
-	calcRhsRegion(kv3, u, v, f, v)
+	calcRhsRegion(kv3, m, u, v, f, v)
 	cuda.Madd2(ku3, v0, kv2, 1, (1./2.)*dt)
 
 	//Stage 4:
@@ -275,7 +278,7 @@ func (_ *elasRK4) StepRegion(region *SolverRegion) {
 	cuda.Madd2(u, u0, ku3, 1, 1.*dt)
 	cuda.Madd2(v, v0, kv3, 1, 1.*dt)
 	//calcBndry()
-	calcRhsRegion(kv4, u, v, f, v)
+	calcRhsRegion(kv4, m, u, v, f, v)
 	cuda.Madd2(ku4, v0, kv3, 1, 1.*dt)
 
 	//###############################
