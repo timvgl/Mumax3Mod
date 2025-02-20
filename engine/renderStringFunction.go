@@ -4,13 +4,11 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
-	"strings"
 	"sync"
 	"time"
 
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/data"
-	"github.com/mumax/3/goptuna"
 	"github.com/mumax/3/govaluate"
 )
 
@@ -880,19 +878,19 @@ func GenerateSliceFromExpr(xDep, yDep, zDep bool, vars map[string]interface{}, c
 
 }
 
-func GenerateExprFromFunctionString(trial goptuna.Trial, q Quantity, cellsize [3]float64, comp int, functionStr string, variablesStart, variablesEnd map[string]vectorScalar) (*Function, map[string]interface{}, [3]bool, error) {
+func GenerateExprFromFunctionString(functionStr string) (*Function, map[string]interface{}, error) {
 	constants := map[string]interface{}{
 		"pi":  math.Pi,
 		"inf": math.Inf(1),
 	}
 	function, err := NewFunction(functionStr)
 	if err != nil {
-		return nil, nil, [3]bool{false, false, false}, err
+		return nil, nil, err
 	}
 
 	vars, err := InitializeVars(function.required)
 	if err != nil {
-		return nil, nil, [3]bool{false, false, false}, err
+		return nil, nil, err
 	}
 
 	for key, value := range constants {
@@ -901,28 +899,6 @@ func GenerateExprFromFunctionString(trial goptuna.Trial, q Quantity, cellsize [3
 			vars[key] = value
 		}
 	}
-	xDep := false
-	yDep := false
-	zDep := false
 
-	for key := range vars {
-		if key != "x_length" && key != "y_length" && key != "z_length" && key != "x_factor" && key != "y_factor" && key != "z_factor" && key != "t" && math.IsNaN(vars[key].(float64)) {
-			//fmt.Println(key, s.variablesStart[j][key].vector[comp], s.variablesEnd[j][key].vector[comp])
-			value, err := trial.SuggestFloat(fmt.Sprintf("%s_%s_%d", NameOf(q), key, comp), variablesStart[key].vector[comp], variablesEnd[key].vector[comp])
-			if err != nil {
-				return nil, nil, [3]bool{false, false, false}, err
-			}
-			vars[key] = value
-		} else if strings.ToLower(key) == "t" {
-			panic("Time as a variable is not allowed in the function.")
-		} else if key == "x_factor" {
-			xDep = true
-		} else if key == "y_factor" {
-			yDep = true
-		} else if key == "z_factor" {
-			zDep = true
-		}
-	}
-
-	return function, vars, [3]bool{xDep, yDep, zDep}, nil
+	return function, vars, nil
 }

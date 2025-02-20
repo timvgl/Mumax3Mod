@@ -134,14 +134,37 @@ func (s optimize) generateSliceFromExpr(xDep, yDep, zDep bool, vars map[string]i
 }
 
 func (s optimize) generateSliceFromFunction(trial goptuna.Trial, q Quantity, j int, cellsize [3]float64, comp int) (*data.Slice, error) {
-	function, vars, coordDep, err := GenerateExprFromFunctionString(trial, q, cellsize, comp, s.functions[j].functions[comp], s.variablesStart[j], s.variablesEnd[j])
+	function, vars, err := GenerateExprFromFunctionString(s.functions[j].functions[comp])
+
+	xDep := false
+	yDep := false
+	zDep := false
+
+	for key := range vars {
+		if key != "x_length" && key != "y_length" && key != "z_length" && key != "x_factor" && key != "y_factor" && key != "z_factor" && key != "t" && math.IsNaN(vars[key].(float64)) {
+			//fmt.Println(key, s.variablesStart[j][key].vector[comp], s.variablesEnd[j][key].vector[comp])
+			value, err := trial.SuggestFloat(fmt.Sprintf("%s_%s_%d", NameOf(q), key, comp), s.variablesStart[j][key].vector[comp], s.variablesEnd[j][key].vector[comp])
+			if err != nil {
+				return nil, err
+			}
+			vars[key] = value
+		} else if strings.ToLower(key) == "t" {
+			panic("Time as a variable is not allowed in the function.")
+		} else if key == "x_factor" {
+			xDep = true
+		} else if key == "y_factor" {
+			yDep = true
+		} else if key == "z_factor" {
+			zDep = true
+		}
+	}
 
 	if err != nil {
 		panic(fmt.Sprintf("Failed to create function: %v", err))
 	}
 	s.parsedFunctions[j][comp] = function
 
-	vector := s.generateSliceFromExpr(coordDep[0], coordDep[1], coordDep[2], vars, cellsize, j, function)
+	vector := s.generateSliceFromExpr(xDep, yDep, zDep, vars, cellsize, j, function)
 
 	return vector, nil
 }
