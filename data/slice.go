@@ -13,12 +13,20 @@ import (
 	"github.com/mumax/3/util"
 )
 
+var DataSliceSlice = make([]*Slice, 0)
+
 // Slice is like a [][]float32, but may be stored in GPU or host memory.
 type Slice struct {
 	ptrs    []unsafe.Pointer
 	size    [3]int
 	memType int8
 	LengthF int
+	StartX  int
+	EndX    int
+	StartY  int
+	EndY    int
+	StartZ  int
+	EndZ    int
 }
 
 // this package must not depend on CUDA. If CUDA is
@@ -136,6 +144,12 @@ func SliceFromPtrs(size [3]int, memType int8, ptrs []unsafe.Pointer) *Slice {
 	}
 	s.memType = memType
 	s.LengthF = 1
+	s.StartX = 0
+	s.EndX = size[X]
+	s.StartY = 0
+	s.EndY = size[Y]
+	s.StartZ = 0
+	s.EndZ = size[Z]
 	return s
 }
 
@@ -151,7 +165,22 @@ func SliceFromPtrsF(size [3]int, fLength int, memType int8, ptrs []unsafe.Pointe
 	}
 	s.memType = memType
 	s.LengthF = fLength
+	s.StartX = 0
+	s.EndX = size[X]
+	s.StartY = 0
+	s.EndY = size[Y]
+	s.StartZ = 0
+	s.EndZ = size[Z]
 	return s
+}
+
+func (s *Slice) SetSolverRegion(startX, endX, startY, endY, startZ, endZ int) {
+	s.StartX = startX
+	s.StartY = startY
+	s.StartZ = startZ
+	s.EndX = endX
+	s.EndY = endY
+	s.EndZ = endZ
 }
 
 func (s *Slice) Get_lengthF() int {
@@ -167,6 +196,19 @@ func (s *Slice) Free() {
 	if s == nil {
 		return
 	}
+	idx := 0
+	gotValue := false
+	for i, _ := range DataSliceSlice {
+		if DataSliceSlice[i] == s {
+			idx = i
+			gotValue = true
+			break
+		}
+	}
+	if !gotValue {
+		panic("Could not find buffer in buffer list.")
+	}
+	DataSliceSlice = append(DataSliceSlice[:idx], DataSliceSlice[idx+1:]...)
 	// free storage
 	switch s.memType {
 	case 0:
@@ -244,6 +286,13 @@ func (s *Slice) Comp(i int) *Slice {
 	sl.ptrs[0] = s.ptrs[i]
 	sl.size = s.size
 	sl.memType = s.memType
+	size := s.Size()
+	s.StartX = 0
+	s.EndX = size[X]
+	s.StartY = 0
+	s.EndY = size[Y]
+	s.StartZ = 0
+	s.EndZ = size[Z]
 	return sl
 }
 
@@ -254,6 +303,10 @@ func (s *Slice) Ptrs() []unsafe.Pointer {
 	return ptrs
 }
 
+func (s *Slice) RegionSize() [3]int {
+	return [3]int{s.EndX - s.StartX, s.EndY - s.StartY, s.EndZ - s.StartZ}
+}
+
 // Subslice returns a subslice with components ranging from
 // minComp to maxComp (exclusive)
 func (s *Slice) SubSlice(minComp, maxComp int) *Slice {
@@ -261,6 +314,13 @@ func (s *Slice) SubSlice(minComp, maxComp int) *Slice {
 	sl.ptrs = s.ptrs[minComp:maxComp]
 	sl.size = s.size
 	sl.memType = s.memType
+	size := s.size
+	s.StartX = 0
+	s.EndX = size[X]
+	s.StartY = 0
+	s.EndY = size[Y]
+	s.StartZ = 0
+	s.EndZ = size[Z]
 	return sl
 }
 

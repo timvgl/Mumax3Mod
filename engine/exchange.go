@@ -66,6 +66,29 @@ func AddExchangeField(dst *data.Slice) {
 	}
 }
 
+func AddExchangeFieldRegion(dst *data.Slice) {
+	inter := !Dind.isZero()
+	bulk := !Dbulk.isZero()
+	ms := Msat.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+	defer ms.Recycle()
+	m := cuda.Buffer(M.NComp(), dst.RegionSize())
+	defer cuda.Recycle(m)
+	cuda.Crop(m, M.Buffer(), dst.StartX, dst.StartY, dst.StartZ)
+	mesh := Crop(&M.varVectorField, dst.StartX, dst.EndX, dst.StartY, dst.EndY, dst.StartZ, dst.EndZ).Mesh()
+	switch {
+	case !inter && !bulk:
+		cuda.AddExchange(dst, m, lex2.Gpu(), ms, regions.Gpu(), mesh)
+	case inter && !bulk:
+		Refer("mulkers2017")
+		cuda.AddDMI(dst, m, lex2.Gpu(), din2.Gpu(), ms, regions.Gpu(), mesh, OpenBC) // dmi+exchange
+	case bulk && !inter:
+		cuda.AddDMIBulk(dst, m, lex2.Gpu(), dbulk2.Gpu(), ms, regions.Gpu(), mesh, OpenBC) // dmi+exchange
+		// TODO: add ScaleInterDbulk and InterDbulk
+	case inter && bulk:
+		util.Fatal("Cannot have interfacial-induced DMI and bulk DMI at the same time")
+	}
+}
+
 // Set dst to the average exchange coupling per cell (average of lex2 with all neighbors).
 func exchangeDecode(dst *data.Slice) {
 	cuda.ExchangeDecode(dst, lex2.Gpu(), regions.Gpu(), M.Mesh())

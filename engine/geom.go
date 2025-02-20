@@ -13,7 +13,7 @@ var limitElasticToGeometry = false
 func init() {
 	DeclFunc("SetGeom", SetGeom, "Sets the Geometry to a given shape")
 	DeclVar("EdgeSmooth", &edgeSmooth, "Geometry edge smoothing with edgeSmooth^3 samples per cell, 0=staircase, ~8=very smooth")
-	DeclVar("limitElasticToGeometry", &limitElasticToGeometry, "")
+	//DeclVar("limitElasticToGeometry", &limitElasticToGeometry, "")
 	Geometry.init()
 }
 

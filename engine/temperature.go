@@ -56,6 +56,16 @@ func (b *thermField) AddTo(dst *data.Slice) {
 	}
 }
 
+func (b *thermField) AddToRegion(dst *data.Slice) {
+	if !Temp.isZero() {
+		b.update()
+		noiseRed := cuda.Buffer(dst.NComp(), dst.RegionSize())
+		cuda.Crop(noiseRed, b.noise, dst.StartX, dst.StartY, dst.StartZ)
+		cuda.Add(dst, dst, noiseRed)
+		cuda.Recycle(noiseRed)
+	}
+}
+
 func (b *thermForce) AddTo(dst *data.Slice) {
 	if !Temp.isZero() {
 		b.update()
@@ -249,6 +259,15 @@ func (b *thermForce) Name() string           { return "Thermal force" }
 func (b *thermForce) Unit() string           { return "N/m3" }
 func (b *thermForce) average() []float64     { return qAverageUniverse(b) }
 func (b *thermForce) EvalTo(dst *data.Slice) { EvalTo(b, dst) }
+func (b *thermForce) AddToRegion(dst *data.Slice) {
+	if !Temp.isZero() {
+		b.update()
+		noiseRed := cuda.Buffer(dst.NComp(), dst.RegionSize())
+		cuda.Crop(noiseRed, b.noise, dst.StartX, dst.StartY, dst.StartZ)
+		cuda.Add(dst, dst, noiseRed)
+		cuda.Recycle(noiseRed)
+	}
+}
 func (b *thermForce) Slice() (*data.Slice, bool) {
 	b.update()
 	return b.noise, false

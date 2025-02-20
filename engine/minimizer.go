@@ -54,6 +54,10 @@ type Minimizer struct {
 	h      float32
 }
 
+func (mini *Minimizer) StepRegion(region SolverRegion) {
+	panic("Step regionwise for minimize not supported")
+}
+
 func (mini *Minimizer) Step() {
 	m := M.Buffer()
 	size := m.Size()

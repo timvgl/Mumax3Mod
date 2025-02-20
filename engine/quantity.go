@@ -110,6 +110,14 @@ func ValueOf(q Quantity) *data.Slice {
 	}
 }
 
+func ValueOfRegion(q Quantity, dst *data.Slice, StartX, StartY, StartZ int) {
+	// TODO: check for Buffered() implementation
+	buf := cuda.Buffer(q.NComp(), SizeOf(q))
+	defer cuda.Recycle(buf)
+	q.EvalTo(buf)
+	cuda.Crop(dst, buf, StartX, StartY, StartZ)
+}
+
 func AxisOf(q Quantity) ([3]int, [3]float64, [3]float64, []string) {
 	if s, ok := q.(interface {
 		Axis() ([3]int, [3]float64, [3]float64, []string)

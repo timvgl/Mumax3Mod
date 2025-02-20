@@ -61,8 +61,9 @@ func Buffer(nComp int, size [3]int) *data.Slice {
 		ptrs[i] = MemAlloc(int64(cu.SIZEOF_FLOAT32 * N))
 		buf_check[ptrs[i]] = struct{}{} // mark this pointer as ours
 	}
-
-	return data.SliceFromPtrs(size, data.GPUMemory, ptrs)
+	slc := data.SliceFromPtrs(size, data.GPUMemory, ptrs)
+	data.DataSliceSlice = append(data.DataSliceSlice, slc)
+	return slc
 }
 
 func BufferFFT_T(nComp int, size [3]int, key string) *data.Slice {
@@ -134,6 +135,19 @@ func Recycle(s *data.Slice) {
 	if Synchronous {
 		Sync()
 	}
+	idx := 0
+	gotValue := false
+	for i, _ := range data.DataSliceSlice {
+		if data.DataSliceSlice[i] == s {
+			idx = i
+			gotValue = true
+			break
+		}
+	}
+	if !gotValue {
+		panic("Could not find buffer in buffer list.")
+	}
+	data.DataSliceSlice = append(data.DataSliceSlice[:idx], data.DataSliceSlice[idx+1:]...)
 
 	N := s.Len()
 	var pool []unsafe.Pointer
