@@ -129,93 +129,19 @@ func (d dummyQuantity) Free() {
 	cuda.Recycle(d.storage)
 }
 
-func (s optimize) generate_array_from_function(xDep, yDep, zDep bool, vars map[string]interface{}, cellsize [3]float64, j int, function *Function) *data.Slice {
-	size := [3]int{s.areaEnd[j][X] - s.areaStart[j][X], s.areaEnd[j][Y] - s.areaStart[j][Y], s.areaEnd[j][Z] - s.areaStart[j][Z]}
-	if zDep {
-		vars["z_length"] = size[Z]
-		vars["z_factor"] = cellsize[Z]
-	}
-	if yDep {
-		vars["y_length"] = size[Y]
-		vars["y_factor"] = cellsize[Y]
-	}
-	if xDep {
-		vars["x_length"] = size[X]
-		vars["x_factor"] = cellsize[X]
-	}
-	result, err := function.Call(vars)
-	if err != nil {
-		panic(fmt.Sprintf("Failed to call function: %v", err))
-	}
-	resultDataSlice, ok1 := result.(*data.Slice)
-	resultFloat, ok2 := result.(float64)
-	if ok1 {
-		if resultDataSlice.Size() != size {
-			buf := cuda.Buffer(resultDataSlice.NComp(), size)
-			cuda.Zero(buf)
-			cuda.AddGovaluate3X3(buf, buf, resultDataSlice)
-			cuda.Recycle(resultDataSlice)
-			return buf
-		} else {
-			return resultDataSlice
-		}
-	}
-	if ok2 {
-		buf := cuda.Buffer(1, size)
-		cuda.Zero(buf)
-		cuda.AddGovaluate3X1(buf, buf, float32(resultFloat))
-		return buf
-	} else {
-		panic("Function does not return a data.Slice or float64")
-	}
-
+func (s optimize) generateSliceFromExpr(xDep, yDep, zDep bool, vars map[string]interface{}, cellsize [3]float64, j int, function *Function) *data.Slice {
+	return GenerateSliceFromExpr(xDep, yDep, zDep, vars, cellsize, function, s.areaStart[j], s.areaEnd[j])
 }
 
-func (s optimize) generate_vector_from_string(trial goptuna.Trial, q Quantity, j int, cellsize [3]float64, comp int) (*data.Slice, error) {
-	constants := map[string]interface{}{
-		"pi":  math.Pi,
-		"inf": math.Inf(1),
-	}
-	function, err := NewFunction(s.functions[j].functions[comp])
+func (s optimize) generateSliceFromFunction(trial goptuna.Trial, q Quantity, j int, cellsize [3]float64, comp int) (*data.Slice, error) {
+	function, vars, coordDep, err := GenerateExprFromFunctionString(trial, q, cellsize, comp, s.functions[j].functions[comp], s.variablesStart[j], s.variablesEnd[j])
+
 	if err != nil {
 		panic(fmt.Sprintf("Failed to create function: %v", err))
 	}
 	s.parsedFunctions[j][comp] = function
 
-	vars, err := InitializeVars(function.required)
-	if err != nil {
-		return nil, err
-	}
-
-	for key, value := range constants {
-		_, ok := vars[key]
-		if ok {
-			vars[key] = value
-		}
-	}
-	xDep := false
-	yDep := false
-	zDep := false
-
-	for key := range vars {
-		if key != "x_length" && key != "y_length" && key != "z_length" && key != "x_factor" && key != "y_factor" && key != "z_factor" && key != "t" && math.IsNaN(vars[key].(float64)) {
-			//fmt.Println(key, s.variablesStart[j][key].vector[comp], s.variablesEnd[j][key].vector[comp])
-			value, err := trial.SuggestFloat(fmt.Sprintf("%s_%s_%d", NameOf(q), key, comp), s.variablesStart[j][key].vector[comp], s.variablesEnd[j][key].vector[comp])
-			if err != nil {
-				return nil, err
-			}
-			vars[key] = value
-		} else if strings.ToLower(key) == "t" {
-			panic("Time as a variable is not allowed in the function.")
-		} else if key == "x_factor" {
-			xDep = true
-		} else if key == "y_factor" {
-			yDep = true
-		} else if key == "z_factor" {
-			zDep = true
-		}
-	}
-	vector := s.generate_array_from_function(xDep, yDep, zDep, vars, cellsize, j, function)
+	vector := s.generateSliceFromExpr(coordDep[0], coordDep[1], coordDep[2], vars, cellsize, j, function)
 
 	return vector, nil
 }
@@ -228,16 +154,16 @@ func (s optimize) generate_vector_suggest_function(trial goptuna.Trial, q Quanti
 	)
 	cellsize := MeshOf(q).CellSize()
 	var err error
-	vector0, err = s.generate_vector_from_string(trial, q, j, cellsize, 0)
+	vector0, err = s.generateSliceFromFunction(trial, q, j, cellsize, 0)
 	if err != nil {
 		return nil, nil, nil, err
 	}
 	if !s.functions[j].useScalar {
-		vector1, err = s.generate_vector_from_string(trial, q, j, cellsize, 1)
+		vector1, err = s.generateSliceFromFunction(trial, q, j, cellsize, 1)
 		if err != nil {
 			return nil, nil, nil, err
 		}
-		vector2, err = s.generate_vector_from_string(trial, q, j, cellsize, 2)
+		vector2, err = s.generateSliceFromFunction(trial, q, j, cellsize, 2)
 		if err != nil {
 			return nil, nil, nil, err
 		}
@@ -498,7 +424,7 @@ func OptimizeQuantity(output Quantity, target dummyQuantity, variables []Quantit
 					zDep = true
 				}
 			}
-			varData[c] = optim.generate_array_from_function(xDep, yDep, zDep, vars, cellsize, k, optim.parsedFunctions[k][c])
+			varData[c] = optim.generateSliceFromExpr(xDep, yDep, zDep, vars, cellsize, k, optim.parsedFunctions[k][c])
 		}
 		bufGPU := data.SliceFromSlices(varData, size)
 		defer cuda.Recycle(bufGPU)

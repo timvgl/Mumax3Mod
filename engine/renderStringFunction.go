@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/data"
+	"github.com/mumax/3/goptuna"
 	"github.com/mumax/3/govaluate"
 )
 
@@ -834,4 +836,93 @@ func InitializeVars(varNames []string) (map[string]interface{}, error) {
 		varsMap[name] = math.NaN()
 	}
 	return varsMap, nil
+}
+
+func GenerateSliceFromExpr(xDep, yDep, zDep bool, vars map[string]interface{}, cellsize [3]float64, function *Function, areaStart, areaEnd [3]int) *data.Slice {
+	size := [3]int{areaEnd[X] - areaStart[X], areaEnd[Y] - areaStart[Y], areaEnd[Z] - areaStart[Z]}
+	if zDep {
+		vars["z_length"] = size[Z]
+		vars["z_factor"] = cellsize[Z]
+	}
+	if yDep {
+		vars["y_length"] = size[Y]
+		vars["y_factor"] = cellsize[Y]
+	}
+	if xDep {
+		vars["x_length"] = size[X]
+		vars["x_factor"] = cellsize[X]
+	}
+	result, err := function.Call(vars)
+	if err != nil {
+		panic(fmt.Sprintf("Failed to call function: %v", err))
+	}
+	resultDataSlice, ok1 := result.(*data.Slice)
+	resultFloat, ok2 := result.(float64)
+	if ok1 {
+		if resultDataSlice.Size() != size {
+			buf := cuda.Buffer(resultDataSlice.NComp(), size)
+			cuda.Zero(buf)
+			cuda.AddGovaluate3X3(buf, buf, resultDataSlice)
+			cuda.Recycle(resultDataSlice)
+			return buf
+		} else {
+			return resultDataSlice
+		}
+	}
+	if ok2 {
+		buf := cuda.Buffer(1, size)
+		cuda.Zero(buf)
+		cuda.AddGovaluate3X1(buf, buf, float32(resultFloat))
+		return buf
+	} else {
+		panic("Function does not return a data.Slice or float64")
+	}
+
+}
+
+func GenerateExprFromFunctionString(trial goptuna.Trial, q Quantity, cellsize [3]float64, comp int, functionStr string, variablesStart, variablesEnd map[string]vectorScalar) (*Function, map[string]interface{}, [3]bool, error) {
+	constants := map[string]interface{}{
+		"pi":  math.Pi,
+		"inf": math.Inf(1),
+	}
+	function, err := NewFunction(functionStr)
+	if err != nil {
+		return nil, nil, [3]bool{false, false, false}, err
+	}
+
+	vars, err := InitializeVars(function.required)
+	if err != nil {
+		return nil, nil, [3]bool{false, false, false}, err
+	}
+
+	for key, value := range constants {
+		_, ok := vars[key]
+		if ok {
+			vars[key] = value
+		}
+	}
+	xDep := false
+	yDep := false
+	zDep := false
+
+	for key := range vars {
+		if key != "x_length" && key != "y_length" && key != "z_length" && key != "x_factor" && key != "y_factor" && key != "z_factor" && key != "t" && math.IsNaN(vars[key].(float64)) {
+			//fmt.Println(key, s.variablesStart[j][key].vector[comp], s.variablesEnd[j][key].vector[comp])
+			value, err := trial.SuggestFloat(fmt.Sprintf("%s_%s_%d", NameOf(q), key, comp), variablesStart[key].vector[comp], variablesEnd[key].vector[comp])
+			if err != nil {
+				return nil, nil, [3]bool{false, false, false}, err
+			}
+			vars[key] = value
+		} else if strings.ToLower(key) == "t" {
+			panic("Time as a variable is not allowed in the function.")
+		} else if key == "x_factor" {
+			xDep = true
+		} else if key == "y_factor" {
+			yDep = true
+		} else if key == "z_factor" {
+			zDep = true
+		}
+	}
+
+	return function, vars, [3]bool{xDep, yDep, zDep}, nil
 }

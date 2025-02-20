@@ -63,6 +63,10 @@ func (m *varVectorField) LoadFileMyDir(fname string) {
 	m.SetArray(LoadFileDSliceMyDir(fname))
 }
 
+func (m *varVectorField) RenderString(equation string) {
+
+}
+
 func (m *varVectorField) SetTime(fname string) {
 	var meta data.Meta
 	_, meta = LoadFileMeta(fname)
