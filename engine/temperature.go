@@ -143,6 +143,13 @@ func (b *thermField) update() {
 
 func (b *thermForce) update() {
 
+	// we need to fix the time step here because solver will not yet have done it before the first step.
+	// FixDt as an lvalue that sets Dt_si on change might be cleaner.
+
+	if b.generator == 0 {
+		b.generator = curand.CreateGenerator(curand.PSEUDO_DEFAULT)
+		b.generator.SetSeed(b.seed)
+	}
 	if b.noise == nil {
 		b.noise = cuda.NewSlice(b.NComp(), b.Mesh().Size())
 		// when noise was (re-)allocated it's invalid for sure.
@@ -160,15 +167,9 @@ func (b *thermForce) update() {
 	if !useTempElastic {
 		return
 	}
-	// we need to fix the time step here because solver will not yet have done it before the first step.
-	// FixDt as an lvalue that sets Dt_si on change might be cleaner.
+
 	if FixDt != 0 {
 		Dt_si = FixDt
-	}
-
-	if b.generator == 0 {
-		b.generator = curand.CreateGenerator(curand.PSEUDO_DEFAULT)
-		b.generator.SetSeed(b.seed)
 	}
 
 	// keep constant during time step

@@ -6,10 +6,11 @@ package cuda
 */
 
 import (
-	"github.com/mumax/3/cuda/cu"
-	"github.com/mumax/3/timer"
 	"sync"
 	"unsafe"
+
+	"github.com/mumax/3/cuda/cu"
+	"github.com/mumax/3/timer"
 )
 
 // CUDA handle for normalize kernel
@@ -69,7 +70,6 @@ func k_normalize_async(vx unsafe.Pointer, vy unsafe.Pointer, vz unsafe.Pointer, 
 
 // maps compute capability on PTX code for normalize kernel.
 var normalize_map = map[int]string{0: "",
-	50: normalize_ptx_50,
 	52: normalize_ptx_52,
 	53: normalize_ptx_53,
 	60: normalize_ptx_60,

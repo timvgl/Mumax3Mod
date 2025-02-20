@@ -32,6 +32,15 @@ func init() {
 	DeclFunc("SetMesh", SetMesh, `Sets GridSize, CellSize and PBC at the same time`)
 	DeclFunc("SetPBC", SetPBC, "Sets the number of repetitions in X,Y,Z to create periodic boundary "+
 		"conditions. The number of repetitions determines the cutoff range for the demagnetization.")
+	DeclVar("Nx", &Nx, "")
+	DeclVar("Ny", &Ny, "")
+	DeclVar("Nz", &Nz, "")
+	DeclVar("Tx", &Tx, "")
+	DeclVar("Ty", &Ty, "")
+	DeclVar("Tz", &Tz, "")
+	DeclVar("Dx", &Dx, "")
+	DeclVar("Dy", &Dy, "")
+	DeclVar("Dz", &Dz, "")
 }
 
 func Mesh() *data.Mesh {
@@ -175,9 +184,36 @@ func SetPBC(nx, ny, nz int) {
 	}
 }
 
+func generateNDT(N int, D, T float64) (int, float64, float64) {
+	if N != 0 && D != 0 && T == 0 {
+		T = float64(N) * D
+	} else if N != 0 && D == 0 && T != 0 {
+		D = T / float64(N)
+	} else if N == 0 && D != 0 && T != 0 {
+		N = int(T / D)
+	}
+	return N, D, T
+}
+
 // check if mesh is set
 func checkMesh() {
 	if globalmesh_.Size() == [3]int{0, 0, 0} {
-		panic("need to set mesh first")
+		if Nx != 0 && Dx != 0 || Nx != 0 && Tx != 0 || Dx != 0 && Tx != 0 {
+			Nx, Dx, Tx = generateNDT(Nx, Dx, Tx)
+		} else {
+			panic("need to set mesh first")
+		}
+		if Ny != 0 && Dy != 0 || Ny != 0 && Ty != 0 || Dy != 0 && Ty != 0 {
+			Ny, Dy, Ty = generateNDT(Ny, Dy, Ty)
+		} else {
+			panic("need to set mesh first")
+		}
+		if Nz != 0 && Dz != 0 || Nz != 0 && Tz != 0 || Dz != 0 && Tz != 0 {
+			Nz, Dz, Tz = generateNDT(Nz, Dz, Tz)
+		} else {
+			panic("need to set mesh first")
+		}
+		SetMesh(Nx, Ny, Nz, Dx, Dy, Dz, PBCx, PBCy, PBCz)
+		//panic("need to set mesh first")
 	}
 }

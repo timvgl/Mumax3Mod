@@ -75,24 +75,24 @@ func CropRegion(parent Quantity, region int) *cropped {
 	return Crop(parent, x1, x2+1, y1, y2+1, z1, z2+1)
 }
 
-func CropLayerOperator(layer int) func(parent Quantity) *cropped {
-	return func(parent Quantity) *cropped { return CropLayer(parent, layer) }
+func CropLayerOperator(layer int) func(parent Quantity) Quantity {
+	return func(parent Quantity) Quantity { return CropLayer(parent, layer) }
 }
 
-func CropXOperator(x1, x2 int) func(parent Quantity) *cropped {
-	return func(parent Quantity) *cropped { return CropX(parent, x1, x2) }
+func CropXOperator(x1, x2 int) func(parent Quantity) Quantity {
+	return func(parent Quantity) Quantity { return CropX(parent, x1, x2) }
 }
 
-func CropYOperator(y1, y2 int) func(parent Quantity) *cropped {
-	return func(parent Quantity) *cropped { return CropY(parent, y1, y2) }
+func CropYOperator(y1, y2 int) func(parent Quantity) Quantity {
+	return func(parent Quantity) Quantity { return CropY(parent, y1, y2) }
 }
 
-func CropZOperator(z1, z2 int) func(parent Quantity) *cropped {
-	return func(parent Quantity) *cropped { return CropZ(parent, z1, z2) }
+func CropZOperator(z1, z2 int) func(parent Quantity) Quantity {
+	return func(parent Quantity) Quantity { return CropZ(parent, z1, z2) }
 }
 
-func CropOperator(x1, x2, y1, y2, z1, z2 int) func(parent Quantity) *cropped {
-	return func(parent Quantity) *cropped { return Crop(parent, x1, x2, y1, y2, z1, z2) }
+func CropOperator(x1, x2, y1, y2, z1, z2 int) func(parent Quantity) Quantity {
+	return func(parent Quantity) Quantity { return Crop(parent, x1, x2, y1, y2, z1, z2) }
 }
 
 func CropLayer(parent Quantity, layer int) *cropped {
@@ -139,9 +139,9 @@ func Crop(parent Quantity, x1, x2, y1, y2, z1, z2 int) *cropped {
 
 func rangeStr(a, b int) string {
 	if a+1 == b {
-		return fmt.Sprint(a, "_")
+		return fmt.Sprint(a)
 	} else {
-		return fmt.Sprint(a, "-", b, "_")
+		return fmt.Sprint(a, "-", b)
 	}
 	// (trailing underscore to separate from subsequent autosave number)
 }
@@ -162,7 +162,52 @@ func (q *cropped) Average() []float64 { return q.average() }         // handy fo
 func (q *cropped) Slice() (*data.Slice, bool) {
 	src := ValueOf(q.parent)
 	defer cuda.Recycle(src)
-	dst := cuda.Buffer(q.NComp(), q.Mesh().Size())
-	cuda.Crop(dst, src, q.x1, q.y1, q.z1)
+	var dst *data.Slice
+	if IsFFT3D(q.parent) {
+		size := q.Mesh().Size()
+		size[0] *= 2
+		dst = cuda.Buffer(q.NComp(), size)
+		cuda.Crop(dst, src, 2*q.x1, q.y1, q.z1)
+	} else {
+		dst = cuda.Buffer(q.NComp(), q.Mesh().Size())
+		cuda.Crop(dst, src, q.x1, q.y1, q.z1)
+	}
 	return dst, true
+}
+
+func (q *cropped) AxisFFT() (newSize [3]int, newStartK, newEndK [3]float64, newTransformedAxis []string) {
+	parent := q.parent
+	if s, ok := parent.(interface {
+		AxisFFT() ([3]int, [3]float64, [3]float64, []string)
+	}); ok {
+		parentSize, parentStartK, parentEndK, parentTransformedAxis := s.AxisFFT()
+		newSize = q.Mesh().Size()
+		newStartK[X] = parentStartK[X] + float64(q.x1)*MeshOf(parent).CellSize()[X]
+		newStartK[Y] = parentStartK[Y] + float64(q.y1)*MeshOf(parent).CellSize()[Y]
+		newStartK[Z] = parentStartK[Z] + float64(q.z1)*MeshOf(parent).CellSize()[Z]
+		newEndK[X] = parentEndK[X] - float64(parentSize[X]-q.x2)*MeshOf(parent).CellSize()[X]
+		newEndK[Y] = parentEndK[Y] - float64(parentSize[Y]-q.y2)*MeshOf(parent).CellSize()[Y]
+		newEndK[Z] = parentEndK[Z] - float64(parentSize[Z]-q.z2)*MeshOf(parent).CellSize()[Z]
+		newTransformedAxis = parentTransformedAxis
+		return newSize, newStartK, newEndK, newTransformedAxis
+	} else if s, ok := parent.(interface {
+		Axis() ([3]int, [3]float64, [3]float64, []string)
+	}); ok {
+		if l, ok2 := s.(*fftOperation3D); ok2 {
+			parentSize, parentStartK, parentEndK, parentTransformedAxis := l.Axis()
+			newSize = q.Mesh().Size()
+			newStartK[X] = parentStartK[X] + float64(q.x1)*MeshOf(parent).CellSize()[X]
+			newStartK[Y] = parentStartK[Y] + float64(q.y1)*MeshOf(parent).CellSize()[Y]
+			newStartK[Z] = parentStartK[Z] + float64(q.z1)*MeshOf(parent).CellSize()[Z]
+			newEndK[X] = parentEndK[X] - float64(parentSize[X]-q.x2)*MeshOf(parent).CellSize()[X]
+			newEndK[Y] = parentEndK[Y] - float64(parentSize[Y]-q.y2)*MeshOf(parent).CellSize()[Y]
+			newEndK[Z] = parentEndK[Z] - float64(parentSize[Z]-q.z2)*MeshOf(parent).CellSize()[Z]
+			newTransformedAxis = parentTransformedAxis
+			return newSize, newStartK, newEndK, newTransformedAxis
+		} else {
+			panic("Axis functions not found for " + NameOf(parent))
+		}
+	} else {
+		panic("Axis functions not found for " + NameOf(parent))
+	}
 }

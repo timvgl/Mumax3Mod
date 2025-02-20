@@ -6,10 +6,11 @@ package cuda
 */
 
 import (
-	"github.com/mumax/3/cuda/cu"
-	"github.com/mumax/3/timer"
 	"sync"
 	"unsafe"
+
+	"github.com/mumax/3/cuda/cu"
+	"github.com/mumax/3/timer"
 )
 
 // CUDA handle for expand kernel
@@ -114,6 +115,7 @@ var expand_map = map[int]string{0: "",
 const (
 	expand_ptx_50 = `
 .version 8.4
+.version 8.4
 .target sm_50
 .address_size 64
 
@@ -138,12 +140,15 @@ const (
 )
 {
 	.reg .pred 	%p<39>;
+	.reg .pred 	%p<39>;
 	.reg .f32 	%f<3>;
 	.reg .b32 	%r<84>;
 	.reg .b64 	%rd<9>;
 
 
 	ld.param.u64 	%rd2, [expand_param_0];
+	ld.param.u32 	%r13, [expand_param_1];
+	ld.param.u32 	%r14, [expand_param_2];
 	ld.param.u32 	%r13, [expand_param_1];
 	ld.param.u32 	%r14, [expand_param_2];
 	ld.param.u32 	%r15, [expand_param_3];
@@ -175,6 +180,7 @@ const (
 	or.pred  	%p3, %p1, %p2;
 	setp.ge.s32 	%p4, %r3, %r15;
 	or.pred  	%p5, %p3, %p4;
+	@%p5 bra 	$L__BB0_13;
 	@%p5 bra 	$L__BB0_13;
 
 	shr.u32 	%r35, %r16, 31;
@@ -284,6 +290,8 @@ $L__BB0_10:
 	add.s64 	%rd1, %rd4, %rd5;
 	@%p38 bra 	$L__BB0_12;
 	bra.uni 	$L__BB0_11;
+	@%p38 bra 	$L__BB0_12;
+	bra.uni 	$L__BB0_11;
 
 $L__BB0_12:
 	mad.lo.s32 	%r79, %r12, %r17, %r11;
@@ -294,10 +302,13 @@ $L__BB0_12:
 	ld.global.nc.f32 	%f2, [%rd8];
 	st.global.f32 	[%rd1], %f2;
 	bra.uni 	$L__BB0_13;
+	bra.uni 	$L__BB0_13;
 
+$L__BB0_11:
 $L__BB0_11:
 	st.global.f32 	[%rd1], %f1;
 
+$L__BB0_13:
 $L__BB0_13:
 	ret;
 
@@ -305,6 +316,7 @@ $L__BB0_13:
 
 `
 	expand_ptx_52 = `
+.version 8.4
 .version 8.4
 .target sm_52
 .address_size 64
@@ -330,12 +342,15 @@ $L__BB0_13:
 )
 {
 	.reg .pred 	%p<39>;
+	.reg .pred 	%p<39>;
 	.reg .f32 	%f<3>;
 	.reg .b32 	%r<84>;
 	.reg .b64 	%rd<9>;
 
 
 	ld.param.u64 	%rd2, [expand_param_0];
+	ld.param.u32 	%r13, [expand_param_1];
+	ld.param.u32 	%r14, [expand_param_2];
 	ld.param.u32 	%r13, [expand_param_1];
 	ld.param.u32 	%r14, [expand_param_2];
 	ld.param.u32 	%r15, [expand_param_3];
@@ -367,6 +382,7 @@ $L__BB0_13:
 	or.pred  	%p3, %p1, %p2;
 	setp.ge.s32 	%p4, %r3, %r15;
 	or.pred  	%p5, %p3, %p4;
+	@%p5 bra 	$L__BB0_13;
 	@%p5 bra 	$L__BB0_13;
 
 	shr.u32 	%r35, %r16, 31;
@@ -476,6 +492,8 @@ $L__BB0_10:
 	add.s64 	%rd1, %rd4, %rd5;
 	@%p38 bra 	$L__BB0_12;
 	bra.uni 	$L__BB0_11;
+	@%p38 bra 	$L__BB0_12;
+	bra.uni 	$L__BB0_11;
 
 $L__BB0_12:
 	mad.lo.s32 	%r79, %r12, %r17, %r11;
@@ -486,10 +504,13 @@ $L__BB0_12:
 	ld.global.nc.f32 	%f2, [%rd8];
 	st.global.f32 	[%rd1], %f2;
 	bra.uni 	$L__BB0_13;
+	bra.uni 	$L__BB0_13;
 
+$L__BB0_11:
 $L__BB0_11:
 	st.global.f32 	[%rd1], %f1;
 
+$L__BB0_13:
 $L__BB0_13:
 	ret;
 
@@ -497,6 +518,7 @@ $L__BB0_13:
 
 `
 	expand_ptx_53 = `
+.version 8.4
 .version 8.4
 .target sm_53
 .address_size 64
@@ -522,12 +544,15 @@ $L__BB0_13:
 )
 {
 	.reg .pred 	%p<39>;
+	.reg .pred 	%p<39>;
 	.reg .f32 	%f<3>;
 	.reg .b32 	%r<84>;
 	.reg .b64 	%rd<9>;
 
 
 	ld.param.u64 	%rd2, [expand_param_0];
+	ld.param.u32 	%r13, [expand_param_1];
+	ld.param.u32 	%r14, [expand_param_2];
 	ld.param.u32 	%r13, [expand_param_1];
 	ld.param.u32 	%r14, [expand_param_2];
 	ld.param.u32 	%r15, [expand_param_3];
@@ -559,6 +584,7 @@ $L__BB0_13:
 	or.pred  	%p3, %p1, %p2;
 	setp.ge.s32 	%p4, %r3, %r15;
 	or.pred  	%p5, %p3, %p4;
+	@%p5 bra 	$L__BB0_13;
 	@%p5 bra 	$L__BB0_13;
 
 	shr.u32 	%r35, %r16, 31;
@@ -668,6 +694,8 @@ $L__BB0_10:
 	add.s64 	%rd1, %rd4, %rd5;
 	@%p38 bra 	$L__BB0_12;
 	bra.uni 	$L__BB0_11;
+	@%p38 bra 	$L__BB0_12;
+	bra.uni 	$L__BB0_11;
 
 $L__BB0_12:
 	mad.lo.s32 	%r79, %r12, %r17, %r11;
@@ -678,10 +706,13 @@ $L__BB0_12:
 	ld.global.nc.f32 	%f2, [%rd8];
 	st.global.f32 	[%rd1], %f2;
 	bra.uni 	$L__BB0_13;
+	bra.uni 	$L__BB0_13;
 
+$L__BB0_11:
 $L__BB0_11:
 	st.global.f32 	[%rd1], %f1;
 
+$L__BB0_13:
 $L__BB0_13:
 	ret;
 
@@ -689,6 +720,7 @@ $L__BB0_13:
 
 `
 	expand_ptx_60 = `
+.version 8.4
 .version 8.4
 .target sm_60
 .address_size 64
@@ -714,12 +746,15 @@ $L__BB0_13:
 )
 {
 	.reg .pred 	%p<39>;
+	.reg .pred 	%p<39>;
 	.reg .f32 	%f<3>;
 	.reg .b32 	%r<84>;
 	.reg .b64 	%rd<9>;
 
 
 	ld.param.u64 	%rd2, [expand_param_0];
+	ld.param.u32 	%r13, [expand_param_1];
+	ld.param.u32 	%r14, [expand_param_2];
 	ld.param.u32 	%r13, [expand_param_1];
 	ld.param.u32 	%r14, [expand_param_2];
 	ld.param.u32 	%r15, [expand_param_3];
@@ -751,6 +786,7 @@ $L__BB0_13:
 	or.pred  	%p3, %p1, %p2;
 	setp.ge.s32 	%p4, %r3, %r15;
 	or.pred  	%p5, %p3, %p4;
+	@%p5 bra 	$L__BB0_13;
 	@%p5 bra 	$L__BB0_13;
 
 	shr.u32 	%r35, %r16, 31;
@@ -860,6 +896,8 @@ $L__BB0_10:
 	add.s64 	%rd1, %rd4, %rd5;
 	@%p38 bra 	$L__BB0_12;
 	bra.uni 	$L__BB0_11;
+	@%p38 bra 	$L__BB0_12;
+	bra.uni 	$L__BB0_11;
 
 $L__BB0_12:
 	mad.lo.s32 	%r79, %r12, %r17, %r11;
@@ -870,10 +908,13 @@ $L__BB0_12:
 	ld.global.nc.f32 	%f2, [%rd8];
 	st.global.f32 	[%rd1], %f2;
 	bra.uni 	$L__BB0_13;
+	bra.uni 	$L__BB0_13;
 
+$L__BB0_11:
 $L__BB0_11:
 	st.global.f32 	[%rd1], %f1;
 
+$L__BB0_13:
 $L__BB0_13:
 	ret;
 
@@ -881,6 +922,7 @@ $L__BB0_13:
 
 `
 	expand_ptx_61 = `
+.version 8.4
 .version 8.4
 .target sm_61
 .address_size 64
@@ -906,12 +948,15 @@ $L__BB0_13:
 )
 {
 	.reg .pred 	%p<39>;
+	.reg .pred 	%p<39>;
 	.reg .f32 	%f<3>;
 	.reg .b32 	%r<84>;
 	.reg .b64 	%rd<9>;
 
 
 	ld.param.u64 	%rd2, [expand_param_0];
+	ld.param.u32 	%r13, [expand_param_1];
+	ld.param.u32 	%r14, [expand_param_2];
 	ld.param.u32 	%r13, [expand_param_1];
 	ld.param.u32 	%r14, [expand_param_2];
 	ld.param.u32 	%r15, [expand_param_3];
@@ -943,6 +988,7 @@ $L__BB0_13:
 	or.pred  	%p3, %p1, %p2;
 	setp.ge.s32 	%p4, %r3, %r15;
 	or.pred  	%p5, %p3, %p4;
+	@%p5 bra 	$L__BB0_13;
 	@%p5 bra 	$L__BB0_13;
 
 	shr.u32 	%r35, %r16, 31;
@@ -1052,6 +1098,8 @@ $L__BB0_10:
 	add.s64 	%rd1, %rd4, %rd5;
 	@%p38 bra 	$L__BB0_12;
 	bra.uni 	$L__BB0_11;
+	@%p38 bra 	$L__BB0_12;
+	bra.uni 	$L__BB0_11;
 
 $L__BB0_12:
 	mad.lo.s32 	%r79, %r12, %r17, %r11;
@@ -1062,10 +1110,13 @@ $L__BB0_12:
 	ld.global.nc.f32 	%f2, [%rd8];
 	st.global.f32 	[%rd1], %f2;
 	bra.uni 	$L__BB0_13;
+	bra.uni 	$L__BB0_13;
 
+$L__BB0_11:
 $L__BB0_11:
 	st.global.f32 	[%rd1], %f1;
 
+$L__BB0_13:
 $L__BB0_13:
 	ret;
 
@@ -1073,6 +1124,7 @@ $L__BB0_13:
 
 `
 	expand_ptx_62 = `
+.version 8.4
 .version 8.4
 .target sm_62
 .address_size 64
@@ -1098,12 +1150,15 @@ $L__BB0_13:
 )
 {
 	.reg .pred 	%p<39>;
+	.reg .pred 	%p<39>;
 	.reg .f32 	%f<3>;
 	.reg .b32 	%r<84>;
 	.reg .b64 	%rd<9>;
 
 
 	ld.param.u64 	%rd2, [expand_param_0];
+	ld.param.u32 	%r13, [expand_param_1];
+	ld.param.u32 	%r14, [expand_param_2];
 	ld.param.u32 	%r13, [expand_param_1];
 	ld.param.u32 	%r14, [expand_param_2];
 	ld.param.u32 	%r15, [expand_param_3];
@@ -1135,6 +1190,7 @@ $L__BB0_13:
 	or.pred  	%p3, %p1, %p2;
 	setp.ge.s32 	%p4, %r3, %r15;
 	or.pred  	%p5, %p3, %p4;
+	@%p5 bra 	$L__BB0_13;
 	@%p5 bra 	$L__BB0_13;
 
 	shr.u32 	%r35, %r16, 31;
@@ -1244,6 +1300,8 @@ $L__BB0_10:
 	add.s64 	%rd1, %rd4, %rd5;
 	@%p38 bra 	$L__BB0_12;
 	bra.uni 	$L__BB0_11;
+	@%p38 bra 	$L__BB0_12;
+	bra.uni 	$L__BB0_11;
 
 $L__BB0_12:
 	mad.lo.s32 	%r79, %r12, %r17, %r11;
@@ -1254,10 +1312,13 @@ $L__BB0_12:
 	ld.global.nc.f32 	%f2, [%rd8];
 	st.global.f32 	[%rd1], %f2;
 	bra.uni 	$L__BB0_13;
+	bra.uni 	$L__BB0_13;
 
+$L__BB0_11:
 $L__BB0_11:
 	st.global.f32 	[%rd1], %f1;
 
+$L__BB0_13:
 $L__BB0_13:
 	ret;
 
@@ -1265,6 +1326,7 @@ $L__BB0_13:
 
 `
 	expand_ptx_70 = `
+.version 8.4
 .version 8.4
 .target sm_70
 .address_size 64
@@ -1290,12 +1352,15 @@ $L__BB0_13:
 )
 {
 	.reg .pred 	%p<39>;
+	.reg .pred 	%p<39>;
 	.reg .f32 	%f<3>;
 	.reg .b32 	%r<84>;
 	.reg .b64 	%rd<9>;
 
 
 	ld.param.u64 	%rd2, [expand_param_0];
+	ld.param.u32 	%r13, [expand_param_1];
+	ld.param.u32 	%r14, [expand_param_2];
 	ld.param.u32 	%r13, [expand_param_1];
 	ld.param.u32 	%r14, [expand_param_2];
 	ld.param.u32 	%r15, [expand_param_3];
@@ -1327,6 +1392,7 @@ $L__BB0_13:
 	or.pred  	%p3, %p1, %p2;
 	setp.ge.s32 	%p4, %r3, %r15;
 	or.pred  	%p5, %p3, %p4;
+	@%p5 bra 	$L__BB0_13;
 	@%p5 bra 	$L__BB0_13;
 
 	shr.u32 	%r35, %r16, 31;
@@ -1436,6 +1502,8 @@ $L__BB0_10:
 	add.s64 	%rd1, %rd4, %rd5;
 	@%p38 bra 	$L__BB0_12;
 	bra.uni 	$L__BB0_11;
+	@%p38 bra 	$L__BB0_12;
+	bra.uni 	$L__BB0_11;
 
 $L__BB0_12:
 	mad.lo.s32 	%r79, %r12, %r17, %r11;
@@ -1446,10 +1514,13 @@ $L__BB0_12:
 	ld.global.nc.f32 	%f2, [%rd8];
 	st.global.f32 	[%rd1], %f2;
 	bra.uni 	$L__BB0_13;
+	bra.uni 	$L__BB0_13;
 
+$L__BB0_11:
 $L__BB0_11:
 	st.global.f32 	[%rd1], %f1;
 
+$L__BB0_13:
 $L__BB0_13:
 	ret;
 
@@ -1457,6 +1528,7 @@ $L__BB0_13:
 
 `
 	expand_ptx_72 = `
+.version 8.4
 .version 8.4
 .target sm_72
 .address_size 64
@@ -1482,12 +1554,15 @@ $L__BB0_13:
 )
 {
 	.reg .pred 	%p<39>;
+	.reg .pred 	%p<39>;
 	.reg .f32 	%f<3>;
 	.reg .b32 	%r<84>;
 	.reg .b64 	%rd<9>;
 
 
 	ld.param.u64 	%rd2, [expand_param_0];
+	ld.param.u32 	%r13, [expand_param_1];
+	ld.param.u32 	%r14, [expand_param_2];
 	ld.param.u32 	%r13, [expand_param_1];
 	ld.param.u32 	%r14, [expand_param_2];
 	ld.param.u32 	%r15, [expand_param_3];
@@ -1519,6 +1594,7 @@ $L__BB0_13:
 	or.pred  	%p3, %p1, %p2;
 	setp.ge.s32 	%p4, %r3, %r15;
 	or.pred  	%p5, %p3, %p4;
+	@%p5 bra 	$L__BB0_13;
 	@%p5 bra 	$L__BB0_13;
 
 	shr.u32 	%r35, %r16, 31;
@@ -1628,6 +1704,8 @@ $L__BB0_10:
 	add.s64 	%rd1, %rd4, %rd5;
 	@%p38 bra 	$L__BB0_12;
 	bra.uni 	$L__BB0_11;
+	@%p38 bra 	$L__BB0_12;
+	bra.uni 	$L__BB0_11;
 
 $L__BB0_12:
 	mad.lo.s32 	%r79, %r12, %r17, %r11;
@@ -1638,10 +1716,13 @@ $L__BB0_12:
 	ld.global.nc.f32 	%f2, [%rd8];
 	st.global.f32 	[%rd1], %f2;
 	bra.uni 	$L__BB0_13;
+	bra.uni 	$L__BB0_13;
 
+$L__BB0_11:
 $L__BB0_11:
 	st.global.f32 	[%rd1], %f1;
 
+$L__BB0_13:
 $L__BB0_13:
 	ret;
 
@@ -1649,6 +1730,7 @@ $L__BB0_13:
 
 `
 	expand_ptx_75 = `
+.version 8.4
 .version 8.4
 .target sm_75
 .address_size 64
@@ -1674,12 +1756,15 @@ $L__BB0_13:
 )
 {
 	.reg .pred 	%p<39>;
+	.reg .pred 	%p<39>;
 	.reg .f32 	%f<3>;
 	.reg .b32 	%r<84>;
 	.reg .b64 	%rd<9>;
 
 
 	ld.param.u64 	%rd2, [expand_param_0];
+	ld.param.u32 	%r13, [expand_param_1];
+	ld.param.u32 	%r14, [expand_param_2];
 	ld.param.u32 	%r13, [expand_param_1];
 	ld.param.u32 	%r14, [expand_param_2];
 	ld.param.u32 	%r15, [expand_param_3];
@@ -1711,6 +1796,7 @@ $L__BB0_13:
 	or.pred  	%p3, %p1, %p2;
 	setp.ge.s32 	%p4, %r3, %r15;
 	or.pred  	%p5, %p3, %p4;
+	@%p5 bra 	$L__BB0_13;
 	@%p5 bra 	$L__BB0_13;
 
 	shr.u32 	%r35, %r16, 31;
@@ -1820,6 +1906,8 @@ $L__BB0_10:
 	add.s64 	%rd1, %rd4, %rd5;
 	@%p38 bra 	$L__BB0_12;
 	bra.uni 	$L__BB0_11;
+	@%p38 bra 	$L__BB0_12;
+	bra.uni 	$L__BB0_11;
 
 $L__BB0_12:
 	mad.lo.s32 	%r79, %r12, %r17, %r11;
@@ -1830,10 +1918,13 @@ $L__BB0_12:
 	ld.global.nc.f32 	%f2, [%rd8];
 	st.global.f32 	[%rd1], %f2;
 	bra.uni 	$L__BB0_13;
+	bra.uni 	$L__BB0_13;
 
+$L__BB0_11:
 $L__BB0_11:
 	st.global.f32 	[%rd1], %f1;
 
+$L__BB0_13:
 $L__BB0_13:
 	ret;
 
@@ -1841,6 +1932,7 @@ $L__BB0_13:
 
 `
 	expand_ptx_80 = `
+.version 8.4
 .version 8.4
 .target sm_80
 .address_size 64
@@ -1866,12 +1958,15 @@ $L__BB0_13:
 )
 {
 	.reg .pred 	%p<39>;
+	.reg .pred 	%p<39>;
 	.reg .f32 	%f<3>;
 	.reg .b32 	%r<84>;
 	.reg .b64 	%rd<9>;
 
 
 	ld.param.u64 	%rd2, [expand_param_0];
+	ld.param.u32 	%r13, [expand_param_1];
+	ld.param.u32 	%r14, [expand_param_2];
 	ld.param.u32 	%r13, [expand_param_1];
 	ld.param.u32 	%r14, [expand_param_2];
 	ld.param.u32 	%r15, [expand_param_3];
@@ -1903,6 +1998,7 @@ $L__BB0_13:
 	or.pred  	%p3, %p1, %p2;
 	setp.ge.s32 	%p4, %r3, %r15;
 	or.pred  	%p5, %p3, %p4;
+	@%p5 bra 	$L__BB0_13;
 	@%p5 bra 	$L__BB0_13;
 
 	shr.u32 	%r35, %r16, 31;
@@ -2012,6 +2108,8 @@ $L__BB0_10:
 	add.s64 	%rd1, %rd4, %rd5;
 	@%p38 bra 	$L__BB0_12;
 	bra.uni 	$L__BB0_11;
+	@%p38 bra 	$L__BB0_12;
+	bra.uni 	$L__BB0_11;
 
 $L__BB0_12:
 	mad.lo.s32 	%r79, %r12, %r17, %r11;
@@ -2022,10 +2120,13 @@ $L__BB0_12:
 	ld.global.nc.f32 	%f2, [%rd8];
 	st.global.f32 	[%rd1], %f2;
 	bra.uni 	$L__BB0_13;
+	bra.uni 	$L__BB0_13;
 
+$L__BB0_11:
 $L__BB0_11:
 	st.global.f32 	[%rd1], %f1;
 
+$L__BB0_13:
 $L__BB0_13:
 	ret;
 

@@ -11,7 +11,7 @@ func Expand(dst, src *data.Slice, offX, offY, offZ, ShiftX, ShiftY, ShiftZ int, 
 	D := dst.Size()
 	S := src.Size()
 	util.Argument(dst.NComp() == src.NComp())
-	util.Argument(D[X]-2*offX == S[X] && D[Y]-2*offY == S[Y] && D[Z]-2*offZ == S[Z])
+	util.Argument((D[X]-2*offX == S[X] || D[X]-2*offX-1 == S[X]) && (D[Y]-2*offY == S[Y] || D[Y]-2*offY-1 == S[Y]) && (D[Z]-2*offZ == S[Z] || D[Z]-2*offZ-1 == S[Z]))
 	util.Argument(len(value) == dst.NComp())
 
 	cfg := make3DConf(D)

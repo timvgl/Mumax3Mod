@@ -96,9 +96,17 @@ func ValueOf(q Quantity) *data.Slice {
 		q.EvalTo(buf)
 		return buf
 	} else {
-		buf := cuda.Buffer(q.NComp(), SizeOf(q))
-		q.EvalTo(buf)
-		return buf
+		if !IsFFT3D(q) {
+			buf := cuda.Buffer(q.NComp(), SizeOf(q))
+			q.EvalTo(buf)
+			return buf
+		} else {
+			size := SizeOf(q)
+			size[0] *= 2
+			buf := cuda.Buffer(q.NComp(), size)
+			q.EvalTo(buf)
+			return buf
+		}
 	}
 }
 

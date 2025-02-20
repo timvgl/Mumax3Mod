@@ -105,6 +105,34 @@ func SliceFromArray(data [][]float32, size [3]int) *Slice {
 	return SliceFromPtrs(size, CPUMemory, ptrs)
 }
 
+func SliceFromSlices(data []*Slice, size [3]int) *Slice {
+	nComp := len(data)
+	length := prod(size)
+	lengthF := data[0].LengthF
+	memType := data[0].memType
+
+	ptrs := make([]unsafe.Pointer, nComp)
+	for i := range ptrs {
+		if data[i].Len() != length {
+			panic("size mismatch")
+		}
+		if data[i].LengthF != lengthF {
+			panic("lengthF mismatch")
+		}
+		if data[i].memType != memType {
+			panic("memType mismatch")
+		}
+		if data[i].NComp() != 1 {
+			panic("slice merge only with one comp slices possible")
+		}
+		ptrs[i] = data[i].DevPtr(0)
+	}
+	slc := SliceFromPtrs(size, CPUMemory, ptrs)
+	slc.LengthF = data[0].LengthF
+	slc.memType = data[0].memType
+	return slc
+}
+
 // Return a slice without underlying storage. Used to represent a mask containing all 1's.
 func NilSlice(nComp int, size [3]int) *Slice {
 	slc := SliceFromPtrs(size, GPUMemory, make([]unsafe.Pointer, nComp))
@@ -383,7 +411,7 @@ func Copy(dst, src *Slice, args ...string) {
 
 func CopyComp(dst, src *Slice, comp int, args ...string) {
 	if dst.NComp() != 1 || dst.Len() != src.Len() && comp > 2 || comp < 0 {
-		panic(fmt.Sprintf("slice copy: illegal sizes: dst: %vx%v, src: %vx%v with %v being selected", dst.NComp(), dst.Len(), src.Len(), comp))
+		panic(fmt.Sprintf("slice copy: illegal sizes: dst: %vx%v, src: %vx%v with %v being selected", dst.NComp(), dst.Len(), src.NComp(), src.Len(), comp))
 	}
 	d, s := dst.GPUAccess(), src.GPUAccess()
 	bytes := SIZEOF_FLOAT32 * int64(dst.Len())
@@ -439,7 +467,6 @@ func CopyPart(dst, src *Slice,
 	yCount := yEnd_src - yStart_src
 	zCount := zEnd_src - zStart_src
 	fCount := fEnd_src - fStart_src
-
 	if d && !s || !d && s || !d && !s {
 		for f := 0; f < fCount; f++ {
 			for z := 0; z < zCount; z++ {
@@ -499,7 +526,6 @@ func CopyPart(dst, src *Slice,
 	} else {
 		cudaCopyPart(dst, src, xStart_src, xEnd_src, yStart_src, yEnd_src, zStart_src, zEnd_src, fStart_src, fEnd_src, xStart_dst, yStart_dst, zStart_dst, fStart_dst)
 	}
-
 }
 
 /*

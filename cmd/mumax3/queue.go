@@ -147,12 +147,19 @@ func run(inFile string, gpu int, port string) {
 	portFlag := fmt.Sprint("-webUIPort=", port)
 
 	// pass through flags
-	flags := []string{gpuFlag, portFlag}
+	flags := []string{portFlag}
+	gotGPUExample := false
 	flag.Visit(func(f *flag.Flag) {
-		if f.Name != "gpu" && f.Name != "failfast" && f.Name != "webUIPort" && f.Name != "template" && f.Name != "flat" && f.Name != "pipelineLenth" && f.Name != "encapsle" {
+		if (f.Name != "gpu" || f.Name == "gpu" && *flag_example) && f.Name != "failfast" && f.Name != "webUIPort" && f.Name != "template" && f.Name != "flat" && f.Name != "pipelineLenth" && f.Name != "encapsle" {
 			flags = append(flags, fmt.Sprintf("-%v=%v", f.Name, f.Value))
 		}
+		if f.Name == "gpu" && *flag_example {
+			gotGPUExample = true
+		}
 	})
+	if !gotGPUExample {
+		flags = append(flags, gpuFlag)
+	}
 	flags = append(flags, inFile)
 
 	cmd := exec.Command(os.Args[0], flags...)
