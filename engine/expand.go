@@ -37,23 +37,25 @@ type expanded struct {
 // Expand quantity to a box enclosing the given region.
 // Used to output a region of interest, even if the region is non-rectangular.
 
-func ExpandXOperator(x1, x2 int, args ...float64) func(parent Quantity) Quantity {
-	return func(parent Quantity) Quantity { return ExpandX(parent, x1, x2, args...) }
+func ExpandXOperator(x1, x2, OffX int, args ...float64) func(parent Quantity) Quantity {
+	return func(parent Quantity) Quantity { return ExpandX(parent, x1, x2, OffX, args...) }
 }
 
-func ExpandYOperator(y1, y2 int, args ...float64) func(parent Quantity) Quantity {
-	return func(parent Quantity) Quantity { return ExpandY(parent, y1, y2, args...) }
+func ExpandYOperator(y1, y2, OffY int, args ...float64) func(parent Quantity) Quantity {
+	return func(parent Quantity) Quantity { return ExpandY(parent, y1, y2, OffY, args...) }
 }
 
-func ExpandZOperator(z1, z2 int, args ...float64) func(parent Quantity) Quantity {
-	return func(parent Quantity) Quantity { return ExpandZ(parent, z1, z2, args...) }
+func ExpandZOperator(z1, z2, OffZ int, args ...float64) func(parent Quantity) Quantity {
+	return func(parent Quantity) Quantity { return ExpandZ(parent, z1, z2, OffZ, args...) }
 }
 
-func ExpandOperator(x1, x2, y1, y2, z1, z2 int, args ...float64) func(parent Quantity) Quantity {
-	return func(parent Quantity) Quantity { return Expand(parent, x1, x2, y1, y2, z1, z2, args...) }
+func ExpandOperator(x1, x2, y1, y2, z1, z2, OffX, OffY, OffZ int, args ...float64) func(parent Quantity) Quantity {
+	return func(parent Quantity) Quantity {
+		return Expand(parent, x1, x2, y1, y2, z1, z2, OffX, OffY, OffZ, args...)
+	}
 }
 
-func ExpandX(parent Quantity, x1, x2 int, args ...float64) *expanded {
+func ExpandX(parent Quantity, x1, x2, shiftX int, args ...float64) *expanded {
 	n := MeshOf(parent).Size()
 	return Expand(parent, x1, x2, 0, n[Y], 0, n[Z], shiftX, 0, 0, args...)
 }
@@ -129,10 +131,10 @@ func (q *expanded) Slice() (*data.Slice, bool) {
 		size := q.Mesh().Size()
 		size[0] *= 2
 		dst = cuda.Buffer(q.NComp(), size)
-		cuda.Expand(dst, src, (q.x2 - q.x1 - srcNxNyNz[0]/2), (q.y2-q.y1-srcNxNyNz[1])/2, (q.z2-q.z1-srcNxNyNz[2])/2, q.values)
+		cuda.Expand(dst, src, (q.x2 - q.x1 - srcNxNyNz[0]/2), (q.y2-q.y1-srcNxNyNz[1])/2, (q.z2-q.z1-srcNxNyNz[2])/2, q.shiftX*2, q.shiftY, q.shiftZ, q.values)
 	} else {
 		dst = cuda.Buffer(q.NComp(), q.Mesh().Size())
-		cuda.Expand(dst, src, (q.x2-q.x1-srcNxNyNz[0])/2, (q.y2-q.y1-srcNxNyNz[1])/2, (q.z2-q.z1-srcNxNyNz[2])/2, q.values)
+		cuda.Expand(dst, src, (q.x2-q.x1-srcNxNyNz[0])/2, (q.y2-q.y1-srcNxNyNz[1])/2, (q.z2-q.z1-srcNxNyNz[2])/2, q.shiftX, q.shiftY, q.shiftZ, q.values)
 	}
 	return dst, true
 }

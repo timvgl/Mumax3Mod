@@ -113,11 +113,7 @@ var poynting_map = map[int]string{0: "",
 // poynting PTX code for various compute capabilities.
 const (
 	poynting_ptx_50 = `
-<<<<<<< HEAD
-.version 8.5
-=======
 .version 8.4
->>>>>>> origin/region_solver
 .target sm_50
 .address_size 64
 
@@ -240,11 +236,7 @@ $L__BB0_2:
 
 `
 	poynting_ptx_52 = `
-<<<<<<< HEAD
-.version 8.5
-=======
 .version 8.4
->>>>>>> origin/region_solver
 .target sm_52
 .address_size 64
 
@@ -367,11 +359,7 @@ $L__BB0_2:
 
 `
 	poynting_ptx_53 = `
-<<<<<<< HEAD
-.version 8.5
-=======
 .version 8.4
->>>>>>> origin/region_solver
 .target sm_53
 .address_size 64
 
@@ -494,11 +482,7 @@ $L__BB0_2:
 
 `
 	poynting_ptx_60 = `
-<<<<<<< HEAD
-.version 8.5
-=======
 .version 8.4
->>>>>>> origin/region_solver
 .target sm_60
 .address_size 64
 
@@ -621,11 +605,7 @@ $L__BB0_2:
 
 `
 	poynting_ptx_61 = `
-<<<<<<< HEAD
-.version 8.5
-=======
 .version 8.4
->>>>>>> origin/region_solver
 .target sm_61
 .address_size 64
 
@@ -748,11 +728,7 @@ $L__BB0_2:
 
 `
 	poynting_ptx_62 = `
-<<<<<<< HEAD
-.version 8.5
-=======
 .version 8.4
->>>>>>> origin/region_solver
 .target sm_62
 .address_size 64
 
@@ -875,11 +851,7 @@ $L__BB0_2:
 
 `
 	poynting_ptx_70 = `
-<<<<<<< HEAD
-.version 8.5
-=======
 .version 8.4
->>>>>>> origin/region_solver
 .target sm_70
 .address_size 64
 
@@ -1002,11 +974,7 @@ $L__BB0_2:
 
 `
 	poynting_ptx_72 = `
-<<<<<<< HEAD
-.version 8.5
-=======
 .version 8.4
->>>>>>> origin/region_solver
 .target sm_72
 .address_size 64
 
@@ -1129,11 +1097,7 @@ $L__BB0_2:
 
 `
 	poynting_ptx_75 = `
-<<<<<<< HEAD
-.version 8.5
-=======
 .version 8.4
->>>>>>> origin/region_solver
 .target sm_75
 .address_size 64
 
@@ -1256,11 +1220,7 @@ $L__BB0_2:
 
 `
 	poynting_ptx_80 = `
-<<<<<<< HEAD
-.version 8.5
-=======
 .version 8.4
->>>>>>> origin/region_solver
 .target sm_80
 .address_size 64
 

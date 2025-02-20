@@ -74,7 +74,7 @@ var asinhGovaluate_map = map[int]string{0: "",
 // asinhGovaluate PTX code for various compute capabilities.
 const (
 	asinhGovaluate_ptx_50 = `
-.version 8.5
+.version 8.4
 .target sm_50
 .address_size 64
 
@@ -194,7 +194,7 @@ $L__BB0_8:
 
 `
 	asinhGovaluate_ptx_52 = `
-.version 8.5
+.version 8.4
 .target sm_52
 .address_size 64
 
@@ -314,7 +314,7 @@ $L__BB0_8:
 
 `
 	asinhGovaluate_ptx_53 = `
-.version 8.5
+.version 8.4
 .target sm_53
 .address_size 64
 
@@ -434,7 +434,7 @@ $L__BB0_8:
 
 `
 	asinhGovaluate_ptx_60 = `
-.version 8.5
+.version 8.4
 .target sm_60
 .address_size 64
 
@@ -554,7 +554,7 @@ $L__BB0_8:
 
 `
 	asinhGovaluate_ptx_61 = `
-.version 8.5
+.version 8.4
 .target sm_61
 .address_size 64
 
@@ -674,7 +674,7 @@ $L__BB0_8:
 
 `
 	asinhGovaluate_ptx_62 = `
-.version 8.5
+.version 8.4
 .target sm_62
 .address_size 64
 
@@ -794,7 +794,7 @@ $L__BB0_8:
 
 `
 	asinhGovaluate_ptx_70 = `
-.version 8.5
+.version 8.4
 .target sm_70
 .address_size 64
 
@@ -914,7 +914,7 @@ $L__BB0_8:
 
 `
 	asinhGovaluate_ptx_72 = `
-.version 8.5
+.version 8.4
 .target sm_72
 .address_size 64
 
@@ -1034,7 +1034,7 @@ $L__BB0_8:
 
 `
 	asinhGovaluate_ptx_75 = `
-.version 8.5
+.version 8.4
 .target sm_75
 .address_size 64
 
@@ -1154,7 +1154,7 @@ $L__BB0_8:
 
 `
 	asinhGovaluate_ptx_80 = `
-.version 8.5
+.version 8.4
 .target sm_80
 .address_size 64
 

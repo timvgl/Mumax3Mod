@@ -75,14 +75,19 @@ func k_shiftbytesy_async(dst unsafe.Pointer, src unsafe.Pointer, Nx int, Ny int,
 
 // maps compute capability on PTX code for shiftbytesy kernel.
 var shiftbytesy_map = map[int]string{0: "",
+	50: shiftbytesy_ptx_50,
+	52: shiftbytesy_ptx_52,
+	53: shiftbytesy_ptx_53,
+	60: shiftbytesy_ptx_60,
+	61: shiftbytesy_ptx_61,
+	62: shiftbytesy_ptx_62,
+	70: shiftbytesy_ptx_70,
+	72: shiftbytesy_ptx_72,
+	75: shiftbytesy_ptx_75,
 	80: shiftbytesy_ptx_80}
 
 // shiftbytesy PTX code for various compute capabilities.
 const (
-<<<<<<< HEAD
-	shiftbytesy_ptx_80 = `
-.version 8.5
-=======
 	shiftbytesy_ptx_50 = `
 .version 8.4
 .target sm_50
@@ -778,7 +783,6 @@ $L__BB0_4:
 `
 	shiftbytesy_ptx_80 = `
 .version 8.4
->>>>>>> origin/region_solver
 .target sm_80
 .address_size 64
 
