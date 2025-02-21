@@ -362,7 +362,9 @@ func LoadFileDSlice(fname string) *data.Slice {
 
 func LoadFileMeta(fname string) (*data.Slice, data.Meta) {
 	in, err := httpfs.Open(fname)
-	util.FatalErr(err)
+	if err != nil {
+		panic(err)
+	}
 	var d *data.Slice
 	var s data.Meta
 	if path.Ext(fname) == ".dump" {
@@ -370,7 +372,9 @@ func LoadFileMeta(fname string) (*data.Slice, data.Meta) {
 	} else {
 		d, s, err = oommf.Read(in)
 	}
-	util.FatalErr(err)
+	if err != nil {
+		panic(err)
+	}
 	return d, s
 }
 

@@ -143,15 +143,23 @@ func (s optimize) generateSliceFromFunction(trial goptuna.Trial, q Quantity, j i
 	xDep := false
 	yDep := false
 	zDep := false
-
+	worldVars := World.GetRuntimeVariables()
 	for key := range vars {
 		if key != "x_length" && key != "y_length" && key != "z_length" && key != "x_factor" && key != "y_factor" && key != "z_factor" && key != "t" && math.IsNaN(vars[key].(float64)) {
-			//fmt.Println(key, s.variablesStart[j][key].vector[comp], s.variablesEnd[j][key].vector[comp])
-			value, err := trial.SuggestFloat(fmt.Sprintf("%s_%s_%d", NameOf(q), key, comp), s.variablesStart[j][key].vector[comp], s.variablesEnd[j][key].vector[comp])
-			if err != nil {
-				return nil, err
+			varStartVector, ok1 := s.variablesStart[j][key]
+			varEndVector, ok2 := s.variablesEnd[j][key]
+			if ok1 && ok2 {
+				value, err := trial.SuggestFloat(fmt.Sprintf("%s_%s_%d", NameOf(q), key, comp), varStartVector.vector[comp], varEndVector.vector[comp])
+				if err != nil {
+					return nil, err
+				}
+				vars[key] = value
+			} else if worldVar, ok := worldVars[strings.ToLower(key)]; ok {
+				vars[key] = worldVar
+			} else {
+				panic(fmt.Sprintf("Variable %s not found in parameter space", key))
 			}
-			vars[key] = value
+
 		} else if strings.ToLower(key) == "t" {
 			panic("Time as a variable is not allowed in the function.")
 		} else if key == "x_factor" {
@@ -216,13 +224,13 @@ func (s optimize) objective(trial goptuna.Trial) (float64, error) {
 			suggestData[1] = vector1
 			suggestData[2] = vector2
 			bufGPU := data.SliceFromSlices(suggestData, size)
-			defer cuda.Recycle(bufGPU)
+			//defer cuda.Recycle(bufGPU)
 			SetExcitation(NameOf(q), ExcitationSlice{NameOf(q), s.areaStart[ii], s.areaEnd[ii], bufGPU, q.NComp(), false, s.functions[ii]})
 		} else {
 			suggestData := make([]*data.Slice, 1)
 			suggestData[0] = vector0
 			bufGPU := data.SliceFromSlices(suggestData, size)
-			defer cuda.Recycle(bufGPU)
+			//defer cuda.Recycle(bufGPU)
 			SetScalarExcitation(NameOf(q), ScalarExcitationSlice{NameOf(q), s.areaStart[ii], s.areaEnd[ii], bufGPU, false, s.functions[ii]})
 		}
 	}
@@ -300,7 +308,6 @@ func MergeFitFunctions(a ...StringFunction) []StringFunction {
 
 func OptimizeQuantity(output Quantity, target dummyQuantity, variables []Quantity, functions []StringFunction, parametersStart, parametersEnd []map[string]vectorScalar, studyName string, trials int, keep_bar bool, reduceTime float64) {
 	util.AssertMsg(len(variables) == len(parametersStart) && len(variables) == len(parametersEnd), "variables, parametersStart and parametersEnd must have the same length")
-	fmt.Println(NameOf(variables[0]))
 	//util.AssertMsg(len(areaStart) == len(areaEnd) && len(areaStart) == len(variables), "areaStart and areaEnd must have the same length like variables")
 	util.AssertMsg(len(functions) == len(variables), "need as many functions as variables.")
 	areaStart := make([][3]int, 0)
@@ -322,7 +329,6 @@ func OptimizeQuantity(output Quantity, target dummyQuantity, variables []Quantit
 			tmpMesh := MeshOf(variables[i])
 			areaEnd = append(areaEnd, tmpMesh.Size())
 		}
-
 	}
 	var bar *ProgressBar
 	if keep_bar {
@@ -337,7 +343,6 @@ func OptimizeQuantity(output Quantity, target dummyQuantity, variables []Quantit
 	}
 	optim := optimize{output, target, variables, parametersStart, parametersEnd, areaStart, areaEnd, target.time - reduceTime - Time, studyName, trials, Time, functions, make([][3]*Function, len(variables)), bar}
 	CreateBackup([]Quantity{output})
-
 	logFile, err := os.OpenFile(OD()+"/optimization.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		fmt.Printf("Failed to open log file: %v\n", err)
@@ -454,7 +459,6 @@ func OptimizeQuantity(output Quantity, target dummyQuantity, variables []Quantit
 			varData[c] = optim.generateSliceFromExpr(xDep, yDep, zDep, vars, cellsize, k, optim.parsedFunctions[k][c])
 		}
 		bufGPU := data.SliceFromSlices(varData, size)
-		defer cuda.Recycle(bufGPU)
 		info := data.Meta{Time: target.time - reduceTime, Name: NameOf(variables[k]), Unit: UnitOf(variables[k]), CellSize: cellsize}
 		idx, ok := SaveCounter[NameOf(variables[k])]
 		if !ok {
@@ -464,8 +468,10 @@ func OptimizeQuantity(output Quantity, target dummyQuantity, variables []Quantit
 		SaveCounter[NameOf(variables[k])] = idx + 1
 		if variables[k].NComp() == 3 {
 			SetExcitation(NameOf(variables[k]), ExcitationSlice{NameOf(variables[k]), optim.areaStart[k], optim.areaEnd[k], bufGPU, variables[k].NComp(), false, optim.functions[k]})
+			defer EraseSetExcitation(NameOf(variables[k]))
 		} else {
 			SetScalarExcitation(NameOf(variables[k]), ScalarExcitationSlice{NameOf(variables[k]), optim.areaStart[k], optim.areaEnd[k], bufGPU, false, optim.functions[k]})
+			defer EraseSetScalarExcitation(NameOf(variables[k]))
 		}
 	}
 	fprint(optiTable, "\t", bestValue)
@@ -483,13 +489,6 @@ func OptimizeQuantity(output Quantity, target dummyQuantity, variables []Quantit
 	}
 	SaveAs(output, fmt.Sprintf(FilenameFormat, NameOf(output), idx)+".ovf")
 	SaveCounter[NameOf(output)] = idx + 1
-	for k := range variables {
-		if variables[k].NComp() == 1 {
-			EraseSetScalarExcitation(NameOf(variables[k]))
-		} else {
-			EraseSetExcitation(NameOf(variables[k]))
-		}
-	}
 	DeleteBackup([]Quantity{output})
 	cuda.Recycle(target.storage)
 	barIdx = 0

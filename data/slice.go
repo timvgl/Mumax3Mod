@@ -89,7 +89,9 @@ func NewSlice(nComp int, size [3]int) *Slice {
 	for i := range ptrs {
 		ptrs[i] = unsafe.Pointer(&(make([]float32, length)[0]))
 	}
-	return SliceFromPtrs(size, CPUMemory, ptrs)
+	slc := SliceFromPtrs(size, CPUMemory, ptrs)
+	DataSliceSlice = append(DataSliceSlice, slc)
+	return slc
 }
 
 func SliceFromArray(data [][]float32, size [3]int) *Slice {
@@ -128,8 +130,24 @@ func SliceFromSlices(data []*Slice, size [3]int) *Slice {
 		ptrs[i] = data[i].DevPtr(0)
 	}
 	slc := SliceFromPtrs(size, CPUMemory, ptrs)
+	for _, s := range data {
+		idx := 0
+		gotValue := false
+		for i, _ := range DataSliceSlice {
+			if DataSliceSlice[i] == s {
+				idx = i
+				gotValue = true
+				break
+			}
+		}
+		if !gotValue {
+			panic("Could not find buffer in buffer list.")
+		}
+		DataSliceSlice = append(DataSliceSlice[:idx], DataSliceSlice[idx+1:]...)
+	}
 	slc.LengthF = data[0].LengthF
 	slc.memType = data[0].memType
+	DataSliceSlice = append(DataSliceSlice, slc)
 	return slc
 }
 
