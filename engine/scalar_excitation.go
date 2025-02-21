@@ -28,6 +28,8 @@ func EraseSetScalarExcitation(name string) {
 			s.d.Free()
 		}
 		mapSetScalarExcitation.Delete(name)
+	} else {
+		panic(fmt.Sprintf("EraseSetScalarExcitation: %s not found", name))
 	}
 }
 
@@ -72,6 +74,10 @@ func (p *ScalarExcitation) RenderFunction(equation StringFunction) {
 	util.AssertMsg(equation.IsScalar(), "RenderFunction: Need scalar function.")
 	d, timeDep := GenerateSliceFromFunctionStringTimeDep(equation, p.Mesh())
 	SetScalarExcitation(p.name, ScalarExcitationSlice{p.name, [3]int{0, 0, 0}, p.Mesh().Size(), d, timeDep, equation})
+}
+
+func (p *ScalarExcitation) RemoveRenderedFunction() {
+	EraseSetScalarExcitation(p.name)
 }
 
 func (e *ScalarExcitation) AddTo(dst *data.Slice) {

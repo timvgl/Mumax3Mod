@@ -29,6 +29,8 @@ func EraseSetExcitation(name string) {
 			s.d.Free()
 		}
 		mapSetExcitation.Delete(name)
+	} else {
+		panic(fmt.Sprintf("EraseSetExcitation: %s not found", name))
 	}
 }
 
@@ -79,6 +81,10 @@ func (p *Excitation) RenderFunction(equation StringFunction) {
 	util.AssertMsg(!equation.IsScalar(), "RenderFunction: Need vector function.")
 	d, timeDep := GenerateSliceFromFunctionStringTimeDep(equation, p.Mesh())
 	SetExcitation(p.name, ExcitationSlice{name: p.name, start: [3]int{0, 0, 0}, end: p.Mesh().Size(), d: d, timedependent: timeDep, stringFct: equation})
+}
+
+func (p *Excitation) RemoveRenderedFunction(equation StringFunction) {
+	EraseSetExcitation(p.name)
 }
 
 func (p *Excitation) MSliceRegion(size [3]int, offsetX, offsetY, offsetZ int) cuda.MSlice {
