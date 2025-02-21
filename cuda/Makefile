@@ -64,25 +64,26 @@ endif
 
 NVCCFLAGS = $(NVCC_COMPATIBILITY_FLAGS) -ccbin=$(NVCC_CCBIN) --compiler-options -Werror --compiler-options -Wall -Xptxas -O3 -ptx
 
-CUDAFILES := $(wildcard *.cu)
-CUDAFILES := $(filter-out cuda_functions.cu, $(CUDAFILES))
-
-ACUDAFILES := $(wildcard *.a.cu)
-
-CUDAFILES := $(filter-out $(ACUDAFILES), $(CUDAFILES))
-
-WRAPPERS := $(CUDAFILES:.cu=_wrapper.go)
-
-AWRAPPERS := $(ACUDAFILES:.a.cu=_wrapper.a.go)
 
 
-.PHONY: all split_cuda_functions wrappers awrappers clean realclean
+ACUDAFILES = $(wildcard *.a.cu)
+
+CUDAFILES := $(filter-out cuda_functions.cu $(ACUDAFILES), $(wildcard *.cu))
+
+WRAPPERS = $(CUDAFILES:.cu=_wrapper.go)
+
+AWRAPPERS = $(ACUDAFILES:.a.cu=_wrapper.a.go)
 
 
-all: split_cuda_functions wrappers awrappers
+.PHONY: all split_cuda_functions update_cudafiles wrappers awrappers clean realclean
+
+
+all: split_cuda_functions update_cudafiles wrappers awrappers
 	@echo "Built with CUDA version ${CUDA_VERSION}"
 	go install -v
 
+update_cudafiles:
+	$(eval CUDAFILES := $(filter-out cuda_functions.cu $(ACUDAFILES), $(wildcard *.cu)))
 
 wrappers: $(WRAPPERS)
 
@@ -114,7 +115,6 @@ awrappers: $(AWRAPPERS)
 
 split_cuda_functions: cuda_functions.cu
 	bash split_cuda_functions.sh
-
 
 acuda2go: acuda2go.go
 	rm -vf acuda2go
