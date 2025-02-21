@@ -33,11 +33,13 @@ func EraseSetExcitation(name string) {
 }
 
 type ExcitationSlice struct {
-	name  string
-	start [3]int
-	end   [3]int
-	d     *data.Slice
-	ncomp int
+	name          string
+	start         [3]int
+	end           [3]int
+	d             *data.Slice
+	ncomp         int
+	timedependent bool
+	stringFct     StringFunction
 }
 
 // An excitation, typically field or current,
@@ -69,8 +71,14 @@ func NewExcitation(name, unit, desc string) *Excitation {
 
 func (p *Excitation) MSlice() cuda.MSlice {
 	buf, r := p.Slice()
-	util.Assert(r == true)
+	util.Assert(r)
 	return cuda.ToMSlice(buf)
+}
+
+func (p *Excitation) RenderFunction(equation StringFunction) {
+	util.AssertMsg(!equation.IsScalar(), "RenderFunction: Need vector function.")
+	d, timeDep := GenerateSliceFromFunctionStringTimeDep(equation, p.Mesh())
+	SetExcitation(p.name, ExcitationSlice{name: p.name, start: [3]int{0, 0, 0}, end: p.Mesh().Size(), d: d, timedependent: timeDep, stringFct: equation})
 }
 
 func (p *Excitation) MSliceRegion(size [3]int, offsetX, offsetY, offsetZ int) cuda.MSlice {
@@ -78,7 +86,7 @@ func (p *Excitation) MSliceRegion(size [3]int, offsetX, offsetY, offsetZ int) cu
 	bufRed := cuda.Buffer(buf.NComp(), size)
 	cuda.Crop(bufRed, buf, offsetX, offsetY, offsetZ)
 	cuda.Recycle(buf)
-	util.Assert(r == true)
+	util.Assert(r)
 	return cuda.ToMSlice(bufRed)
 }
 
@@ -142,6 +150,10 @@ func (e *Excitation) Slice() (*data.Slice, bool) {
 	tmp, ok := mapSetExcitation.Load(e.name)
 	if ok {
 		setExcitations := tmp.(ExcitationSlice)
+		if setExcitations.timedependent {
+			d := GenerateSliceFromFunctionString(setExcitations.stringFct, e.Mesh())
+			setExcitations.d = d
+		}
 		newData := setExcitations.d
 		regionStart := setExcitations.start
 		regionEnd := setExcitations.end

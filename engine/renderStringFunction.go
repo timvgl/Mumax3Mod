@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+	"regexp"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -901,4 +904,104 @@ func GenerateExprFromFunctionString(functionStr string) (*Function, map[string]i
 	}
 
 	return function, vars, nil
+}
+
+func preprocessExpression(expr string) string {
+	if expr == "" {
+		return "0"
+	}
+	// Regular expression to match scientific notation (e.g., 1e7, 3.14e-2)
+	re := regexp.MustCompile(`(\d+(\.\d+)?)[eE]([+-]?\d+)`)
+
+	// Replace each scientific notation occurrence with its evaluated value
+	return re.ReplaceAllStringFunc(expr, func(match string) string {
+		// Parse the matched string into a float64
+		f, err := strconv.ParseFloat(match, 64)
+		if err != nil {
+			// If parsing fails, return the original match
+			return match
+		}
+		// Format the float without wissenschaftlicher Notation
+		return strconv.FormatFloat(f, 'f', -1, 64)
+	})
+}
+
+func GenerateSliceFromFunctionStringTimeDep(functionStr StringFunction, mesh *data.Mesh) (*data.Slice, bool) {
+	function, vars, err := GenerateExprFromFunctionString(preprocessExpression(functionStr.functions[0]))
+	if err != nil {
+		panic(fmt.Sprintf("Failed to generate function: %v", err))
+	}
+	var (
+		xDep    = false
+		yDep    = false
+		zDep    = false
+		TimeDep = false
+	)
+	worldVars := World.GetRuntimeVariables()
+	for key := range vars {
+		if key != "x_length" && key != "y_length" && key != "z_length" && key != "x_factor" && key != "y_factor" && key != "z_factor" && key != "t" && math.IsNaN(vars[key].(float64)) {
+			//fmt.Println(key, s.variablesStart[j][key].vector[comp], s.variablesEnd[j][key].vector[comp])
+			if value, ok := worldVars[key]; ok {
+				vars[key] = value
+			} else {
+				panic(fmt.Sprintf("Variable %s not defined.", key))
+			}
+		} else if strings.ToLower(key) == "t" {
+			vars[key] = Time
+			TimeDep = true
+		} else if key == "x_factor" {
+			xDep = true
+		} else if key == "y_factor" {
+			yDep = true
+		} else if key == "z_factor" {
+			zDep = true
+		}
+	}
+	var dataFused *data.Slice
+	data0 := GenerateSliceFromExpr(xDep, yDep, zDep, vars, mesh.CellSize(), function, [3]int{0, 0, 0}, mesh.Size())
+	if !functionStr.useScalar {
+		data123 := make([]*data.Slice, 3)
+		for c := 1; c <= 2; c++ {
+			xDep = false
+			yDep = false
+			zDep = false
+			function, vars, err := GenerateExprFromFunctionString(preprocessExpression(functionStr.functions[c]))
+			if err != nil {
+				panic(fmt.Sprintf("Failed to generate function: %v", err))
+			}
+			var (
+				xDep, yDep, zDep bool
+			)
+			for key := range vars {
+				if key != "x_length" && key != "y_length" && key != "z_length" && key != "x_factor" && key != "y_factor" && key != "z_factor" && key != "t" && math.IsNaN(vars[key].(float64)) {
+					//fmt.Println(key, s.variablesStart[j][key].vector[comp], s.variablesEnd[j][key].vector[comp])
+					if value, ok := worldVars[key]; ok {
+						vars[key] = value
+					} else {
+						panic(fmt.Sprintf("Variable %s not defined.", key))
+					}
+				} else if strings.ToLower(key) == "t" {
+					vars[key] = Time
+					TimeDep = true
+				} else if key == "x_factor" {
+					xDep = true
+				} else if key == "y_factor" {
+					yDep = true
+				} else if key == "z_factor" {
+					zDep = true
+				}
+			}
+			data123[c] = GenerateSliceFromExpr(xDep, yDep, zDep, vars, mesh.CellSize(), function, [3]int{0, 0, 0}, mesh.Size())
+		}
+		data123[0] = data0
+		dataFused = data.SliceFromSlices(data123, mesh.Size())
+	} else {
+		dataFused = data.SliceFromSlices([]*data.Slice{data0}, mesh.Size())
+	}
+	return dataFused, TimeDep
+}
+
+func GenerateSliceFromFunctionString(functionStr StringFunction, mesh *data.Mesh) *data.Slice {
+	d, _ := GenerateSliceFromFunctionStringTimeDep(functionStr, mesh)
+	return d
 }

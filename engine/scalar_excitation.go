@@ -32,10 +32,12 @@ func EraseSetScalarExcitation(name string) {
 }
 
 type ScalarExcitationSlice struct {
-	name  string
-	start [3]int
-	end   [3]int
-	d     *data.Slice
+	name          string
+	start         [3]int
+	end           [3]int
+	d             *data.Slice
+	timedependent bool
+	stringFct     StringFunction
 }
 
 // An excitation, typically field or current,
@@ -56,7 +58,7 @@ func NewScalarExcitation(name, unit, desc string) *ScalarExcitation {
 
 func (p *ScalarExcitation) LoadFile(path string, xOffset, yOffset, zOffset int) {
 	d := LoadFileDSlice(path)
-	SetScalarExcitation(p.name, ScalarExcitationSlice{p.name, [3]int{xOffset, yOffset, zOffset}, [3]int{xOffset + d.Size()[X], yOffset + d.Size()[Y], zOffset + d.Size()[Z]}, d})
+	SetScalarExcitation(p.name, ScalarExcitationSlice{p.name, [3]int{xOffset, yOffset, zOffset}, [3]int{xOffset + d.Size()[X], yOffset + d.Size()[Y], zOffset + d.Size()[Z]}, d, false, StringFunction{[3]string{"", "", ""}, false}})
 
 }
 
@@ -64,6 +66,12 @@ func (p *ScalarExcitation) MSlice() cuda.MSlice {
 	buf, r := p.Slice()
 	util.Assert(r == true)
 	return cuda.ToMSlice(buf)
+}
+
+func (p *ScalarExcitation) RenderFunction(equation StringFunction) {
+	util.AssertMsg(equation.IsScalar(), "RenderFunction: Need scalar function.")
+	d, timeDep := GenerateSliceFromFunctionStringTimeDep(equation, p.Mesh())
+	SetScalarExcitation(p.name, ScalarExcitationSlice{p.name, [3]int{0, 0, 0}, p.Mesh().Size(), d, timeDep, equation})
 }
 
 func (e *ScalarExcitation) AddTo(dst *data.Slice) {
@@ -92,6 +100,10 @@ func (e *ScalarExcitation) Slice() (*data.Slice, bool) {
 	tmp, ok := mapSetScalarExcitation.Load(e.name)
 	if ok {
 		setExcitations := tmp.(ScalarExcitationSlice)
+		if setExcitations.timedependent {
+			d := GenerateSliceFromFunctionString(setExcitations.stringFct, e.Mesh())
+			setExcitations.d = d
+		}
 		newData := setExcitations.d
 		regionStart := setExcitations.start
 		regionEnd := setExcitations.end

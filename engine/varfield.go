@@ -63,8 +63,9 @@ func (m *varVectorField) LoadFileMyDir(fname string) {
 	m.SetArray(LoadFileDSliceMyDir(fname))
 }
 
-func (m *varVectorField) RenderString(equation string) {
-
+func (m *varVectorField) RenderFunction(equation StringFunction) {
+	util.AssertMsg(!equation.IsScalar(), "RenderFunction: Need vector function.")
+	m.SetArray(GenerateSliceFromFunctionString(equation, m.Mesh()))
 }
 
 func (m *varVectorField) SetTime(fname string) {

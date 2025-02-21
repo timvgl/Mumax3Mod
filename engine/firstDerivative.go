@@ -65,6 +65,11 @@ func (du *firstDerivative) LoadFileMyDir(fname string) {
 	du.SetArray(LoadFileDSliceMyDir(fname))
 }
 
+func (du *firstDerivative) RenderFunction(equation StringFunction) {
+	util.AssertMsg(!equation.IsScalar(), "RenderFunction: Need vector function.")
+	du.SetArray(GenerateSliceFromFunctionString(equation, du.Mesh()))
+}
+
 func (du *firstDerivative) Slice() (s *data.Slice, recycle bool) {
 	return du.Buffer(), false
 }

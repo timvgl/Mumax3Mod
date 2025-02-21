@@ -37,9 +37,10 @@ func (w *scope) init() {
 }
 
 // adds a native variable to the world. E.g.:
-// 	var x = 3.14
-// 	world.Var("x", &x)
-// 	world.MustEval("x") // returns 3.14
+//
+//	var x = 3.14
+//	world.Var("x", &x)
+//	world.MustEval("x") // returns 3.14
 func (w *scope) Var(name string, addr interface{}, doc ...string) {
 	w.declare(name, newReflectLvalue(addr), doc...)
 }
@@ -51,10 +52,11 @@ func (w *scope) TVar(name string, addr interface{}, doc ...string) {
 }
 
 // adds a native variable to the world. It cannot be changed from script.
-// 	var x = 3.14
-// 	world.ROnly("x", &x)
-// 	world.MustEval("x")   // returns 3.14
-// 	world.MustExec("x=2") // fails: cannot assign to x
+//
+//	var x = 3.14
+//	world.ROnly("x", &x)
+//	world.MustEval("x")   // returns 3.14
+//	world.MustExec("x=2") // fails: cannot assign to x
 func (w *scope) ROnly(name string, addr interface{}, doc ...string) {
 	w.declare(name, newReflectROnly(addr), doc...)
 }
@@ -78,8 +80,9 @@ func (w *scope) LValue(name string, v LValue, doc ...string) {
 }
 
 // adds a native function to the world. E.g.:
-// 	world.Func("sin", math.Sin)
-// 	world.MustEval("sin(0)") // returns 0
+//
+//	world.Func("sin", math.Sin)
+//	world.MustEval("sin(0)") // returns 0
 func (w *scope) Func(name string, f interface{}, doc ...string) {
 	w.declare(name, newFunction(f), doc...)
 }
@@ -100,6 +103,11 @@ func (w *scope) safeDeclare(key string, value Expr) (ok bool) {
 	}
 	w.Identifiers[lname] = value
 	return true
+}
+
+func (w *scope) Lookup(name string) (v Expr, ok bool) {
+	v, ok = w.Identifiers[strings.ToLower(name)]
+	return v, ok
 }
 
 // resolve identifier in this scope or its parents
@@ -152,4 +160,26 @@ func (w *World) ExitScope() {
 	if w.scope == nil { // went above toplevel
 		panic("bug")
 	}
+}
+
+// GetRuntimeVariables returns a map of all variables defined at runtime.
+// It aggregates variables from the current scope and all its parent scopes.
+// Variables defined in an inner scope take precedence over those in an outer scope.
+func (w *World) GetRuntimeVariables() map[string]interface{} {
+	vars := make(map[string]interface{})
+	// Iterate through the scope stack from the current scope to the top-level scope.
+	for sc := w.scope; sc != nil; sc = sc.parent {
+		for name, expr := range sc.Identifiers {
+			// Add the variable if it hasn't been added yet,
+			// so that inner scope variables override outer scope ones.
+			if _, exists := vars[name]; !exists {
+				if lval, ok := expr.(LValue); ok {
+					vars[name] = lval.Eval()
+				} else {
+					vars[name] = expr
+				}
+			}
+		}
+	}
+	return vars
 }

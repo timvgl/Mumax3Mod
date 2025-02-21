@@ -30,7 +30,7 @@ func init() {
 	DeclFunc("CreateParameterSpace", CreateParameterSpace, "")
 	DeclFunc("CreateParameter", CreateParameter, "")
 	DeclFunc("ImportOVFAsQuantity", ImportOVFAsQuantity, "")
-	DeclFunc("CreateFitFunction", CreateFitFunction, "")
+	DeclFunc("CreateFunction", CreateFunction, "")
 	DeclFunc("MergeFitFunctions", MergeFitFunctions, "")
 	DeclFunc("MergeParameterSpace", MergeParameterSpace, "")
 
@@ -48,7 +48,7 @@ type optimize struct {
 	StudyName       string
 	Trials          int
 	time            float64
-	functions       []fitFunction
+	functions       []StringFunction
 	parsedFunctions [][3]*Function
 	bar             *ProgressBar
 }
@@ -70,9 +70,13 @@ type dummyQuantity struct {
 	comp     float64
 }
 
-type fitFunction struct {
+type StringFunction struct {
 	functions [3]string
 	useScalar bool
+}
+
+func (s *StringFunction) IsScalar() bool {
+	return s.useScalar
 }
 
 func (d dummyQuantity) Time() float64 {
@@ -213,13 +217,13 @@ func (s optimize) objective(trial goptuna.Trial) (float64, error) {
 			suggestData[2] = vector2
 			bufGPU := data.SliceFromSlices(suggestData, size)
 			defer cuda.Recycle(bufGPU)
-			SetExcitation(NameOf(q), ExcitationSlice{NameOf(q), s.areaStart[ii], s.areaEnd[ii], bufGPU, q.NComp()})
+			SetExcitation(NameOf(q), ExcitationSlice{NameOf(q), s.areaStart[ii], s.areaEnd[ii], bufGPU, q.NComp(), false, s.functions[ii]})
 		} else {
 			suggestData := make([]*data.Slice, 1)
 			suggestData[0] = vector0
 			bufGPU := data.SliceFromSlices(suggestData, size)
 			defer cuda.Recycle(bufGPU)
-			SetScalarExcitation(NameOf(q), ScalarExcitationSlice{NameOf(q), s.areaStart[ii], s.areaEnd[ii], bufGPU})
+			SetScalarExcitation(NameOf(q), ScalarExcitationSlice{NameOf(q), s.areaStart[ii], s.areaEnd[ii], bufGPU, false, s.functions[ii]})
 		}
 	}
 	//t := time.Now()
@@ -277,24 +281,24 @@ func MergeParameterSpace(q ...map[string]vectorScalar) []map[string]vectorScalar
 	return q
 }
 
-func CreateFitFunction(a ...string) fitFunction {
+func CreateFunction(a ...string) StringFunction {
 	if len(a) == 1 {
 		b := [3]string{a[0], "", ""}
-		return fitFunction{b, true}
+		return StringFunction{b, true}
 	} else if len(a) == 3 {
 		b := [3]string{a[0], a[1], a[2]}
-		return fitFunction{b, false}
+		return StringFunction{b, false}
 	} else {
 		panic("Need to have either one or three functions, depending on the quantity.")
 	}
 
 }
 
-func MergeFitFunctions(a ...fitFunction) []fitFunction {
+func MergeFitFunctions(a ...StringFunction) []StringFunction {
 	return a
 }
 
-func OptimizeQuantity(output Quantity, target dummyQuantity, variables []Quantity, functions []fitFunction, parametersStart, parametersEnd []map[string]vectorScalar, studyName string, trials int, keep_bar bool, reduceTime float64) {
+func OptimizeQuantity(output Quantity, target dummyQuantity, variables []Quantity, functions []StringFunction, parametersStart, parametersEnd []map[string]vectorScalar, studyName string, trials int, keep_bar bool, reduceTime float64) {
 	util.AssertMsg(len(variables) == len(parametersStart) && len(variables) == len(parametersEnd), "variables, parametersStart and parametersEnd must have the same length")
 	fmt.Println(NameOf(variables[0]))
 	//util.AssertMsg(len(areaStart) == len(areaEnd) && len(areaStart) == len(variables), "areaStart and areaEnd must have the same length like variables")
@@ -459,9 +463,9 @@ func OptimizeQuantity(output Quantity, target dummyQuantity, variables []Quantit
 		saveAs_sync(OD()+fmt.Sprintf(FilenameFormat, NameOf(variables[k]), idx)+".ovf", bufGPU.HostCopy(), info, outputFormat)
 		SaveCounter[NameOf(variables[k])] = idx + 1
 		if variables[k].NComp() == 3 {
-			SetExcitation(NameOf(variables[k]), ExcitationSlice{NameOf(variables[k]), optim.areaStart[k], optim.areaEnd[k], bufGPU, variables[k].NComp()})
+			SetExcitation(NameOf(variables[k]), ExcitationSlice{NameOf(variables[k]), optim.areaStart[k], optim.areaEnd[k], bufGPU, variables[k].NComp(), false, optim.functions[k]})
 		} else {
-			SetScalarExcitation(NameOf(variables[k]), ScalarExcitationSlice{NameOf(variables[k]), optim.areaStart[k], optim.areaEnd[k], bufGPU})
+			SetScalarExcitation(NameOf(variables[k]), ScalarExcitationSlice{NameOf(variables[k]), optim.areaStart[k], optim.areaEnd[k], bufGPU, false, optim.functions[k]})
 		}
 	}
 	fprint(optiTable, "\t", bestValue)

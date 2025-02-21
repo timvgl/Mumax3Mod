@@ -69,6 +69,11 @@ func (u *displacement) LoadFileMyDir(fname string) {
 	u.SetArray(LoadFileDSliceMyDir(fname))
 }
 
+func (u *displacement) RenderFunction(equation StringFunction) {
+	util.AssertMsg(!equation.IsScalar(), "RenderFunction: Need vector function.")
+	u.SetArray(GenerateSliceFromFunctionString(equation, u.Mesh()))
+}
+
 func (u *displacement) SetTime(fname string) {
 	var meta data.Meta
 	_, meta = LoadFileMeta(fname)

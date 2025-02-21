@@ -92,7 +92,7 @@ var FFT_Step_Complex_map = map[int]string{0: "",
 // FFT_Step_Complex PTX code for various compute capabilities.
 const (
 	FFT_Step_Complex_ptx_50 = `
-.version 8.4
+.version 8.2
 .target sm_50
 .address_size 64
 
@@ -266,18 +266,18 @@ $L__BB0_9:
 	mov.f32 	%f21, 0f3BBB989D;
 	mov.f32 	%f22, 0f00000000;
 	fma.rn.f32 	%f23, %f22, %f21, %f20;
-	cvt.sat.f32.f32 	%f24, %f23;
-	mov.f32 	%f25, 0f4B400001;
-	mov.f32 	%f26, 0f437C0000;
-	fma.rm.f32 	%f27, %f24, %f26, %f25;
-	add.f32 	%f28, %f27, 0fCB40007F;
-	neg.f32 	%f29, %f28;
-	mov.f32 	%f30, 0f3FB8AA3B;
-	fma.rn.f32 	%f31, %f22, %f30, %f29;
+	mov.f32 	%f24, 0f3FB8AA3B;
+	mov.f32 	%f25, 0f437C0000;
+	cvt.sat.f32.f32 	%f26, %f23;
+	mov.f32 	%f27, 0f4B400001;
+	fma.rm.f32 	%f28, %f26, %f25, %f27;
+	add.f32 	%f29, %f28, 0fCB40007F;
+	neg.f32 	%f30, %f29;
+	fma.rn.f32 	%f31, %f22, %f24, %f30;
 	mov.f32 	%f32, 0f32A57060;
 	fma.rn.f32 	%f33, %f22, %f32, %f31;
 	ex2.approx.ftz.f32 	%f34, %f33;
-	mov.b32 	%r66, %f27;
+	mov.b32 	%r66, %f28;
 	shl.b32 	%r67, %r66, 23;
 	mov.b32 	%f35, %r67;
 	mul.f32 	%f36, %f34, %f35;
@@ -340,7 +340,7 @@ $L__BB0_10:
 
 `
 	FFT_Step_Complex_ptx_52 = `
-.version 8.4
+.version 8.2
 .target sm_52
 .address_size 64
 
@@ -514,18 +514,18 @@ $L__BB0_9:
 	mov.f32 	%f21, 0f3BBB989D;
 	mov.f32 	%f22, 0f00000000;
 	fma.rn.f32 	%f23, %f22, %f21, %f20;
-	cvt.sat.f32.f32 	%f24, %f23;
-	mov.f32 	%f25, 0f4B400001;
-	mov.f32 	%f26, 0f437C0000;
-	fma.rm.f32 	%f27, %f24, %f26, %f25;
-	add.f32 	%f28, %f27, 0fCB40007F;
-	neg.f32 	%f29, %f28;
-	mov.f32 	%f30, 0f3FB8AA3B;
-	fma.rn.f32 	%f31, %f22, %f30, %f29;
+	mov.f32 	%f24, 0f3FB8AA3B;
+	mov.f32 	%f25, 0f437C0000;
+	cvt.sat.f32.f32 	%f26, %f23;
+	mov.f32 	%f27, 0f4B400001;
+	fma.rm.f32 	%f28, %f26, %f25, %f27;
+	add.f32 	%f29, %f28, 0fCB40007F;
+	neg.f32 	%f30, %f29;
+	fma.rn.f32 	%f31, %f22, %f24, %f30;
 	mov.f32 	%f32, 0f32A57060;
 	fma.rn.f32 	%f33, %f22, %f32, %f31;
 	ex2.approx.ftz.f32 	%f34, %f33;
-	mov.b32 	%r66, %f27;
+	mov.b32 	%r66, %f28;
 	shl.b32 	%r67, %r66, 23;
 	mov.b32 	%f35, %r67;
 	mul.f32 	%f36, %f34, %f35;
@@ -588,7 +588,7 @@ $L__BB0_10:
 
 `
 	FFT_Step_Complex_ptx_53 = `
-.version 8.4
+.version 8.2
 .target sm_53
 .address_size 64
 
@@ -762,18 +762,18 @@ $L__BB0_9:
 	mov.f32 	%f21, 0f3BBB989D;
 	mov.f32 	%f22, 0f00000000;
 	fma.rn.f32 	%f23, %f22, %f21, %f20;
-	cvt.sat.f32.f32 	%f24, %f23;
-	mov.f32 	%f25, 0f4B400001;
-	mov.f32 	%f26, 0f437C0000;
-	fma.rm.f32 	%f27, %f24, %f26, %f25;
-	add.f32 	%f28, %f27, 0fCB40007F;
-	neg.f32 	%f29, %f28;
-	mov.f32 	%f30, 0f3FB8AA3B;
-	fma.rn.f32 	%f31, %f22, %f30, %f29;
+	mov.f32 	%f24, 0f3FB8AA3B;
+	mov.f32 	%f25, 0f437C0000;
+	cvt.sat.f32.f32 	%f26, %f23;
+	mov.f32 	%f27, 0f4B400001;
+	fma.rm.f32 	%f28, %f26, %f25, %f27;
+	add.f32 	%f29, %f28, 0fCB40007F;
+	neg.f32 	%f30, %f29;
+	fma.rn.f32 	%f31, %f22, %f24, %f30;
 	mov.f32 	%f32, 0f32A57060;
 	fma.rn.f32 	%f33, %f22, %f32, %f31;
 	ex2.approx.ftz.f32 	%f34, %f33;
-	mov.b32 	%r66, %f27;
+	mov.b32 	%r66, %f28;
 	shl.b32 	%r67, %r66, 23;
 	mov.b32 	%f35, %r67;
 	mul.f32 	%f36, %f34, %f35;
@@ -836,7 +836,7 @@ $L__BB0_10:
 
 `
 	FFT_Step_Complex_ptx_60 = `
-.version 8.4
+.version 8.2
 .target sm_60
 .address_size 64
 
@@ -1010,18 +1010,18 @@ $L__BB0_9:
 	mov.f32 	%f21, 0f3BBB989D;
 	mov.f32 	%f22, 0f00000000;
 	fma.rn.f32 	%f23, %f22, %f21, %f20;
-	cvt.sat.f32.f32 	%f24, %f23;
-	mov.f32 	%f25, 0f4B400001;
-	mov.f32 	%f26, 0f437C0000;
-	fma.rm.f32 	%f27, %f24, %f26, %f25;
-	add.f32 	%f28, %f27, 0fCB40007F;
-	neg.f32 	%f29, %f28;
-	mov.f32 	%f30, 0f3FB8AA3B;
-	fma.rn.f32 	%f31, %f22, %f30, %f29;
+	mov.f32 	%f24, 0f3FB8AA3B;
+	mov.f32 	%f25, 0f437C0000;
+	cvt.sat.f32.f32 	%f26, %f23;
+	mov.f32 	%f27, 0f4B400001;
+	fma.rm.f32 	%f28, %f26, %f25, %f27;
+	add.f32 	%f29, %f28, 0fCB40007F;
+	neg.f32 	%f30, %f29;
+	fma.rn.f32 	%f31, %f22, %f24, %f30;
 	mov.f32 	%f32, 0f32A57060;
 	fma.rn.f32 	%f33, %f22, %f32, %f31;
 	ex2.approx.ftz.f32 	%f34, %f33;
-	mov.b32 	%r66, %f27;
+	mov.b32 	%r66, %f28;
 	shl.b32 	%r67, %r66, 23;
 	mov.b32 	%f35, %r67;
 	mul.f32 	%f36, %f34, %f35;
@@ -1084,7 +1084,7 @@ $L__BB0_10:
 
 `
 	FFT_Step_Complex_ptx_61 = `
-.version 8.4
+.version 8.2
 .target sm_61
 .address_size 64
 
@@ -1258,18 +1258,18 @@ $L__BB0_9:
 	mov.f32 	%f21, 0f3BBB989D;
 	mov.f32 	%f22, 0f00000000;
 	fma.rn.f32 	%f23, %f22, %f21, %f20;
-	cvt.sat.f32.f32 	%f24, %f23;
-	mov.f32 	%f25, 0f4B400001;
-	mov.f32 	%f26, 0f437C0000;
-	fma.rm.f32 	%f27, %f24, %f26, %f25;
-	add.f32 	%f28, %f27, 0fCB40007F;
-	neg.f32 	%f29, %f28;
-	mov.f32 	%f30, 0f3FB8AA3B;
-	fma.rn.f32 	%f31, %f22, %f30, %f29;
+	mov.f32 	%f24, 0f3FB8AA3B;
+	mov.f32 	%f25, 0f437C0000;
+	cvt.sat.f32.f32 	%f26, %f23;
+	mov.f32 	%f27, 0f4B400001;
+	fma.rm.f32 	%f28, %f26, %f25, %f27;
+	add.f32 	%f29, %f28, 0fCB40007F;
+	neg.f32 	%f30, %f29;
+	fma.rn.f32 	%f31, %f22, %f24, %f30;
 	mov.f32 	%f32, 0f32A57060;
 	fma.rn.f32 	%f33, %f22, %f32, %f31;
 	ex2.approx.ftz.f32 	%f34, %f33;
-	mov.b32 	%r66, %f27;
+	mov.b32 	%r66, %f28;
 	shl.b32 	%r67, %r66, 23;
 	mov.b32 	%f35, %r67;
 	mul.f32 	%f36, %f34, %f35;
@@ -1332,7 +1332,7 @@ $L__BB0_10:
 
 `
 	FFT_Step_Complex_ptx_62 = `
-.version 8.4
+.version 8.2
 .target sm_62
 .address_size 64
 
@@ -1506,18 +1506,18 @@ $L__BB0_9:
 	mov.f32 	%f21, 0f3BBB989D;
 	mov.f32 	%f22, 0f00000000;
 	fma.rn.f32 	%f23, %f22, %f21, %f20;
-	cvt.sat.f32.f32 	%f24, %f23;
-	mov.f32 	%f25, 0f4B400001;
-	mov.f32 	%f26, 0f437C0000;
-	fma.rm.f32 	%f27, %f24, %f26, %f25;
-	add.f32 	%f28, %f27, 0fCB40007F;
-	neg.f32 	%f29, %f28;
-	mov.f32 	%f30, 0f3FB8AA3B;
-	fma.rn.f32 	%f31, %f22, %f30, %f29;
+	mov.f32 	%f24, 0f3FB8AA3B;
+	mov.f32 	%f25, 0f437C0000;
+	cvt.sat.f32.f32 	%f26, %f23;
+	mov.f32 	%f27, 0f4B400001;
+	fma.rm.f32 	%f28, %f26, %f25, %f27;
+	add.f32 	%f29, %f28, 0fCB40007F;
+	neg.f32 	%f30, %f29;
+	fma.rn.f32 	%f31, %f22, %f24, %f30;
 	mov.f32 	%f32, 0f32A57060;
 	fma.rn.f32 	%f33, %f22, %f32, %f31;
 	ex2.approx.ftz.f32 	%f34, %f33;
-	mov.b32 	%r66, %f27;
+	mov.b32 	%r66, %f28;
 	shl.b32 	%r67, %r66, 23;
 	mov.b32 	%f35, %r67;
 	mul.f32 	%f36, %f34, %f35;
@@ -1580,7 +1580,7 @@ $L__BB0_10:
 
 `
 	FFT_Step_Complex_ptx_70 = `
-.version 8.4
+.version 8.2
 .target sm_70
 .address_size 64
 
@@ -1755,18 +1755,18 @@ $L__BB0_9:
 	mov.f32 	%f21, 0f3BBB989D;
 	mov.f32 	%f22, 0f00000000;
 	fma.rn.f32 	%f23, %f22, %f21, %f20;
-	cvt.sat.f32.f32 	%f24, %f23;
-	mov.f32 	%f25, 0f4B400001;
-	mov.f32 	%f26, 0f437C0000;
-	fma.rm.f32 	%f27, %f24, %f26, %f25;
-	add.f32 	%f28, %f27, 0fCB40007F;
-	neg.f32 	%f29, %f28;
-	mov.f32 	%f30, 0f3FB8AA3B;
-	fma.rn.f32 	%f31, %f22, %f30, %f29;
+	mov.f32 	%f24, 0f3FB8AA3B;
+	mov.f32 	%f25, 0f437C0000;
+	cvt.sat.f32.f32 	%f26, %f23;
+	mov.f32 	%f27, 0f4B400001;
+	fma.rm.f32 	%f28, %f26, %f25, %f27;
+	add.f32 	%f29, %f28, 0fCB40007F;
+	neg.f32 	%f30, %f29;
+	fma.rn.f32 	%f31, %f22, %f24, %f30;
 	mov.f32 	%f32, 0f32A57060;
 	fma.rn.f32 	%f33, %f22, %f32, %f31;
 	ex2.approx.ftz.f32 	%f34, %f33;
-	mov.b32 	%r67, %f27;
+	mov.b32 	%r67, %f28;
 	shl.b32 	%r68, %r67, 23;
 	mov.b32 	%f35, %r68;
 	mul.f32 	%f36, %f34, %f35;
@@ -1829,7 +1829,7 @@ $L__BB0_10:
 
 `
 	FFT_Step_Complex_ptx_72 = `
-.version 8.4
+.version 8.2
 .target sm_72
 .address_size 64
 
@@ -2004,18 +2004,18 @@ $L__BB0_9:
 	mov.f32 	%f21, 0f3BBB989D;
 	mov.f32 	%f22, 0f00000000;
 	fma.rn.f32 	%f23, %f22, %f21, %f20;
-	cvt.sat.f32.f32 	%f24, %f23;
-	mov.f32 	%f25, 0f4B400001;
-	mov.f32 	%f26, 0f437C0000;
-	fma.rm.f32 	%f27, %f24, %f26, %f25;
-	add.f32 	%f28, %f27, 0fCB40007F;
-	neg.f32 	%f29, %f28;
-	mov.f32 	%f30, 0f3FB8AA3B;
-	fma.rn.f32 	%f31, %f22, %f30, %f29;
+	mov.f32 	%f24, 0f3FB8AA3B;
+	mov.f32 	%f25, 0f437C0000;
+	cvt.sat.f32.f32 	%f26, %f23;
+	mov.f32 	%f27, 0f4B400001;
+	fma.rm.f32 	%f28, %f26, %f25, %f27;
+	add.f32 	%f29, %f28, 0fCB40007F;
+	neg.f32 	%f30, %f29;
+	fma.rn.f32 	%f31, %f22, %f24, %f30;
 	mov.f32 	%f32, 0f32A57060;
 	fma.rn.f32 	%f33, %f22, %f32, %f31;
 	ex2.approx.ftz.f32 	%f34, %f33;
-	mov.b32 	%r67, %f27;
+	mov.b32 	%r67, %f28;
 	shl.b32 	%r68, %r67, 23;
 	mov.b32 	%f35, %r68;
 	mul.f32 	%f36, %f34, %f35;
@@ -2078,7 +2078,7 @@ $L__BB0_10:
 
 `
 	FFT_Step_Complex_ptx_75 = `
-.version 8.4
+.version 8.2
 .target sm_75
 .address_size 64
 
@@ -2253,18 +2253,18 @@ $L__BB0_9:
 	mov.f32 	%f21, 0f3BBB989D;
 	mov.f32 	%f22, 0f00000000;
 	fma.rn.f32 	%f23, %f22, %f21, %f20;
-	cvt.sat.f32.f32 	%f24, %f23;
-	mov.f32 	%f25, 0f4B400001;
-	mov.f32 	%f26, 0f437C0000;
-	fma.rm.f32 	%f27, %f24, %f26, %f25;
-	add.f32 	%f28, %f27, 0fCB40007F;
-	neg.f32 	%f29, %f28;
-	mov.f32 	%f30, 0f3FB8AA3B;
-	fma.rn.f32 	%f31, %f22, %f30, %f29;
+	mov.f32 	%f24, 0f3FB8AA3B;
+	mov.f32 	%f25, 0f437C0000;
+	cvt.sat.f32.f32 	%f26, %f23;
+	mov.f32 	%f27, 0f4B400001;
+	fma.rm.f32 	%f28, %f26, %f25, %f27;
+	add.f32 	%f29, %f28, 0fCB40007F;
+	neg.f32 	%f30, %f29;
+	fma.rn.f32 	%f31, %f22, %f24, %f30;
 	mov.f32 	%f32, 0f32A57060;
 	fma.rn.f32 	%f33, %f22, %f32, %f31;
 	ex2.approx.ftz.f32 	%f34, %f33;
-	mov.b32 	%r67, %f27;
+	mov.b32 	%r67, %f28;
 	shl.b32 	%r68, %r67, 23;
 	mov.b32 	%f35, %r68;
 	mul.f32 	%f36, %f34, %f35;
@@ -2327,7 +2327,7 @@ $L__BB0_10:
 
 `
 	FFT_Step_Complex_ptx_80 = `
-.version 8.4
+.version 8.2
 .target sm_80
 .address_size 64
 
@@ -2502,18 +2502,18 @@ $L__BB0_9:
 	mov.f32 	%f21, 0f3BBB989D;
 	mov.f32 	%f22, 0f00000000;
 	fma.rn.f32 	%f23, %f22, %f21, %f20;
-	cvt.sat.f32.f32 	%f24, %f23;
-	mov.f32 	%f25, 0f4B400001;
-	mov.f32 	%f26, 0f437C0000;
-	fma.rm.f32 	%f27, %f24, %f26, %f25;
-	add.f32 	%f28, %f27, 0fCB40007F;
-	neg.f32 	%f29, %f28;
-	mov.f32 	%f30, 0f3FB8AA3B;
-	fma.rn.f32 	%f31, %f22, %f30, %f29;
+	mov.f32 	%f24, 0f3FB8AA3B;
+	mov.f32 	%f25, 0f437C0000;
+	cvt.sat.f32.f32 	%f26, %f23;
+	mov.f32 	%f27, 0f4B400001;
+	fma.rm.f32 	%f28, %f26, %f25, %f27;
+	add.f32 	%f29, %f28, 0fCB40007F;
+	neg.f32 	%f30, %f29;
+	fma.rn.f32 	%f31, %f22, %f24, %f30;
 	mov.f32 	%f32, 0f32A57060;
 	fma.rn.f32 	%f33, %f22, %f32, %f31;
 	ex2.approx.ftz.f32 	%f34, %f33;
-	mov.b32 	%r67, %f27;
+	mov.b32 	%r67, %f28;
 	shl.b32 	%r68, %r67, 23;
 	mov.b32 	%f35, %r68;
 	mul.f32 	%f36, %f34, %f35;
