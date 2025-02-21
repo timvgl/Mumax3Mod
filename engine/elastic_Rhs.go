@@ -41,10 +41,10 @@ func calcRhsRegion(dst, m, u, du, f, g *data.Slice) {
 func RightSide(dst, f, g *data.Slice, Eta, Rho *RegionwiseScalar, Bf *Excitation) {
 	//No elastodynamics is calculated if density is zero
 	if Rho.nonZero() {
-		rho, _ := Rho.Slice()
+		rho, _ := Rho.Slice("rho", true)
 		defer cuda.Recycle(rho)
 
-		eta, _ := Eta.Slice()
+		eta, _ := Eta.Slice("eta", true)
 		defer cuda.Recycle(eta)
 
 		bf, _ := Bf.Slice()

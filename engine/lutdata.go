@@ -81,8 +81,23 @@ func (p *lut) assureAlloc() {
 func (b *lut) NComp() int { return len(b.cpu_buf) }
 
 // uncompress the table to a full array with parameter values per cell.
-func (p *lut) Slice() (*data.Slice, bool) {
+func (p *lut) Slice(paramName string, param bool) (*data.Slice, bool) {
 	b := cuda.Buffer(p.NComp(), Mesh().Size())
+	if param {
+		tmp, ok := mapSetParam.Load(paramName)
+		if ok {
+			setParams := tmp.(ParameterSlice)
+			if setParams.timedependent {
+				d := GenerateSliceFromFunctionString(setParams.stringFct, Mesh())
+				setParams.d = d
+			}
+			newData := setParams.d
+			regionStart := setParams.start
+			regionEnd := setParams.end
+			data.CopyPart(b, newData, 0, regionEnd[X]-regionStart[X], 0, regionEnd[Y]-regionStart[Y], 0, regionEnd[Z]-regionStart[Z], 0, 1, regionStart[X], regionStart[Y], regionStart[Z], 0)
+			return b, true
+		}
+	}
 	p.EvalTo(b)
 	return b, true
 }

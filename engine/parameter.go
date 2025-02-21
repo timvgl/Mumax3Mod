@@ -10,6 +10,7 @@ import (
 	"math"
 	"reflect"
 	"strings"
+	"sync"
 
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/data"
@@ -18,6 +19,38 @@ import (
 )
 
 var Params map[string]field
+
+var mapSetParam sync.Map
+
+func SetParam(name string, s ParameterSlice) {
+	EraseSetExcitation(name)
+	mapSetParam.Store(name, s)
+}
+
+func EraseSetParam(name string) {
+	tmp, ok := mapSetParam.Load(name)
+	if ok {
+		s := tmp.(ParameterSlice)
+		if s.d.GPUAccess() {
+			cuda.Recycle(s.d)
+		} else {
+			s.d.Free()
+		}
+		mapSetParam.Delete(name)
+	} else {
+		panic(fmt.Sprintf("EraseSetExcitation: %s not found", name))
+	}
+}
+
+type ParameterSlice struct {
+	name          string
+	start         [3]int
+	end           [3]int
+	d             *data.Slice
+	ncomp         int
+	timedependent bool
+	stringFct     StringFunction
+}
 
 type field struct {
 	Name        string           `json:"name"`
@@ -87,8 +120,8 @@ func (p *regionwise) MSlice() cuda.MSlice {
 	if p.IsUniform() {
 		return cuda.MakeMSlice(data.NilSlice(p.NComp(), Mesh().Size()), p.getRegion(0))
 	} else {
-		buf, r := p.Slice()
-		util.Assert(r == true)
+		buf, r := p.Slice(p.name, true)
+		util.Assert(r)
 		return cuda.ToMSlice(buf)
 	}
 }
@@ -97,11 +130,11 @@ func (p *regionwise) MSliceRegion(size [3]int, offsetX, offsetY, offsetZ int) cu
 	if p.IsUniform() {
 		return cuda.MakeMSlice(data.NilSlice(p.NComp(), size), p.getRegion(0))
 	} else {
-		buf, r := p.Slice()
+		mBuf := p.MSlice()
+		buf := cuda.SliceFromMSlice(mBuf)
 		redBuf := cuda.Buffer(p.NComp(), size)
 		cuda.Crop(redBuf, buf, offsetX, offsetY, offsetZ)
-		cuda.Recycle(buf)
-		util.Assert(r == true)
+		defer mBuf.Recycle()
 		return cuda.ToMSlice(redBuf)
 	}
 }
@@ -209,6 +242,10 @@ func (p *regionwise) getRegion(region int) []float64 {
 }
 
 func (p *regionwise) IsUniform() bool {
+	_, ok := mapSetParam.Load(p.name)
+	if ok {
+		return false
+	}
 	cpu := p.cpuLUT()
 	v1 := p.getRegion(0)
 	for r := 1; r < NREGION; r++ {
@@ -307,6 +344,16 @@ func NewScalarParam(name, unit, desc string, children ...derived) *RegionwiseSca
 	return p
 }
 
+func (p *RegionwiseScalar) RenderFunction(equation StringFunction) {
+	util.AssertMsg(equation.IsScalar(), "RenderFunction: Need scalar function.")
+	d, timeDep := GenerateSliceFromFunctionStringTimeDep(equation, p.Mesh())
+	SetParam(p.name, ParameterSlice{name: p.name, start: [3]int{0, 0, 0}, end: p.Mesh().Size(), d: d, ncomp: d.NComp(), timedependent: timeDep, stringFct: equation})
+}
+
+func (p *RegionwiseScalar) RemoveRenderedFunction() {
+	EraseSetParam(p.name)
+}
+
 func (p *RegionwiseScalar) SetRegion(region int, f script.ScalarFunction) {
 	if region == -1 {
 		p.setRegionsFunc(0, NREGION, f) // uniform
@@ -393,6 +440,16 @@ func NewVectorParam(name, unit, desc string) *RegionwiseVector {
 		DeclLValue(name, p, cat(desc, unit))
 	}
 	return p
+}
+
+func (p *RegionwiseVector) RenderFunction(equation StringFunction) {
+	util.AssertMsg(!equation.IsScalar(), "RenderFunction: Need vector function.")
+	d, timeDep := GenerateSliceFromFunctionStringTimeDep(equation, p.Mesh())
+	SetParam(p.name, ParameterSlice{name: p.name, start: [3]int{0, 0, 0}, end: p.Mesh().Size(), d: d, ncomp: d.NComp(), timedependent: timeDep, stringFct: equation})
+}
+
+func (p *RegionwiseVector) RemoveRenderedFunction() {
+	EraseSetParam(p.name)
 }
 
 func (p *RegionwiseVector) SetRegion(region int, f script.VectorFunction) {

@@ -134,7 +134,7 @@ func corePosCPU() []float64 {
 	c := Mesh().CellSize()
 	pos[X] *= c[X]
 	pos[Y] *= c[Y]
-	msat, rM := Msat.Slice()
+	msat, rM := Msat.Slice("msat", true)
 	if rM {
 		defer cuda.Recycle(msat)
 	}

@@ -1,8 +1,9 @@
 package cuda
 
 import (
-	"github.com/mumax/3/data"
 	"unsafe"
+
+	"github.com/mumax/3/data"
 )
 
 // Slice + scalar multiplier.
@@ -16,6 +17,10 @@ func ToMSlice(s *data.Slice) MSlice {
 		arr: s,
 		mul: ones(s.NComp()),
 	}
+}
+
+func SliceFromMSlice(m MSlice) *data.Slice {
+	return m.arr
 }
 
 func MakeMSlice(arr *data.Slice, mul []float64) MSlice {
@@ -36,6 +41,10 @@ func (m MSlice) DevPtr(c int) unsafe.Pointer {
 
 func (m MSlice) Mul(c int) float32 {
 	return float32(m.mul[c])
+}
+
+func (m MSlice) Muls() []float64 {
+	return m.mul
 }
 
 func (m MSlice) SetMul(c int, mul float32) {
