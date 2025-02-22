@@ -23,7 +23,10 @@ var Params map[string]field
 var mapSetParam sync.Map
 
 func SetParam(name string, s ParameterSlice) {
-	EraseSetExcitation(name)
+	_, ok := mapSetParam.Load(name)
+	if ok {
+		EraseSetParam(name)
+	}
 	mapSetParam.Store(name, s)
 }
 
@@ -110,6 +113,7 @@ type regionwise struct {
 
 func (p *regionwise) init(nComp int, name, unit string, children []derived) {
 	p.lut.init(nComp, p)
+	p.lut.name = name
 	p.name = name
 	p.unit = unit
 	p.children = children
@@ -120,7 +124,7 @@ func (p *regionwise) MSlice() cuda.MSlice {
 	if p.IsUniform() {
 		return cuda.MakeMSlice(data.NilSlice(p.NComp(), Mesh().Size()), p.getRegion(0))
 	} else {
-		buf, r := p.Slice(p.name, true)
+		buf, r := p.Slice()
 		util.Assert(r)
 		return cuda.ToMSlice(buf)
 	}
@@ -140,7 +144,7 @@ func (p *regionwise) ValueAt(idx, idy, idz int) []float64 {
 	if p.IsUniform() {
 		return p.getRegion(0)
 	} else {
-		buf, r := p.Slice(p.name, true)
+		buf, r := p.Slice()
 		defer cuda.Recycle(buf)
 		util.Assert(r)
 		if p.NComp() == 1 {
@@ -362,6 +366,7 @@ func NewScalarParam(name, unit, desc string, children ...derived) *RegionwiseSca
 }
 
 func (p *RegionwiseScalar) RenderFunction(equation StringFunction) {
+	util.AssertMsg(strings.ToLower(p.name) != "aex" && strings.ToLower(p.name) != "dind" && strings.ToLower(p.name) != "dmi", "RenderFunction: Not available for exchange and DMI.")
 	util.AssertMsg(equation.IsScalar(), "RenderFunction: Need scalar function.")
 	d, timeDep := GenerateSliceFromFunctionStringTimeDep(equation, p.Mesh())
 	SetParam(p.name, ParameterSlice{name: p.name, start: [3]int{0, 0, 0}, end: p.Mesh().Size(), d: d, ncomp: d.NComp(), timedependent: timeDep, stringFct: equation})

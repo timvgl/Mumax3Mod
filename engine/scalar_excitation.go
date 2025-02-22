@@ -14,7 +14,10 @@ import (
 var mapSetScalarExcitation sync.Map
 
 func SetScalarExcitation(name string, s ScalarExcitationSlice) {
-	EraseSetScalarExcitation(name)
+	_, ok := mapSetScalarExcitation.Load(name)
+	if ok {
+		EraseSetScalarExcitation(name)
+	}
 	mapSetScalarExcitation.Store(name, s)
 }
 

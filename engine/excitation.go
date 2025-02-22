@@ -15,7 +15,10 @@ import (
 var mapSetExcitation sync.Map
 
 func SetExcitation(name string, s ExcitationSlice) {
-	EraseSetExcitation(name)
+	_, ok := mapSetExcitation.Load(name)
+	if ok {
+		EraseSetExcitation(name)
+	}
 	mapSetExcitation.Store(name, s)
 }
 

@@ -15,6 +15,7 @@ type lut struct {
 	gpu_ok  bool               // gpu cache up-to date with cpu source?
 	cpu_buf [][NREGION]float32 // table data on cpu
 	source  updater            // updates cpu data
+	name    string
 }
 
 type updater interface {
@@ -81,29 +82,14 @@ func (p *lut) assureAlloc() {
 func (b *lut) NComp() int { return len(b.cpu_buf) }
 
 // uncompress the table to a full array with parameter values per cell.
-func (p *lut) Slice(paramName string, param bool) (*data.Slice, bool) {
+func (p *lut) Slice() (*data.Slice, bool) {
 	b := cuda.Buffer(p.NComp(), Mesh().Size())
-	if param {
-		tmp, ok := mapSetParam.Load(paramName)
-		if ok {
-			setParams := tmp.(ParameterSlice)
-			if setParams.timedependent {
-				d := GenerateSliceFromFunctionString(setParams.stringFct, Mesh())
-				setParams.d = d
-			}
-			newData := setParams.d
-			regionStart := setParams.start
-			regionEnd := setParams.end
-			data.CopyPart(b, newData, 0, regionEnd[X]-regionStart[X], 0, regionEnd[Y]-regionStart[Y], 0, regionEnd[Z]-regionStart[Z], 0, 1, regionStart[X], regionStart[Y], regionStart[Z], 0)
-			return b, true
-		}
-	}
 	p.EvalTo(b)
 	return b, true
 }
 
 func (p *lut) SliceRegion(paramName string, param bool, size [3]int, offsetX, offsetY, offsetZ int) (*data.Slice, bool) {
-	b, ok := p.Slice(paramName, param)
+	b, ok := p.Slice()
 	c := cuda.Buffer(p.NComp(), size)
 	cuda.Crop(c, b, offsetX, offsetY, offsetZ)
 	if ok {
@@ -114,6 +100,19 @@ func (p *lut) SliceRegion(paramName string, param bool, size [3]int, offsetX, of
 
 // uncompress the table to a full array in the dst Slice with parameter values per cell.
 func (p *lut) EvalTo(dst *data.Slice) {
+	tmp, ok := mapSetParam.Load(p.name)
+	if ok {
+		setParams := tmp.(ParameterSlice)
+		if setParams.timedependent {
+			d := GenerateSliceFromFunctionString(setParams.stringFct, Mesh())
+			setParams.d = d
+		}
+		newData := setParams.d
+		regionStart := setParams.start
+		regionEnd := setParams.end
+		data.CopyPart(dst, newData, 0, regionEnd[X]-regionStart[X], 0, regionEnd[Y]-regionStart[Y], 0, regionEnd[Z]-regionStart[Z], 0, 1, regionStart[X], regionStart[Y], regionStart[Z], 0)
+		return
+	}
 	gpu := p.gpuLUT()
 	for c := 0; c < p.NComp(); c++ {
 		cuda.RegionDecode(dst.Comp(c), cuda.LUTPtr(gpu[c]), regions.Gpu())
