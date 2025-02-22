@@ -75,7 +75,7 @@ split_cuda_functions: cuda_functions.cu
 	./split_cuda_functions.sh
 
 # After splitting, re-run the make targets so that newly generated CUDA files are detected.
-rebuild: #split_cuda_functions
+rebuild: split_cuda_functions
 	$(MAKE) wrappers awrappers
 	@echo "Built with CUDA version $(CUDA_VERSION)"
 	go install -v
