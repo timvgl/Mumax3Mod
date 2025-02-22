@@ -205,7 +205,7 @@ func (b *thermForce) update() {
 	defer temp.Recycle()
 	for i := 0; i < 3; i++ {
 		b.generator.GenerateNormal(uintptr(noise.DevPtr(0)), int64(N), mean, stddev)
-		cuda.SetTemperatureElastic(dst.Comp(i), noise, eta, temp, float32(Dt_si), float32(1))
+		cuda.SetTemperatureElastic(dst.Comp(i), noise, eta, temp, float32(Dt_si), float32(cellVolume()))
 	}
 
 	b.step = NSteps
