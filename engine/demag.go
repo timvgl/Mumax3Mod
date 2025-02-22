@@ -135,12 +135,10 @@ func setMaskedDemagFieldRegion(dst, m *data.Slice, msat cuda.MSlice, pbcX, pbcY,
 // Sets dst to the full (unnormalized) magnetization in A/m
 func SetMFull(dst *data.Slice) {
 	// scale m by Msat...
-	msat, rM := Msat.Slice("msat", true)
-	if rM {
-		defer cuda.Recycle(msat)
-	}
+	msat := Msat.MSlice()
+	defer msat.Recycle()
 	for c := 0; c < 3; c++ {
-		cuda.Mul(dst.Comp(c), M.Buffer().Comp(c), msat)
+		cuda.MulMSlice(dst.Comp(c), cuda.ToMSlice(M.Buffer().Comp(c)), msat)
 	}
 
 	// ...and by cell volume if applicable

@@ -27,6 +27,23 @@ func Mul(dst, a, b *data.Slice) {
 	}
 }
 
+func MulMSlice(dst *data.Slice, a, b MSlice) {
+	N := dst.Len()
+	nComp := dst.NComp()
+	util.Assert(a.Len() == N && a.NComp() == nComp && b.Len() == N && b.NComp() == nComp || a.Len() == N && a.NComp() == nComp && b.Len() == N && b.NComp() == 1)
+	cfg := make1DConf(N)
+	if b.NComp() == a.NComp() {
+		for c := 0; c < nComp; c++ {
+			k_mul_mslice_async(dst.DevPtr(c), a.DevPtr(c), a.Mul(c), b.DevPtr(c), b.Mul(c), N, cfg)
+		}
+	}
+	if b.NComp() != a.NComp() && b.NComp() == 1 {
+		for c := 0; c < nComp; c++ {
+			k_mul_mslice_async(dst.DevPtr(c), a.DevPtr(c), a.Mul(c), b.DevPtr(0), b.Mul(0), N, cfg)
+		}
+	}
+}
+
 // divide: dst[i] = a[i] / b[i]
 // divide-by-zero yields zero.
 func Div(dst, a, b *data.Slice) {
@@ -42,6 +59,22 @@ func Div(dst, a, b *data.Slice) {
 	if b.NComp() != a.NComp() && b.NComp() == 1 {
 		for c := 0; c < nComp; c++ {
 			k_pointwise_div_async(dst.DevPtr(c), a.DevPtr(c), b.DevPtr(0), N, cfg)
+		}
+	}
+}
+func DivMSlice(dst *data.Slice, a, b MSlice) {
+	N := dst.Len()
+	nComp := dst.NComp()
+	util.Assert(a.Len() == N && a.NComp() == nComp && b.Len() == N && b.NComp() == nComp || a.Len() == N && a.NComp() == nComp && b.Len() == N && b.NComp() == 1)
+	cfg := make1DConf(N)
+	if b.NComp() == a.NComp() {
+		for c := 0; c < nComp; c++ {
+			k_pointwise_div_mslice_async(dst.DevPtr(c), a.DevPtr(c), a.Mul(c), b.DevPtr(c), b.Mul(c), N, cfg)
+		}
+	}
+	if b.NComp() != a.NComp() && b.NComp() == 1 {
+		for c := 0; c < nComp; c++ {
+			k_pointwise_div_mslice_async(dst.DevPtr(c), a.DevPtr(c), a.Mul(c), b.DevPtr(0), b.Mul(0), N, cfg)
 		}
 	}
 }

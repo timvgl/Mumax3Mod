@@ -19,8 +19,8 @@ func GetKineticEnergy(dst *data.Slice) {
 }
 
 func KineticEnergyDens(dst *data.Slice, DU firstDerivative, Rho *RegionwiseScalar) {
-	rho, _ := Rho.Slice("", false)
-	defer cuda.Recycle(rho)
+	rho := Rho.MSlice()
+	defer rho.Recycle()
 	cuda.KineticEnergy(dst, DU.Buffer(), rho, U.Mesh())
 }
 

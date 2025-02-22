@@ -134,12 +134,8 @@ func corePosCPU() []float64 {
 	c := Mesh().CellSize()
 	pos[X] *= c[X]
 	pos[Y] *= c[Y]
-	msat, rM := Msat.Slice("msat", true)
-	if rM {
-		defer cuda.Recycle(msat)
-	}
-	pos[Z] = float64(m_z[maxZ][maxY][maxX]) / float64(msat.HostCopy().Scalars()[maxZ][maxY][maxX]) // 3rd coordinate is core polarization
-	pos[X] += GetShiftPos()                                                                        // add simulation window shift
+	pos[Z] = float64(m_z[maxZ][maxY][maxX]) / Msat.ValueAt(maxX, maxY, maxZ)[0] // 3rd coordinate is core polarization
+	pos[X] += GetShiftPos()                                                     // add simulation window shift
 	CorePosRT = pos
 	return pos
 }

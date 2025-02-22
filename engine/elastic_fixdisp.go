@@ -1,6 +1,8 @@
 package engine
 
 import (
+	"fmt"
+
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/data"
 )
@@ -13,6 +15,7 @@ var (
 
 func FreezeDisp(dst *data.Slice) {
 	if !FrozenDispLoc.isZero() {
+		fmt.Println("heres")
 		//Us, _ := U.Slice()
 		//defer cuda.Recycle(Us)
 

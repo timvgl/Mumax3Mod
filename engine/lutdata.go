@@ -102,12 +102,13 @@ func (p *lut) Slice(paramName string, param bool) (*data.Slice, bool) {
 	return b, true
 }
 
-func (p *lut) SliceRegion(size [3]int, offsetX, offsetY, offsetZ int) (*data.Slice, bool) {
-	b := cuda.Buffer(p.NComp(), Mesh().Size())
-	p.EvalTo(b)
+func (p *lut) SliceRegion(paramName string, param bool, size [3]int, offsetX, offsetY, offsetZ int) (*data.Slice, bool) {
+	b, ok := p.Slice(paramName, param)
 	c := cuda.Buffer(p.NComp(), size)
 	cuda.Crop(c, b, offsetX, offsetY, offsetZ)
-	cuda.Recycle(b)
+	if ok {
+		cuda.Recycle(b)
+	}
 	return c, true
 }
 

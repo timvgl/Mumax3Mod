@@ -17,15 +17,16 @@ var KineticEnergy_code cu.Function
 
 // Stores the arguments for KineticEnergy kernel invocation
 type KineticEnergy_args_t struct {
-	arg_energy unsafe.Pointer
-	arg_dux    unsafe.Pointer
-	arg_duy    unsafe.Pointer
-	arg_duz    unsafe.Pointer
-	arg_rho    unsafe.Pointer
-	arg_Nx     int
-	arg_Ny     int
-	arg_Nz     int
-	argptr     [8]unsafe.Pointer
+	arg_energy  unsafe.Pointer
+	arg_dux     unsafe.Pointer
+	arg_duy     unsafe.Pointer
+	arg_duz     unsafe.Pointer
+	arg_rho_    unsafe.Pointer
+	arg_rho_mul float32
+	arg_Nx      int
+	arg_Ny      int
+	arg_Nz      int
+	argptr      [9]unsafe.Pointer
 	sync.Mutex
 }
 
@@ -38,14 +39,15 @@ func init() {
 	KineticEnergy_args.argptr[1] = unsafe.Pointer(&KineticEnergy_args.arg_dux)
 	KineticEnergy_args.argptr[2] = unsafe.Pointer(&KineticEnergy_args.arg_duy)
 	KineticEnergy_args.argptr[3] = unsafe.Pointer(&KineticEnergy_args.arg_duz)
-	KineticEnergy_args.argptr[4] = unsafe.Pointer(&KineticEnergy_args.arg_rho)
-	KineticEnergy_args.argptr[5] = unsafe.Pointer(&KineticEnergy_args.arg_Nx)
-	KineticEnergy_args.argptr[6] = unsafe.Pointer(&KineticEnergy_args.arg_Ny)
-	KineticEnergy_args.argptr[7] = unsafe.Pointer(&KineticEnergy_args.arg_Nz)
+	KineticEnergy_args.argptr[4] = unsafe.Pointer(&KineticEnergy_args.arg_rho_)
+	KineticEnergy_args.argptr[5] = unsafe.Pointer(&KineticEnergy_args.arg_rho_mul)
+	KineticEnergy_args.argptr[6] = unsafe.Pointer(&KineticEnergy_args.arg_Nx)
+	KineticEnergy_args.argptr[7] = unsafe.Pointer(&KineticEnergy_args.arg_Ny)
+	KineticEnergy_args.argptr[8] = unsafe.Pointer(&KineticEnergy_args.arg_Nz)
 }
 
 // Wrapper for KineticEnergy CUDA kernel, asynchronous.
-func k_KineticEnergy_async(energy unsafe.Pointer, dux unsafe.Pointer, duy unsafe.Pointer, duz unsafe.Pointer, rho unsafe.Pointer, Nx int, Ny int, Nz int, cfg *config) {
+func k_KineticEnergy_async(energy unsafe.Pointer, dux unsafe.Pointer, duy unsafe.Pointer, duz unsafe.Pointer, rho_ unsafe.Pointer, rho_mul float32, Nx int, Ny int, Nz int, cfg *config) {
 	if Synchronous { // debug
 		Sync()
 		timer.Start("KineticEnergy")
@@ -62,7 +64,8 @@ func k_KineticEnergy_async(energy unsafe.Pointer, dux unsafe.Pointer, duy unsafe
 	KineticEnergy_args.arg_dux = dux
 	KineticEnergy_args.arg_duy = duy
 	KineticEnergy_args.arg_duz = duz
-	KineticEnergy_args.arg_rho = rho
+	KineticEnergy_args.arg_rho_ = rho_
+	KineticEnergy_args.arg_rho_mul = rho_mul
 	KineticEnergy_args.arg_Nx = Nx
 	KineticEnergy_args.arg_Ny = Ny
 	KineticEnergy_args.arg_Nz = Nz
@@ -104,16 +107,17 @@ const (
 	.param .u64 KineticEnergy_param_2,
 	.param .u64 KineticEnergy_param_3,
 	.param .u64 KineticEnergy_param_4,
-	.param .u32 KineticEnergy_param_5,
+	.param .f32 KineticEnergy_param_5,
 	.param .u32 KineticEnergy_param_6,
-	.param .u32 KineticEnergy_param_7
+	.param .u32 KineticEnergy_param_7,
+	.param .u32 KineticEnergy_param_8
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<9>;
+	.reg .pred 	%p<7>;
+	.reg .f32 	%f<13>;
 	.reg .b32 	%r<18>;
 	.reg .f64 	%fd<5>;
-	.reg .b64 	%rd<17>;
+	.reg .b64 	%rd<18>;
 
 
 	ld.param.u64 	%rd1, [KineticEnergy_param_0];
@@ -121,56 +125,64 @@ const (
 	ld.param.u64 	%rd3, [KineticEnergy_param_2];
 	ld.param.u64 	%rd4, [KineticEnergy_param_3];
 	ld.param.u64 	%rd5, [KineticEnergy_param_4];
-	ld.param.u32 	%r4, [KineticEnergy_param_5];
+	ld.param.f32 	%f12, [KineticEnergy_param_5];
 	ld.param.u32 	%r5, [KineticEnergy_param_6];
 	ld.param.u32 	%r6, [KineticEnergy_param_7];
-	mov.u32 	%r7, %ctaid.x;
+	ld.param.u32 	%r7, [KineticEnergy_param_8];
 	mov.u32 	%r8, %ntid.x;
-	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r7, %r8, %r9;
-	mov.u32 	%r10, %ntid.y;
-	mov.u32 	%r11, %ctaid.y;
-	mov.u32 	%r12, %tid.y;
-	mad.lo.s32 	%r2, %r11, %r10, %r12;
-	mov.u32 	%r13, %ntid.z;
-	mov.u32 	%r14, %ctaid.z;
-	mov.u32 	%r15, %tid.z;
-	mad.lo.s32 	%r3, %r14, %r13, %r15;
-	setp.ge.s32 	%p1, %r1, %r4;
-	setp.ge.s32 	%p2, %r2, %r5;
+	mov.u32 	%r9, %ctaid.x;
+	mov.u32 	%r10, %tid.x;
+	mad.lo.s32 	%r1, %r9, %r8, %r10;
+	mov.u32 	%r11, %ntid.y;
+	mov.u32 	%r12, %ctaid.y;
+	mov.u32 	%r13, %tid.y;
+	mad.lo.s32 	%r2, %r12, %r11, %r13;
+	mov.u32 	%r14, %ntid.z;
+	mov.u32 	%r15, %ctaid.z;
+	mov.u32 	%r16, %tid.z;
+	mad.lo.s32 	%r3, %r15, %r14, %r16;
+	setp.ge.s32 	%p1, %r1, %r5;
+	setp.ge.s32 	%p2, %r2, %r6;
 	or.pred  	%p3, %p1, %p2;
-	setp.ge.s32 	%p4, %r3, %r6;
+	setp.ge.s32 	%p4, %r3, %r7;
 	or.pred  	%p5, %p3, %p4;
-	@%p5 bra 	$L__BB0_2;
+	@%p5 bra 	$L__BB0_4;
 
-	cvta.to.global.u64 	%rd6, %rd2;
-	mad.lo.s32 	%r16, %r3, %r5, %r2;
-	mad.lo.s32 	%r17, %r16, %r4, %r1;
-	cvta.to.global.u64 	%rd7, %rd5;
-	mul.wide.s32 	%rd8, %r17, 4;
-	add.s64 	%rd9, %rd7, %rd8;
-	ld.global.nc.f32 	%f1, [%rd9];
-	cvt.f64.f32 	%fd1, %f1;
+	mad.lo.s32 	%r17, %r3, %r6, %r2;
+	mad.lo.s32 	%r4, %r17, %r5, %r1;
+	setp.eq.s64 	%p6, %rd5, 0;
+	@%p6 bra 	$L__BB0_3;
+
+	cvta.to.global.u64 	%rd6, %rd5;
+	mul.wide.s32 	%rd7, %r4, 4;
+	add.s64 	%rd8, %rd6, %rd7;
+	ld.global.nc.f32 	%f4, [%rd8];
+	mul.f32 	%f12, %f4, %f12;
+
+$L__BB0_3:
+	cvt.f64.f32 	%fd1, %f12;
 	mul.f64 	%fd2, %fd1, 0d3FE0000000000000;
-	add.s64 	%rd10, %rd6, %rd8;
-	ld.global.nc.f32 	%f2, [%rd10];
-	cvta.to.global.u64 	%rd11, %rd3;
-	add.s64 	%rd12, %rd11, %rd8;
-	ld.global.nc.f32 	%f3, [%rd12];
-	mul.f32 	%f4, %f3, %f3;
-	fma.rn.f32 	%f5, %f2, %f2, %f4;
-	cvta.to.global.u64 	%rd13, %rd4;
-	add.s64 	%rd14, %rd13, %rd8;
-	ld.global.nc.f32 	%f6, [%rd14];
-	fma.rn.f32 	%f7, %f6, %f6, %f5;
-	cvt.f64.f32 	%fd3, %f7;
+	cvta.to.global.u64 	%rd9, %rd2;
+	mul.wide.s32 	%rd10, %r4, 4;
+	add.s64 	%rd11, %rd9, %rd10;
+	ld.global.nc.f32 	%f5, [%rd11];
+	cvta.to.global.u64 	%rd12, %rd3;
+	add.s64 	%rd13, %rd12, %rd10;
+	ld.global.nc.f32 	%f6, [%rd13];
+	mul.f32 	%f7, %f6, %f6;
+	fma.rn.f32 	%f8, %f5, %f5, %f7;
+	cvta.to.global.u64 	%rd14, %rd4;
+	add.s64 	%rd15, %rd14, %rd10;
+	ld.global.nc.f32 	%f9, [%rd15];
+	fma.rn.f32 	%f10, %f9, %f9, %f8;
+	cvt.f64.f32 	%fd3, %f10;
 	mul.f64 	%fd4, %fd2, %fd3;
-	cvt.rn.f32.f64 	%f8, %fd4;
-	cvta.to.global.u64 	%rd15, %rd1;
-	add.s64 	%rd16, %rd15, %rd8;
-	st.global.f32 	[%rd16], %f8;
+	cvt.rn.f32.f64 	%f11, %fd4;
+	cvta.to.global.u64 	%rd16, %rd1;
+	add.s64 	%rd17, %rd16, %rd10;
+	st.global.f32 	[%rd17], %f11;
 
-$L__BB0_2:
+$L__BB0_4:
 	ret;
 
 }
@@ -189,16 +201,17 @@ $L__BB0_2:
 	.param .u64 KineticEnergy_param_2,
 	.param .u64 KineticEnergy_param_3,
 	.param .u64 KineticEnergy_param_4,
-	.param .u32 KineticEnergy_param_5,
+	.param .f32 KineticEnergy_param_5,
 	.param .u32 KineticEnergy_param_6,
-	.param .u32 KineticEnergy_param_7
+	.param .u32 KineticEnergy_param_7,
+	.param .u32 KineticEnergy_param_8
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<9>;
+	.reg .pred 	%p<7>;
+	.reg .f32 	%f<13>;
 	.reg .b32 	%r<18>;
 	.reg .f64 	%fd<5>;
-	.reg .b64 	%rd<17>;
+	.reg .b64 	%rd<18>;
 
 
 	ld.param.u64 	%rd1, [KineticEnergy_param_0];
@@ -206,56 +219,64 @@ $L__BB0_2:
 	ld.param.u64 	%rd3, [KineticEnergy_param_2];
 	ld.param.u64 	%rd4, [KineticEnergy_param_3];
 	ld.param.u64 	%rd5, [KineticEnergy_param_4];
-	ld.param.u32 	%r4, [KineticEnergy_param_5];
+	ld.param.f32 	%f12, [KineticEnergy_param_5];
 	ld.param.u32 	%r5, [KineticEnergy_param_6];
 	ld.param.u32 	%r6, [KineticEnergy_param_7];
-	mov.u32 	%r7, %ctaid.x;
+	ld.param.u32 	%r7, [KineticEnergy_param_8];
 	mov.u32 	%r8, %ntid.x;
-	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r7, %r8, %r9;
-	mov.u32 	%r10, %ntid.y;
-	mov.u32 	%r11, %ctaid.y;
-	mov.u32 	%r12, %tid.y;
-	mad.lo.s32 	%r2, %r11, %r10, %r12;
-	mov.u32 	%r13, %ntid.z;
-	mov.u32 	%r14, %ctaid.z;
-	mov.u32 	%r15, %tid.z;
-	mad.lo.s32 	%r3, %r14, %r13, %r15;
-	setp.ge.s32 	%p1, %r1, %r4;
-	setp.ge.s32 	%p2, %r2, %r5;
+	mov.u32 	%r9, %ctaid.x;
+	mov.u32 	%r10, %tid.x;
+	mad.lo.s32 	%r1, %r9, %r8, %r10;
+	mov.u32 	%r11, %ntid.y;
+	mov.u32 	%r12, %ctaid.y;
+	mov.u32 	%r13, %tid.y;
+	mad.lo.s32 	%r2, %r12, %r11, %r13;
+	mov.u32 	%r14, %ntid.z;
+	mov.u32 	%r15, %ctaid.z;
+	mov.u32 	%r16, %tid.z;
+	mad.lo.s32 	%r3, %r15, %r14, %r16;
+	setp.ge.s32 	%p1, %r1, %r5;
+	setp.ge.s32 	%p2, %r2, %r6;
 	or.pred  	%p3, %p1, %p2;
-	setp.ge.s32 	%p4, %r3, %r6;
+	setp.ge.s32 	%p4, %r3, %r7;
 	or.pred  	%p5, %p3, %p4;
-	@%p5 bra 	$L__BB0_2;
+	@%p5 bra 	$L__BB0_4;
 
-	cvta.to.global.u64 	%rd6, %rd2;
-	mad.lo.s32 	%r16, %r3, %r5, %r2;
-	mad.lo.s32 	%r17, %r16, %r4, %r1;
-	cvta.to.global.u64 	%rd7, %rd5;
-	mul.wide.s32 	%rd8, %r17, 4;
-	add.s64 	%rd9, %rd7, %rd8;
-	ld.global.nc.f32 	%f1, [%rd9];
-	cvt.f64.f32 	%fd1, %f1;
+	mad.lo.s32 	%r17, %r3, %r6, %r2;
+	mad.lo.s32 	%r4, %r17, %r5, %r1;
+	setp.eq.s64 	%p6, %rd5, 0;
+	@%p6 bra 	$L__BB0_3;
+
+	cvta.to.global.u64 	%rd6, %rd5;
+	mul.wide.s32 	%rd7, %r4, 4;
+	add.s64 	%rd8, %rd6, %rd7;
+	ld.global.nc.f32 	%f4, [%rd8];
+	mul.f32 	%f12, %f4, %f12;
+
+$L__BB0_3:
+	cvt.f64.f32 	%fd1, %f12;
 	mul.f64 	%fd2, %fd1, 0d3FE0000000000000;
-	add.s64 	%rd10, %rd6, %rd8;
-	ld.global.nc.f32 	%f2, [%rd10];
-	cvta.to.global.u64 	%rd11, %rd3;
-	add.s64 	%rd12, %rd11, %rd8;
-	ld.global.nc.f32 	%f3, [%rd12];
-	mul.f32 	%f4, %f3, %f3;
-	fma.rn.f32 	%f5, %f2, %f2, %f4;
-	cvta.to.global.u64 	%rd13, %rd4;
-	add.s64 	%rd14, %rd13, %rd8;
-	ld.global.nc.f32 	%f6, [%rd14];
-	fma.rn.f32 	%f7, %f6, %f6, %f5;
-	cvt.f64.f32 	%fd3, %f7;
+	cvta.to.global.u64 	%rd9, %rd2;
+	mul.wide.s32 	%rd10, %r4, 4;
+	add.s64 	%rd11, %rd9, %rd10;
+	ld.global.nc.f32 	%f5, [%rd11];
+	cvta.to.global.u64 	%rd12, %rd3;
+	add.s64 	%rd13, %rd12, %rd10;
+	ld.global.nc.f32 	%f6, [%rd13];
+	mul.f32 	%f7, %f6, %f6;
+	fma.rn.f32 	%f8, %f5, %f5, %f7;
+	cvta.to.global.u64 	%rd14, %rd4;
+	add.s64 	%rd15, %rd14, %rd10;
+	ld.global.nc.f32 	%f9, [%rd15];
+	fma.rn.f32 	%f10, %f9, %f9, %f8;
+	cvt.f64.f32 	%fd3, %f10;
 	mul.f64 	%fd4, %fd2, %fd3;
-	cvt.rn.f32.f64 	%f8, %fd4;
-	cvta.to.global.u64 	%rd15, %rd1;
-	add.s64 	%rd16, %rd15, %rd8;
-	st.global.f32 	[%rd16], %f8;
+	cvt.rn.f32.f64 	%f11, %fd4;
+	cvta.to.global.u64 	%rd16, %rd1;
+	add.s64 	%rd17, %rd16, %rd10;
+	st.global.f32 	[%rd17], %f11;
 
-$L__BB0_2:
+$L__BB0_4:
 	ret;
 
 }
@@ -274,16 +295,17 @@ $L__BB0_2:
 	.param .u64 KineticEnergy_param_2,
 	.param .u64 KineticEnergy_param_3,
 	.param .u64 KineticEnergy_param_4,
-	.param .u32 KineticEnergy_param_5,
+	.param .f32 KineticEnergy_param_5,
 	.param .u32 KineticEnergy_param_6,
-	.param .u32 KineticEnergy_param_7
+	.param .u32 KineticEnergy_param_7,
+	.param .u32 KineticEnergy_param_8
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<9>;
+	.reg .pred 	%p<7>;
+	.reg .f32 	%f<13>;
 	.reg .b32 	%r<18>;
 	.reg .f64 	%fd<5>;
-	.reg .b64 	%rd<17>;
+	.reg .b64 	%rd<18>;
 
 
 	ld.param.u64 	%rd1, [KineticEnergy_param_0];
@@ -291,56 +313,64 @@ $L__BB0_2:
 	ld.param.u64 	%rd3, [KineticEnergy_param_2];
 	ld.param.u64 	%rd4, [KineticEnergy_param_3];
 	ld.param.u64 	%rd5, [KineticEnergy_param_4];
-	ld.param.u32 	%r4, [KineticEnergy_param_5];
+	ld.param.f32 	%f12, [KineticEnergy_param_5];
 	ld.param.u32 	%r5, [KineticEnergy_param_6];
 	ld.param.u32 	%r6, [KineticEnergy_param_7];
-	mov.u32 	%r7, %ctaid.x;
+	ld.param.u32 	%r7, [KineticEnergy_param_8];
 	mov.u32 	%r8, %ntid.x;
-	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r7, %r8, %r9;
-	mov.u32 	%r10, %ntid.y;
-	mov.u32 	%r11, %ctaid.y;
-	mov.u32 	%r12, %tid.y;
-	mad.lo.s32 	%r2, %r11, %r10, %r12;
-	mov.u32 	%r13, %ntid.z;
-	mov.u32 	%r14, %ctaid.z;
-	mov.u32 	%r15, %tid.z;
-	mad.lo.s32 	%r3, %r14, %r13, %r15;
-	setp.ge.s32 	%p1, %r1, %r4;
-	setp.ge.s32 	%p2, %r2, %r5;
+	mov.u32 	%r9, %ctaid.x;
+	mov.u32 	%r10, %tid.x;
+	mad.lo.s32 	%r1, %r9, %r8, %r10;
+	mov.u32 	%r11, %ntid.y;
+	mov.u32 	%r12, %ctaid.y;
+	mov.u32 	%r13, %tid.y;
+	mad.lo.s32 	%r2, %r12, %r11, %r13;
+	mov.u32 	%r14, %ntid.z;
+	mov.u32 	%r15, %ctaid.z;
+	mov.u32 	%r16, %tid.z;
+	mad.lo.s32 	%r3, %r15, %r14, %r16;
+	setp.ge.s32 	%p1, %r1, %r5;
+	setp.ge.s32 	%p2, %r2, %r6;
 	or.pred  	%p3, %p1, %p2;
-	setp.ge.s32 	%p4, %r3, %r6;
+	setp.ge.s32 	%p4, %r3, %r7;
 	or.pred  	%p5, %p3, %p4;
-	@%p5 bra 	$L__BB0_2;
+	@%p5 bra 	$L__BB0_4;
 
-	cvta.to.global.u64 	%rd6, %rd2;
-	mad.lo.s32 	%r16, %r3, %r5, %r2;
-	mad.lo.s32 	%r17, %r16, %r4, %r1;
-	cvta.to.global.u64 	%rd7, %rd5;
-	mul.wide.s32 	%rd8, %r17, 4;
-	add.s64 	%rd9, %rd7, %rd8;
-	ld.global.nc.f32 	%f1, [%rd9];
-	cvt.f64.f32 	%fd1, %f1;
+	mad.lo.s32 	%r17, %r3, %r6, %r2;
+	mad.lo.s32 	%r4, %r17, %r5, %r1;
+	setp.eq.s64 	%p6, %rd5, 0;
+	@%p6 bra 	$L__BB0_3;
+
+	cvta.to.global.u64 	%rd6, %rd5;
+	mul.wide.s32 	%rd7, %r4, 4;
+	add.s64 	%rd8, %rd6, %rd7;
+	ld.global.nc.f32 	%f4, [%rd8];
+	mul.f32 	%f12, %f4, %f12;
+
+$L__BB0_3:
+	cvt.f64.f32 	%fd1, %f12;
 	mul.f64 	%fd2, %fd1, 0d3FE0000000000000;
-	add.s64 	%rd10, %rd6, %rd8;
-	ld.global.nc.f32 	%f2, [%rd10];
-	cvta.to.global.u64 	%rd11, %rd3;
-	add.s64 	%rd12, %rd11, %rd8;
-	ld.global.nc.f32 	%f3, [%rd12];
-	mul.f32 	%f4, %f3, %f3;
-	fma.rn.f32 	%f5, %f2, %f2, %f4;
-	cvta.to.global.u64 	%rd13, %rd4;
-	add.s64 	%rd14, %rd13, %rd8;
-	ld.global.nc.f32 	%f6, [%rd14];
-	fma.rn.f32 	%f7, %f6, %f6, %f5;
-	cvt.f64.f32 	%fd3, %f7;
+	cvta.to.global.u64 	%rd9, %rd2;
+	mul.wide.s32 	%rd10, %r4, 4;
+	add.s64 	%rd11, %rd9, %rd10;
+	ld.global.nc.f32 	%f5, [%rd11];
+	cvta.to.global.u64 	%rd12, %rd3;
+	add.s64 	%rd13, %rd12, %rd10;
+	ld.global.nc.f32 	%f6, [%rd13];
+	mul.f32 	%f7, %f6, %f6;
+	fma.rn.f32 	%f8, %f5, %f5, %f7;
+	cvta.to.global.u64 	%rd14, %rd4;
+	add.s64 	%rd15, %rd14, %rd10;
+	ld.global.nc.f32 	%f9, [%rd15];
+	fma.rn.f32 	%f10, %f9, %f9, %f8;
+	cvt.f64.f32 	%fd3, %f10;
 	mul.f64 	%fd4, %fd2, %fd3;
-	cvt.rn.f32.f64 	%f8, %fd4;
-	cvta.to.global.u64 	%rd15, %rd1;
-	add.s64 	%rd16, %rd15, %rd8;
-	st.global.f32 	[%rd16], %f8;
+	cvt.rn.f32.f64 	%f11, %fd4;
+	cvta.to.global.u64 	%rd16, %rd1;
+	add.s64 	%rd17, %rd16, %rd10;
+	st.global.f32 	[%rd17], %f11;
 
-$L__BB0_2:
+$L__BB0_4:
 	ret;
 
 }
@@ -359,16 +389,17 @@ $L__BB0_2:
 	.param .u64 KineticEnergy_param_2,
 	.param .u64 KineticEnergy_param_3,
 	.param .u64 KineticEnergy_param_4,
-	.param .u32 KineticEnergy_param_5,
+	.param .f32 KineticEnergy_param_5,
 	.param .u32 KineticEnergy_param_6,
-	.param .u32 KineticEnergy_param_7
+	.param .u32 KineticEnergy_param_7,
+	.param .u32 KineticEnergy_param_8
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<9>;
+	.reg .pred 	%p<7>;
+	.reg .f32 	%f<13>;
 	.reg .b32 	%r<18>;
 	.reg .f64 	%fd<5>;
-	.reg .b64 	%rd<17>;
+	.reg .b64 	%rd<18>;
 
 
 	ld.param.u64 	%rd1, [KineticEnergy_param_0];
@@ -376,56 +407,64 @@ $L__BB0_2:
 	ld.param.u64 	%rd3, [KineticEnergy_param_2];
 	ld.param.u64 	%rd4, [KineticEnergy_param_3];
 	ld.param.u64 	%rd5, [KineticEnergy_param_4];
-	ld.param.u32 	%r4, [KineticEnergy_param_5];
+	ld.param.f32 	%f12, [KineticEnergy_param_5];
 	ld.param.u32 	%r5, [KineticEnergy_param_6];
 	ld.param.u32 	%r6, [KineticEnergy_param_7];
-	mov.u32 	%r7, %ctaid.x;
+	ld.param.u32 	%r7, [KineticEnergy_param_8];
 	mov.u32 	%r8, %ntid.x;
-	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r7, %r8, %r9;
-	mov.u32 	%r10, %ntid.y;
-	mov.u32 	%r11, %ctaid.y;
-	mov.u32 	%r12, %tid.y;
-	mad.lo.s32 	%r2, %r11, %r10, %r12;
-	mov.u32 	%r13, %ntid.z;
-	mov.u32 	%r14, %ctaid.z;
-	mov.u32 	%r15, %tid.z;
-	mad.lo.s32 	%r3, %r14, %r13, %r15;
-	setp.ge.s32 	%p1, %r1, %r4;
-	setp.ge.s32 	%p2, %r2, %r5;
+	mov.u32 	%r9, %ctaid.x;
+	mov.u32 	%r10, %tid.x;
+	mad.lo.s32 	%r1, %r9, %r8, %r10;
+	mov.u32 	%r11, %ntid.y;
+	mov.u32 	%r12, %ctaid.y;
+	mov.u32 	%r13, %tid.y;
+	mad.lo.s32 	%r2, %r12, %r11, %r13;
+	mov.u32 	%r14, %ntid.z;
+	mov.u32 	%r15, %ctaid.z;
+	mov.u32 	%r16, %tid.z;
+	mad.lo.s32 	%r3, %r15, %r14, %r16;
+	setp.ge.s32 	%p1, %r1, %r5;
+	setp.ge.s32 	%p2, %r2, %r6;
 	or.pred  	%p3, %p1, %p2;
-	setp.ge.s32 	%p4, %r3, %r6;
+	setp.ge.s32 	%p4, %r3, %r7;
 	or.pred  	%p5, %p3, %p4;
-	@%p5 bra 	$L__BB0_2;
+	@%p5 bra 	$L__BB0_4;
 
-	cvta.to.global.u64 	%rd6, %rd2;
-	mad.lo.s32 	%r16, %r3, %r5, %r2;
-	mad.lo.s32 	%r17, %r16, %r4, %r1;
-	cvta.to.global.u64 	%rd7, %rd5;
-	mul.wide.s32 	%rd8, %r17, 4;
-	add.s64 	%rd9, %rd7, %rd8;
-	ld.global.nc.f32 	%f1, [%rd9];
-	cvt.f64.f32 	%fd1, %f1;
+	mad.lo.s32 	%r17, %r3, %r6, %r2;
+	mad.lo.s32 	%r4, %r17, %r5, %r1;
+	setp.eq.s64 	%p6, %rd5, 0;
+	@%p6 bra 	$L__BB0_3;
+
+	cvta.to.global.u64 	%rd6, %rd5;
+	mul.wide.s32 	%rd7, %r4, 4;
+	add.s64 	%rd8, %rd6, %rd7;
+	ld.global.nc.f32 	%f4, [%rd8];
+	mul.f32 	%f12, %f4, %f12;
+
+$L__BB0_3:
+	cvt.f64.f32 	%fd1, %f12;
 	mul.f64 	%fd2, %fd1, 0d3FE0000000000000;
-	add.s64 	%rd10, %rd6, %rd8;
-	ld.global.nc.f32 	%f2, [%rd10];
-	cvta.to.global.u64 	%rd11, %rd3;
-	add.s64 	%rd12, %rd11, %rd8;
-	ld.global.nc.f32 	%f3, [%rd12];
-	mul.f32 	%f4, %f3, %f3;
-	fma.rn.f32 	%f5, %f2, %f2, %f4;
-	cvta.to.global.u64 	%rd13, %rd4;
-	add.s64 	%rd14, %rd13, %rd8;
-	ld.global.nc.f32 	%f6, [%rd14];
-	fma.rn.f32 	%f7, %f6, %f6, %f5;
-	cvt.f64.f32 	%fd3, %f7;
+	cvta.to.global.u64 	%rd9, %rd2;
+	mul.wide.s32 	%rd10, %r4, 4;
+	add.s64 	%rd11, %rd9, %rd10;
+	ld.global.nc.f32 	%f5, [%rd11];
+	cvta.to.global.u64 	%rd12, %rd3;
+	add.s64 	%rd13, %rd12, %rd10;
+	ld.global.nc.f32 	%f6, [%rd13];
+	mul.f32 	%f7, %f6, %f6;
+	fma.rn.f32 	%f8, %f5, %f5, %f7;
+	cvta.to.global.u64 	%rd14, %rd4;
+	add.s64 	%rd15, %rd14, %rd10;
+	ld.global.nc.f32 	%f9, [%rd15];
+	fma.rn.f32 	%f10, %f9, %f9, %f8;
+	cvt.f64.f32 	%fd3, %f10;
 	mul.f64 	%fd4, %fd2, %fd3;
-	cvt.rn.f32.f64 	%f8, %fd4;
-	cvta.to.global.u64 	%rd15, %rd1;
-	add.s64 	%rd16, %rd15, %rd8;
-	st.global.f32 	[%rd16], %f8;
+	cvt.rn.f32.f64 	%f11, %fd4;
+	cvta.to.global.u64 	%rd16, %rd1;
+	add.s64 	%rd17, %rd16, %rd10;
+	st.global.f32 	[%rd17], %f11;
 
-$L__BB0_2:
+$L__BB0_4:
 	ret;
 
 }
@@ -444,16 +483,17 @@ $L__BB0_2:
 	.param .u64 KineticEnergy_param_2,
 	.param .u64 KineticEnergy_param_3,
 	.param .u64 KineticEnergy_param_4,
-	.param .u32 KineticEnergy_param_5,
+	.param .f32 KineticEnergy_param_5,
 	.param .u32 KineticEnergy_param_6,
-	.param .u32 KineticEnergy_param_7
+	.param .u32 KineticEnergy_param_7,
+	.param .u32 KineticEnergy_param_8
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<9>;
+	.reg .pred 	%p<7>;
+	.reg .f32 	%f<13>;
 	.reg .b32 	%r<18>;
 	.reg .f64 	%fd<5>;
-	.reg .b64 	%rd<17>;
+	.reg .b64 	%rd<18>;
 
 
 	ld.param.u64 	%rd1, [KineticEnergy_param_0];
@@ -461,56 +501,64 @@ $L__BB0_2:
 	ld.param.u64 	%rd3, [KineticEnergy_param_2];
 	ld.param.u64 	%rd4, [KineticEnergy_param_3];
 	ld.param.u64 	%rd5, [KineticEnergy_param_4];
-	ld.param.u32 	%r4, [KineticEnergy_param_5];
+	ld.param.f32 	%f12, [KineticEnergy_param_5];
 	ld.param.u32 	%r5, [KineticEnergy_param_6];
 	ld.param.u32 	%r6, [KineticEnergy_param_7];
-	mov.u32 	%r7, %ctaid.x;
+	ld.param.u32 	%r7, [KineticEnergy_param_8];
 	mov.u32 	%r8, %ntid.x;
-	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r7, %r8, %r9;
-	mov.u32 	%r10, %ntid.y;
-	mov.u32 	%r11, %ctaid.y;
-	mov.u32 	%r12, %tid.y;
-	mad.lo.s32 	%r2, %r11, %r10, %r12;
-	mov.u32 	%r13, %ntid.z;
-	mov.u32 	%r14, %ctaid.z;
-	mov.u32 	%r15, %tid.z;
-	mad.lo.s32 	%r3, %r14, %r13, %r15;
-	setp.ge.s32 	%p1, %r1, %r4;
-	setp.ge.s32 	%p2, %r2, %r5;
+	mov.u32 	%r9, %ctaid.x;
+	mov.u32 	%r10, %tid.x;
+	mad.lo.s32 	%r1, %r9, %r8, %r10;
+	mov.u32 	%r11, %ntid.y;
+	mov.u32 	%r12, %ctaid.y;
+	mov.u32 	%r13, %tid.y;
+	mad.lo.s32 	%r2, %r12, %r11, %r13;
+	mov.u32 	%r14, %ntid.z;
+	mov.u32 	%r15, %ctaid.z;
+	mov.u32 	%r16, %tid.z;
+	mad.lo.s32 	%r3, %r15, %r14, %r16;
+	setp.ge.s32 	%p1, %r1, %r5;
+	setp.ge.s32 	%p2, %r2, %r6;
 	or.pred  	%p3, %p1, %p2;
-	setp.ge.s32 	%p4, %r3, %r6;
+	setp.ge.s32 	%p4, %r3, %r7;
 	or.pred  	%p5, %p3, %p4;
-	@%p5 bra 	$L__BB0_2;
+	@%p5 bra 	$L__BB0_4;
 
-	cvta.to.global.u64 	%rd6, %rd2;
-	mad.lo.s32 	%r16, %r3, %r5, %r2;
-	mad.lo.s32 	%r17, %r16, %r4, %r1;
-	cvta.to.global.u64 	%rd7, %rd5;
-	mul.wide.s32 	%rd8, %r17, 4;
-	add.s64 	%rd9, %rd7, %rd8;
-	ld.global.nc.f32 	%f1, [%rd9];
-	cvt.f64.f32 	%fd1, %f1;
+	mad.lo.s32 	%r17, %r3, %r6, %r2;
+	mad.lo.s32 	%r4, %r17, %r5, %r1;
+	setp.eq.s64 	%p6, %rd5, 0;
+	@%p6 bra 	$L__BB0_3;
+
+	cvta.to.global.u64 	%rd6, %rd5;
+	mul.wide.s32 	%rd7, %r4, 4;
+	add.s64 	%rd8, %rd6, %rd7;
+	ld.global.nc.f32 	%f4, [%rd8];
+	mul.f32 	%f12, %f4, %f12;
+
+$L__BB0_3:
+	cvt.f64.f32 	%fd1, %f12;
 	mul.f64 	%fd2, %fd1, 0d3FE0000000000000;
-	add.s64 	%rd10, %rd6, %rd8;
-	ld.global.nc.f32 	%f2, [%rd10];
-	cvta.to.global.u64 	%rd11, %rd3;
-	add.s64 	%rd12, %rd11, %rd8;
-	ld.global.nc.f32 	%f3, [%rd12];
-	mul.f32 	%f4, %f3, %f3;
-	fma.rn.f32 	%f5, %f2, %f2, %f4;
-	cvta.to.global.u64 	%rd13, %rd4;
-	add.s64 	%rd14, %rd13, %rd8;
-	ld.global.nc.f32 	%f6, [%rd14];
-	fma.rn.f32 	%f7, %f6, %f6, %f5;
-	cvt.f64.f32 	%fd3, %f7;
+	cvta.to.global.u64 	%rd9, %rd2;
+	mul.wide.s32 	%rd10, %r4, 4;
+	add.s64 	%rd11, %rd9, %rd10;
+	ld.global.nc.f32 	%f5, [%rd11];
+	cvta.to.global.u64 	%rd12, %rd3;
+	add.s64 	%rd13, %rd12, %rd10;
+	ld.global.nc.f32 	%f6, [%rd13];
+	mul.f32 	%f7, %f6, %f6;
+	fma.rn.f32 	%f8, %f5, %f5, %f7;
+	cvta.to.global.u64 	%rd14, %rd4;
+	add.s64 	%rd15, %rd14, %rd10;
+	ld.global.nc.f32 	%f9, [%rd15];
+	fma.rn.f32 	%f10, %f9, %f9, %f8;
+	cvt.f64.f32 	%fd3, %f10;
 	mul.f64 	%fd4, %fd2, %fd3;
-	cvt.rn.f32.f64 	%f8, %fd4;
-	cvta.to.global.u64 	%rd15, %rd1;
-	add.s64 	%rd16, %rd15, %rd8;
-	st.global.f32 	[%rd16], %f8;
+	cvt.rn.f32.f64 	%f11, %fd4;
+	cvta.to.global.u64 	%rd16, %rd1;
+	add.s64 	%rd17, %rd16, %rd10;
+	st.global.f32 	[%rd17], %f11;
 
-$L__BB0_2:
+$L__BB0_4:
 	ret;
 
 }
@@ -529,16 +577,17 @@ $L__BB0_2:
 	.param .u64 KineticEnergy_param_2,
 	.param .u64 KineticEnergy_param_3,
 	.param .u64 KineticEnergy_param_4,
-	.param .u32 KineticEnergy_param_5,
+	.param .f32 KineticEnergy_param_5,
 	.param .u32 KineticEnergy_param_6,
-	.param .u32 KineticEnergy_param_7
+	.param .u32 KineticEnergy_param_7,
+	.param .u32 KineticEnergy_param_8
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<9>;
+	.reg .pred 	%p<7>;
+	.reg .f32 	%f<13>;
 	.reg .b32 	%r<18>;
 	.reg .f64 	%fd<5>;
-	.reg .b64 	%rd<17>;
+	.reg .b64 	%rd<18>;
 
 
 	ld.param.u64 	%rd1, [KineticEnergy_param_0];
@@ -546,56 +595,64 @@ $L__BB0_2:
 	ld.param.u64 	%rd3, [KineticEnergy_param_2];
 	ld.param.u64 	%rd4, [KineticEnergy_param_3];
 	ld.param.u64 	%rd5, [KineticEnergy_param_4];
-	ld.param.u32 	%r4, [KineticEnergy_param_5];
+	ld.param.f32 	%f12, [KineticEnergy_param_5];
 	ld.param.u32 	%r5, [KineticEnergy_param_6];
 	ld.param.u32 	%r6, [KineticEnergy_param_7];
-	mov.u32 	%r7, %ctaid.x;
+	ld.param.u32 	%r7, [KineticEnergy_param_8];
 	mov.u32 	%r8, %ntid.x;
-	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r7, %r8, %r9;
-	mov.u32 	%r10, %ntid.y;
-	mov.u32 	%r11, %ctaid.y;
-	mov.u32 	%r12, %tid.y;
-	mad.lo.s32 	%r2, %r11, %r10, %r12;
-	mov.u32 	%r13, %ntid.z;
-	mov.u32 	%r14, %ctaid.z;
-	mov.u32 	%r15, %tid.z;
-	mad.lo.s32 	%r3, %r14, %r13, %r15;
-	setp.ge.s32 	%p1, %r1, %r4;
-	setp.ge.s32 	%p2, %r2, %r5;
+	mov.u32 	%r9, %ctaid.x;
+	mov.u32 	%r10, %tid.x;
+	mad.lo.s32 	%r1, %r9, %r8, %r10;
+	mov.u32 	%r11, %ntid.y;
+	mov.u32 	%r12, %ctaid.y;
+	mov.u32 	%r13, %tid.y;
+	mad.lo.s32 	%r2, %r12, %r11, %r13;
+	mov.u32 	%r14, %ntid.z;
+	mov.u32 	%r15, %ctaid.z;
+	mov.u32 	%r16, %tid.z;
+	mad.lo.s32 	%r3, %r15, %r14, %r16;
+	setp.ge.s32 	%p1, %r1, %r5;
+	setp.ge.s32 	%p2, %r2, %r6;
 	or.pred  	%p3, %p1, %p2;
-	setp.ge.s32 	%p4, %r3, %r6;
+	setp.ge.s32 	%p4, %r3, %r7;
 	or.pred  	%p5, %p3, %p4;
-	@%p5 bra 	$L__BB0_2;
+	@%p5 bra 	$L__BB0_4;
 
-	cvta.to.global.u64 	%rd6, %rd2;
-	mad.lo.s32 	%r16, %r3, %r5, %r2;
-	mad.lo.s32 	%r17, %r16, %r4, %r1;
-	cvta.to.global.u64 	%rd7, %rd5;
-	mul.wide.s32 	%rd8, %r17, 4;
-	add.s64 	%rd9, %rd7, %rd8;
-	ld.global.nc.f32 	%f1, [%rd9];
-	cvt.f64.f32 	%fd1, %f1;
+	mad.lo.s32 	%r17, %r3, %r6, %r2;
+	mad.lo.s32 	%r4, %r17, %r5, %r1;
+	setp.eq.s64 	%p6, %rd5, 0;
+	@%p6 bra 	$L__BB0_3;
+
+	cvta.to.global.u64 	%rd6, %rd5;
+	mul.wide.s32 	%rd7, %r4, 4;
+	add.s64 	%rd8, %rd6, %rd7;
+	ld.global.nc.f32 	%f4, [%rd8];
+	mul.f32 	%f12, %f4, %f12;
+
+$L__BB0_3:
+	cvt.f64.f32 	%fd1, %f12;
 	mul.f64 	%fd2, %fd1, 0d3FE0000000000000;
-	add.s64 	%rd10, %rd6, %rd8;
-	ld.global.nc.f32 	%f2, [%rd10];
-	cvta.to.global.u64 	%rd11, %rd3;
-	add.s64 	%rd12, %rd11, %rd8;
-	ld.global.nc.f32 	%f3, [%rd12];
-	mul.f32 	%f4, %f3, %f3;
-	fma.rn.f32 	%f5, %f2, %f2, %f4;
-	cvta.to.global.u64 	%rd13, %rd4;
-	add.s64 	%rd14, %rd13, %rd8;
-	ld.global.nc.f32 	%f6, [%rd14];
-	fma.rn.f32 	%f7, %f6, %f6, %f5;
-	cvt.f64.f32 	%fd3, %f7;
+	cvta.to.global.u64 	%rd9, %rd2;
+	mul.wide.s32 	%rd10, %r4, 4;
+	add.s64 	%rd11, %rd9, %rd10;
+	ld.global.nc.f32 	%f5, [%rd11];
+	cvta.to.global.u64 	%rd12, %rd3;
+	add.s64 	%rd13, %rd12, %rd10;
+	ld.global.nc.f32 	%f6, [%rd13];
+	mul.f32 	%f7, %f6, %f6;
+	fma.rn.f32 	%f8, %f5, %f5, %f7;
+	cvta.to.global.u64 	%rd14, %rd4;
+	add.s64 	%rd15, %rd14, %rd10;
+	ld.global.nc.f32 	%f9, [%rd15];
+	fma.rn.f32 	%f10, %f9, %f9, %f8;
+	cvt.f64.f32 	%fd3, %f10;
 	mul.f64 	%fd4, %fd2, %fd3;
-	cvt.rn.f32.f64 	%f8, %fd4;
-	cvta.to.global.u64 	%rd15, %rd1;
-	add.s64 	%rd16, %rd15, %rd8;
-	st.global.f32 	[%rd16], %f8;
+	cvt.rn.f32.f64 	%f11, %fd4;
+	cvta.to.global.u64 	%rd16, %rd1;
+	add.s64 	%rd17, %rd16, %rd10;
+	st.global.f32 	[%rd17], %f11;
 
-$L__BB0_2:
+$L__BB0_4:
 	ret;
 
 }
@@ -614,16 +671,17 @@ $L__BB0_2:
 	.param .u64 KineticEnergy_param_2,
 	.param .u64 KineticEnergy_param_3,
 	.param .u64 KineticEnergy_param_4,
-	.param .u32 KineticEnergy_param_5,
+	.param .f32 KineticEnergy_param_5,
 	.param .u32 KineticEnergy_param_6,
-	.param .u32 KineticEnergy_param_7
+	.param .u32 KineticEnergy_param_7,
+	.param .u32 KineticEnergy_param_8
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<9>;
+	.reg .pred 	%p<7>;
+	.reg .f32 	%f<13>;
 	.reg .b32 	%r<18>;
 	.reg .f64 	%fd<5>;
-	.reg .b64 	%rd<17>;
+	.reg .b64 	%rd<18>;
 
 
 	ld.param.u64 	%rd1, [KineticEnergy_param_0];
@@ -631,56 +689,64 @@ $L__BB0_2:
 	ld.param.u64 	%rd3, [KineticEnergy_param_2];
 	ld.param.u64 	%rd4, [KineticEnergy_param_3];
 	ld.param.u64 	%rd5, [KineticEnergy_param_4];
-	ld.param.u32 	%r4, [KineticEnergy_param_5];
+	ld.param.f32 	%f12, [KineticEnergy_param_5];
 	ld.param.u32 	%r5, [KineticEnergy_param_6];
 	ld.param.u32 	%r6, [KineticEnergy_param_7];
-	mov.u32 	%r7, %ctaid.x;
+	ld.param.u32 	%r7, [KineticEnergy_param_8];
 	mov.u32 	%r8, %ntid.x;
-	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r7, %r8, %r9;
-	mov.u32 	%r10, %ntid.y;
-	mov.u32 	%r11, %ctaid.y;
-	mov.u32 	%r12, %tid.y;
-	mad.lo.s32 	%r2, %r11, %r10, %r12;
-	mov.u32 	%r13, %ntid.z;
-	mov.u32 	%r14, %ctaid.z;
-	mov.u32 	%r15, %tid.z;
-	mad.lo.s32 	%r3, %r14, %r13, %r15;
-	setp.ge.s32 	%p1, %r1, %r4;
-	setp.ge.s32 	%p2, %r2, %r5;
+	mov.u32 	%r9, %ctaid.x;
+	mov.u32 	%r10, %tid.x;
+	mad.lo.s32 	%r1, %r9, %r8, %r10;
+	mov.u32 	%r11, %ntid.y;
+	mov.u32 	%r12, %ctaid.y;
+	mov.u32 	%r13, %tid.y;
+	mad.lo.s32 	%r2, %r12, %r11, %r13;
+	mov.u32 	%r14, %ntid.z;
+	mov.u32 	%r15, %ctaid.z;
+	mov.u32 	%r16, %tid.z;
+	mad.lo.s32 	%r3, %r15, %r14, %r16;
+	setp.ge.s32 	%p1, %r1, %r5;
+	setp.ge.s32 	%p2, %r2, %r6;
 	or.pred  	%p3, %p1, %p2;
-	setp.ge.s32 	%p4, %r3, %r6;
+	setp.ge.s32 	%p4, %r3, %r7;
 	or.pred  	%p5, %p3, %p4;
-	@%p5 bra 	$L__BB0_2;
+	@%p5 bra 	$L__BB0_4;
 
-	cvta.to.global.u64 	%rd6, %rd2;
-	mad.lo.s32 	%r16, %r3, %r5, %r2;
-	mad.lo.s32 	%r17, %r16, %r4, %r1;
-	cvta.to.global.u64 	%rd7, %rd5;
-	mul.wide.s32 	%rd8, %r17, 4;
-	add.s64 	%rd9, %rd7, %rd8;
-	ld.global.nc.f32 	%f1, [%rd9];
-	cvt.f64.f32 	%fd1, %f1;
+	mad.lo.s32 	%r17, %r3, %r6, %r2;
+	mad.lo.s32 	%r4, %r17, %r5, %r1;
+	setp.eq.s64 	%p6, %rd5, 0;
+	@%p6 bra 	$L__BB0_3;
+
+	cvta.to.global.u64 	%rd6, %rd5;
+	mul.wide.s32 	%rd7, %r4, 4;
+	add.s64 	%rd8, %rd6, %rd7;
+	ld.global.nc.f32 	%f4, [%rd8];
+	mul.f32 	%f12, %f4, %f12;
+
+$L__BB0_3:
+	cvt.f64.f32 	%fd1, %f12;
 	mul.f64 	%fd2, %fd1, 0d3FE0000000000000;
-	add.s64 	%rd10, %rd6, %rd8;
-	ld.global.nc.f32 	%f2, [%rd10];
-	cvta.to.global.u64 	%rd11, %rd3;
-	add.s64 	%rd12, %rd11, %rd8;
-	ld.global.nc.f32 	%f3, [%rd12];
-	mul.f32 	%f4, %f3, %f3;
-	fma.rn.f32 	%f5, %f2, %f2, %f4;
-	cvta.to.global.u64 	%rd13, %rd4;
-	add.s64 	%rd14, %rd13, %rd8;
-	ld.global.nc.f32 	%f6, [%rd14];
-	fma.rn.f32 	%f7, %f6, %f6, %f5;
-	cvt.f64.f32 	%fd3, %f7;
+	cvta.to.global.u64 	%rd9, %rd2;
+	mul.wide.s32 	%rd10, %r4, 4;
+	add.s64 	%rd11, %rd9, %rd10;
+	ld.global.nc.f32 	%f5, [%rd11];
+	cvta.to.global.u64 	%rd12, %rd3;
+	add.s64 	%rd13, %rd12, %rd10;
+	ld.global.nc.f32 	%f6, [%rd13];
+	mul.f32 	%f7, %f6, %f6;
+	fma.rn.f32 	%f8, %f5, %f5, %f7;
+	cvta.to.global.u64 	%rd14, %rd4;
+	add.s64 	%rd15, %rd14, %rd10;
+	ld.global.nc.f32 	%f9, [%rd15];
+	fma.rn.f32 	%f10, %f9, %f9, %f8;
+	cvt.f64.f32 	%fd3, %f10;
 	mul.f64 	%fd4, %fd2, %fd3;
-	cvt.rn.f32.f64 	%f8, %fd4;
-	cvta.to.global.u64 	%rd15, %rd1;
-	add.s64 	%rd16, %rd15, %rd8;
-	st.global.f32 	[%rd16], %f8;
+	cvt.rn.f32.f64 	%f11, %fd4;
+	cvta.to.global.u64 	%rd16, %rd1;
+	add.s64 	%rd17, %rd16, %rd10;
+	st.global.f32 	[%rd17], %f11;
 
-$L__BB0_2:
+$L__BB0_4:
 	ret;
 
 }
@@ -699,16 +765,17 @@ $L__BB0_2:
 	.param .u64 KineticEnergy_param_2,
 	.param .u64 KineticEnergy_param_3,
 	.param .u64 KineticEnergy_param_4,
-	.param .u32 KineticEnergy_param_5,
+	.param .f32 KineticEnergy_param_5,
 	.param .u32 KineticEnergy_param_6,
-	.param .u32 KineticEnergy_param_7
+	.param .u32 KineticEnergy_param_7,
+	.param .u32 KineticEnergy_param_8
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<9>;
+	.reg .pred 	%p<7>;
+	.reg .f32 	%f<13>;
 	.reg .b32 	%r<18>;
 	.reg .f64 	%fd<5>;
-	.reg .b64 	%rd<17>;
+	.reg .b64 	%rd<18>;
 
 
 	ld.param.u64 	%rd1, [KineticEnergy_param_0];
@@ -716,56 +783,64 @@ $L__BB0_2:
 	ld.param.u64 	%rd3, [KineticEnergy_param_2];
 	ld.param.u64 	%rd4, [KineticEnergy_param_3];
 	ld.param.u64 	%rd5, [KineticEnergy_param_4];
-	ld.param.u32 	%r4, [KineticEnergy_param_5];
+	ld.param.f32 	%f12, [KineticEnergy_param_5];
 	ld.param.u32 	%r5, [KineticEnergy_param_6];
 	ld.param.u32 	%r6, [KineticEnergy_param_7];
-	mov.u32 	%r7, %ctaid.x;
+	ld.param.u32 	%r7, [KineticEnergy_param_8];
 	mov.u32 	%r8, %ntid.x;
-	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r7, %r8, %r9;
-	mov.u32 	%r10, %ntid.y;
-	mov.u32 	%r11, %ctaid.y;
-	mov.u32 	%r12, %tid.y;
-	mad.lo.s32 	%r2, %r11, %r10, %r12;
-	mov.u32 	%r13, %ntid.z;
-	mov.u32 	%r14, %ctaid.z;
-	mov.u32 	%r15, %tid.z;
-	mad.lo.s32 	%r3, %r14, %r13, %r15;
-	setp.ge.s32 	%p1, %r1, %r4;
-	setp.ge.s32 	%p2, %r2, %r5;
+	mov.u32 	%r9, %ctaid.x;
+	mov.u32 	%r10, %tid.x;
+	mad.lo.s32 	%r1, %r9, %r8, %r10;
+	mov.u32 	%r11, %ntid.y;
+	mov.u32 	%r12, %ctaid.y;
+	mov.u32 	%r13, %tid.y;
+	mad.lo.s32 	%r2, %r12, %r11, %r13;
+	mov.u32 	%r14, %ntid.z;
+	mov.u32 	%r15, %ctaid.z;
+	mov.u32 	%r16, %tid.z;
+	mad.lo.s32 	%r3, %r15, %r14, %r16;
+	setp.ge.s32 	%p1, %r1, %r5;
+	setp.ge.s32 	%p2, %r2, %r6;
 	or.pred  	%p3, %p1, %p2;
-	setp.ge.s32 	%p4, %r3, %r6;
+	setp.ge.s32 	%p4, %r3, %r7;
 	or.pred  	%p5, %p3, %p4;
-	@%p5 bra 	$L__BB0_2;
+	@%p5 bra 	$L__BB0_4;
 
-	cvta.to.global.u64 	%rd6, %rd2;
-	mad.lo.s32 	%r16, %r3, %r5, %r2;
-	mad.lo.s32 	%r17, %r16, %r4, %r1;
-	cvta.to.global.u64 	%rd7, %rd5;
-	mul.wide.s32 	%rd8, %r17, 4;
-	add.s64 	%rd9, %rd7, %rd8;
-	ld.global.nc.f32 	%f1, [%rd9];
-	cvt.f64.f32 	%fd1, %f1;
+	mad.lo.s32 	%r17, %r3, %r6, %r2;
+	mad.lo.s32 	%r4, %r17, %r5, %r1;
+	setp.eq.s64 	%p6, %rd5, 0;
+	@%p6 bra 	$L__BB0_3;
+
+	cvta.to.global.u64 	%rd6, %rd5;
+	mul.wide.s32 	%rd7, %r4, 4;
+	add.s64 	%rd8, %rd6, %rd7;
+	ld.global.nc.f32 	%f4, [%rd8];
+	mul.f32 	%f12, %f4, %f12;
+
+$L__BB0_3:
+	cvt.f64.f32 	%fd1, %f12;
 	mul.f64 	%fd2, %fd1, 0d3FE0000000000000;
-	add.s64 	%rd10, %rd6, %rd8;
-	ld.global.nc.f32 	%f2, [%rd10];
-	cvta.to.global.u64 	%rd11, %rd3;
-	add.s64 	%rd12, %rd11, %rd8;
-	ld.global.nc.f32 	%f3, [%rd12];
-	mul.f32 	%f4, %f3, %f3;
-	fma.rn.f32 	%f5, %f2, %f2, %f4;
-	cvta.to.global.u64 	%rd13, %rd4;
-	add.s64 	%rd14, %rd13, %rd8;
-	ld.global.nc.f32 	%f6, [%rd14];
-	fma.rn.f32 	%f7, %f6, %f6, %f5;
-	cvt.f64.f32 	%fd3, %f7;
+	cvta.to.global.u64 	%rd9, %rd2;
+	mul.wide.s32 	%rd10, %r4, 4;
+	add.s64 	%rd11, %rd9, %rd10;
+	ld.global.nc.f32 	%f5, [%rd11];
+	cvta.to.global.u64 	%rd12, %rd3;
+	add.s64 	%rd13, %rd12, %rd10;
+	ld.global.nc.f32 	%f6, [%rd13];
+	mul.f32 	%f7, %f6, %f6;
+	fma.rn.f32 	%f8, %f5, %f5, %f7;
+	cvta.to.global.u64 	%rd14, %rd4;
+	add.s64 	%rd15, %rd14, %rd10;
+	ld.global.nc.f32 	%f9, [%rd15];
+	fma.rn.f32 	%f10, %f9, %f9, %f8;
+	cvt.f64.f32 	%fd3, %f10;
 	mul.f64 	%fd4, %fd2, %fd3;
-	cvt.rn.f32.f64 	%f8, %fd4;
-	cvta.to.global.u64 	%rd15, %rd1;
-	add.s64 	%rd16, %rd15, %rd8;
-	st.global.f32 	[%rd16], %f8;
+	cvt.rn.f32.f64 	%f11, %fd4;
+	cvta.to.global.u64 	%rd16, %rd1;
+	add.s64 	%rd17, %rd16, %rd10;
+	st.global.f32 	[%rd17], %f11;
 
-$L__BB0_2:
+$L__BB0_4:
 	ret;
 
 }
@@ -784,16 +859,17 @@ $L__BB0_2:
 	.param .u64 KineticEnergy_param_2,
 	.param .u64 KineticEnergy_param_3,
 	.param .u64 KineticEnergy_param_4,
-	.param .u32 KineticEnergy_param_5,
+	.param .f32 KineticEnergy_param_5,
 	.param .u32 KineticEnergy_param_6,
-	.param .u32 KineticEnergy_param_7
+	.param .u32 KineticEnergy_param_7,
+	.param .u32 KineticEnergy_param_8
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<9>;
+	.reg .pred 	%p<7>;
+	.reg .f32 	%f<13>;
 	.reg .b32 	%r<18>;
 	.reg .f64 	%fd<5>;
-	.reg .b64 	%rd<17>;
+	.reg .b64 	%rd<18>;
 
 
 	ld.param.u64 	%rd1, [KineticEnergy_param_0];
@@ -801,56 +877,64 @@ $L__BB0_2:
 	ld.param.u64 	%rd3, [KineticEnergy_param_2];
 	ld.param.u64 	%rd4, [KineticEnergy_param_3];
 	ld.param.u64 	%rd5, [KineticEnergy_param_4];
-	ld.param.u32 	%r4, [KineticEnergy_param_5];
+	ld.param.f32 	%f12, [KineticEnergy_param_5];
 	ld.param.u32 	%r5, [KineticEnergy_param_6];
 	ld.param.u32 	%r6, [KineticEnergy_param_7];
-	mov.u32 	%r7, %ctaid.x;
+	ld.param.u32 	%r7, [KineticEnergy_param_8];
 	mov.u32 	%r8, %ntid.x;
-	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r7, %r8, %r9;
-	mov.u32 	%r10, %ntid.y;
-	mov.u32 	%r11, %ctaid.y;
-	mov.u32 	%r12, %tid.y;
-	mad.lo.s32 	%r2, %r11, %r10, %r12;
-	mov.u32 	%r13, %ntid.z;
-	mov.u32 	%r14, %ctaid.z;
-	mov.u32 	%r15, %tid.z;
-	mad.lo.s32 	%r3, %r14, %r13, %r15;
-	setp.ge.s32 	%p1, %r1, %r4;
-	setp.ge.s32 	%p2, %r2, %r5;
+	mov.u32 	%r9, %ctaid.x;
+	mov.u32 	%r10, %tid.x;
+	mad.lo.s32 	%r1, %r9, %r8, %r10;
+	mov.u32 	%r11, %ntid.y;
+	mov.u32 	%r12, %ctaid.y;
+	mov.u32 	%r13, %tid.y;
+	mad.lo.s32 	%r2, %r12, %r11, %r13;
+	mov.u32 	%r14, %ntid.z;
+	mov.u32 	%r15, %ctaid.z;
+	mov.u32 	%r16, %tid.z;
+	mad.lo.s32 	%r3, %r15, %r14, %r16;
+	setp.ge.s32 	%p1, %r1, %r5;
+	setp.ge.s32 	%p2, %r2, %r6;
 	or.pred  	%p3, %p1, %p2;
-	setp.ge.s32 	%p4, %r3, %r6;
+	setp.ge.s32 	%p4, %r3, %r7;
 	or.pred  	%p5, %p3, %p4;
-	@%p5 bra 	$L__BB0_2;
+	@%p5 bra 	$L__BB0_4;
 
-	cvta.to.global.u64 	%rd6, %rd2;
-	mad.lo.s32 	%r16, %r3, %r5, %r2;
-	mad.lo.s32 	%r17, %r16, %r4, %r1;
-	cvta.to.global.u64 	%rd7, %rd5;
-	mul.wide.s32 	%rd8, %r17, 4;
-	add.s64 	%rd9, %rd7, %rd8;
-	ld.global.nc.f32 	%f1, [%rd9];
-	cvt.f64.f32 	%fd1, %f1;
+	mad.lo.s32 	%r17, %r3, %r6, %r2;
+	mad.lo.s32 	%r4, %r17, %r5, %r1;
+	setp.eq.s64 	%p6, %rd5, 0;
+	@%p6 bra 	$L__BB0_3;
+
+	cvta.to.global.u64 	%rd6, %rd5;
+	mul.wide.s32 	%rd7, %r4, 4;
+	add.s64 	%rd8, %rd6, %rd7;
+	ld.global.nc.f32 	%f4, [%rd8];
+	mul.f32 	%f12, %f4, %f12;
+
+$L__BB0_3:
+	cvt.f64.f32 	%fd1, %f12;
 	mul.f64 	%fd2, %fd1, 0d3FE0000000000000;
-	add.s64 	%rd10, %rd6, %rd8;
-	ld.global.nc.f32 	%f2, [%rd10];
-	cvta.to.global.u64 	%rd11, %rd3;
-	add.s64 	%rd12, %rd11, %rd8;
-	ld.global.nc.f32 	%f3, [%rd12];
-	mul.f32 	%f4, %f3, %f3;
-	fma.rn.f32 	%f5, %f2, %f2, %f4;
-	cvta.to.global.u64 	%rd13, %rd4;
-	add.s64 	%rd14, %rd13, %rd8;
-	ld.global.nc.f32 	%f6, [%rd14];
-	fma.rn.f32 	%f7, %f6, %f6, %f5;
-	cvt.f64.f32 	%fd3, %f7;
+	cvta.to.global.u64 	%rd9, %rd2;
+	mul.wide.s32 	%rd10, %r4, 4;
+	add.s64 	%rd11, %rd9, %rd10;
+	ld.global.nc.f32 	%f5, [%rd11];
+	cvta.to.global.u64 	%rd12, %rd3;
+	add.s64 	%rd13, %rd12, %rd10;
+	ld.global.nc.f32 	%f6, [%rd13];
+	mul.f32 	%f7, %f6, %f6;
+	fma.rn.f32 	%f8, %f5, %f5, %f7;
+	cvta.to.global.u64 	%rd14, %rd4;
+	add.s64 	%rd15, %rd14, %rd10;
+	ld.global.nc.f32 	%f9, [%rd15];
+	fma.rn.f32 	%f10, %f9, %f9, %f8;
+	cvt.f64.f32 	%fd3, %f10;
 	mul.f64 	%fd4, %fd2, %fd3;
-	cvt.rn.f32.f64 	%f8, %fd4;
-	cvta.to.global.u64 	%rd15, %rd1;
-	add.s64 	%rd16, %rd15, %rd8;
-	st.global.f32 	[%rd16], %f8;
+	cvt.rn.f32.f64 	%f11, %fd4;
+	cvta.to.global.u64 	%rd16, %rd1;
+	add.s64 	%rd17, %rd16, %rd10;
+	st.global.f32 	[%rd17], %f11;
 
-$L__BB0_2:
+$L__BB0_4:
 	ret;
 
 }
@@ -869,16 +953,17 @@ $L__BB0_2:
 	.param .u64 KineticEnergy_param_2,
 	.param .u64 KineticEnergy_param_3,
 	.param .u64 KineticEnergy_param_4,
-	.param .u32 KineticEnergy_param_5,
+	.param .f32 KineticEnergy_param_5,
 	.param .u32 KineticEnergy_param_6,
-	.param .u32 KineticEnergy_param_7
+	.param .u32 KineticEnergy_param_7,
+	.param .u32 KineticEnergy_param_8
 )
 {
-	.reg .pred 	%p<6>;
-	.reg .f32 	%f<9>;
+	.reg .pred 	%p<7>;
+	.reg .f32 	%f<13>;
 	.reg .b32 	%r<18>;
 	.reg .f64 	%fd<5>;
-	.reg .b64 	%rd<17>;
+	.reg .b64 	%rd<18>;
 
 
 	ld.param.u64 	%rd1, [KineticEnergy_param_0];
@@ -886,56 +971,64 @@ $L__BB0_2:
 	ld.param.u64 	%rd3, [KineticEnergy_param_2];
 	ld.param.u64 	%rd4, [KineticEnergy_param_3];
 	ld.param.u64 	%rd5, [KineticEnergy_param_4];
-	ld.param.u32 	%r4, [KineticEnergy_param_5];
+	ld.param.f32 	%f12, [KineticEnergy_param_5];
 	ld.param.u32 	%r5, [KineticEnergy_param_6];
 	ld.param.u32 	%r6, [KineticEnergy_param_7];
-	mov.u32 	%r7, %ctaid.x;
+	ld.param.u32 	%r7, [KineticEnergy_param_8];
 	mov.u32 	%r8, %ntid.x;
-	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r7, %r8, %r9;
-	mov.u32 	%r10, %ntid.y;
-	mov.u32 	%r11, %ctaid.y;
-	mov.u32 	%r12, %tid.y;
-	mad.lo.s32 	%r2, %r11, %r10, %r12;
-	mov.u32 	%r13, %ntid.z;
-	mov.u32 	%r14, %ctaid.z;
-	mov.u32 	%r15, %tid.z;
-	mad.lo.s32 	%r3, %r14, %r13, %r15;
-	setp.ge.s32 	%p1, %r1, %r4;
-	setp.ge.s32 	%p2, %r2, %r5;
+	mov.u32 	%r9, %ctaid.x;
+	mov.u32 	%r10, %tid.x;
+	mad.lo.s32 	%r1, %r9, %r8, %r10;
+	mov.u32 	%r11, %ntid.y;
+	mov.u32 	%r12, %ctaid.y;
+	mov.u32 	%r13, %tid.y;
+	mad.lo.s32 	%r2, %r12, %r11, %r13;
+	mov.u32 	%r14, %ntid.z;
+	mov.u32 	%r15, %ctaid.z;
+	mov.u32 	%r16, %tid.z;
+	mad.lo.s32 	%r3, %r15, %r14, %r16;
+	setp.ge.s32 	%p1, %r1, %r5;
+	setp.ge.s32 	%p2, %r2, %r6;
 	or.pred  	%p3, %p1, %p2;
-	setp.ge.s32 	%p4, %r3, %r6;
+	setp.ge.s32 	%p4, %r3, %r7;
 	or.pred  	%p5, %p3, %p4;
-	@%p5 bra 	$L__BB0_2;
+	@%p5 bra 	$L__BB0_4;
 
-	cvta.to.global.u64 	%rd6, %rd2;
-	mad.lo.s32 	%r16, %r3, %r5, %r2;
-	mad.lo.s32 	%r17, %r16, %r4, %r1;
-	cvta.to.global.u64 	%rd7, %rd5;
-	mul.wide.s32 	%rd8, %r17, 4;
-	add.s64 	%rd9, %rd7, %rd8;
-	ld.global.nc.f32 	%f1, [%rd9];
-	cvt.f64.f32 	%fd1, %f1;
+	mad.lo.s32 	%r17, %r3, %r6, %r2;
+	mad.lo.s32 	%r4, %r17, %r5, %r1;
+	setp.eq.s64 	%p6, %rd5, 0;
+	@%p6 bra 	$L__BB0_3;
+
+	cvta.to.global.u64 	%rd6, %rd5;
+	mul.wide.s32 	%rd7, %r4, 4;
+	add.s64 	%rd8, %rd6, %rd7;
+	ld.global.nc.f32 	%f4, [%rd8];
+	mul.f32 	%f12, %f4, %f12;
+
+$L__BB0_3:
+	cvt.f64.f32 	%fd1, %f12;
 	mul.f64 	%fd2, %fd1, 0d3FE0000000000000;
-	add.s64 	%rd10, %rd6, %rd8;
-	ld.global.nc.f32 	%f2, [%rd10];
-	cvta.to.global.u64 	%rd11, %rd3;
-	add.s64 	%rd12, %rd11, %rd8;
-	ld.global.nc.f32 	%f3, [%rd12];
-	mul.f32 	%f4, %f3, %f3;
-	fma.rn.f32 	%f5, %f2, %f2, %f4;
-	cvta.to.global.u64 	%rd13, %rd4;
-	add.s64 	%rd14, %rd13, %rd8;
-	ld.global.nc.f32 	%f6, [%rd14];
-	fma.rn.f32 	%f7, %f6, %f6, %f5;
-	cvt.f64.f32 	%fd3, %f7;
+	cvta.to.global.u64 	%rd9, %rd2;
+	mul.wide.s32 	%rd10, %r4, 4;
+	add.s64 	%rd11, %rd9, %rd10;
+	ld.global.nc.f32 	%f5, [%rd11];
+	cvta.to.global.u64 	%rd12, %rd3;
+	add.s64 	%rd13, %rd12, %rd10;
+	ld.global.nc.f32 	%f6, [%rd13];
+	mul.f32 	%f7, %f6, %f6;
+	fma.rn.f32 	%f8, %f5, %f5, %f7;
+	cvta.to.global.u64 	%rd14, %rd4;
+	add.s64 	%rd15, %rd14, %rd10;
+	ld.global.nc.f32 	%f9, [%rd15];
+	fma.rn.f32 	%f10, %f9, %f9, %f8;
+	cvt.f64.f32 	%fd3, %f10;
 	mul.f64 	%fd4, %fd2, %fd3;
-	cvt.rn.f32.f64 	%f8, %fd4;
-	cvta.to.global.u64 	%rd15, %rd1;
-	add.s64 	%rd16, %rd15, %rd8;
-	st.global.f32 	[%rd16], %f8;
+	cvt.rn.f32.f64 	%f11, %fd4;
+	cvta.to.global.u64 	%rd16, %rd1;
+	add.s64 	%rd17, %rd16, %rd10;
+	st.global.f32 	[%rd17], %f11;
 
-$L__BB0_2:
+$L__BB0_4:
 	ret;
 
 }

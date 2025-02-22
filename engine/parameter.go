@@ -130,12 +130,29 @@ func (p *regionwise) MSliceRegion(size [3]int, offsetX, offsetY, offsetZ int) cu
 	if p.IsUniform() {
 		return cuda.MakeMSlice(data.NilSlice(p.NComp(), size), p.getRegion(0))
 	} else {
-		mBuf := p.MSlice()
-		buf := cuda.SliceFromMSlice(mBuf)
-		redBuf := cuda.Buffer(p.NComp(), size)
-		cuda.Crop(redBuf, buf, offsetX, offsetY, offsetZ)
-		defer mBuf.Recycle()
-		return cuda.ToMSlice(redBuf)
+		buf, r := p.SliceRegion(p.name, true, size, offsetX, offsetY, offsetZ)
+		util.Assert(r)
+		return cuda.ToMSlice(buf)
+	}
+}
+
+func (p *regionwise) ValueAt(idx, idy, idz int) []float64 {
+	if p.IsUniform() {
+		return p.getRegion(0)
+	} else {
+		buf, r := p.Slice(p.name, true)
+		defer cuda.Recycle(buf)
+		util.Assert(r)
+		if p.NComp() == 1 {
+			return []float64{float64(buf.HostCopy().Scalars()[idz][idy][idx])}
+		} else {
+			vec := buf.HostCopy().Vectors()[idz][idy][idx]
+			vec64 := make([]float64, 3)
+			for i := range vec {
+				vec64[i] = float64(vec[i])
+			}
+			return vec64
+		}
 	}
 }
 

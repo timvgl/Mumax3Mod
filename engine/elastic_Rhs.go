@@ -41,11 +41,11 @@ func calcRhsRegion(dst, m, u, du, f, g *data.Slice) {
 func RightSide(dst, f, g *data.Slice, Eta, Rho *RegionwiseScalar, Bf *Excitation) {
 	//No elastodynamics is calculated if density is zero
 	if Rho.nonZero() {
-		rho, _ := Rho.Slice("rho", true)
-		defer cuda.Recycle(rho)
+		rho := Rho.MSlice()
+		defer rho.Recycle()
 
-		eta, _ := Eta.Slice("eta", true)
-		defer cuda.Recycle(eta)
+		eta := Eta.MSlice()
+		defer eta.Recycle()
 
 		bf, _ := Bf.Slice()
 		defer cuda.Recycle(bf)
@@ -72,11 +72,10 @@ func RightSide(dst, f, g *data.Slice, Eta, Rho *RegionwiseScalar, Bf *Excitation
 func RightSideRegion(dst, m, u, f, g *data.Slice, Eta, Rho *RegionwiseScalar, Bf *Excitation) {
 	//No elastodynamics is calculated if density is zero
 	if Rho.nonZero() {
-		rho, _ := Rho.SliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
-		defer cuda.Recycle(rho)
-
-		eta, _ := Eta.SliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
-		defer cuda.Recycle(eta)
+		rho := Rho.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+		defer rho.Recycle()
+		eta := Eta.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+		defer eta.Recycle()
 
 		bf, _ := Bf.SliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
 		defer cuda.Recycle(bf)

@@ -209,10 +209,10 @@ func GetDisplacementSpeedForceDensity(dst *data.Slice) {
 		util.AssertMsg(B1.IsUniform() && B2.IsUniform(), "Magnetoelastic: B1, B2 must be uniform")
 	}
 
-	eta, _ := Eta.Slice("eta", true)
-	defer cuda.Recycle(eta)
+	eta := Eta.MSlice()
+	defer eta.Recycle()
 
-	cuda.Mul(dst, DU.Buffer(), eta)
+	cuda.MulMSlice(dst, cuda.ToMSlice(DU.Buffer()), eta)
 }
 
 func GetDisplacementForceDensity(dst *data.Slice) {
@@ -251,9 +251,9 @@ func GetMaxDisplacementForceDensity() float64 {
 
 func GetDisplacementAcceleration(dst *data.Slice) {
 	GetDisplacementForceDensity(dst)
-	rho, _ := Rho.Slice("rho", true)
-	defer cuda.Recycle(rho)
-	cuda.Div(dst, dst, rho)
+	rho := Rho.MSlice()
+	defer rho.Recycle()
+	cuda.DivMSlice(dst, cuda.ToMSlice(dst), rho)
 }
 
 func GetMaxDisplacementAcceleration() float64 {
