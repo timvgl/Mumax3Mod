@@ -102,15 +102,17 @@ func (p *lut) SliceRegion(paramName string, param bool, size [3]int, offsetX, of
 func (p *lut) EvalTo(dst *data.Slice) {
 	tmp, ok := mapSetParam.Load(p.name)
 	if ok {
-		setParams := tmp.(ParameterSlice)
-		if setParams.timedependent {
-			d := GenerateSliceFromFunctionString(setParams.stringFct, Mesh())
-			setParams.d = d
+		setParams := tmp.(ParameterSlices)
+		for _, setParam := range setParams.slc {
+			if setParam.timedependent {
+				d := GenerateSliceFromFunctionString(setParam.stringFct, Mesh())
+				setParam.d = d
+			}
+			newData := setParam.d
+			regionStart := setParam.start
+			regionEnd := setParam.end
+			data.CopyPart(dst, newData, 0, regionEnd[X]-regionStart[X], 0, regionEnd[Y]-regionStart[Y], 0, regionEnd[Z]-regionStart[Z], 0, 1, regionStart[X], regionStart[Y], regionStart[Z], 0)
 		}
-		newData := setParams.d
-		regionStart := setParams.start
-		regionEnd := setParams.end
-		data.CopyPart(dst, newData, 0, regionEnd[X]-regionStart[X], 0, regionEnd[Y]-regionStart[Y], 0, regionEnd[Z]-regionStart[Z], 0, 1, regionStart[X], regionStart[Y], regionStart[Z], 0)
 		return
 	}
 	gpu := p.gpuLUT()

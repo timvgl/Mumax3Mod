@@ -225,13 +225,13 @@ func (s optimize) objective(trial goptuna.Trial) (float64, error) {
 			suggestData[2] = vector2
 			bufGPU := data.SliceFromSlices(suggestData, size)
 			//defer cuda.Recycle(bufGPU)
-			SetExcitation(NameOf(q), ExcitationSlice{NameOf(q), s.areaStart[ii], s.areaEnd[ii], bufGPU, q.NComp(), false, s.functions[ii]})
+			SetExcitation(NameOf(q), ExcitationSlice{s.areaStart[ii], s.areaEnd[ii], bufGPU, q.NComp(), false, s.functions[ii]})
 		} else {
 			suggestData := make([]*data.Slice, 1)
 			suggestData[0] = vector0
 			bufGPU := data.SliceFromSlices(suggestData, size)
 			//defer cuda.Recycle(bufGPU)
-			SetScalarExcitation(NameOf(q), ScalarExcitationSlice{NameOf(q), s.areaStart[ii], s.areaEnd[ii], bufGPU, false, s.functions[ii]})
+			SetScalarExcitation(NameOf(q), ScalarExcitationSlice{s.areaStart[ii], s.areaEnd[ii], bufGPU, false, s.functions[ii]})
 		}
 	}
 	//t := time.Now()
@@ -467,10 +467,10 @@ func OptimizeQuantity(output Quantity, target dummyQuantity, variables []Quantit
 		saveAs_sync(OD()+fmt.Sprintf(FilenameFormat, NameOf(variables[k]), idx)+".ovf", bufGPU.HostCopy(), info, outputFormat)
 		SaveCounter[NameOf(variables[k])] = idx + 1
 		if variables[k].NComp() == 3 {
-			SetExcitation(NameOf(variables[k]), ExcitationSlice{NameOf(variables[k]), optim.areaStart[k], optim.areaEnd[k], bufGPU, variables[k].NComp(), false, optim.functions[k]})
+			SetExcitation(NameOf(variables[k]), ExcitationSlice{optim.areaStart[k], optim.areaEnd[k], bufGPU, variables[k].NComp(), false, optim.functions[k]})
 			defer EraseSetExcitation(NameOf(variables[k]))
 		} else {
-			SetScalarExcitation(NameOf(variables[k]), ScalarExcitationSlice{NameOf(variables[k]), optim.areaStart[k], optim.areaEnd[k], bufGPU, false, optim.functions[k]})
+			SetScalarExcitation(NameOf(variables[k]), ScalarExcitationSlice{optim.areaStart[k], optim.areaEnd[k], bufGPU, false, optim.functions[k]})
 			defer EraseSetScalarExcitation(NameOf(variables[k]))
 		}
 	}

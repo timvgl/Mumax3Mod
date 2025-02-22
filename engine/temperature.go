@@ -45,7 +45,7 @@ func init() {
 	B_therm.step = -1 // invalidate noise cache
 	F_therm.step = -1
 	DeclROnly("B_therm", &B_therm, "Thermal field (T)")
-	DeclROnly("F_therm", &F_therm, "Thermal field (T)")
+	DeclROnly("F_therm", &F_therm, "Thermal forcedensity (F/m3)")
 	DeclVar("useTempElastic", &useTempElastic, "")
 }
 

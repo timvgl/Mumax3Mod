@@ -14,21 +14,34 @@ import (
 var mapSetScalarExcitation sync.Map
 
 func SetScalarExcitation(name string, s ScalarExcitationSlice) {
-	_, ok := mapSetScalarExcitation.Load(name)
+	tmp, ok := mapSetScalarExcitation.Load(name)
 	if ok {
-		EraseSetScalarExcitation(name)
+		slces := tmp.(ScalarExcitationSlices)
+		var slcInterfaces = make([]SetSlice, 0)
+		for _, slc := range slces.slc {
+			slcInterfaces = append(slcInterfaces, slc)
+		}
+		overlapIndices := GetOverlapIndex(s, slcInterfaces)
+		FreeMemoryIndices(slcInterfaces, overlapIndices)
+		slces.slc = RemoveIndices(slces.slc, overlapIndices)
+		slces.slc = append(slces.slc, s)
+		mapSetScalarExcitation.Store(name, slces)
+	} else {
+		slc := ScalarExcitationSlices{name: name, slc: []ScalarExcitationSlice{s}}
+		mapSetScalarExcitation.Store(name, slc)
 	}
-	mapSetScalarExcitation.Store(name, s)
 }
 
 func EraseSetScalarExcitation(name string) {
 	tmp, ok := mapSetScalarExcitation.Load(name)
 	if ok {
-		s := tmp.(ScalarExcitationSlice)
-		if s.d.GPUAccess() {
-			cuda.Recycle(s.d)
-		} else {
-			s.d.Free()
+		s := tmp.(ScalarExcitationSlices)
+		for _, s := range s.slc {
+			if s.d.GPUAccess() {
+				cuda.Recycle(s.d)
+			} else {
+				s.d.Free()
+			}
 		}
 		mapSetScalarExcitation.Delete(name)
 	} else {
@@ -36,13 +49,29 @@ func EraseSetScalarExcitation(name string) {
 	}
 }
 
+type ScalarExcitationSlices struct {
+	name string
+	slc  []ScalarExcitationSlice
+}
+
 type ScalarExcitationSlice struct {
-	name          string
 	start         [3]int
 	end           [3]int
 	d             *data.Slice
 	timedependent bool
 	stringFct     StringFunction
+}
+
+func (s ScalarExcitationSlice) StartAt() [3]int {
+	return s.start
+}
+
+func (s ScalarExcitationSlice) EndAt() [3]int {
+	return s.end
+}
+
+func (s ScalarExcitationSlice) Buffer() *data.Slice {
+	return s.d
 }
 
 // An excitation, typically field or current,
@@ -63,20 +92,45 @@ func NewScalarExcitation(name, unit, desc string) *ScalarExcitation {
 
 func (p *ScalarExcitation) LoadFile(path string, xOffset, yOffset, zOffset int) {
 	d := LoadFileDSlice(path)
-	SetScalarExcitation(p.name, ScalarExcitationSlice{p.name, [3]int{xOffset, yOffset, zOffset}, [3]int{xOffset + d.Size()[X], yOffset + d.Size()[Y], zOffset + d.Size()[Z]}, d, false, StringFunction{[3]string{"", "", ""}, false}})
+	SetScalarExcitation(p.name, ScalarExcitationSlice{[3]int{xOffset, yOffset, zOffset}, [3]int{xOffset + d.Size()[X], yOffset + d.Size()[Y], zOffset + d.Size()[Z]}, d, false, StringFunction{[3]string{"", "", ""}, false}})
 
 }
 
 func (p *ScalarExcitation) MSlice() cuda.MSlice {
 	buf, r := p.Slice()
-	util.Assert(r == true)
+	util.Assert(r)
 	return cuda.ToMSlice(buf)
 }
 
 func (p *ScalarExcitation) RenderFunction(equation StringFunction) {
 	util.AssertMsg(equation.IsScalar(), "RenderFunction: Need scalar function.")
 	d, timeDep := GenerateSliceFromFunctionStringTimeDep(equation, p.Mesh())
-	SetScalarExcitation(p.name, ScalarExcitationSlice{p.name, [3]int{0, 0, 0}, p.Mesh().Size(), d, timeDep, equation})
+	SetScalarExcitation(p.name, ScalarExcitationSlice{[3]int{0, 0, 0}, p.Mesh().Size(), d, timeDep, equation})
+}
+
+func (p *ScalarExcitation) RenderFunctionLimit(equation StringFunction, xStart, xEnd, yStart, yEnd, zStart, zEnd int) {
+	util.AssertMsg(equation.IsScalar(), "RenderFunction: Need scalar function.")
+	n := MeshOf(p).Size()
+	util.Argument(xStart < xEnd && yStart < yEnd && zStart < zEnd)
+	util.Argument(xStart >= 0 && yStart >= 0 && zStart >= 0)
+	util.Argument(xEnd <= n[X] && yEnd <= n[Y] && zEnd <= n[Z])
+	d, timeDep := GenerateSliceFromFunctionStringTimeDep(equation, p.Mesh())
+	SetScalarExcitation(p.name, ScalarExcitationSlice{[3]int{xStart, yStart, zStart}, [3]int{xEnd, yEnd, zEnd}, d, timeDep, equation})
+}
+
+func (p *ScalarExcitation) RenderFunctionLimitX(equation StringFunction, xStart, xEnd int) {
+	n := MeshOf(p).Size()
+	p.RenderFunctionLimit(equation, xStart, xEnd, 0, n[Y], 0, n[Z])
+}
+
+func (p *ScalarExcitation) RenderFunctionLimitY(equation StringFunction, yStart, yEnd int) {
+	n := MeshOf(p).Size()
+	p.RenderFunctionLimit(equation, 0, n[X], yStart, yEnd, 0, n[Z])
+}
+
+func (p *ScalarExcitation) RenderFunctionLimitZ(equation StringFunction, zStart, zEnd int) {
+	n := MeshOf(p).Size()
+	p.RenderFunctionLimit(equation, 0, n[X], 0, n[Y], zStart, zEnd)
 }
 
 func (p *ScalarExcitation) RemoveRenderedFunction() {
@@ -108,16 +162,17 @@ func (e *ScalarExcitation) Slice() (*data.Slice, bool) {
 	e.AddTo(buf)
 	tmp, ok := mapSetScalarExcitation.Load(e.name)
 	if ok {
-		setExcitations := tmp.(ScalarExcitationSlice)
-		if setExcitations.timedependent {
-			d := GenerateSliceFromFunctionString(setExcitations.stringFct, e.Mesh())
-			setExcitations.d = d
+		setExcitations := tmp.(ScalarExcitationSlices)
+		for _, setExcitation := range setExcitations.slc {
+			if setExcitation.timedependent {
+				d := GenerateSliceFromFunctionString(setExcitation.stringFct, e.Mesh())
+				setExcitation.d = d
+			}
+			newData := setExcitation.d
+			regionStart := setExcitation.start
+			regionEnd := setExcitation.end
+			data.CopyPart(buf, newData, 0, regionEnd[X]-regionStart[X], 0, regionEnd[Y]-regionStart[Y], 0, regionEnd[Z]-regionStart[Z], 0, 1, regionStart[X], regionStart[Y], regionStart[Z], 0)
 		}
-		newData := setExcitations.d
-		regionStart := setExcitations.start
-		regionEnd := setExcitations.end
-		data.CopyPart(buf, newData, 0, regionEnd[X]-regionStart[X], 0, regionEnd[Y]-regionStart[Y], 0, regionEnd[Z]-regionStart[Z], 0, 1, regionStart[X], regionStart[Y], regionStart[Z], 0)
-
 	}
 	return buf, true
 }

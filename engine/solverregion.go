@@ -193,14 +193,18 @@ func (s *SolverRegion) PBC(x, y, z int) {
 }
 
 func (r *SolverRegion) Overlaps(other *SolverRegion) bool {
+	return Overlaps(r.StartX, r.EndX, r.StartY, r.EndY, r.StartZ, r.EndZ, other.StartX, other.EndX, other.StartY, other.EndY, other.StartZ, other.EndZ)
+}
+
+func Overlaps(StartX1, EndX1, StartY1, EndY1, StartZ1, EndZ1, StartX2, EndX2, StartY2, EndY2, StartZ2, EndZ2 int) bool {
 	// Check for separation along each axis.
-	if r.EndX < other.StartX || r.StartX > other.EndX {
+	if EndX1 < StartX2 || StartX1 > EndX2 {
 		return false
 	}
-	if r.EndY < other.StartY || r.StartY > other.EndY {
+	if EndY1 < StartY2 || StartY1 > EndY2 {
 		return false
 	}
-	if r.EndZ < other.StartZ || r.StartZ > other.EndZ {
+	if EndZ1 < StartZ2 || StartZ1 > EndZ2 {
 		return false
 	}
 	return true
@@ -257,4 +261,47 @@ func (s *SolverRegionsStruct) CompareAllOverlapsElastic() []bool {
 		comparisons = append(comparisons, overlapping)
 	}
 	return comparisons
+}
+
+func GetOverlapIndex(s SetSlice, setSliceSlice []SetSlice) (overlappingIndices []int) {
+	if s == nil {
+		return overlappingIndices
+	}
+	for i, s2 := range setSliceSlice {
+		if Overlaps(s.StartAt()[X], s.EndAt()[X], s.StartAt()[Y], s.EndAt()[Y], s.StartAt()[Z], s.EndAt()[Z], s2.StartAt()[X], s2.EndAt()[X], s2.StartAt()[Y], s2.EndAt()[Y], s2.StartAt()[Z], s2.EndAt()[Z]) {
+			overlappingIndices = append(overlappingIndices, i)
+		}
+	}
+	return overlappingIndices
+}
+
+func FreeMemoryIndices(slice []SetSlice, indices []int) {
+	for _, i := range indices {
+		if slice[i].Buffer().GPUAccess() {
+			cuda.Recycle(slice[i].Buffer())
+		} else {
+			slice[i].Buffer().Free()
+		}
+	}
+}
+
+func RemoveIndices[T any](slice []T, indices []int) []T {
+	toRemove := make(map[int]struct{}, len(indices))
+	for _, i := range indices {
+		toRemove[i] = struct{}{}
+	}
+
+	newSlice := make([]T, 0, len(slice)-len(indices))
+	for i, elem := range slice {
+		if _, remove := toRemove[i]; !remove {
+			newSlice = append(newSlice, elem)
+		}
+	}
+	return newSlice
+}
+
+type SetSlice interface {
+	StartAt() [3]int
+	EndAt() [3]int
+	Buffer() *data.Slice
 }

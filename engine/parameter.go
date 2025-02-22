@@ -23,21 +23,34 @@ var Params map[string]field
 var mapSetParam sync.Map
 
 func SetParam(name string, s ParameterSlice) {
-	_, ok := mapSetParam.Load(name)
+	tmp, ok := mapSetParam.Load(name)
 	if ok {
-		EraseSetParam(name)
+		slces := tmp.(ParameterSlices)
+		var slcInterfaces = make([]SetSlice, 0)
+		for _, slc := range slces.slc {
+			slcInterfaces = append(slcInterfaces, &slc)
+		}
+		overlapIndices := GetOverlapIndex(&s, slcInterfaces)
+		FreeMemoryIndices(slcInterfaces, overlapIndices)
+		slces.slc = RemoveIndices(slces.slc, overlapIndices)
+		slces.slc = append(slces.slc, s)
+		mapSetParam.Store(name, slces)
+	} else {
+		slc := ParameterSlices{name: name, slc: []ParameterSlice{s}}
+		mapSetParam.Store(name, slc)
 	}
-	mapSetParam.Store(name, s)
 }
 
 func EraseSetParam(name string) {
 	tmp, ok := mapSetParam.Load(name)
 	if ok {
-		s := tmp.(ParameterSlice)
-		if s.d.GPUAccess() {
-			cuda.Recycle(s.d)
-		} else {
-			s.d.Free()
+		s := tmp.(ParameterSlices)
+		for _, slc := range s.slc {
+			if slc.d.GPUAccess() {
+				cuda.Recycle(slc.d)
+			} else {
+				slc.d.Free()
+			}
 		}
 		mapSetParam.Delete(name)
 	} else {
@@ -45,14 +58,30 @@ func EraseSetParam(name string) {
 	}
 }
 
+type ParameterSlices struct {
+	name string
+	slc  []ParameterSlice
+}
+
 type ParameterSlice struct {
-	name          string
 	start         [3]int
 	end           [3]int
 	d             *data.Slice
 	ncomp         int
 	timedependent bool
 	stringFct     StringFunction
+}
+
+func (p *ParameterSlice) StartAt() [3]int {
+	return p.start
+}
+
+func (p *ParameterSlice) EndAt() [3]int {
+	return p.end
+}
+
+func (p *ParameterSlice) Buffer() *data.Slice {
+	return p.d
 }
 
 type field struct {
@@ -369,7 +398,33 @@ func (p *RegionwiseScalar) RenderFunction(equation StringFunction) {
 	util.AssertMsg(strings.ToLower(p.name) != "aex" && strings.ToLower(p.name) != "dind" && strings.ToLower(p.name) != "dmi", "RenderFunction: Not available for exchange and DMI.")
 	util.AssertMsg(equation.IsScalar(), "RenderFunction: Need scalar function.")
 	d, timeDep := GenerateSliceFromFunctionStringTimeDep(equation, p.Mesh())
-	SetParam(p.name, ParameterSlice{name: p.name, start: [3]int{0, 0, 0}, end: p.Mesh().Size(), d: d, ncomp: d.NComp(), timedependent: timeDep, stringFct: equation})
+	SetParam(p.name, ParameterSlice{start: [3]int{0, 0, 0}, end: p.Mesh().Size(), d: d, ncomp: d.NComp(), timedependent: timeDep, stringFct: equation})
+}
+
+func (p *RegionwiseScalar) RenderFunctionLimit(equation StringFunction, xStart, xEnd, yStart, yEnd, zStart, zEnd int) {
+	util.AssertMsg(strings.ToLower(p.name) != "aex" && strings.ToLower(p.name) != "dind" && strings.ToLower(p.name) != "dmi", "RenderFunction: Not available for exchange and DMI.")
+	util.AssertMsg(equation.IsScalar(), "RenderFunction: Need scalar function.")
+	n := MeshOf(p).Size()
+	util.Argument(xStart < xEnd && yStart < yEnd && zStart < zEnd)
+	util.Argument(xStart >= 0 && yStart >= 0 && zStart >= 0)
+	util.Argument(xEnd <= n[X] && yEnd <= n[Y] && zEnd <= n[Z])
+	d, timeDep := GenerateSliceFromFunctionStringTimeDep(equation, p.Mesh())
+	SetParam(p.name, ParameterSlice{start: [3]int{xStart, yStart, zStart}, end: [3]int{xEnd, yEnd, zEnd}, d: d, ncomp: d.NComp(), timedependent: timeDep, stringFct: equation})
+}
+
+func (p *RegionwiseScalar) RenderFunctionLimitX(equation StringFunction, xStart, xEnd int) {
+	n := MeshOf(p).Size()
+	p.RenderFunctionLimit(equation, xStart, xEnd, 0, n[Y], 0, n[Z])
+}
+
+func (p *RegionwiseScalar) RenderFunctionLimitY(equation StringFunction, yStart, yEnd int) {
+	n := MeshOf(p).Size()
+	p.RenderFunctionLimit(equation, 0, n[X], yStart, yEnd, 0, n[Z])
+}
+
+func (p *RegionwiseScalar) RenderFunctionLimitZ(equation StringFunction, zStart, zEnd int) {
+	n := MeshOf(p).Size()
+	p.RenderFunctionLimit(equation, 0, n[X], 0, n[Y], zStart, zEnd)
 }
 
 func (p *RegionwiseScalar) RemoveRenderedFunction() {
@@ -467,7 +522,32 @@ func NewVectorParam(name, unit, desc string) *RegionwiseVector {
 func (p *RegionwiseVector) RenderFunction(equation StringFunction) {
 	util.AssertMsg(!equation.IsScalar(), "RenderFunction: Need vector function.")
 	d, timeDep := GenerateSliceFromFunctionStringTimeDep(equation, p.Mesh())
-	SetParam(p.name, ParameterSlice{name: p.name, start: [3]int{0, 0, 0}, end: p.Mesh().Size(), d: d, ncomp: d.NComp(), timedependent: timeDep, stringFct: equation})
+	SetParam(p.name, ParameterSlice{start: [3]int{0, 0, 0}, end: p.Mesh().Size(), d: d, ncomp: d.NComp(), timedependent: timeDep, stringFct: equation})
+}
+
+func (p *RegionwiseVector) RenderFunctionLimit(equation StringFunction, xStart, xEnd, yStart, yEnd, zStart, zEnd int) {
+	util.AssertMsg(!equation.IsScalar(), "RenderFunction: Need vector function.")
+	n := MeshOf(p).Size()
+	util.Argument(xStart < xEnd && yStart < yEnd && zStart < zEnd)
+	util.Argument(xStart >= 0 && yStart >= 0 && zStart >= 0)
+	util.Argument(xEnd <= n[X] && yEnd <= n[Y] && zEnd <= n[Z])
+	d, timeDep := GenerateSliceFromFunctionStringTimeDep(equation, p.Mesh())
+	SetParam(p.name, ParameterSlice{start: [3]int{xStart, yStart, zStart}, end: [3]int{xEnd, yEnd, zEnd}, d: d, ncomp: d.NComp(), timedependent: timeDep, stringFct: equation})
+}
+
+func (p *RegionwiseVector) RenderFunctionLimitX(equation StringFunction, xStart, xEnd int) {
+	n := MeshOf(p).Size()
+	p.RenderFunctionLimit(equation, xStart, xEnd, 0, n[Y], 0, n[Z])
+}
+
+func (p *RegionwiseVector) RenderFunctionLimitY(equation StringFunction, yStart, yEnd int) {
+	n := MeshOf(p).Size()
+	p.RenderFunctionLimit(equation, 0, n[X], yStart, yEnd, 0, n[Z])
+}
+
+func (p *RegionwiseVector) RenderFunctionLimitZ(equation StringFunction, zStart, zEnd int) {
+	n := MeshOf(p).Size()
+	p.RenderFunctionLimit(equation, 0, n[X], 0, n[Y], zStart, zEnd)
 }
 
 func (p *RegionwiseVector) RemoveRenderedFunction() {
