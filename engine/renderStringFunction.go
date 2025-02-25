@@ -941,6 +941,7 @@ func GenerateSliceFromFunctionStringTimeDep(functionStr StringFunction, mesh *da
 	for key := range vars {
 		if key != "x_length" && key != "y_length" && key != "z_length" && key != "x_factor" && key != "y_factor" && key != "z_factor" && key != "t" && math.IsNaN(vars[key].(float64)) {
 			//fmt.Println(key, s.variablesStart[j][key].vector[comp], s.variablesEnd[j][key].vector[comp])
+			fmt.Println(key)
 			if value, ok := worldVars[strings.ToLower(key)]; ok {
 				vars[key] = value
 			} else {
@@ -975,7 +976,7 @@ func GenerateSliceFromFunctionStringTimeDep(functionStr StringFunction, mesh *da
 			for key := range vars {
 				if key != "x_length" && key != "y_length" && key != "z_length" && key != "x_factor" && key != "y_factor" && key != "z_factor" && key != "t" && math.IsNaN(vars[key].(float64)) {
 					//fmt.Println(key, s.variablesStart[j][key].vector[comp], s.variablesEnd[j][key].vector[comp])
-					if value, ok := worldVars[key]; ok {
+					if value, ok := worldVars[strings.ToLower(key)]; ok {
 						vars[key] = value
 					} else {
 						panic(fmt.Sprintf("Variable %s not defined.", key))
@@ -995,6 +996,7 @@ func GenerateSliceFromFunctionStringTimeDep(functionStr StringFunction, mesh *da
 		}
 		data123[0] = data0
 		dataFused = data.SliceFromSlices(data123, mesh.Size())
+
 	} else {
 		dataFused = data.SliceFromSlices([]*data.Slice{data0}, mesh.Size())
 	}

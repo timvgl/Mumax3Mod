@@ -49,7 +49,6 @@ func RightSide(dst, f, g *data.Slice, Eta, Rho *RegionwiseScalar, Bf *Excitation
 
 		bf, _ := Bf.Slice()
 		defer cuda.Recycle(bf)
-
 		//Elastic part of wave equation
 		calcSecondDerivDisp(f)
 
@@ -57,7 +56,9 @@ func RightSide(dst, f, g *data.Slice, Eta, Rho *RegionwiseScalar, Bf *Excitation
 		melForce := cuda.Buffer(3, size)
 		defer cuda.Recycle(melForce)
 		// cuda.Zero(melForce)
+
 		GetMagnetoelasticForceDensity(melForce)
+
 		thermalElasticNoise := cuda.Buffer(melForce.NComp(), melForce.Size())
 		defer cuda.Recycle(thermalElasticNoise)
 		F_therm.EvalTo(thermalElasticNoise)
@@ -66,6 +67,7 @@ func RightSide(dst, f, g *data.Slice, Eta, Rho *RegionwiseScalar, Bf *Excitation
 		//Sufficient to only set right to zero because udot2 = udot+right
 		//If initial udot!=0, then do also FreezeDisp(udot2)
 		FreezeDisp(dst)
+
 	}
 }
 

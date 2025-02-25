@@ -36,11 +36,15 @@ func init() {
 // Sets dst to the current demag field
 func SetDemagField(dst *data.Slice) {
 	if EnableDemag {
+
 		msat := Msat.MSlice()
+
 		defer msat.Recycle()
 		if NoDemagSpins.isZero() {
 			// Normal demag, everywhere
+
 			demagConv().Exec(dst, M.Buffer(), Geometry.Gpu(), msat)
+
 		} else {
 			setMaskedDemagField(dst, msat)
 		}

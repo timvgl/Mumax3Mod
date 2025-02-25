@@ -166,7 +166,8 @@ func (e *ScalarExcitation) Slice() (*data.Slice, bool) {
 		for _, setExcitation := range setExcitations.slc {
 			if setExcitation.timedependent {
 				d := GenerateSliceFromFunctionString(setExcitation.stringFct, e.Mesh())
-				setExcitation.d = d
+				data.Copy(setExcitation.d, d)
+				cuda.Recycle(d)
 			}
 			newData := setExcitation.d
 			regionStart := setExcitation.start

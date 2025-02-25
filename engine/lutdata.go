@@ -106,7 +106,8 @@ func (p *lut) EvalTo(dst *data.Slice) {
 		for _, setParam := range setParams.slc {
 			if setParam.timedependent {
 				d := GenerateSliceFromFunctionString(setParam.stringFct, Mesh())
-				setParam.d = d
+				data.Copy(setParam.d, d)
+				cuda.Recycle(d)
 			}
 			newData := setParam.d
 			regionStart := setParam.start

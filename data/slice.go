@@ -129,11 +129,11 @@ func SliceFromSlices(data []*Slice, size [3]int) *Slice {
 		}
 		ptrs[i] = data[i].DevPtr(0)
 	}
-	slc := SliceFromPtrs(size, CPUMemory, ptrs)
+	slc := SliceFromPtrs(size, GPUMemory, ptrs)
 	for _, s := range data {
 		idx := 0
 		gotValue := false
-		for i, _ := range DataSliceSlice {
+		for i := range DataSliceSlice {
 			if DataSliceSlice[i] == s {
 				idx = i
 				gotValue = true
@@ -225,7 +225,7 @@ func (s *Slice) Free() {
 	}
 	idx := 0
 	gotValue := false
-	for i, _ := range DataSliceSlice {
+	for i := range DataSliceSlice {
 		if DataSliceSlice[i] == s {
 			idx = i
 			gotValue = true

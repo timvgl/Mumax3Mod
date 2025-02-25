@@ -65,7 +65,9 @@ func (m *varVectorField) LoadFileMyDir(fname string) {
 
 func (m *varVectorField) RenderFunction(equation StringFunction) {
 	util.AssertMsg(!equation.IsScalar(), "RenderFunction: Need vector function.")
-	m.SetArray(GenerateSliceFromFunctionString(equation, m.Mesh()))
+	d := GenerateSliceFromFunctionString(equation, m.Mesh())
+	m.SetArray(d)
+	cuda.Recycle(d)
 }
 
 func (m *varVectorField) SetTime(fname string) {

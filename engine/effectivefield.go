@@ -2,7 +2,9 @@ package engine
 
 // Effective field
 
-import "github.com/mumax/3/data"
+import (
+	"github.com/mumax/3/data"
+)
 
 var B_eff = NewVectorField("B_eff", "T", "Effective field", SetEffectiveField)
 
@@ -10,7 +12,9 @@ var B_eff = NewVectorField("B_eff", "T", "Effective field", SetEffectiveField)
 // This is the sum of all effective field terms,
 // like demag, exchange, ...
 func SetEffectiveField(dst *data.Slice) {
-	SetDemagField(dst)    // set to B_demag...
+
+	SetDemagField(dst) // set to B_demag...
+
 	AddExchangeField(dst) // ...then add other terms
 	AddAnisotropyField(dst)
 	AddMagnetoelasticField(dst)

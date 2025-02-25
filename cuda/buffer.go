@@ -137,7 +137,7 @@ func Recycle(s *data.Slice) {
 	}
 	idx := 0
 	gotValue := false
-	for i, _ := range data.DataSliceSlice {
+	for i := range data.DataSliceSlice {
 		if data.DataSliceSlice[i] == s {
 			idx = i
 			gotValue = true

@@ -111,6 +111,7 @@ func (p *Excitation) MSlice() cuda.MSlice {
 
 func (p *Excitation) RenderFunction(equation StringFunction) {
 	util.AssertMsg(!equation.IsScalar(), "RenderFunction: Need vector function.")
+	fmt.Println("exc")
 	d, timeDep := GenerateSliceFromFunctionStringTimeDep(equation, p.Mesh())
 	SetExcitation(p.name, ExcitationSlice{start: [3]int{0, 0, 0}, end: p.Mesh().Size(), d: d, timedependent: timeDep, stringFct: equation})
 }
@@ -121,6 +122,7 @@ func (p *Excitation) RenderFunctionLimit(equation StringFunction, xStart, xEnd, 
 	util.Argument(xStart >= 0 && yStart >= 0 && zStart >= 0)
 	util.Argument(xEnd <= n[X] && yEnd <= n[Y] && zEnd <= n[Z])
 	util.AssertMsg(!equation.IsScalar(), "RenderFunction: Need vector function.")
+	fmt.Println("exc l")
 	d, timeDep := GenerateSliceFromFunctionStringTimeDep(equation, p.Mesh())
 	SetExcitation(p.name, ExcitationSlice{start: [3]int{xStart, yStart, zStart}, end: [3]int{xEnd, yEnd, zEnd}, d: d, timedependent: timeDep, stringFct: equation})
 }
@@ -216,7 +218,8 @@ func (e *Excitation) Slice() (*data.Slice, bool) {
 		for _, setExcitation := range setExcitations.slc {
 			if setExcitation.timedependent {
 				d := GenerateSliceFromFunctionString(setExcitation.stringFct, e.Mesh())
-				setExcitation.d = d
+				data.Copy(setExcitation.d, d)
+				cuda.Recycle(d)
 			}
 			newData := setExcitation.d
 			regionStart := setExcitation.start

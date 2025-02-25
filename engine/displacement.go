@@ -71,7 +71,9 @@ func (u *displacement) LoadFileMyDir(fname string) {
 
 func (u *displacement) RenderFunction(equation StringFunction) {
 	util.AssertMsg(!equation.IsScalar(), "RenderFunction: Need vector function.")
-	u.SetArray(GenerateSliceFromFunctionString(equation, u.Mesh()))
+	d := GenerateSliceFromFunctionString(equation, u.Mesh())
+	u.SetArray(d)
+	cuda.Recycle(d)
 }
 
 func (u *displacement) SetTime(fname string) {

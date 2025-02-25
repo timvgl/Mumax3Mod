@@ -67,7 +67,9 @@ func (du *firstDerivative) LoadFileMyDir(fname string) {
 
 func (du *firstDerivative) RenderFunction(equation StringFunction) {
 	util.AssertMsg(!equation.IsScalar(), "RenderFunction: Need vector function.")
-	du.SetArray(GenerateSliceFromFunctionString(equation, du.Mesh()))
+	d := GenerateSliceFromFunctionString(equation, du.Mesh())
+	du.SetArray(d)
+	cuda.Recycle(d)
 }
 
 func (du *firstDerivative) Slice() (s *data.Slice, recycle bool) {
