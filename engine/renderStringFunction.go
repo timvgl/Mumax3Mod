@@ -941,7 +941,6 @@ func GenerateSliceFromFunctionStringTimeDep(functionStr StringFunction, mesh *da
 	for key := range vars {
 		if key != "x_length" && key != "y_length" && key != "z_length" && key != "x_factor" && key != "y_factor" && key != "z_factor" && key != "t" && math.IsNaN(vars[key].(float64)) {
 			//fmt.Println(key, s.variablesStart[j][key].vector[comp], s.variablesEnd[j][key].vector[comp])
-			fmt.Println(key)
 			if value, ok := worldVars[strings.ToLower(key)]; ok {
 				vars[key] = value
 			} else {

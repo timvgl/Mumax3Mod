@@ -100,6 +100,10 @@ func (p *lut) SliceRegion(paramName string, param bool, size [3]int, offsetX, of
 
 // uncompress the table to a full array in the dst Slice with parameter values per cell.
 func (p *lut) EvalTo(dst *data.Slice) {
+	gpu := p.gpuLUT()
+	for c := 0; c < p.NComp(); c++ {
+		cuda.RegionDecode(dst.Comp(c), cuda.LUTPtr(gpu[c]), regions.Gpu())
+	}
 	tmp, ok := mapSetParam.Load(p.name)
 	if ok {
 		setParams := tmp.(ParameterSlices)
@@ -114,10 +118,5 @@ func (p *lut) EvalTo(dst *data.Slice) {
 			regionEnd := setParam.end
 			data.CopyPart(dst, newData, 0, regionEnd[X]-regionStart[X], 0, regionEnd[Y]-regionStart[Y], 0, regionEnd[Z]-regionStart[Z], 0, 1, regionStart[X], regionStart[Y], regionStart[Z], 0)
 		}
-		return
-	}
-	gpu := p.gpuLUT()
-	for c := 0; c < p.NComp(); c++ {
-		cuda.RegionDecode(dst.Comp(c), cuda.LUTPtr(gpu[c]), regions.Gpu())
 	}
 }
