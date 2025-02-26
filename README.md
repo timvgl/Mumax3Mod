@@ -148,6 +148,17 @@ Comment: Loading strains is highly experimental - if you want to use the strain 
 
     Created OVF file has twice the amount of values calculated for kx for holding imag and real value.
     Can be imported into xarray by making use of mumaxXR. Please don't combine data holding non-FFT data and FFT data
+
+* RenderFunctions
+     + __RenderFunction__ - convert a string into a function with NewFunction(...) and render this function as (scalar) excitations or parameters (excluding exchange and DMI). Variables defined in the script and all mathematical standart functions in mumax3 are available. x, y and z are coordiantes in the mesh, t is being replace with the current simulated time. Dont use x_factor, y_factor, z_factor, x_length, y_length and z_length in your functions, since those variables are being used internally to represent x, y and z data. Args: StringFunction
+          - e.g. ```B_ext.RenderFunction(CreateFunction("", "amplitude*1e7*sin(2*pi*t*freq*1e6)", ""))```
+          - e.g. ```exx.RenderFunction(CreateFunction("amplitude*1e7*sin(2*pi*t*freqElastic*1e6)"))```
+     + __RenderFunctionLimit__ - Same as __RenderFunction__, but limited in space (mesh only, x, y and z still start at 0 for internal evaluation). These functions can be called multiple times on the same (scalar) excitation/parameter. Make sure that the areas dont overlap. Args: StringFunction, startX int, endX int, startY int, endY int, startZ int, endZ int
+     + __RenderFunctionLimitX__ - Same as __RenderFunctionLimit__, but limits only in x. Args: StringFunction, startX int, endX int
+          - e.g. ```alpha.RenderFunctionLimitX(CreateFunction("alphaLow+(alphaHigh-alphaLow)*tanh((128*dx-x)/(128*dx))"), 0, 128)```
+     + __RenderFunctionLimitY__ - Same as __RenderFunctionLimitX__, but for y:  Args: StringFunction, startY int, endY int
+     + __RenderFunctionLimitZ__ - Same as __RenderFunctionLimitX__, but for z:  Args: StringFunction, startZ int, endZ int
+  
     
 * Queue:
    When a queue is started in mumax it cannot be paused by default. Here an env "MumaxQueue_%d" is created
