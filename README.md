@@ -272,7 +272,6 @@ Save(operator(B_ext))
     *Args:* q Quantity, period float
   - **FFT_T:** Performs a Fourier transform in time only (using real-space data).
     *Args:* q Quantity, period float
-  *Parameters:*
   - __FFT_T_IN_MEM__ – if set to false, required data is stored continuously in ovf files (lower GPU memory consumption but slower)
   - __minFrequency__, __maxFrequency__, __dFrequency__ (floats)
   - __FFT4D_Label__ – a string to use instead of the quantity name
