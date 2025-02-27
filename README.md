@@ -178,7 +178,7 @@ The functions have been mainly tested for researching vortices in magnetic syste
 
 - **useHighEta:** Sets eta homogeneously to 1e6 during relaxation (requires __RelaxFullCoupled__ = true).
 
-- **__printSlope__:** Prints the slope or the value of the variable being minimized (requires __RelaxFullCoupled__ = true).
+- **__\__printSlope__\__:** Prints the slope or the value of the variable being minimized (requires __RelaxFullCoupled__ = true).
 
 - **SlopeTresholdEnergyRelax:** Threshold from which it can be assumed that the energy slope (over time) is zero (default is 1e-12; may vary depending on the system, requires __RelaxFullCoupled__ = true).
 
