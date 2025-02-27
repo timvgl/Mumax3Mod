@@ -277,6 +277,10 @@ Save(operator(B_ext))
   - __FFT4D_Label__ – a string to use instead of the quantity name
   - __negativeKx__ - set to false to not get negtative kx values
   - __operatorsKSpace__ - fuse as many operators (e.g. ExpandOperator or CropOperator) as wished together with MergeOperators(...) and assign the result to this variable to crop or expand the k-space before performing the fouriertransform in time
+    *Example:*
+    ```
+    operatorsKSpace = MergeOperators(CropXOperator(0, 64), ExpandXOperator(0, 128, -32)) //only consider everything in the area from x = 0 to x = 64, and then expand to the right side
+    ```
   - __interpolate__ - set to true - interpolate between time steps for fouriertransform - need when FixDt not set or the calculation period not a multiple from the calculation period (experimental)
   - Methods on the result: __.SaveAbs()__, __.SavePhi()__, __.ToPolar()__
   
