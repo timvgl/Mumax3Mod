@@ -350,6 +350,9 @@ func RunInteractive() {
 
 // take one time step
 func step(output bool) {
+	if output {
+		StorePrimaryInterpolationStates()
+	}
 	stepper.Step()
 	for _, f := range postStep {
 		f()

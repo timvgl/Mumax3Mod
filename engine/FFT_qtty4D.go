@@ -32,6 +32,7 @@ var (
 	dFrequency      float64 = math.NaN()
 	fft4DLabel      string  = ""
 	operatorsKSpace         = [](func(q Quantity) Quantity){func(q Quantity) Quantity { return q }}
+	interpolate             = false
 )
 
 func init() {
@@ -47,6 +48,7 @@ func init() {
 	DeclFunc("emptyOperator", func(q Quantity) Quantity { return q }, "")
 	DeclFunc("MergeOperators", MergeOperators, "")
 	DeclFunc("ApplyOperators", ApplyOperators, "")
+	DeclVar("interpolate", &interpolate, "")
 }
 
 type fftOperation4D struct {
@@ -67,6 +69,7 @@ type fftOperation4D struct {
 	phi             bool
 	abs             bool
 	operatorsKSpace [](func(q Quantity) Quantity)
+	preData         *data.Slice
 }
 
 func MergeOperators(fs ...func(q Quantity) Quantity) [](func(q Quantity) Quantity) {
@@ -120,7 +123,8 @@ func FFT4D(q Quantity, period float64) *fftOperation4D {
 	}
 
 	var dataT *data.Slice
-	FFT_T_OP_Obj := fftOperation4D{fieldOp{q, q, q.NComp()}, q, dFrequency, maxFrequency, minFrequency, Time, period, -1, false, qOP, QTTYName, true, dataT, false, false, false, operatorsKSpace}
+	var dataTPre *data.Slice
+	FFT_T_OP_Obj := fftOperation4D{fieldOp{q, q, q.NComp()}, q, dFrequency, maxFrequency, minFrequency, Time, period, -1, false, qOP, QTTYName, true, dataT, false, false, false, operatorsKSpace, dataTPre}
 	FFT_T_OP = append(FFT_T_OP, &FFT_T_OP_Obj)
 	FFT_T_OPRunning[&FFT_T_OP_Obj] = false
 	FFT_T_OPDataCopied[&FFT_T_OP_Obj] = false
@@ -135,7 +139,8 @@ func FFT_T(q Quantity, period float64) *fftOperation4D {
 		QTTYName = NameOf(q)
 	}
 	var dataT *data.Slice
-	FFT_T_OP_Obj := fftOperation4D{fieldOp{q, q, q.NComp()}, q, dFrequency, maxFrequency, minFrequency, Time, period, -1, false, q, QTTYName, false, dataT, false, false, false, [](func(q Quantity) Quantity){func(q Quantity) Quantity { return q }}}
+	var dataTPre *data.Slice
+	FFT_T_OP_Obj := fftOperation4D{fieldOp{q, q, q.NComp()}, q, dFrequency, maxFrequency, minFrequency, Time, period, -1, false, q, QTTYName, false, dataT, false, false, false, [](func(q Quantity) Quantity){func(q Quantity) Quantity { return q }}, dataTPre}
 	FFT_T_OP = append(FFT_T_OP, &FFT_T_OP_Obj)
 	FFT_T_OPRunning[&FFT_T_OP_Obj] = false
 	FFT_T_OPDataCopied[&FFT_T_OP_Obj] = false
@@ -200,6 +205,15 @@ func (s *fftOperation4D) Eval() {
 	)
 	defer cuda.Recycle_FFT_T(dataT, fmt.Sprintf("%s_%s", NameOf(s.qOP), FFTType))
 	s.qOP.EvalTo(dataT)
+	dt := 0.
+	if FixDt != 0 {
+		dt = FixDt
+	} else {
+		dt = Dt_si
+	}
+	if s.preData != nil && interpolate {
+		cuda.Madd2(dataT, dataT, s.preData, float32((float64(s.count)*s.period-(Time-dt))/dt), float32(1-((float64(s.count)*s.period-(Time-dt))/dt)))
+	}
 	if s.kspace {
 		if l, ok := s.qOP.(interface {
 			AxisFFT() ([3]int, [3]float64, [3]float64, []string)
@@ -510,6 +524,15 @@ func (s *fftOperation4D) needUpdate() bool {
 	return s.period != 0 && t-float64(s.count)*s.period >= s.period
 }
 
+func (s *fftOperation4D) needUpdatePostStep() bool {
+	t := Time - s.start
+	if FixDt != 0 {
+		return s.period != 0 && t-float64(s.count)*s.period+FixDt >= s.period
+	} else {
+		return s.period != 0 && t-float64(s.count)*s.period+Dt_si >= s.period
+	}
+}
+
 func (s *fftOperation4D) waitUntilCopied() {
 	mu.Lock()
 	defer mu.Unlock()
@@ -555,6 +578,23 @@ func DoFFT4D() {
 			tmpOp := FFT_T_OP[i]
 			tmpOp.count++
 			FFT_T_OP[i] = tmpOp
+		}
+	}
+}
+
+func StorePrimaryInterpolationStates() {
+	if interpolate {
+		for i := range FFT_T_OP {
+			if FFT_T_OP[i].needUpdatePostStep() {
+				if FFT_T_OP[i].preData == nil {
+					size := MeshOf(FFT_T_OP[i].qOP).Size()
+					if FFT_T_OP[i].kspace {
+						size[0] *= 2
+					}
+					FFT_T_OP[i].preData = cuda.Buffer(FFT_T_OP[i].qOP.NComp(), size)
+				}
+				FFT_T_OP[i].qOP.EvalTo(FFT_T_OP[i].preData)
+			}
 		}
 	}
 }
