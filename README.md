@@ -286,8 +286,9 @@ Save(operator(B_ext))
   
   *Examples:*  
   ```
-  FFT4D(m, 10e-10).SaveAbs().SavePhi()  //10e-10 is the calculation period - like in AutoSave, but for incremental updating fouriertransform data in time
-  FFT4D(m, 10e-10).ToPolar()
+  FFT4D(m, 10e-10).SaveAbs().SavePhi()  //10e-10 is the calculation period - like in AutoSave, but for incremental updating fouriertransform data in time. Saves Length and Angle of complex number in distincted ovf files
+  FFT4D(m, 10e-10).ToPolar() //saves complex number in polar form in single ovf file
+  FFT4D(m, 10e-10) //saves complex number in single ovf file
   ```
   
 *Note:* The FFT4D code creates twice as many values for kx to hold the imaginary and real parts.  
