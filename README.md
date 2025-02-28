@@ -178,7 +178,7 @@ The functions have been mainly tested for researching vortices in magnetic syste
 
 - **useHighEta:** Sets eta homogeneously to 1e6 during relaxation (requires __RelaxFullCoupled__ = true).
 
-- **__printSlope:** Prints the slope or the value of the variable being minimized (requires __RelaxFullCoupled__ = true).
+- **__\__printSlope__\__:** Prints the slope or the value of the variable being minimized (requires __RelaxFullCoupled__ = true).
 
 - **SlopeTresholdEnergyRelax:** Threshold from which it can be assumed that the energy slope (over time) is zero (default is 1e-12; may vary depending on the system, requires __RelaxFullCoupled__ = true).
 
@@ -208,6 +208,48 @@ The functions have been mainly tested for researching vortices in magnetic syste
 - **EraseAllRegions:** Erases all regions – resets all cells to region 0 (more efficient than redefining each region separately).
 
 ==================================================
+# Commands for expanding Quantities
+- **Expand:** Expands the array of a quantity and fills the new created entries with constant (default 0).
+  *Args:* q (Quantity), fromX, toX, fromY, toY, fromZ, toZ, shiftX, shiftY, shiftZ (int, in cells), value to set for the expanded area (optional, can be set componentwise, but does not have to. Default is 0. float)
+- **ExpandX:** Same as **Expand** but only for x dimension
+  *Args:* q (Quantity), fromX, toX, shiftX (int, in cells), value to set for the expanded area (optional, can be set componentwise, but does not have to. Default is 0. float)
+- **ExpandY:** Same as **Expand** but only for y dimension
+  *Args:* q (Quantity), fromY, toY, shiftY (int, in cells), value to set for the expanded area (optional, can be set componentwise, but does not have to. Default is 0. float)
+- **ExpandZ** Same as **Expand** but only for z dimension
+  *Args:* q (Quantity), fromZ, toZ, shiftZ (int, in cells), value to set for the expanded area (optional, can be set componentwise, but does not have to. Default is 0. float)
+
+==================================================
+# Commands for generating Operators
+
+## Crop
+- **CropOperator:** Returns a function with the cropping area being defined already but the quantity missing.
+  *Args:* fromX, toX, fromY, toY, fromZ, toZ (int, in cells)
+- **CropXOperator:** Same as **CropOperator** but only for x dimension
+  *Args:* fromX, toX (int, in cells)
+- **CropYOperator:** Same as **CropOperator** but only for y dimension
+  *Args:* fromY, toY (int, in cells)
+- **CropZOperator:** Same as **CropOperator** but only for z dimension
+  *Args:* fromZ, toZ (int, in cells)
+
+## Expand
+- **ExpandOperator:** Returns a function with the expanding area being defined already but the quantity missing:
+  *Args:* fromX, toX, fromY, toY, fromZ, toZ, shiftX, shiftY, shiftZ (int, in cells), value to set for the expanded area (optional, can be set componentwise, but does not have to. Default is 0. float)
+- **ExpandXOperator:** Same as **ExpandOperator** but only for x dimension
+  *Args:* fromX, toX, shiftX (int, in cells), value to set for the expanded area (optional, can be set componentwise, but does not have to. Default is 0. float)
+- **ExpandYOperator:** Same as **ExpandOperator** but only for y dimension
+  *Args:* fromY, toY, shiftY (int, in cells), value to set for the expanded area (optional, can be set componentwise, but does not have to. Default is 0. float)
+- **ExpandZOperator:** Same as **ExpandOperator** but only for z dimension
+  *Args:* fromZ, toZ, shiftZ (int, in cells), value to set for the expanded area (optional, can be set componentwise, but does not have to. Default is 0. float)
+
+*Example*
+```
+operator := CropXOperator(0, 32)
+Save(operator(m))
+Save(operator(B_ext))
+```
+
+
+==================================================
 # FFT Functions
 
 ## FFT3D
@@ -227,18 +269,26 @@ The functions have been mainly tested for researching vortices in magnetic syste
 ## FFT4D / FFT_T
 - **FFT4D / FFT_T:**  
   - **FFT4D:** Computes a 3D FFT (x, y, z) and performs an incremental Fourier transform in time.
-  - **FFT_T:** Performs a Fourier transform in time only (using real-space data).  
-  *Parameters:*
-  - Time period (how often the Fourier coefficients are updated)
+    *Args:* q Quantity, period float
+  - **FFT_T:** Performs a Fourier transform in time only (using real-space data).
+    *Args:* q Quantity, period float
   - __FFT_T_IN_MEM__ – if set to false, required data is stored continuously in ovf files (lower GPU memory consumption but slower)
   - __minFrequency__, __maxFrequency__, __dFrequency__ (floats)
   - __FFT4D_Label__ – a string to use instead of the quantity name
+  - __negativeKx__ - set to false to not get negtative kx values
+  - __operatorsKSpace__ - fuse as many operators (e.g. ExpandOperator or CropOperator) as wished together with MergeOperators(...) and assign the result to this variable to crop or expand the k-space before performing the fouriertransform in time
+    *Example:*
+    ```
+    operatorsKSpace = MergeOperators(CropXOperator(0, 64), ExpandXOperator(0, 128, -32)) //only consider everything in the area from x = 0 to x = 64, and then expand to the right side
+    ```
+  - __interpolate__ - set to true - interpolate between time steps for fouriertransform - need when FixDt not set or the calculation period not a multiple from the calculation period (experimental)
   - Methods on the result: __.SaveAbs()__, __.SavePhi()__, __.ToPolar()__
   
   *Examples:*  
   ```
-  FFT4D(m, 10e-10).SaveAbs().SavePhi()  
-  FFT4D(m, 10e-10).ToPolar()
+  FFT4D(m, 10e-10).SaveAbs().SavePhi()  //10e-10 is the calculation period - like in AutoSave, but for incremental updating fouriertransform data in time. Saves Length and Angle of complex number in distincted ovf files
+  FFT4D(m, 10e-10).ToPolar() //saves complex number in polar form in single ovf file
+  FFT4D(m, 10e-10) //saves complex number in single ovf file
   ```
   
 *Note:* The FFT4D code creates twice as many values for kx to hold the imaginary and real parts.  
