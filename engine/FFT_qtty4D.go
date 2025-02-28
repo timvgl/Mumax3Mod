@@ -70,6 +70,7 @@ type fftOperation4D struct {
 	abs             bool
 	operatorsKSpace [](func(q Quantity) Quantity)
 	preData         *data.Slice
+	interpolate     bool
 }
 
 func MergeOperators(fs ...func(q Quantity) Quantity) [](func(q Quantity) Quantity) {
@@ -124,7 +125,7 @@ func FFT4D(q Quantity, period float64) *fftOperation4D {
 
 	var dataT *data.Slice
 	var dataTPre *data.Slice
-	FFT_T_OP_Obj := fftOperation4D{fieldOp{q, q, q.NComp()}, q, dFrequency, maxFrequency, minFrequency, Time, period, -1, false, qOP, QTTYName, true, dataT, false, false, false, operatorsKSpace, dataTPre}
+	FFT_T_OP_Obj := fftOperation4D{fieldOp{q, q, q.NComp()}, q, dFrequency, maxFrequency, minFrequency, Time, period, -1, false, qOP, QTTYName, true, dataT, false, false, false, operatorsKSpace, dataTPre, interpolate}
 	FFT_T_OP = append(FFT_T_OP, &FFT_T_OP_Obj)
 	FFT_T_OPRunning[&FFT_T_OP_Obj] = false
 	FFT_T_OPDataCopied[&FFT_T_OP_Obj] = false
@@ -140,7 +141,7 @@ func FFT_T(q Quantity, period float64) *fftOperation4D {
 	}
 	var dataT *data.Slice
 	var dataTPre *data.Slice
-	FFT_T_OP_Obj := fftOperation4D{fieldOp{q, q, q.NComp()}, q, dFrequency, maxFrequency, minFrequency, Time, period, -1, false, q, QTTYName, false, dataT, false, false, false, [](func(q Quantity) Quantity){func(q Quantity) Quantity { return q }}, dataTPre}
+	FFT_T_OP_Obj := fftOperation4D{fieldOp{q, q, q.NComp()}, q, dFrequency, maxFrequency, minFrequency, Time, period, -1, false, q, QTTYName, false, dataT, false, false, false, [](func(q Quantity) Quantity){func(q Quantity) Quantity { return q }}, dataTPre, interpolate}
 	FFT_T_OP = append(FFT_T_OP, &FFT_T_OP_Obj)
 	FFT_T_OPRunning[&FFT_T_OP_Obj] = false
 	FFT_T_OPDataCopied[&FFT_T_OP_Obj] = false
@@ -211,7 +212,7 @@ func (s *fftOperation4D) Eval() {
 	} else {
 		dt = Dt_si
 	}
-	if s.preData != nil && interpolate {
+	if s.preData != nil && s.interpolate {
 		cuda.Madd2(dataT, dataT, s.preData, float32((float64(s.count)*s.period-(Time-dt))/dt), float32(1-((float64(s.count)*s.period-(Time-dt))/dt)))
 	}
 	if s.kspace {
@@ -583,18 +584,16 @@ func DoFFT4D() {
 }
 
 func StorePrimaryInterpolationStates() {
-	if interpolate {
-		for i := range FFT_T_OP {
-			if FFT_T_OP[i].needUpdatePostStep() {
-				if FFT_T_OP[i].preData == nil {
-					size := MeshOf(FFT_T_OP[i].qOP).Size()
-					if FFT_T_OP[i].kspace {
-						size[0] *= 2
-					}
-					FFT_T_OP[i].preData = cuda.Buffer(FFT_T_OP[i].qOP.NComp(), size)
+	for i := range FFT_T_OP {
+		if FFT_T_OP[i].interpolate && FFT_T_OP[i].needUpdatePostStep() {
+			if FFT_T_OP[i].preData == nil {
+				size := MeshOf(FFT_T_OP[i].qOP).Size()
+				if FFT_T_OP[i].kspace {
+					size[0] *= 2
 				}
-				FFT_T_OP[i].qOP.EvalTo(FFT_T_OP[i].preData)
+				FFT_T_OP[i].preData = cuda.Buffer(FFT_T_OP[i].qOP.NComp(), size)
 			}
+			FFT_T_OP[i].qOP.EvalTo(FFT_T_OP[i].preData)
 		}
 	}
 }
