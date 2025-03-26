@@ -6,6 +6,8 @@ import (
 	_ "image/png"
 	"math"
 
+	"github.com/mumax/3/cuda"
+	"github.com/mumax/3/data"
 	"github.com/mumax/3/httpfs"
 	"github.com/mumax/3/util"
 )
@@ -35,7 +37,6 @@ func init() {
 
 // geometrical shape for setting sample Geometry
 type Shape func(x, y, z float64) bool
-
 
 // Ellipsoid with given diameters
 func Ellipsoid(diamx, diamy, diamz float64) Shape {
@@ -310,12 +311,42 @@ func (a Shape) Xor(b Shape) Shape {
 
 func sqr64(x float64) float64 { return x * x }
 
-
 func IDT(IDTWidthFinger, IDTDistanceFinger, IDTFingerLength float64, AmountFingers int) Shape {
 	idt := Rect(IDTWidthFinger, IDTFingerLength)
-	for i:= 0; i < AmountFingers -1; i++ {
+	for i := 0; i < AmountFingers-1; i++ {
 		idt = idt.Transl(-(IDTWidthFinger + IDTDistanceFinger), 0, 0)
 		idt = idt.Add(Rect(IDTWidthFinger, IDTFingerLength))
 	}
-	return idt.Transl((float64(AmountFingers) -1.)*(IDTWidthFinger + IDTDistanceFinger) / 2, 0, 0)
+	return idt.Transl((float64(AmountFingers)-1.)*(IDTWidthFinger+IDTDistanceFinger)/2, 0, 0)
+}
+
+func RenderShape(s Shape) (*data.Slice, *data.Slice) {
+	N := Mesh().Size()
+	d := Mesh().CellSize()
+	dat := data.NewSlice(1, N)
+	array := dat.Tensors()
+	dataI := data.NewSlice(1, N)
+	arrayI := dataI.Tensors()
+	for iz := 0; iz < N[Z]; iz++ {
+		for iy := 0; iy < N[Y]; iy++ {
+			for ix := 0; ix < N[X]; ix++ {
+				for c := 0; c < dat.NComp(); c++ {
+					if s(float64(d[X])*float64(ix), float64(d[Y])*float64(iy), float64(d[Z])*float64(iz)) {
+						array[c][iz][iy][ix] = 1
+						arrayI[c][iz][iy][ix] = 0
+					} else {
+						array[c][iz][iy][ix] = 0
+						arrayI[c][iz][iy][ix] = 1
+					}
+				}
+			}
+		}
+	}
+	datGPU := cuda.Buffer(1, N)
+	dataIGPU := cuda.Buffer(1, N)
+	data.Copy(datGPU, dat)
+	data.Copy(dataIGPU, dataI)
+	dat.Free()
+	dataI.Free()
+	return datGPU, dataIGPU
 }

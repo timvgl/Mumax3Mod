@@ -17,13 +17,15 @@ func SetScalarExcitation(name string, s ScalarExcitationSlice) {
 	tmp, ok := mapSetScalarExcitation.Load(name)
 	if ok {
 		slces := tmp.(ScalarExcitationSlices)
-		var slcInterfaces = make([]SetSlice, 0)
-		for _, slc := range slces.slc {
-			slcInterfaces = append(slcInterfaces, slc)
+		if s.inversedRenderedShape == nil && s.renderedShape == nil {
+			var slcInterfaces = make([]SetSlice, 0)
+			for _, slc := range slces.slc {
+				slcInterfaces = append(slcInterfaces, slc)
+			}
+			overlapIndices := GetOverlapIndex(s, slcInterfaces)
+			FreeMemoryIndices(slcInterfaces, overlapIndices)
+			slces.slc = RemoveIndices(slces.slc, overlapIndices)
 		}
-		overlapIndices := GetOverlapIndex(s, slcInterfaces)
-		FreeMemoryIndices(slcInterfaces, overlapIndices)
-		slces.slc = RemoveIndices(slces.slc, overlapIndices)
 		slces.slc = append(slces.slc, s)
 		mapSetScalarExcitation.Store(name, slces)
 	} else {
@@ -55,11 +57,13 @@ type ScalarExcitationSlices struct {
 }
 
 type ScalarExcitationSlice struct {
-	start         [3]int
-	end           [3]int
-	d             *data.Slice
-	timedependent bool
-	stringFct     StringFunction
+	start                 [3]int
+	end                   [3]int
+	d                     *data.Slice
+	timedependent         bool
+	stringFct             StringFunction
+	renderedShape         *data.Slice
+	inversedRenderedShape *data.Slice
 }
 
 func (s ScalarExcitationSlice) StartAt() [3]int {
@@ -92,7 +96,7 @@ func NewScalarExcitation(name, unit, desc string) *ScalarExcitation {
 
 func (p *ScalarExcitation) LoadFile(path string, xOffset, yOffset, zOffset int) {
 	d := LoadFileDSlice(path)
-	SetScalarExcitation(p.name, ScalarExcitationSlice{[3]int{xOffset, yOffset, zOffset}, [3]int{xOffset + d.Size()[X], yOffset + d.Size()[Y], zOffset + d.Size()[Z]}, d, false, StringFunction{[3]string{"", "", ""}, false}})
+	SetScalarExcitation(p.name, ScalarExcitationSlice{[3]int{xOffset, yOffset, zOffset}, [3]int{xOffset + d.Size()[X], yOffset + d.Size()[Y], zOffset + d.Size()[Z]}, d, false, StringFunction{[3]string{"", "", ""}, false}, nil, nil})
 
 }
 
@@ -105,7 +109,7 @@ func (p *ScalarExcitation) MSlice() cuda.MSlice {
 func (p *ScalarExcitation) RenderFunction(equation StringFunction) {
 	util.AssertMsg(equation.IsScalar(), "RenderFunction: Need scalar function.")
 	d, timeDep := GenerateSliceFromFunctionStringTimeDep(equation, p.Mesh())
-	SetScalarExcitation(p.name, ScalarExcitationSlice{[3]int{0, 0, 0}, p.Mesh().Size(), d, timeDep, equation})
+	SetScalarExcitation(p.name, ScalarExcitationSlice{[3]int{0, 0, 0}, p.Mesh().Size(), d, timeDep, equation, nil, nil})
 }
 
 func (p *ScalarExcitation) RenderFunctionLimit(equation StringFunction, xStart, xEnd, yStart, yEnd, zStart, zEnd int) {
@@ -115,7 +119,14 @@ func (p *ScalarExcitation) RenderFunctionLimit(equation StringFunction, xStart, 
 	util.Argument(xStart >= 0 && yStart >= 0 && zStart >= 0)
 	util.Argument(xEnd <= n[X] && yEnd <= n[Y] && zEnd <= n[Z])
 	d, timeDep := GenerateSliceFromFunctionStringTimeDep(equation, p.Mesh())
-	SetScalarExcitation(p.name, ScalarExcitationSlice{[3]int{xStart, yStart, zStart}, [3]int{xEnd, yEnd, zEnd}, d, timeDep, equation})
+	SetScalarExcitation(p.name, ScalarExcitationSlice{[3]int{xStart, yStart, zStart}, [3]int{xEnd, yEnd, zEnd}, d, timeDep, equation, nil, nil})
+}
+
+func (p *ScalarExcitation) RenderFunctionShape(equation StringFunction, s Shape) {
+	util.AssertMsg(equation.IsScalar(), "RenderFunction: Need scalar function.")
+	d, timeDep := GenerateSliceFromFunctionStringTimeDep(equation, p.Mesh())
+	dataS, dataSI := RenderShape(s)
+	SetScalarExcitation(p.name, ScalarExcitationSlice{[3]int{0, 0, 0}, p.Mesh().Size(), d, timeDep, equation, dataS, dataSI})
 }
 
 func (p *ScalarExcitation) RenderFunctionLimitX(equation StringFunction, xStart, xEnd int) {
@@ -169,10 +180,18 @@ func (e *ScalarExcitation) Slice() (*data.Slice, bool) {
 				data.Copy(setExcitation.d, d)
 				cuda.Recycle(d)
 			}
-			newData := setExcitation.d
-			regionStart := setExcitation.start
-			regionEnd := setExcitation.end
-			data.CopyPart(buf, newData, 0, regionEnd[X]-regionStart[X], 0, regionEnd[Y]-regionStart[Y], 0, regionEnd[Z]-regionStart[Z], 0, 1, regionStart[X], regionStart[Y], regionStart[Z], 0)
+			if setExcitation.inversedRenderedShape == nil && setExcitation.renderedShape == nil {
+				newData := setExcitation.d
+				regionStart := setExcitation.start
+				regionEnd := setExcitation.end
+				data.CopyPart(buf, newData, 0, regionEnd[X]-regionStart[X], 0, regionEnd[Y]-regionStart[Y], 0, regionEnd[Z]-regionStart[Z], 0, 1, regionStart[X], regionStart[Y], regionStart[Z], 0)
+			} else if setExcitation.inversedRenderedShape != nil && setExcitation.renderedShape != nil {
+				cuda.Mul(buf, buf, setExcitation.inversedRenderedShape)
+				cuda.Mul(setExcitation.d, setExcitation.d, setExcitation.renderedShape)
+				cuda.Add(buf, buf, setExcitation.d)
+			} else {
+				panic("Invalid option for rendering function in scalar excitation encountered.")
+			}
 		}
 	}
 	return buf, true

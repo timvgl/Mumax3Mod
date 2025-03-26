@@ -113,10 +113,18 @@ func (p *lut) EvalTo(dst *data.Slice) {
 				data.Copy(setParam.d, d)
 				cuda.Recycle(d)
 			}
-			newData := setParam.d
-			regionStart := setParam.start
-			regionEnd := setParam.end
-			data.CopyPart(dst, newData, 0, regionEnd[X]-regionStart[X], 0, regionEnd[Y]-regionStart[Y], 0, regionEnd[Z]-regionStart[Z], 0, 1, regionStart[X], regionStart[Y], regionStart[Z], 0)
+			if setParam.renderedShape == nil && setParam.inversedRenderedShape == nil {
+				newData := setParam.d
+				regionStart := setParam.start
+				regionEnd := setParam.end
+				data.CopyPart(dst, newData, 0, regionEnd[X]-regionStart[X], 0, regionEnd[Y]-regionStart[Y], 0, regionEnd[Z]-regionStart[Z], 0, 1, regionStart[X], regionStart[Y], regionStart[Z], 0)
+			} else if setParam.renderedShape != nil && setParam.inversedRenderedShape != nil {
+				cuda.Mul(dst, dst, setParam.inversedRenderedShape)
+				cuda.Mul(setParam.d, setParam.d, setParam.renderedShape)
+				cuda.Add(dst, dst, setParam.d)
+			} else {
+				panic("Invalid option for rendering function in parameters encountered.")
+			}
 		}
 	}
 }

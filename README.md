@@ -318,6 +318,9 @@ It can be imported into xarray using mumaxXR. Please do not mix non-FFT data wit
   alpha.RenderFunctionLimitX(CreateFunction("alphaLow+(alphaHigh-alphaLow)*tanh((128*dx-x)/(128*dx))"), 0, 128)
   ```
 
+- **RenderFunctionShape:** Same es RenderFunction, but the shape, given as an argument is layed over the result, of the individual function and is being merged with prior defintions.
+  *Args:* StringFunction, Shape
+
 ==================================================
 # Queue
 

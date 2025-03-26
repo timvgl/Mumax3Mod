@@ -18,13 +18,15 @@ func SetExcitation(name string, s ExcitationSlice) {
 	tmp, ok := mapSetExcitation.Load(name)
 	if ok {
 		slces := tmp.(ExcitationSlices)
-		var slcInterfaces = make([]SetSlice, 0)
-		for _, slc := range slces.slc {
-			slcInterfaces = append(slcInterfaces, slc)
+		if s.inversedRenderedShape == nil && s.renderedShape == nil {
+			var slcInterfaces = make([]SetSlice, 0)
+			for _, slc := range slces.slc {
+				slcInterfaces = append(slcInterfaces, slc)
+			}
+			overlapIndices := GetOverlapIndex(s, slcInterfaces)
+			FreeMemoryIndices(slcInterfaces, overlapIndices)
+			slces.slc = RemoveIndices(slces.slc, overlapIndices)
 		}
-		overlapIndices := GetOverlapIndex(s, slcInterfaces)
-		FreeMemoryIndices(slcInterfaces, overlapIndices)
-		slces.slc = RemoveIndices(slces.slc, overlapIndices)
 		slces.slc = append(slces.slc, s)
 		mapSetExcitation.Store(name, slces)
 	} else {
@@ -56,12 +58,14 @@ type ExcitationSlices struct {
 }
 
 type ExcitationSlice struct {
-	start         [3]int
-	end           [3]int
-	d             *data.Slice
-	ncomp         int
-	timedependent bool
-	stringFct     StringFunction
+	start                 [3]int
+	end                   [3]int
+	d                     *data.Slice
+	ncomp                 int
+	timedependent         bool
+	stringFct             StringFunction
+	renderedShape         *data.Slice
+	inversedRenderedShape *data.Slice
 }
 
 func (e ExcitationSlice) StartAt() [3]int {
@@ -111,9 +115,8 @@ func (p *Excitation) MSlice() cuda.MSlice {
 
 func (p *Excitation) RenderFunction(equation StringFunction) {
 	util.AssertMsg(!equation.IsScalar(), "RenderFunction: Need vector function.")
-	fmt.Println("exc")
 	d, timeDep := GenerateSliceFromFunctionStringTimeDep(equation, p.Mesh())
-	SetExcitation(p.name, ExcitationSlice{start: [3]int{0, 0, 0}, end: p.Mesh().Size(), d: d, timedependent: timeDep, stringFct: equation})
+	SetExcitation(p.name, ExcitationSlice{start: [3]int{0, 0, 0}, end: p.Mesh().Size(), d: d, timedependent: timeDep, stringFct: equation, renderedShape: nil, inversedRenderedShape: nil})
 }
 
 func (p *Excitation) RenderFunctionLimit(equation StringFunction, xStart, xEnd, yStart, yEnd, zStart, zEnd int) {
@@ -122,9 +125,15 @@ func (p *Excitation) RenderFunctionLimit(equation StringFunction, xStart, xEnd, 
 	util.Argument(xStart >= 0 && yStart >= 0 && zStart >= 0)
 	util.Argument(xEnd <= n[X] && yEnd <= n[Y] && zEnd <= n[Z])
 	util.AssertMsg(!equation.IsScalar(), "RenderFunction: Need vector function.")
-	fmt.Println("exc l")
 	d, timeDep := GenerateSliceFromFunctionStringTimeDep(equation, p.Mesh())
-	SetExcitation(p.name, ExcitationSlice{start: [3]int{xStart, yStart, zStart}, end: [3]int{xEnd, yEnd, zEnd}, d: d, timedependent: timeDep, stringFct: equation})
+	SetExcitation(p.name, ExcitationSlice{start: [3]int{xStart, yStart, zStart}, end: [3]int{xEnd, yEnd, zEnd}, d: d, timedependent: timeDep, stringFct: equation, renderedShape: nil, inversedRenderedShape: nil})
+}
+
+func (p *Excitation) RenderFunctionShape(equation StringFunction, s Shape) {
+	util.AssertMsg(!equation.IsScalar(), "RenderFunction: Need vector function.")
+	d, timeDep := GenerateSliceFromFunctionStringTimeDep(equation, p.Mesh())
+	dataS, dataSI := RenderShape(s)
+	SetExcitation(p.name, ExcitationSlice{start: [3]int{0, 0, 0}, end: p.Mesh().Size(), d: d, timedependent: timeDep, stringFct: equation, renderedShape: dataS, inversedRenderedShape: dataSI})
 }
 
 func (p *Excitation) RenderFunctionLimitX(equation StringFunction, xStart, xEnd int) {
@@ -221,10 +230,18 @@ func (e *Excitation) Slice() (*data.Slice, bool) {
 				data.Copy(setExcitation.d, d)
 				cuda.Recycle(d)
 			}
-			newData := setExcitation.d
-			regionStart := setExcitation.start
-			regionEnd := setExcitation.end
-			data.CopyPart(buf, newData, 0, regionEnd[X]-regionStart[X], 0, regionEnd[Y]-regionStart[Y], 0, regionEnd[Z]-regionStart[Z], 0, 1, regionStart[X], regionStart[Y], regionStart[Z], 0)
+			if setExcitation.inversedRenderedShape == nil && setExcitation.renderedShape == nil {
+				newData := setExcitation.d
+				regionStart := setExcitation.start
+				regionEnd := setExcitation.end
+				data.CopyPart(buf, newData, 0, regionEnd[X]-regionStart[X], 0, regionEnd[Y]-regionStart[Y], 0, regionEnd[Z]-regionStart[Z], 0, 1, regionStart[X], regionStart[Y], regionStart[Z], 0)
+			} else if setExcitation.inversedRenderedShape != nil && setExcitation.renderedShape != nil {
+				cuda.Mul(buf, buf, setExcitation.inversedRenderedShape)
+				cuda.Mul(setExcitation.d, setExcitation.d, setExcitation.renderedShape)
+				cuda.Add(buf, buf, setExcitation.d)
+			} else {
+				panic("Invalid option for rendering function in excitation encountered.")
+			}
 		}
 	}
 	return buf, true
