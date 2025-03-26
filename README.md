@@ -162,6 +162,12 @@ The functions have been mainly tested for researching vortices in magnetic syste
   Exec("python3 foo.py path_to_outputdir/fee path_to_outputdir/faa")
   ```
 
+- **ExecSweep:** Executes a bash command after finishing a sweep from a template-
+  *Args:* cmd (string)
+
+- **ExecSweepDir:** Executes a bash command after sweep from a template but appends the absolute path to the output directory as an argument, or replaces all occurrences of %v and %s with the path.
+  *Args:* cmd (string)
+
 - **string:** Casts a float or int to a string.  
   *Args:* interface
 
