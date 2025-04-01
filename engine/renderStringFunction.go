@@ -21,6 +21,10 @@ type ExprEvaluator struct {
 	mu         sync.Mutex // Ensures thread-safe access to rng
 }
 
+func init() {
+	DeclFunc("CreateSlice", CreateSlice, "")
+}
+
 // NewExprEvaluator compiles the expression string and prepares the evaluator
 func NewExprEvaluator(expressionStr string) (*ExprEvaluator, error) {
 	evaluator := &ExprEvaluator{
@@ -886,7 +890,7 @@ func GenerateExprFromFunctionString(functionStr string) (*Function, map[string]i
 		"pi":  math.Pi,
 		"inf": math.Inf(1),
 	}
-	function, err := NewFunction(preprocessExpression(functionStr))
+	function, err := NewFunction(preprocessExpressionScientific(functionStr))
 	if err != nil {
 		return nil, nil, err
 	}
@@ -906,7 +910,7 @@ func GenerateExprFromFunctionString(functionStr string) (*Function, map[string]i
 	return function, vars, nil
 }
 
-func preprocessExpression(expr string) string {
+func preprocessExpressionScientific(expr string) string {
 	if expr == "" {
 		return "0"
 	}
@@ -926,10 +930,258 @@ func preprocessExpression(expr string) string {
 	})
 }
 
-func GenerateSliceFromFunctionStringTimeDep(functionStr StringFunction, mesh *data.Mesh) (*data.Slice, bool) {
-	function, vars, err := GenerateExprFromFunctionString(preprocessExpression(functionStr.functions[0]))
+// preprocessExpressionExpandSum expands sum expressions in the input string using
+// different max values provided in the 'max' slice. It expects expressions of the form:
+//
+//	sum_<index>(<innerExpr>)
+//
+// For each found sum, it expands the inner expression by replacing occurrences of the
+// index variable (both as part of an identifier like slc_i and as a standalone token)
+// with numbers from 1 up to the provided max value.
+func preprocessExpressionExpandSum(expr string, max []int) string {
+	var output strings.Builder
+	sumIndex := 0
+	i := 0
+
+	for i < len(expr) {
+		// Find the next occurrence of "sum_"
+		idx := strings.Index(expr[i:], "sum_")
+		if idx == -1 {
+			// Append the rest of the string if no more sums are found.
+			output.WriteString(expr[i:])
+			break
+		}
+		// Write everything up to the found "sum_"
+		output.WriteString(expr[i : i+idx])
+		i += idx
+
+		// Check that we have at least "sum_X" (where X is the index variable)
+		if i+4 >= len(expr) {
+			output.WriteString(expr[i:])
+			break
+		}
+		// The character after "sum_" is our index variable.
+		indexVar := expr[i+4]
+		j := i + 5
+		// Skip any whitespace after the index variable.
+		for j < len(expr) && (expr[j] == ' ' || expr[j] == '\t') {
+			j++
+		}
+		// The next character must be '(' for a valid sum expression.
+		if j >= len(expr) || expr[j] != '(' {
+			output.WriteString(expr[i : i+4])
+			i += 4
+			continue
+		}
+		// Find the matching closing parenthesis.
+		endParen, err := findMatchingParen(expr, j)
+		if err != nil {
+			panic(err)
+		}
+		// Extract the inner expression (without the surrounding parentheses).
+		innerExpr := expr[j+1 : endParen]
+
+		// If not enough max values are provided, leave this sum expression unchanged.
+		if sumIndex >= len(max) {
+			output.WriteString(expr[i : endParen+1])
+			i = endParen + 1
+			continue
+		}
+		currentMax := max[sumIndex]
+		sumIndex++
+
+		var terms []string
+		// Expand the inner expression for each index value.
+		for k := 0; k < currentMax; k++ {
+			replaced := innerExpr
+
+			// Replace occurrences of an underscore followed by the index variable.
+			// The regex captures an underscore+index variable and ensures the next character is not a word character.
+			underscorePattern := fmt.Sprintf(`(_%c)([^0-9A-Za-z]|$)`, indexVar)
+			reUnderscore := regexp.MustCompile(underscorePattern)
+			replaced = reUnderscore.ReplaceAllStringFunc(replaced, func(match string) string {
+				groups := reUnderscore.FindStringSubmatch(match)
+				// groups[1] is the matched "_<indexVar>" and groups[2] is the following character (if any)
+				trailing := ""
+				if len(groups) >= 3 {
+					trailing = groups[2]
+				}
+				return fmt.Sprintf("_%d%s", k, trailing)
+			})
+
+			// Replace standalone occurrences of the index variable as a whole word.
+			standalonePattern := fmt.Sprintf(`\b%c\b`, indexVar)
+			reStandalone := regexp.MustCompile(standalonePattern)
+			replaced = reStandalone.ReplaceAllString(replaced, fmt.Sprintf("%d", k))
+
+			terms = append(terms, replaced)
+		}
+		// Join all expanded terms with " + " and append to the output.
+		output.WriteString(strings.Join(terms, " + "))
+		i = endParen + 1
+	}
+	return output.String()
+}
+
+// findMatchingParen returns the index of the matching closing parenthesis for the opening
+// parenthesis at position 'start' in the string s. It handles nested parentheses.
+func findMatchingParen(s string, start int) (int, error) {
+	if s[start] != '(' {
+		return -1, fmt.Errorf("expected '(' at position %d", start)
+	}
+	depth := 0
+	for i := start; i < len(s); i++ {
+		switch s[i] {
+		case '(':
+			depth++
+		case ')':
+			depth--
+			if depth == 0 {
+				return i, nil
+			}
+		}
+	}
+	return -1, fmt.Errorf("no matching closing parenthesis found")
+}
+
+// containsIndex checks if the given indexPart contains the index variable (as a single character).
+func containsIndex(indexPart, indexVar string) bool {
+	for _, ch := range indexPart {
+		if string(ch) == indexVar {
+			return true
+		}
+	}
+	return false
+}
+
+// extractIndexedVars extracts indexed variables from each sum expression in the input expression.
+// It handles nested parentheses so that functions like sin, cos, etc. can appear.
+// Only variables with an underscore index (e.g. a_i, b_j, etc.) that actually include the current
+// sum's index variable are returned.
+func extractIndexedVars(expr string) [][]string {
+	var result [][]string
+	i := 0
+
+	// Loop through the entire expression to find sum expressions.
+	for i < len(expr) {
+		// Find the next occurrence of "sum_"
+		idx := strings.Index(expr[i:], "sum_")
+		if idx == -1 {
+			break
+		}
+		i += idx
+
+		// Check for a valid "sum_<letter>" pattern.
+		if i+4 >= len(expr) {
+			break
+		}
+		// The character after "sum_" is our index variable (e.g., 'i' in "sum_i")
+		indexVar := expr[i+4]
+		// Skip whitespace until the '(' is reached.
+		j := i + 5
+		for j < len(expr) && (expr[j] == ' ' || expr[j] == '\t') {
+			j++
+		}
+		if j >= len(expr) || expr[j] != '(' {
+			i = j
+			continue
+		}
+
+		// Find the matching closing parenthesis for this sum expression.
+		endParen, err := findMatchingParen(expr, j)
+		if err != nil {
+			panic(err)
+		}
+		// Extract the inner expression (without the surrounding parentheses).
+		innerExpr := expr[j+1 : endParen]
+
+		// Regex to find variables that have an underscore index.
+		// It matches an identifier that contains an underscore followed by at least one letter/digit.
+		reVar := regexp.MustCompile(`\b([a-zA-Z]\w*_[a-zA-Z][a-zA-Z0-9]*)\b`)
+		matches := reVar.FindAllStringSubmatch(innerExpr, -1)
+		unique := map[string]bool{}
+
+		// For each matched variable, verify that the part after '_' contains the current index variable.
+		reIndexPart := regexp.MustCompile(`_([a-zA-Z0-9]+)`)
+		for _, m := range matches {
+			fullVar := m[1] // e.g., "a_i" or "b_j"
+			parts := reIndexPart.FindStringSubmatch(fullVar)
+			if len(parts) == 2 {
+				if containsIndex(parts[1], string(indexVar)) {
+					unique[fullVar] = true
+				}
+			}
+		}
+		var group []string
+		for key := range unique {
+			group = append(group, key)
+		}
+		result = append(result, group)
+		i = endParen + 1
+	}
+	return result
+}
+
+func removeIndexStructure(s string, doPanic bool) string {
+	// Compile a regular expression that matches underscore followed by one or more letters/digits.
+	re := regexp.MustCompile(`_[0-9A-Za-z]+`)
+
+	// Check if the string contains the index structure.
+	if !re.MatchString(s) && doPanic {
+		panic("Index structure not found in string")
+	}
+
+	// Remove all occurrences of the pattern from the string.
+	return re.ReplaceAllString(s, "")
+}
+
+func extractIndexNumber(s string) int {
+	// Regular expression to match an underscore followed by one or more digits.
+	re := regexp.MustCompile(`_[0-9]+`)
+
+	// Find the first occurrence that matches the pattern.
+	match := re.FindString(s)
+	if match == "" {
+		panic("no index number found in " + s)
+	}
+
+	// Remove the underscore to get only the digits.
+	numStr := match[1:]
+
+	// Convert the digit string to an integer.
+	num, err := strconv.Atoi(numStr)
 	if err != nil {
-		panic(fmt.Sprintf("Failed to generate function: %v", err))
+		panic(fmt.Sprintf("failed to convert %s to integer: %v", numStr, err))
+	}
+
+	return num
+}
+func GenerateSliceFromFunctionStringTimeDep(functionStr StringFunction, mesh *data.Mesh) (*data.Slice, bool) {
+	indexedVars := extractIndexedVars(functionStr.functions[0])
+	worldVars := World.GetRuntimeVariables()
+	lengthIndexedVars := make([]int, 0)
+	for _, sum := range indexedVars {
+		referenceLen := 0
+		for _, vari := range sum {
+			if value, ok := worldVars[strings.ToLower(vari)]; ok {
+				if slice, ok := value.([]float64); ok {
+					if referenceLen == 0 {
+						referenceLen = len(slice)
+						lengthIndexedVars = append(lengthIndexedVars, referenceLen)
+					} else if referenceLen != len(slice) {
+						panic("Indexed variables need to have the same length per sum")
+					}
+				} else {
+					panic("Unsuppported type in indexed variables.")
+				}
+			} else {
+				panic("Could not find variable: " + vari)
+			}
+		}
+	}
+	function, vars, err := GenerateExprFromFunctionString(preprocessExpressionExpandSum(preprocessExpressionScientific(functionStr.functions[0]), lengthIndexedVars))
+	if err != nil {
+		panic(fmt.Sprintf("Failed to generate function: %v\n%s", err, preprocessExpressionExpandSum(preprocessExpressionScientific(functionStr.functions[0]), lengthIndexedVars)))
 	}
 	var (
 		xDep    = false
@@ -937,15 +1189,40 @@ func GenerateSliceFromFunctionStringTimeDep(functionStr StringFunction, mesh *da
 		zDep    = false
 		TimeDep = false
 	)
-	worldVars := World.GetRuntimeVariables()
 	for key := range vars {
 		if key != "x_length" && key != "y_length" && key != "z_length" && key != "x_factor" && key != "y_factor" && key != "z_factor" && key != "t" && math.IsNaN(vars[key].(float64)) {
 			//fmt.Println(key, s.variablesStart[j][key].vector[comp], s.variablesEnd[j][key].vector[comp])
-			if value, ok := worldVars[strings.ToLower(key)]; ok {
-				vars[key] = value
-			} else {
-				panic(fmt.Sprintf("Variable %s not defined.", key))
+			foundVal := false
+			for _, sum := range indexedVars {
+				breakLoop := false
+				for _, vari := range sum {
+					if removeIndexStructure(vari, true) == removeIndexStructure(key, false) {
+						if value, ok := worldVars[strings.ToLower(vari)]; ok {
+							if slice, ok := value.([]float64); ok {
+								vars[key] = slice[extractIndexNumber(key)]
+								breakLoop = true
+								foundVal = true
+								break
+							} else {
+								panic("Unsuppported type in indexed variables.")
+							}
+						} else {
+							panic(fmt.Sprintf("Variable %s not defined.", key))
+						}
+					}
+				}
+				if breakLoop {
+					break
+				}
 			}
+			if !foundVal {
+				if value, ok := worldVars[strings.ToLower(key)]; ok {
+					vars[key] = value
+				} else {
+					panic(fmt.Sprintf("Variable %s not defined.", key))
+				}
+			}
+
 		} else if strings.ToLower(key) == "t" {
 			vars[key] = Time
 			TimeDep = true
@@ -965,7 +1242,28 @@ func GenerateSliceFromFunctionStringTimeDep(functionStr StringFunction, mesh *da
 			xDep = false
 			yDep = false
 			zDep = false
-			function, vars, err := GenerateExprFromFunctionString(preprocessExpression(functionStr.functions[c]))
+			indexedVars := extractIndexedVars(functionStr.functions[c])
+			lengthIndexedVars := make([]int, 0)
+			for _, sum := range indexedVars {
+				referenceLen := 0
+				for _, vari := range sum {
+					if value, ok := worldVars[strings.ToLower(vari)]; ok {
+						if slice, ok := value.([]float64); ok {
+							if referenceLen == 0 {
+								referenceLen = len(slice)
+								lengthIndexedVars = append(lengthIndexedVars, referenceLen)
+							} else if referenceLen != len(slice) {
+								panic("Indexed variables need to have the same length per sum")
+							}
+						} else {
+							panic("Unsuppported type in indexed variables.")
+						}
+					} else {
+						panic("Could not find variable: " + vari)
+					}
+				}
+			}
+			function, vars, err := GenerateExprFromFunctionString(preprocessExpressionExpandSum(preprocessExpressionScientific(functionStr.functions[c]), lengthIndexedVars))
 			if err != nil {
 				panic(fmt.Sprintf("Failed to generate function: %v", err))
 			}
@@ -975,10 +1273,35 @@ func GenerateSliceFromFunctionStringTimeDep(functionStr StringFunction, mesh *da
 			for key := range vars {
 				if key != "x_length" && key != "y_length" && key != "z_length" && key != "x_factor" && key != "y_factor" && key != "z_factor" && key != "t" && math.IsNaN(vars[key].(float64)) {
 					//fmt.Println(key, s.variablesStart[j][key].vector[comp], s.variablesEnd[j][key].vector[comp])
-					if value, ok := worldVars[strings.ToLower(key)]; ok {
-						vars[key] = value
-					} else {
-						panic(fmt.Sprintf("Variable %s not defined.", key))
+					foundVal := false
+					for _, sum := range indexedVars {
+						breakLoop := false
+						for _, vari := range sum {
+							if removeIndexStructure(vari, true) == removeIndexStructure(key, false) {
+								if value, ok := worldVars[strings.ToLower(vari)]; ok {
+									if slice, ok := value.([]float64); ok {
+										vars[key] = slice[extractIndexNumber(key)]
+										breakLoop = true
+										foundVal = true
+										break
+									} else {
+										panic("Unsuppported type in indexed variables.")
+									}
+								} else {
+									panic(fmt.Sprintf("Variable %s not defined.", key))
+								}
+							}
+						}
+						if breakLoop {
+							break
+						}
+					}
+					if !foundVal {
+						if value, ok := worldVars[strings.ToLower(key)]; ok {
+							vars[key] = value
+						} else {
+							panic(fmt.Sprintf("Variable %s not defined.", key))
+						}
 					}
 				} else if strings.ToLower(key) == "t" {
 					vars[key] = Time
@@ -1005,4 +1328,8 @@ func GenerateSliceFromFunctionStringTimeDep(functionStr StringFunction, mesh *da
 func GenerateSliceFromFunctionString(functionStr StringFunction, mesh *data.Mesh) *data.Slice {
 	d, _ := GenerateSliceFromFunctionStringTimeDep(functionStr, mesh)
 	return d
+}
+
+func CreateSlice(args ...float64) []float64 {
+	return args
 }
