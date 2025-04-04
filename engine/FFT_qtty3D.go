@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"fmt"
 	"slices"
 
 	"github.com/mumax/3/cuda"
@@ -139,6 +140,7 @@ func FFT3D_FFT_T(q Quantity) *fftOperation3D {
 	FFTEvaluatedImag[q] = false
 	FFTEvaluatedPhi[q] = false
 	FFTEvaluatedAbs[q] = false
+	fmt.Println(fftOP3D.FFTOutputSize())
 	if !slices.Contains(DeclVarFFTDyn, q) {
 		if q.NComp() == 3 || q.NComp() == 1 {
 			FFT3DData[q] = cuda.Buffer(q.NComp(), fftOP3D.FFTOutputSize())

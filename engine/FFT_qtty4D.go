@@ -115,7 +115,9 @@ func GetKeys[T any](m *sync.Map) []T {
 
 func FFT4D(q Quantity, period float64) *fftOperation4D {
 	qOP := ApplyOperators(FFT3D_FFT_T(q), operatorsKSpace)
-
+	if period < MinDt {
+		MinDt = period
+	}
 	QTTYName := ""
 	if fft4DLabel != "" {
 		QTTYName = fft4DLabel
@@ -138,6 +140,9 @@ func FFT_T(q Quantity, period float64) *fftOperation4D {
 		QTTYName = fft4DLabel
 	} else {
 		QTTYName = NameOf(q)
+	}
+	if period < MinDt {
+		MinDt = period
 	}
 	var dataT *data.Slice
 	var dataTPre *data.Slice
@@ -314,6 +319,9 @@ func (s *fftOperation4D) Eval() {
 		}
 	}
 	fftT := Time
+	if interpolate {
+		fftT = float64(s.count) * s.period
+	}
 	if !FFT_T_in_mem {
 		wg := sync.WaitGroup{}
 		for core := range cores {

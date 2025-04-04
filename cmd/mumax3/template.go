@@ -373,7 +373,7 @@ func generateFiles(parentDir, mx3, orgScriptName string, expressions []Expressio
 				if strings.HasSuffix(exp.Format, "d") || strings.HasSuffix(exp.Format, "f") {
 					return make([]string, 0), fmt.Errorf("invalid format '%s' for string value '%v'", exp.Format, value)
 				}
-				formattedValue = fmt.Sprintf(exp.Format, value)
+				formattedValue = strings.ReplaceAll(fmt.Sprintf(exp.Format, value), "/", "_")
 			}
 			// formattedValue := fmt.Sprintf(exp.Format, value)
 
