@@ -22,7 +22,10 @@ type ExprEvaluator struct {
 }
 
 func init() {
-	DeclFunc("CreateSlice", CreateSlice, "")
+	DeclFunc("CreateFloatSlice", CreateFloatSlice, "")
+	DeclFunc("CreateFloatSliceZero", CreateFloatSliceZero, "")
+	DeclFunc("CreateFloatSliceOne", CreateFloatSliceOne, "")
+	DeclFunc("CreateFloatSliceArb", CreateFloatSliceArb, "")
 	DeclFunc("CreateString", CreateString, "")
 }
 func CreateString(name string) string {
@@ -1334,6 +1337,30 @@ func GenerateSliceFromFunctionString(functionStr StringFunction, mesh *data.Mesh
 	return d
 }
 
-func CreateSlice(args ...float64) []float64 {
+func CreateFloatSlice(args ...float64) []float64 {
 	return args
+}
+
+func CreateFloatSliceZero(size int) []float64 {
+	ar := make([]float64, size)
+	for i := range ar {
+		ar[i] = 0
+	}
+	return ar
+}
+
+func CreateFloatSliceOne(size int) []float64 {
+	ar := make([]float64, size)
+	for i := range ar {
+		ar[i] = 1
+	}
+	return ar
+}
+
+func CreateFloatSliceArb(size int, val float64) []float64 {
+	ar := make([]float64, size)
+	for i := range ar {
+		ar[i] = val
+	}
+	return ar
 }

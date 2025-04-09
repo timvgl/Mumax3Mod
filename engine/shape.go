@@ -322,7 +322,6 @@ func IDT(IDTWidthFinger, IDTDistanceFinger, IDTFingerLength float64, AmountFinge
 
 func RenderShape(s Shape) (*data.Slice, *data.Slice) {
 	N := Mesh().Size()
-	d := Mesh().CellSize()
 	dat := data.NewSlice(1, N)
 	array := dat.Tensors()
 	dataI := data.NewSlice(1, N)
@@ -331,7 +330,8 @@ func RenderShape(s Shape) (*data.Slice, *data.Slice) {
 		for iy := 0; iy < N[Y]; iy++ {
 			for ix := 0; ix < N[X]; ix++ {
 				for c := 0; c < dat.NComp(); c++ {
-					if s(float64(d[X])*float64(ix), float64(d[Y])*float64(iy), float64(d[Z])*float64(iz)) {
+					r := Index2Coord(ix, iy, iz)
+					if s(r[X], r[Y], r[Z]) {
 						array[c][iz][iy][ix] = 1
 						arrayI[c][iz][iy][ix] = 0
 					} else {
