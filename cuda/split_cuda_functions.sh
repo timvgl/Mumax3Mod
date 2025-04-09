@@ -20,7 +20,7 @@ INPUT="cuda_functions.cu"
 # Use csplit to split the input file into chunks using the delimiter.
 # The regex '^#################$' matches a line that consists solely of 20 '#' characters.
 # The -z option removes empty output files.
-csplit -z -f chunk_ "$INPUT" '/^#################$/' '{*}'
+csplit -z -f chunk_ "$INPUT" '/^#################$/' '{*}' > /dev/null
 
 # Iterate over each generated chunk file
 for chunk in chunk_*; do

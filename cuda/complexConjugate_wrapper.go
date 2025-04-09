@@ -77,7 +77,7 @@ var complexConjugate_map = map[int]string{0: "",
 // complexConjugate PTX code for various compute capabilities.
 const (
 	complexConjugate_ptx_50 = `
-.version 8.2
+.version 8.5
 .target sm_50
 .address_size 64
 
@@ -90,7 +90,7 @@ const (
 )
 {
 	.reg .pred 	%p<2>;
-	.reg .f32 	%f<3>;
+	.reg .f32 	%f<4>;
 	.reg .b32 	%r<10>;
 	.reg .b64 	%rd<8>;
 
@@ -98,25 +98,27 @@ const (
 	ld.param.u64 	%rd1, [complexConjugate_param_0];
 	ld.param.u64 	%rd2, [complexConjugate_param_1];
 	ld.param.u32 	%r2, [complexConjugate_param_2];
-	mov.u32 	%r3, %ctaid.y;
-	mov.u32 	%r4, %nctaid.x;
+	mov.u32 	%r3, %nctaid.x;
+	mov.u32 	%r4, %ctaid.y;
 	mov.u32 	%r5, %ctaid.x;
-	mad.lo.s32 	%r6, %r3, %r4, %r5;
+	mad.lo.s32 	%r6, %r4, %r3, %r5;
 	mov.u32 	%r7, %ntid.x;
 	mov.u32 	%r8, %tid.x;
 	mad.lo.s32 	%r1, %r6, %r7, %r8;
 	setp.ge.s32 	%p1, %r1, %r2;
 	@%p1 bra 	$L__BB0_2;
 
-	cvta.to.global.u64 	%rd3, %rd2;
 	shl.b32 	%r9, %r1, 1;
+	cvta.to.global.u64 	%rd3, %rd2;
 	mul.wide.s32 	%rd4, %r9, 4;
 	add.s64 	%rd5, %rd3, %rd4;
-	ld.global.nc.f32 	%f1, [%rd5+4];
-	neg.f32 	%f2, %f1;
+	ld.global.nc.f32 	%f1, [%rd5];
 	cvta.to.global.u64 	%rd6, %rd1;
 	add.s64 	%rd7, %rd6, %rd4;
-	st.global.f32 	[%rd7+4], %f2;
+	st.global.f32 	[%rd7], %f1;
+	ld.global.nc.f32 	%f2, [%rd5+4];
+	neg.f32 	%f3, %f2;
+	st.global.f32 	[%rd7+4], %f3;
 
 $L__BB0_2:
 	ret;
@@ -125,7 +127,7 @@ $L__BB0_2:
 
 `
 	complexConjugate_ptx_52 = `
-.version 8.2
+.version 8.5
 .target sm_52
 .address_size 64
 
@@ -138,7 +140,7 @@ $L__BB0_2:
 )
 {
 	.reg .pred 	%p<2>;
-	.reg .f32 	%f<3>;
+	.reg .f32 	%f<4>;
 	.reg .b32 	%r<10>;
 	.reg .b64 	%rd<8>;
 
@@ -146,25 +148,27 @@ $L__BB0_2:
 	ld.param.u64 	%rd1, [complexConjugate_param_0];
 	ld.param.u64 	%rd2, [complexConjugate_param_1];
 	ld.param.u32 	%r2, [complexConjugate_param_2];
-	mov.u32 	%r3, %ctaid.y;
-	mov.u32 	%r4, %nctaid.x;
+	mov.u32 	%r3, %nctaid.x;
+	mov.u32 	%r4, %ctaid.y;
 	mov.u32 	%r5, %ctaid.x;
-	mad.lo.s32 	%r6, %r3, %r4, %r5;
+	mad.lo.s32 	%r6, %r4, %r3, %r5;
 	mov.u32 	%r7, %ntid.x;
 	mov.u32 	%r8, %tid.x;
 	mad.lo.s32 	%r1, %r6, %r7, %r8;
 	setp.ge.s32 	%p1, %r1, %r2;
 	@%p1 bra 	$L__BB0_2;
 
-	cvta.to.global.u64 	%rd3, %rd2;
 	shl.b32 	%r9, %r1, 1;
+	cvta.to.global.u64 	%rd3, %rd2;
 	mul.wide.s32 	%rd4, %r9, 4;
 	add.s64 	%rd5, %rd3, %rd4;
-	ld.global.nc.f32 	%f1, [%rd5+4];
-	neg.f32 	%f2, %f1;
+	ld.global.nc.f32 	%f1, [%rd5];
 	cvta.to.global.u64 	%rd6, %rd1;
 	add.s64 	%rd7, %rd6, %rd4;
-	st.global.f32 	[%rd7+4], %f2;
+	st.global.f32 	[%rd7], %f1;
+	ld.global.nc.f32 	%f2, [%rd5+4];
+	neg.f32 	%f3, %f2;
+	st.global.f32 	[%rd7+4], %f3;
 
 $L__BB0_2:
 	ret;
@@ -173,7 +177,7 @@ $L__BB0_2:
 
 `
 	complexConjugate_ptx_53 = `
-.version 8.2
+.version 8.5
 .target sm_53
 .address_size 64
 
@@ -186,7 +190,7 @@ $L__BB0_2:
 )
 {
 	.reg .pred 	%p<2>;
-	.reg .f32 	%f<3>;
+	.reg .f32 	%f<4>;
 	.reg .b32 	%r<10>;
 	.reg .b64 	%rd<8>;
 
@@ -194,25 +198,27 @@ $L__BB0_2:
 	ld.param.u64 	%rd1, [complexConjugate_param_0];
 	ld.param.u64 	%rd2, [complexConjugate_param_1];
 	ld.param.u32 	%r2, [complexConjugate_param_2];
-	mov.u32 	%r3, %ctaid.y;
-	mov.u32 	%r4, %nctaid.x;
+	mov.u32 	%r3, %nctaid.x;
+	mov.u32 	%r4, %ctaid.y;
 	mov.u32 	%r5, %ctaid.x;
-	mad.lo.s32 	%r6, %r3, %r4, %r5;
+	mad.lo.s32 	%r6, %r4, %r3, %r5;
 	mov.u32 	%r7, %ntid.x;
 	mov.u32 	%r8, %tid.x;
 	mad.lo.s32 	%r1, %r6, %r7, %r8;
 	setp.ge.s32 	%p1, %r1, %r2;
 	@%p1 bra 	$L__BB0_2;
 
-	cvta.to.global.u64 	%rd3, %rd2;
 	shl.b32 	%r9, %r1, 1;
+	cvta.to.global.u64 	%rd3, %rd2;
 	mul.wide.s32 	%rd4, %r9, 4;
 	add.s64 	%rd5, %rd3, %rd4;
-	ld.global.nc.f32 	%f1, [%rd5+4];
-	neg.f32 	%f2, %f1;
+	ld.global.nc.f32 	%f1, [%rd5];
 	cvta.to.global.u64 	%rd6, %rd1;
 	add.s64 	%rd7, %rd6, %rd4;
-	st.global.f32 	[%rd7+4], %f2;
+	st.global.f32 	[%rd7], %f1;
+	ld.global.nc.f32 	%f2, [%rd5+4];
+	neg.f32 	%f3, %f2;
+	st.global.f32 	[%rd7+4], %f3;
 
 $L__BB0_2:
 	ret;
@@ -221,7 +227,7 @@ $L__BB0_2:
 
 `
 	complexConjugate_ptx_60 = `
-.version 8.2
+.version 8.5
 .target sm_60
 .address_size 64
 
@@ -234,7 +240,7 @@ $L__BB0_2:
 )
 {
 	.reg .pred 	%p<2>;
-	.reg .f32 	%f<3>;
+	.reg .f32 	%f<4>;
 	.reg .b32 	%r<10>;
 	.reg .b64 	%rd<8>;
 
@@ -242,25 +248,27 @@ $L__BB0_2:
 	ld.param.u64 	%rd1, [complexConjugate_param_0];
 	ld.param.u64 	%rd2, [complexConjugate_param_1];
 	ld.param.u32 	%r2, [complexConjugate_param_2];
-	mov.u32 	%r3, %ctaid.y;
-	mov.u32 	%r4, %nctaid.x;
+	mov.u32 	%r3, %nctaid.x;
+	mov.u32 	%r4, %ctaid.y;
 	mov.u32 	%r5, %ctaid.x;
-	mad.lo.s32 	%r6, %r3, %r4, %r5;
+	mad.lo.s32 	%r6, %r4, %r3, %r5;
 	mov.u32 	%r7, %ntid.x;
 	mov.u32 	%r8, %tid.x;
 	mad.lo.s32 	%r1, %r6, %r7, %r8;
 	setp.ge.s32 	%p1, %r1, %r2;
 	@%p1 bra 	$L__BB0_2;
 
-	cvta.to.global.u64 	%rd3, %rd2;
 	shl.b32 	%r9, %r1, 1;
+	cvta.to.global.u64 	%rd3, %rd2;
 	mul.wide.s32 	%rd4, %r9, 4;
 	add.s64 	%rd5, %rd3, %rd4;
-	ld.global.nc.f32 	%f1, [%rd5+4];
-	neg.f32 	%f2, %f1;
+	ld.global.nc.f32 	%f1, [%rd5];
 	cvta.to.global.u64 	%rd6, %rd1;
 	add.s64 	%rd7, %rd6, %rd4;
-	st.global.f32 	[%rd7+4], %f2;
+	st.global.f32 	[%rd7], %f1;
+	ld.global.nc.f32 	%f2, [%rd5+4];
+	neg.f32 	%f3, %f2;
+	st.global.f32 	[%rd7+4], %f3;
 
 $L__BB0_2:
 	ret;
@@ -269,7 +277,7 @@ $L__BB0_2:
 
 `
 	complexConjugate_ptx_61 = `
-.version 8.2
+.version 8.5
 .target sm_61
 .address_size 64
 
@@ -282,7 +290,7 @@ $L__BB0_2:
 )
 {
 	.reg .pred 	%p<2>;
-	.reg .f32 	%f<3>;
+	.reg .f32 	%f<4>;
 	.reg .b32 	%r<10>;
 	.reg .b64 	%rd<8>;
 
@@ -290,25 +298,27 @@ $L__BB0_2:
 	ld.param.u64 	%rd1, [complexConjugate_param_0];
 	ld.param.u64 	%rd2, [complexConjugate_param_1];
 	ld.param.u32 	%r2, [complexConjugate_param_2];
-	mov.u32 	%r3, %ctaid.y;
-	mov.u32 	%r4, %nctaid.x;
+	mov.u32 	%r3, %nctaid.x;
+	mov.u32 	%r4, %ctaid.y;
 	mov.u32 	%r5, %ctaid.x;
-	mad.lo.s32 	%r6, %r3, %r4, %r5;
+	mad.lo.s32 	%r6, %r4, %r3, %r5;
 	mov.u32 	%r7, %ntid.x;
 	mov.u32 	%r8, %tid.x;
 	mad.lo.s32 	%r1, %r6, %r7, %r8;
 	setp.ge.s32 	%p1, %r1, %r2;
 	@%p1 bra 	$L__BB0_2;
 
-	cvta.to.global.u64 	%rd3, %rd2;
 	shl.b32 	%r9, %r1, 1;
+	cvta.to.global.u64 	%rd3, %rd2;
 	mul.wide.s32 	%rd4, %r9, 4;
 	add.s64 	%rd5, %rd3, %rd4;
-	ld.global.nc.f32 	%f1, [%rd5+4];
-	neg.f32 	%f2, %f1;
+	ld.global.nc.f32 	%f1, [%rd5];
 	cvta.to.global.u64 	%rd6, %rd1;
 	add.s64 	%rd7, %rd6, %rd4;
-	st.global.f32 	[%rd7+4], %f2;
+	st.global.f32 	[%rd7], %f1;
+	ld.global.nc.f32 	%f2, [%rd5+4];
+	neg.f32 	%f3, %f2;
+	st.global.f32 	[%rd7+4], %f3;
 
 $L__BB0_2:
 	ret;
@@ -317,7 +327,7 @@ $L__BB0_2:
 
 `
 	complexConjugate_ptx_62 = `
-.version 8.2
+.version 8.5
 .target sm_62
 .address_size 64
 
@@ -330,7 +340,7 @@ $L__BB0_2:
 )
 {
 	.reg .pred 	%p<2>;
-	.reg .f32 	%f<3>;
+	.reg .f32 	%f<4>;
 	.reg .b32 	%r<10>;
 	.reg .b64 	%rd<8>;
 
@@ -338,25 +348,27 @@ $L__BB0_2:
 	ld.param.u64 	%rd1, [complexConjugate_param_0];
 	ld.param.u64 	%rd2, [complexConjugate_param_1];
 	ld.param.u32 	%r2, [complexConjugate_param_2];
-	mov.u32 	%r3, %ctaid.y;
-	mov.u32 	%r4, %nctaid.x;
+	mov.u32 	%r3, %nctaid.x;
+	mov.u32 	%r4, %ctaid.y;
 	mov.u32 	%r5, %ctaid.x;
-	mad.lo.s32 	%r6, %r3, %r4, %r5;
+	mad.lo.s32 	%r6, %r4, %r3, %r5;
 	mov.u32 	%r7, %ntid.x;
 	mov.u32 	%r8, %tid.x;
 	mad.lo.s32 	%r1, %r6, %r7, %r8;
 	setp.ge.s32 	%p1, %r1, %r2;
 	@%p1 bra 	$L__BB0_2;
 
-	cvta.to.global.u64 	%rd3, %rd2;
 	shl.b32 	%r9, %r1, 1;
+	cvta.to.global.u64 	%rd3, %rd2;
 	mul.wide.s32 	%rd4, %r9, 4;
 	add.s64 	%rd5, %rd3, %rd4;
-	ld.global.nc.f32 	%f1, [%rd5+4];
-	neg.f32 	%f2, %f1;
+	ld.global.nc.f32 	%f1, [%rd5];
 	cvta.to.global.u64 	%rd6, %rd1;
 	add.s64 	%rd7, %rd6, %rd4;
-	st.global.f32 	[%rd7+4], %f2;
+	st.global.f32 	[%rd7], %f1;
+	ld.global.nc.f32 	%f2, [%rd5+4];
+	neg.f32 	%f3, %f2;
+	st.global.f32 	[%rd7+4], %f3;
 
 $L__BB0_2:
 	ret;
@@ -365,7 +377,7 @@ $L__BB0_2:
 
 `
 	complexConjugate_ptx_70 = `
-.version 8.2
+.version 8.5
 .target sm_70
 .address_size 64
 
@@ -378,7 +390,7 @@ $L__BB0_2:
 )
 {
 	.reg .pred 	%p<2>;
-	.reg .f32 	%f<3>;
+	.reg .f32 	%f<4>;
 	.reg .b32 	%r<10>;
 	.reg .b64 	%rd<8>;
 
@@ -386,25 +398,27 @@ $L__BB0_2:
 	ld.param.u64 	%rd1, [complexConjugate_param_0];
 	ld.param.u64 	%rd2, [complexConjugate_param_1];
 	ld.param.u32 	%r2, [complexConjugate_param_2];
-	mov.u32 	%r3, %ctaid.y;
-	mov.u32 	%r4, %nctaid.x;
+	mov.u32 	%r3, %nctaid.x;
+	mov.u32 	%r4, %ctaid.y;
 	mov.u32 	%r5, %ctaid.x;
-	mad.lo.s32 	%r6, %r3, %r4, %r5;
+	mad.lo.s32 	%r6, %r4, %r3, %r5;
 	mov.u32 	%r7, %ntid.x;
 	mov.u32 	%r8, %tid.x;
 	mad.lo.s32 	%r1, %r6, %r7, %r8;
 	setp.ge.s32 	%p1, %r1, %r2;
 	@%p1 bra 	$L__BB0_2;
 
-	cvta.to.global.u64 	%rd3, %rd2;
 	shl.b32 	%r9, %r1, 1;
+	cvta.to.global.u64 	%rd3, %rd2;
 	mul.wide.s32 	%rd4, %r9, 4;
 	add.s64 	%rd5, %rd3, %rd4;
-	ld.global.nc.f32 	%f1, [%rd5+4];
-	neg.f32 	%f2, %f1;
+	ld.global.nc.f32 	%f1, [%rd5];
 	cvta.to.global.u64 	%rd6, %rd1;
 	add.s64 	%rd7, %rd6, %rd4;
-	st.global.f32 	[%rd7+4], %f2;
+	st.global.f32 	[%rd7], %f1;
+	ld.global.nc.f32 	%f2, [%rd5+4];
+	neg.f32 	%f3, %f2;
+	st.global.f32 	[%rd7+4], %f3;
 
 $L__BB0_2:
 	ret;
@@ -413,7 +427,7 @@ $L__BB0_2:
 
 `
 	complexConjugate_ptx_72 = `
-.version 8.2
+.version 8.5
 .target sm_72
 .address_size 64
 
@@ -426,7 +440,7 @@ $L__BB0_2:
 )
 {
 	.reg .pred 	%p<2>;
-	.reg .f32 	%f<3>;
+	.reg .f32 	%f<4>;
 	.reg .b32 	%r<10>;
 	.reg .b64 	%rd<8>;
 
@@ -434,25 +448,27 @@ $L__BB0_2:
 	ld.param.u64 	%rd1, [complexConjugate_param_0];
 	ld.param.u64 	%rd2, [complexConjugate_param_1];
 	ld.param.u32 	%r2, [complexConjugate_param_2];
-	mov.u32 	%r3, %ctaid.y;
-	mov.u32 	%r4, %nctaid.x;
+	mov.u32 	%r3, %nctaid.x;
+	mov.u32 	%r4, %ctaid.y;
 	mov.u32 	%r5, %ctaid.x;
-	mad.lo.s32 	%r6, %r3, %r4, %r5;
+	mad.lo.s32 	%r6, %r4, %r3, %r5;
 	mov.u32 	%r7, %ntid.x;
 	mov.u32 	%r8, %tid.x;
 	mad.lo.s32 	%r1, %r6, %r7, %r8;
 	setp.ge.s32 	%p1, %r1, %r2;
 	@%p1 bra 	$L__BB0_2;
 
-	cvta.to.global.u64 	%rd3, %rd2;
 	shl.b32 	%r9, %r1, 1;
+	cvta.to.global.u64 	%rd3, %rd2;
 	mul.wide.s32 	%rd4, %r9, 4;
 	add.s64 	%rd5, %rd3, %rd4;
-	ld.global.nc.f32 	%f1, [%rd5+4];
-	neg.f32 	%f2, %f1;
+	ld.global.nc.f32 	%f1, [%rd5];
 	cvta.to.global.u64 	%rd6, %rd1;
 	add.s64 	%rd7, %rd6, %rd4;
-	st.global.f32 	[%rd7+4], %f2;
+	st.global.f32 	[%rd7], %f1;
+	ld.global.nc.f32 	%f2, [%rd5+4];
+	neg.f32 	%f3, %f2;
+	st.global.f32 	[%rd7+4], %f3;
 
 $L__BB0_2:
 	ret;
@@ -461,7 +477,7 @@ $L__BB0_2:
 
 `
 	complexConjugate_ptx_75 = `
-.version 8.2
+.version 8.5
 .target sm_75
 .address_size 64
 
@@ -474,7 +490,7 @@ $L__BB0_2:
 )
 {
 	.reg .pred 	%p<2>;
-	.reg .f32 	%f<3>;
+	.reg .f32 	%f<4>;
 	.reg .b32 	%r<10>;
 	.reg .b64 	%rd<8>;
 
@@ -482,25 +498,27 @@ $L__BB0_2:
 	ld.param.u64 	%rd1, [complexConjugate_param_0];
 	ld.param.u64 	%rd2, [complexConjugate_param_1];
 	ld.param.u32 	%r2, [complexConjugate_param_2];
-	mov.u32 	%r3, %ctaid.y;
-	mov.u32 	%r4, %nctaid.x;
+	mov.u32 	%r3, %nctaid.x;
+	mov.u32 	%r4, %ctaid.y;
 	mov.u32 	%r5, %ctaid.x;
-	mad.lo.s32 	%r6, %r3, %r4, %r5;
+	mad.lo.s32 	%r6, %r4, %r3, %r5;
 	mov.u32 	%r7, %ntid.x;
 	mov.u32 	%r8, %tid.x;
 	mad.lo.s32 	%r1, %r6, %r7, %r8;
 	setp.ge.s32 	%p1, %r1, %r2;
 	@%p1 bra 	$L__BB0_2;
 
-	cvta.to.global.u64 	%rd3, %rd2;
 	shl.b32 	%r9, %r1, 1;
+	cvta.to.global.u64 	%rd3, %rd2;
 	mul.wide.s32 	%rd4, %r9, 4;
 	add.s64 	%rd5, %rd3, %rd4;
-	ld.global.nc.f32 	%f1, [%rd5+4];
-	neg.f32 	%f2, %f1;
+	ld.global.nc.f32 	%f1, [%rd5];
 	cvta.to.global.u64 	%rd6, %rd1;
 	add.s64 	%rd7, %rd6, %rd4;
-	st.global.f32 	[%rd7+4], %f2;
+	st.global.f32 	[%rd7], %f1;
+	ld.global.nc.f32 	%f2, [%rd5+4];
+	neg.f32 	%f3, %f2;
+	st.global.f32 	[%rd7+4], %f3;
 
 $L__BB0_2:
 	ret;
@@ -509,7 +527,7 @@ $L__BB0_2:
 
 `
 	complexConjugate_ptx_80 = `
-.version 8.2
+.version 8.5
 .target sm_80
 .address_size 64
 
@@ -522,7 +540,7 @@ $L__BB0_2:
 )
 {
 	.reg .pred 	%p<2>;
-	.reg .f32 	%f<3>;
+	.reg .f32 	%f<4>;
 	.reg .b32 	%r<10>;
 	.reg .b64 	%rd<8>;
 
@@ -530,25 +548,27 @@ $L__BB0_2:
 	ld.param.u64 	%rd1, [complexConjugate_param_0];
 	ld.param.u64 	%rd2, [complexConjugate_param_1];
 	ld.param.u32 	%r2, [complexConjugate_param_2];
-	mov.u32 	%r3, %ctaid.y;
-	mov.u32 	%r4, %nctaid.x;
+	mov.u32 	%r3, %nctaid.x;
+	mov.u32 	%r4, %ctaid.y;
 	mov.u32 	%r5, %ctaid.x;
-	mad.lo.s32 	%r6, %r3, %r4, %r5;
+	mad.lo.s32 	%r6, %r4, %r3, %r5;
 	mov.u32 	%r7, %ntid.x;
 	mov.u32 	%r8, %tid.x;
 	mad.lo.s32 	%r1, %r6, %r7, %r8;
 	setp.ge.s32 	%p1, %r1, %r2;
 	@%p1 bra 	$L__BB0_2;
 
-	cvta.to.global.u64 	%rd3, %rd2;
 	shl.b32 	%r9, %r1, 1;
+	cvta.to.global.u64 	%rd3, %rd2;
 	mul.wide.s32 	%rd4, %r9, 4;
 	add.s64 	%rd5, %rd3, %rd4;
-	ld.global.nc.f32 	%f1, [%rd5+4];
-	neg.f32 	%f2, %f1;
+	ld.global.nc.f32 	%f1, [%rd5];
 	cvta.to.global.u64 	%rd6, %rd1;
 	add.s64 	%rd7, %rd6, %rd4;
-	st.global.f32 	[%rd7+4], %f2;
+	st.global.f32 	[%rd7], %f1;
+	ld.global.nc.f32 	%f2, [%rd5+4];
+	neg.f32 	%f3, %f2;
+	st.global.f32 	[%rd7+4], %f3;
 
 $L__BB0_2:
 	ret;

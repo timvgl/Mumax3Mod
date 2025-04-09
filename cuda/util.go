@@ -2,6 +2,7 @@ package cuda
 
 import (
 	"fmt"
+
 	"github.com/mumax/3/cuda/cu"
 )
 
@@ -20,12 +21,15 @@ type config struct {
 }
 
 // Make a 1D kernel launch configuration suited for N threads.
-func make1DConf(N int) *config {
+func make1DConf(N int, args ...bool) *config {
 	bl := cu.Dim3{X: BlockSize, Y: 1, Z: 1}
 
 	n2 := divUp(N, BlockSize) // N2 blocks left
 	nx := divUp(n2, MaxGridSize)
 	ny := divUp(n2, nx)
+	if len(args) > 0 && args[0] {
+		fmt.Println("nx:", nx, "ny:", ny)
+	}
 	gr := cu.Dim3{X: nx, Y: ny, Z: 1}
 
 	return &config{gr, bl}

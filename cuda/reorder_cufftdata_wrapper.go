@@ -83,7 +83,7 @@ var fftshift3D_partial_map = map[int]string{0: "",
 // fftshift3D_partial PTX code for various compute capabilities.
 const (
 	fftshift3D_partial_ptx_50 = `
-.version 8.2
+.version 8.5
 .target sm_50
 .address_size 64
 
@@ -98,8 +98,8 @@ const (
 )
 {
 	.reg .pred 	%p<6>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<30>;
+	.reg .f32 	%f<3>;
+	.reg .b32 	%r<32>;
 	.reg .b64 	%rd<9>;
 
 
@@ -108,10 +108,10 @@ const (
 	ld.param.u32 	%r4, [fftshift3D_partial_param_2];
 	ld.param.u32 	%r5, [fftshift3D_partial_param_3];
 	ld.param.u32 	%r6, [fftshift3D_partial_param_4];
-	mov.u32 	%r7, %ctaid.x;
-	mov.u32 	%r8, %ntid.x;
+	mov.u32 	%r7, %ntid.x;
+	mov.u32 	%r8, %ctaid.x;
 	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r7, %r8, %r9;
+	mad.lo.s32 	%r1, %r8, %r7, %r9;
 	mov.u32 	%r10, %ntid.y;
 	mov.u32 	%r11, %ctaid.y;
 	mov.u32 	%r12, %tid.y;
@@ -127,7 +127,6 @@ const (
 	or.pred  	%p5, %p3, %p4;
 	@%p5 bra 	$L__BB0_2;
 
-	cvta.to.global.u64 	%rd3, %rd2;
 	shr.u32 	%r16, %r5, 31;
 	add.s32 	%r17, %r5, %r16;
 	shr.s32 	%r18, %r17, 1;
@@ -140,15 +139,20 @@ const (
 	rem.s32 	%r25, %r24, %r6;
 	mad.lo.s32 	%r26, %r3, %r5, %r2;
 	mad.lo.s32 	%r27, %r26, %r4, %r1;
-	mad.lo.s32 	%r28, %r25, %r5, %r20;
-	mad.lo.s32 	%r29, %r28, %r4, %r1;
-	mul.wide.s32 	%rd4, %r27, 4;
+	shl.b32 	%r28, %r27, 1;
+	mad.lo.s32 	%r29, %r25, %r5, %r20;
+	mad.lo.s32 	%r30, %r29, %r4, %r1;
+	shl.b32 	%r31, %r30, 1;
+	cvta.to.global.u64 	%rd3, %rd2;
+	mul.wide.s32 	%rd4, %r28, 4;
 	add.s64 	%rd5, %rd3, %rd4;
 	ld.global.nc.f32 	%f1, [%rd5];
 	cvta.to.global.u64 	%rd6, %rd1;
-	mul.wide.s32 	%rd7, %r29, 4;
+	mul.wide.s32 	%rd7, %r31, 4;
 	add.s64 	%rd8, %rd6, %rd7;
 	st.global.f32 	[%rd8], %f1;
+	ld.global.nc.f32 	%f2, [%rd5+4];
+	st.global.f32 	[%rd8+4], %f2;
 
 $L__BB0_2:
 	ret;
@@ -157,7 +161,7 @@ $L__BB0_2:
 
 `
 	fftshift3D_partial_ptx_52 = `
-.version 8.2
+.version 8.5
 .target sm_52
 .address_size 64
 
@@ -172,8 +176,8 @@ $L__BB0_2:
 )
 {
 	.reg .pred 	%p<6>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<30>;
+	.reg .f32 	%f<3>;
+	.reg .b32 	%r<32>;
 	.reg .b64 	%rd<9>;
 
 
@@ -182,10 +186,10 @@ $L__BB0_2:
 	ld.param.u32 	%r4, [fftshift3D_partial_param_2];
 	ld.param.u32 	%r5, [fftshift3D_partial_param_3];
 	ld.param.u32 	%r6, [fftshift3D_partial_param_4];
-	mov.u32 	%r7, %ctaid.x;
-	mov.u32 	%r8, %ntid.x;
+	mov.u32 	%r7, %ntid.x;
+	mov.u32 	%r8, %ctaid.x;
 	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r7, %r8, %r9;
+	mad.lo.s32 	%r1, %r8, %r7, %r9;
 	mov.u32 	%r10, %ntid.y;
 	mov.u32 	%r11, %ctaid.y;
 	mov.u32 	%r12, %tid.y;
@@ -201,7 +205,6 @@ $L__BB0_2:
 	or.pred  	%p5, %p3, %p4;
 	@%p5 bra 	$L__BB0_2;
 
-	cvta.to.global.u64 	%rd3, %rd2;
 	shr.u32 	%r16, %r5, 31;
 	add.s32 	%r17, %r5, %r16;
 	shr.s32 	%r18, %r17, 1;
@@ -214,15 +217,20 @@ $L__BB0_2:
 	rem.s32 	%r25, %r24, %r6;
 	mad.lo.s32 	%r26, %r3, %r5, %r2;
 	mad.lo.s32 	%r27, %r26, %r4, %r1;
-	mad.lo.s32 	%r28, %r25, %r5, %r20;
-	mad.lo.s32 	%r29, %r28, %r4, %r1;
-	mul.wide.s32 	%rd4, %r27, 4;
+	shl.b32 	%r28, %r27, 1;
+	mad.lo.s32 	%r29, %r25, %r5, %r20;
+	mad.lo.s32 	%r30, %r29, %r4, %r1;
+	shl.b32 	%r31, %r30, 1;
+	cvta.to.global.u64 	%rd3, %rd2;
+	mul.wide.s32 	%rd4, %r28, 4;
 	add.s64 	%rd5, %rd3, %rd4;
 	ld.global.nc.f32 	%f1, [%rd5];
 	cvta.to.global.u64 	%rd6, %rd1;
-	mul.wide.s32 	%rd7, %r29, 4;
+	mul.wide.s32 	%rd7, %r31, 4;
 	add.s64 	%rd8, %rd6, %rd7;
 	st.global.f32 	[%rd8], %f1;
+	ld.global.nc.f32 	%f2, [%rd5+4];
+	st.global.f32 	[%rd8+4], %f2;
 
 $L__BB0_2:
 	ret;
@@ -231,7 +239,7 @@ $L__BB0_2:
 
 `
 	fftshift3D_partial_ptx_53 = `
-.version 8.2
+.version 8.5
 .target sm_53
 .address_size 64
 
@@ -246,8 +254,8 @@ $L__BB0_2:
 )
 {
 	.reg .pred 	%p<6>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<30>;
+	.reg .f32 	%f<3>;
+	.reg .b32 	%r<32>;
 	.reg .b64 	%rd<9>;
 
 
@@ -256,10 +264,10 @@ $L__BB0_2:
 	ld.param.u32 	%r4, [fftshift3D_partial_param_2];
 	ld.param.u32 	%r5, [fftshift3D_partial_param_3];
 	ld.param.u32 	%r6, [fftshift3D_partial_param_4];
-	mov.u32 	%r7, %ctaid.x;
-	mov.u32 	%r8, %ntid.x;
+	mov.u32 	%r7, %ntid.x;
+	mov.u32 	%r8, %ctaid.x;
 	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r7, %r8, %r9;
+	mad.lo.s32 	%r1, %r8, %r7, %r9;
 	mov.u32 	%r10, %ntid.y;
 	mov.u32 	%r11, %ctaid.y;
 	mov.u32 	%r12, %tid.y;
@@ -275,7 +283,6 @@ $L__BB0_2:
 	or.pred  	%p5, %p3, %p4;
 	@%p5 bra 	$L__BB0_2;
 
-	cvta.to.global.u64 	%rd3, %rd2;
 	shr.u32 	%r16, %r5, 31;
 	add.s32 	%r17, %r5, %r16;
 	shr.s32 	%r18, %r17, 1;
@@ -288,15 +295,20 @@ $L__BB0_2:
 	rem.s32 	%r25, %r24, %r6;
 	mad.lo.s32 	%r26, %r3, %r5, %r2;
 	mad.lo.s32 	%r27, %r26, %r4, %r1;
-	mad.lo.s32 	%r28, %r25, %r5, %r20;
-	mad.lo.s32 	%r29, %r28, %r4, %r1;
-	mul.wide.s32 	%rd4, %r27, 4;
+	shl.b32 	%r28, %r27, 1;
+	mad.lo.s32 	%r29, %r25, %r5, %r20;
+	mad.lo.s32 	%r30, %r29, %r4, %r1;
+	shl.b32 	%r31, %r30, 1;
+	cvta.to.global.u64 	%rd3, %rd2;
+	mul.wide.s32 	%rd4, %r28, 4;
 	add.s64 	%rd5, %rd3, %rd4;
 	ld.global.nc.f32 	%f1, [%rd5];
 	cvta.to.global.u64 	%rd6, %rd1;
-	mul.wide.s32 	%rd7, %r29, 4;
+	mul.wide.s32 	%rd7, %r31, 4;
 	add.s64 	%rd8, %rd6, %rd7;
 	st.global.f32 	[%rd8], %f1;
+	ld.global.nc.f32 	%f2, [%rd5+4];
+	st.global.f32 	[%rd8+4], %f2;
 
 $L__BB0_2:
 	ret;
@@ -305,7 +317,7 @@ $L__BB0_2:
 
 `
 	fftshift3D_partial_ptx_60 = `
-.version 8.2
+.version 8.5
 .target sm_60
 .address_size 64
 
@@ -320,8 +332,8 @@ $L__BB0_2:
 )
 {
 	.reg .pred 	%p<6>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<30>;
+	.reg .f32 	%f<3>;
+	.reg .b32 	%r<32>;
 	.reg .b64 	%rd<9>;
 
 
@@ -330,10 +342,10 @@ $L__BB0_2:
 	ld.param.u32 	%r4, [fftshift3D_partial_param_2];
 	ld.param.u32 	%r5, [fftshift3D_partial_param_3];
 	ld.param.u32 	%r6, [fftshift3D_partial_param_4];
-	mov.u32 	%r7, %ctaid.x;
-	mov.u32 	%r8, %ntid.x;
+	mov.u32 	%r7, %ntid.x;
+	mov.u32 	%r8, %ctaid.x;
 	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r7, %r8, %r9;
+	mad.lo.s32 	%r1, %r8, %r7, %r9;
 	mov.u32 	%r10, %ntid.y;
 	mov.u32 	%r11, %ctaid.y;
 	mov.u32 	%r12, %tid.y;
@@ -349,7 +361,6 @@ $L__BB0_2:
 	or.pred  	%p5, %p3, %p4;
 	@%p5 bra 	$L__BB0_2;
 
-	cvta.to.global.u64 	%rd3, %rd2;
 	shr.u32 	%r16, %r5, 31;
 	add.s32 	%r17, %r5, %r16;
 	shr.s32 	%r18, %r17, 1;
@@ -362,15 +373,20 @@ $L__BB0_2:
 	rem.s32 	%r25, %r24, %r6;
 	mad.lo.s32 	%r26, %r3, %r5, %r2;
 	mad.lo.s32 	%r27, %r26, %r4, %r1;
-	mad.lo.s32 	%r28, %r25, %r5, %r20;
-	mad.lo.s32 	%r29, %r28, %r4, %r1;
-	mul.wide.s32 	%rd4, %r27, 4;
+	shl.b32 	%r28, %r27, 1;
+	mad.lo.s32 	%r29, %r25, %r5, %r20;
+	mad.lo.s32 	%r30, %r29, %r4, %r1;
+	shl.b32 	%r31, %r30, 1;
+	cvta.to.global.u64 	%rd3, %rd2;
+	mul.wide.s32 	%rd4, %r28, 4;
 	add.s64 	%rd5, %rd3, %rd4;
 	ld.global.nc.f32 	%f1, [%rd5];
 	cvta.to.global.u64 	%rd6, %rd1;
-	mul.wide.s32 	%rd7, %r29, 4;
+	mul.wide.s32 	%rd7, %r31, 4;
 	add.s64 	%rd8, %rd6, %rd7;
 	st.global.f32 	[%rd8], %f1;
+	ld.global.nc.f32 	%f2, [%rd5+4];
+	st.global.f32 	[%rd8+4], %f2;
 
 $L__BB0_2:
 	ret;
@@ -379,7 +395,7 @@ $L__BB0_2:
 
 `
 	fftshift3D_partial_ptx_61 = `
-.version 8.2
+.version 8.5
 .target sm_61
 .address_size 64
 
@@ -394,8 +410,8 @@ $L__BB0_2:
 )
 {
 	.reg .pred 	%p<6>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<30>;
+	.reg .f32 	%f<3>;
+	.reg .b32 	%r<32>;
 	.reg .b64 	%rd<9>;
 
 
@@ -404,10 +420,10 @@ $L__BB0_2:
 	ld.param.u32 	%r4, [fftshift3D_partial_param_2];
 	ld.param.u32 	%r5, [fftshift3D_partial_param_3];
 	ld.param.u32 	%r6, [fftshift3D_partial_param_4];
-	mov.u32 	%r7, %ctaid.x;
-	mov.u32 	%r8, %ntid.x;
+	mov.u32 	%r7, %ntid.x;
+	mov.u32 	%r8, %ctaid.x;
 	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r7, %r8, %r9;
+	mad.lo.s32 	%r1, %r8, %r7, %r9;
 	mov.u32 	%r10, %ntid.y;
 	mov.u32 	%r11, %ctaid.y;
 	mov.u32 	%r12, %tid.y;
@@ -423,7 +439,6 @@ $L__BB0_2:
 	or.pred  	%p5, %p3, %p4;
 	@%p5 bra 	$L__BB0_2;
 
-	cvta.to.global.u64 	%rd3, %rd2;
 	shr.u32 	%r16, %r5, 31;
 	add.s32 	%r17, %r5, %r16;
 	shr.s32 	%r18, %r17, 1;
@@ -436,15 +451,20 @@ $L__BB0_2:
 	rem.s32 	%r25, %r24, %r6;
 	mad.lo.s32 	%r26, %r3, %r5, %r2;
 	mad.lo.s32 	%r27, %r26, %r4, %r1;
-	mad.lo.s32 	%r28, %r25, %r5, %r20;
-	mad.lo.s32 	%r29, %r28, %r4, %r1;
-	mul.wide.s32 	%rd4, %r27, 4;
+	shl.b32 	%r28, %r27, 1;
+	mad.lo.s32 	%r29, %r25, %r5, %r20;
+	mad.lo.s32 	%r30, %r29, %r4, %r1;
+	shl.b32 	%r31, %r30, 1;
+	cvta.to.global.u64 	%rd3, %rd2;
+	mul.wide.s32 	%rd4, %r28, 4;
 	add.s64 	%rd5, %rd3, %rd4;
 	ld.global.nc.f32 	%f1, [%rd5];
 	cvta.to.global.u64 	%rd6, %rd1;
-	mul.wide.s32 	%rd7, %r29, 4;
+	mul.wide.s32 	%rd7, %r31, 4;
 	add.s64 	%rd8, %rd6, %rd7;
 	st.global.f32 	[%rd8], %f1;
+	ld.global.nc.f32 	%f2, [%rd5+4];
+	st.global.f32 	[%rd8+4], %f2;
 
 $L__BB0_2:
 	ret;
@@ -453,7 +473,7 @@ $L__BB0_2:
 
 `
 	fftshift3D_partial_ptx_62 = `
-.version 8.2
+.version 8.5
 .target sm_62
 .address_size 64
 
@@ -468,8 +488,8 @@ $L__BB0_2:
 )
 {
 	.reg .pred 	%p<6>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<30>;
+	.reg .f32 	%f<3>;
+	.reg .b32 	%r<32>;
 	.reg .b64 	%rd<9>;
 
 
@@ -478,10 +498,10 @@ $L__BB0_2:
 	ld.param.u32 	%r4, [fftshift3D_partial_param_2];
 	ld.param.u32 	%r5, [fftshift3D_partial_param_3];
 	ld.param.u32 	%r6, [fftshift3D_partial_param_4];
-	mov.u32 	%r7, %ctaid.x;
-	mov.u32 	%r8, %ntid.x;
+	mov.u32 	%r7, %ntid.x;
+	mov.u32 	%r8, %ctaid.x;
 	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r7, %r8, %r9;
+	mad.lo.s32 	%r1, %r8, %r7, %r9;
 	mov.u32 	%r10, %ntid.y;
 	mov.u32 	%r11, %ctaid.y;
 	mov.u32 	%r12, %tid.y;
@@ -497,7 +517,6 @@ $L__BB0_2:
 	or.pred  	%p5, %p3, %p4;
 	@%p5 bra 	$L__BB0_2;
 
-	cvta.to.global.u64 	%rd3, %rd2;
 	shr.u32 	%r16, %r5, 31;
 	add.s32 	%r17, %r5, %r16;
 	shr.s32 	%r18, %r17, 1;
@@ -510,15 +529,20 @@ $L__BB0_2:
 	rem.s32 	%r25, %r24, %r6;
 	mad.lo.s32 	%r26, %r3, %r5, %r2;
 	mad.lo.s32 	%r27, %r26, %r4, %r1;
-	mad.lo.s32 	%r28, %r25, %r5, %r20;
-	mad.lo.s32 	%r29, %r28, %r4, %r1;
-	mul.wide.s32 	%rd4, %r27, 4;
+	shl.b32 	%r28, %r27, 1;
+	mad.lo.s32 	%r29, %r25, %r5, %r20;
+	mad.lo.s32 	%r30, %r29, %r4, %r1;
+	shl.b32 	%r31, %r30, 1;
+	cvta.to.global.u64 	%rd3, %rd2;
+	mul.wide.s32 	%rd4, %r28, 4;
 	add.s64 	%rd5, %rd3, %rd4;
 	ld.global.nc.f32 	%f1, [%rd5];
 	cvta.to.global.u64 	%rd6, %rd1;
-	mul.wide.s32 	%rd7, %r29, 4;
+	mul.wide.s32 	%rd7, %r31, 4;
 	add.s64 	%rd8, %rd6, %rd7;
 	st.global.f32 	[%rd8], %f1;
+	ld.global.nc.f32 	%f2, [%rd5+4];
+	st.global.f32 	[%rd8+4], %f2;
 
 $L__BB0_2:
 	ret;
@@ -527,7 +551,7 @@ $L__BB0_2:
 
 `
 	fftshift3D_partial_ptx_70 = `
-.version 8.2
+.version 8.5
 .target sm_70
 .address_size 64
 
@@ -542,8 +566,8 @@ $L__BB0_2:
 )
 {
 	.reg .pred 	%p<6>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<30>;
+	.reg .f32 	%f<3>;
+	.reg .b32 	%r<32>;
 	.reg .b64 	%rd<9>;
 
 
@@ -552,10 +576,10 @@ $L__BB0_2:
 	ld.param.u32 	%r4, [fftshift3D_partial_param_2];
 	ld.param.u32 	%r5, [fftshift3D_partial_param_3];
 	ld.param.u32 	%r6, [fftshift3D_partial_param_4];
-	mov.u32 	%r7, %ctaid.x;
-	mov.u32 	%r8, %ntid.x;
+	mov.u32 	%r7, %ntid.x;
+	mov.u32 	%r8, %ctaid.x;
 	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r7, %r8, %r9;
+	mad.lo.s32 	%r1, %r8, %r7, %r9;
 	mov.u32 	%r10, %ntid.y;
 	mov.u32 	%r11, %ctaid.y;
 	mov.u32 	%r12, %tid.y;
@@ -571,7 +595,6 @@ $L__BB0_2:
 	or.pred  	%p5, %p3, %p4;
 	@%p5 bra 	$L__BB0_2;
 
-	cvta.to.global.u64 	%rd3, %rd2;
 	shr.u32 	%r16, %r5, 31;
 	add.s32 	%r17, %r5, %r16;
 	shr.s32 	%r18, %r17, 1;
@@ -584,15 +607,20 @@ $L__BB0_2:
 	rem.s32 	%r25, %r24, %r6;
 	mad.lo.s32 	%r26, %r3, %r5, %r2;
 	mad.lo.s32 	%r27, %r26, %r4, %r1;
-	mad.lo.s32 	%r28, %r25, %r5, %r20;
-	mad.lo.s32 	%r29, %r28, %r4, %r1;
-	mul.wide.s32 	%rd4, %r27, 4;
+	shl.b32 	%r28, %r27, 1;
+	mad.lo.s32 	%r29, %r25, %r5, %r20;
+	mad.lo.s32 	%r30, %r29, %r4, %r1;
+	shl.b32 	%r31, %r30, 1;
+	cvta.to.global.u64 	%rd3, %rd2;
+	mul.wide.s32 	%rd4, %r28, 4;
 	add.s64 	%rd5, %rd3, %rd4;
 	ld.global.nc.f32 	%f1, [%rd5];
 	cvta.to.global.u64 	%rd6, %rd1;
-	mul.wide.s32 	%rd7, %r29, 4;
+	mul.wide.s32 	%rd7, %r31, 4;
 	add.s64 	%rd8, %rd6, %rd7;
 	st.global.f32 	[%rd8], %f1;
+	ld.global.nc.f32 	%f2, [%rd5+4];
+	st.global.f32 	[%rd8+4], %f2;
 
 $L__BB0_2:
 	ret;
@@ -601,7 +629,7 @@ $L__BB0_2:
 
 `
 	fftshift3D_partial_ptx_72 = `
-.version 8.2
+.version 8.5
 .target sm_72
 .address_size 64
 
@@ -616,8 +644,8 @@ $L__BB0_2:
 )
 {
 	.reg .pred 	%p<6>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<30>;
+	.reg .f32 	%f<3>;
+	.reg .b32 	%r<32>;
 	.reg .b64 	%rd<9>;
 
 
@@ -626,10 +654,10 @@ $L__BB0_2:
 	ld.param.u32 	%r4, [fftshift3D_partial_param_2];
 	ld.param.u32 	%r5, [fftshift3D_partial_param_3];
 	ld.param.u32 	%r6, [fftshift3D_partial_param_4];
-	mov.u32 	%r7, %ctaid.x;
-	mov.u32 	%r8, %ntid.x;
+	mov.u32 	%r7, %ntid.x;
+	mov.u32 	%r8, %ctaid.x;
 	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r7, %r8, %r9;
+	mad.lo.s32 	%r1, %r8, %r7, %r9;
 	mov.u32 	%r10, %ntid.y;
 	mov.u32 	%r11, %ctaid.y;
 	mov.u32 	%r12, %tid.y;
@@ -645,7 +673,6 @@ $L__BB0_2:
 	or.pred  	%p5, %p3, %p4;
 	@%p5 bra 	$L__BB0_2;
 
-	cvta.to.global.u64 	%rd3, %rd2;
 	shr.u32 	%r16, %r5, 31;
 	add.s32 	%r17, %r5, %r16;
 	shr.s32 	%r18, %r17, 1;
@@ -658,15 +685,20 @@ $L__BB0_2:
 	rem.s32 	%r25, %r24, %r6;
 	mad.lo.s32 	%r26, %r3, %r5, %r2;
 	mad.lo.s32 	%r27, %r26, %r4, %r1;
-	mad.lo.s32 	%r28, %r25, %r5, %r20;
-	mad.lo.s32 	%r29, %r28, %r4, %r1;
-	mul.wide.s32 	%rd4, %r27, 4;
+	shl.b32 	%r28, %r27, 1;
+	mad.lo.s32 	%r29, %r25, %r5, %r20;
+	mad.lo.s32 	%r30, %r29, %r4, %r1;
+	shl.b32 	%r31, %r30, 1;
+	cvta.to.global.u64 	%rd3, %rd2;
+	mul.wide.s32 	%rd4, %r28, 4;
 	add.s64 	%rd5, %rd3, %rd4;
 	ld.global.nc.f32 	%f1, [%rd5];
 	cvta.to.global.u64 	%rd6, %rd1;
-	mul.wide.s32 	%rd7, %r29, 4;
+	mul.wide.s32 	%rd7, %r31, 4;
 	add.s64 	%rd8, %rd6, %rd7;
 	st.global.f32 	[%rd8], %f1;
+	ld.global.nc.f32 	%f2, [%rd5+4];
+	st.global.f32 	[%rd8+4], %f2;
 
 $L__BB0_2:
 	ret;
@@ -675,7 +707,7 @@ $L__BB0_2:
 
 `
 	fftshift3D_partial_ptx_75 = `
-.version 8.2
+.version 8.5
 .target sm_75
 .address_size 64
 
@@ -690,8 +722,8 @@ $L__BB0_2:
 )
 {
 	.reg .pred 	%p<6>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<30>;
+	.reg .f32 	%f<3>;
+	.reg .b32 	%r<32>;
 	.reg .b64 	%rd<9>;
 
 
@@ -700,10 +732,10 @@ $L__BB0_2:
 	ld.param.u32 	%r4, [fftshift3D_partial_param_2];
 	ld.param.u32 	%r5, [fftshift3D_partial_param_3];
 	ld.param.u32 	%r6, [fftshift3D_partial_param_4];
-	mov.u32 	%r7, %ctaid.x;
-	mov.u32 	%r8, %ntid.x;
+	mov.u32 	%r7, %ntid.x;
+	mov.u32 	%r8, %ctaid.x;
 	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r7, %r8, %r9;
+	mad.lo.s32 	%r1, %r8, %r7, %r9;
 	mov.u32 	%r10, %ntid.y;
 	mov.u32 	%r11, %ctaid.y;
 	mov.u32 	%r12, %tid.y;
@@ -719,7 +751,6 @@ $L__BB0_2:
 	or.pred  	%p5, %p3, %p4;
 	@%p5 bra 	$L__BB0_2;
 
-	cvta.to.global.u64 	%rd3, %rd2;
 	shr.u32 	%r16, %r5, 31;
 	add.s32 	%r17, %r5, %r16;
 	shr.s32 	%r18, %r17, 1;
@@ -732,15 +763,20 @@ $L__BB0_2:
 	rem.s32 	%r25, %r24, %r6;
 	mad.lo.s32 	%r26, %r3, %r5, %r2;
 	mad.lo.s32 	%r27, %r26, %r4, %r1;
-	mad.lo.s32 	%r28, %r25, %r5, %r20;
-	mad.lo.s32 	%r29, %r28, %r4, %r1;
-	mul.wide.s32 	%rd4, %r27, 4;
+	shl.b32 	%r28, %r27, 1;
+	mad.lo.s32 	%r29, %r25, %r5, %r20;
+	mad.lo.s32 	%r30, %r29, %r4, %r1;
+	shl.b32 	%r31, %r30, 1;
+	cvta.to.global.u64 	%rd3, %rd2;
+	mul.wide.s32 	%rd4, %r28, 4;
 	add.s64 	%rd5, %rd3, %rd4;
 	ld.global.nc.f32 	%f1, [%rd5];
 	cvta.to.global.u64 	%rd6, %rd1;
-	mul.wide.s32 	%rd7, %r29, 4;
+	mul.wide.s32 	%rd7, %r31, 4;
 	add.s64 	%rd8, %rd6, %rd7;
 	st.global.f32 	[%rd8], %f1;
+	ld.global.nc.f32 	%f2, [%rd5+4];
+	st.global.f32 	[%rd8+4], %f2;
 
 $L__BB0_2:
 	ret;
@@ -749,7 +785,7 @@ $L__BB0_2:
 
 `
 	fftshift3D_partial_ptx_80 = `
-.version 8.2
+.version 8.5
 .target sm_80
 .address_size 64
 
@@ -764,8 +800,8 @@ $L__BB0_2:
 )
 {
 	.reg .pred 	%p<6>;
-	.reg .f32 	%f<2>;
-	.reg .b32 	%r<30>;
+	.reg .f32 	%f<3>;
+	.reg .b32 	%r<32>;
 	.reg .b64 	%rd<9>;
 
 
@@ -774,10 +810,10 @@ $L__BB0_2:
 	ld.param.u32 	%r4, [fftshift3D_partial_param_2];
 	ld.param.u32 	%r5, [fftshift3D_partial_param_3];
 	ld.param.u32 	%r6, [fftshift3D_partial_param_4];
-	mov.u32 	%r7, %ctaid.x;
-	mov.u32 	%r8, %ntid.x;
+	mov.u32 	%r7, %ntid.x;
+	mov.u32 	%r8, %ctaid.x;
 	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r7, %r8, %r9;
+	mad.lo.s32 	%r1, %r8, %r7, %r9;
 	mov.u32 	%r10, %ntid.y;
 	mov.u32 	%r11, %ctaid.y;
 	mov.u32 	%r12, %tid.y;
@@ -793,7 +829,6 @@ $L__BB0_2:
 	or.pred  	%p5, %p3, %p4;
 	@%p5 bra 	$L__BB0_2;
 
-	cvta.to.global.u64 	%rd3, %rd2;
 	shr.u32 	%r16, %r5, 31;
 	add.s32 	%r17, %r5, %r16;
 	shr.s32 	%r18, %r17, 1;
@@ -806,15 +841,20 @@ $L__BB0_2:
 	rem.s32 	%r25, %r24, %r6;
 	mad.lo.s32 	%r26, %r3, %r5, %r2;
 	mad.lo.s32 	%r27, %r26, %r4, %r1;
-	mad.lo.s32 	%r28, %r25, %r5, %r20;
-	mad.lo.s32 	%r29, %r28, %r4, %r1;
-	mul.wide.s32 	%rd4, %r27, 4;
+	shl.b32 	%r28, %r27, 1;
+	mad.lo.s32 	%r29, %r25, %r5, %r20;
+	mad.lo.s32 	%r30, %r29, %r4, %r1;
+	shl.b32 	%r31, %r30, 1;
+	cvta.to.global.u64 	%rd3, %rd2;
+	mul.wide.s32 	%rd4, %r28, 4;
 	add.s64 	%rd5, %rd3, %rd4;
 	ld.global.nc.f32 	%f1, [%rd5];
 	cvta.to.global.u64 	%rd6, %rd1;
-	mul.wide.s32 	%rd7, %r29, 4;
+	mul.wide.s32 	%rd7, %r31, 4;
 	add.s64 	%rd8, %rd6, %rd7;
 	st.global.f32 	[%rd8], %f1;
+	ld.global.nc.f32 	%f2, [%rd5+4];
+	st.global.f32 	[%rd8+4], %f2;
 
 $L__BB0_2:
 	ret;

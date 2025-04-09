@@ -58,11 +58,27 @@ func ComplexConjugate(dst, src *data.Slice) {
 	}
 }
 
-func ReverseX(dst, src *data.Slice) {
+func ReverseX(dst, input *data.Slice) {
 	size := dst.Size()
-	size[0] /= 4
-	cfg := make3DConf(size)
+	util.Argument(dst.Size() == input.Size())
+	util.Argument(dst.NComp() == input.NComp())
+	oddNx := 0
+	if size[X]/2%2 == 1 {
+		oddNx = 1
+	}
+	size[0] /= 2
+	var cfg *config
+	if size[X]%2 == 1 {
+		cfgSize := size
+		cfgSize[X] /= 2
+		cfgSize[X]++
+		cfg = make3DConf(cfgSize)
+	} else {
+		cfgSize := size
+		cfgSize[X] /= 2
+		cfg = make3DConf(cfgSize)
+	}
 	for c := range dst.NComp() {
-		k_reverseX_async(dst.DevPtr(c), src.DevPtr(c), size[X], size[Y], size[Z], cfg)
+		k_reverseX_async(dst.DevPtr(c), input.DevPtr(c), size[X], size[Y], size[Z], oddNx, cfg)
 	}
 }

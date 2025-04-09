@@ -23,6 +23,10 @@ type ExprEvaluator struct {
 
 func init() {
 	DeclFunc("CreateSlice", CreateSlice, "")
+	DeclFunc("CreateString", CreateString, "")
+}
+func CreateString(name string) string {
+	return name
 }
 
 // NewExprEvaluator compiles the expression string and prepares the evaluator

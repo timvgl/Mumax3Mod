@@ -8,6 +8,7 @@ import (
 func ReorderCufftData(output, input *data.Slice) {
 	util.Assert(output.Size() == input.Size() && output.NComp() == input.NComp())
 	size := output.Size()
+	size[X] /= 2
 	cfg := make3DConf(size)
 	if input.NComp() == 1 {
 		k_fftshift3D_partial_async(output.DevPtr(0), input.DevPtr(0), size[X], size[Y], size[Z], cfg)

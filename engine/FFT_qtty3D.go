@@ -233,11 +233,13 @@ func (d *fftOperation3D) evalIntern() {
 	}
 	if d.NegativeKX {
 		ccBuf := cuda.Buffer(bufReOrd.NComp(), bufReOrd.Size())
+		ccBufRevX := cuda.Buffer(bufReOrd.NComp(), bufReOrd.Size())
 		defer cuda.Recycle(ccBuf)
+		defer cuda.Recycle(ccBufRevX)
 		cuda.ComplexConjugate(ccBuf, bufReOrd)
-		cuda.ReverseX(ccBuf, ccBuf)
-		data.CopyPart(FFT3DData[d.q], ccBuf, 0, ccBuf.Size()[X], 0, ccBuf.Size()[Y], 0, ccBuf.Size()[Z], 0, 1, 0, 0, 0, 0)
-		data.CopyPart(FFT3DData[d.q], bufReOrd, 0, bufReOrd.Size()[X], 0, bufReOrd.Size()[Y], 0, bufReOrd.Size()[Z], 0, 1, ccBuf.Size()[X], 0, 0, 0)
+		cuda.ReverseX(ccBufRevX, ccBuf)
+		data.CopyPart(FFT3DData[d.q], ccBufRevX, 0, ccBufRevX.Size()[X], 0, ccBufRevX.Size()[Y], 0, ccBufRevX.Size()[Z], 0, 1, 0, 0, 0, 0)
+		data.CopyPart(FFT3DData[d.q], bufReOrd, 0, bufReOrd.Size()[X], 0, bufReOrd.Size()[Y], 0, bufReOrd.Size()[Z], 0, 1, ccBufRevX.Size()[X], 0, 0, 0)
 	} else {
 		data.Copy(FFT3DData[d.q], bufReOrd)
 	}

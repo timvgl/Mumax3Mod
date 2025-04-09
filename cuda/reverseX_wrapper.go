@@ -22,7 +22,8 @@ type reverseX_args_t struct {
 	arg_Nx       int
 	arg_Ny       int
 	arg_Nz       int
-	argptr       [5]unsafe.Pointer
+	arg_oddNx    int
+	argptr       [6]unsafe.Pointer
 	sync.Mutex
 }
 
@@ -36,10 +37,11 @@ func init() {
 	reverseX_args.argptr[2] = unsafe.Pointer(&reverseX_args.arg_Nx)
 	reverseX_args.argptr[3] = unsafe.Pointer(&reverseX_args.arg_Ny)
 	reverseX_args.argptr[4] = unsafe.Pointer(&reverseX_args.arg_Nz)
+	reverseX_args.argptr[5] = unsafe.Pointer(&reverseX_args.arg_oddNx)
 }
 
 // Wrapper for reverseX CUDA kernel, asynchronous.
-func k_reverseX_async(data_out unsafe.Pointer, data_in unsafe.Pointer, Nx int, Ny int, Nz int, cfg *config) {
+func k_reverseX_async(data_out unsafe.Pointer, data_in unsafe.Pointer, Nx int, Ny int, Nz int, oddNx int, cfg *config) {
 	if Synchronous { // debug
 		Sync()
 		timer.Start("reverseX")
@@ -57,6 +59,7 @@ func k_reverseX_async(data_out unsafe.Pointer, data_in unsafe.Pointer, Nx int, N
 	reverseX_args.arg_Nx = Nx
 	reverseX_args.arg_Ny = Ny
 	reverseX_args.arg_Nz = Nz
+	reverseX_args.arg_oddNx = oddNx
 
 	args := reverseX_args.argptr[:]
 	cu.LaunchKernel(reverseX_code, cfg.Grid.X, cfg.Grid.Y, cfg.Grid.Z, cfg.Block.X, cfg.Block.Y, cfg.Block.Z, 0, stream0, args)
@@ -83,7 +86,7 @@ var reverseX_map = map[int]string{0: "",
 // reverseX PTX code for various compute capabilities.
 const (
 	reverseX_ptx_50 = `
-.version 8.2
+.version 8.5
 .target sm_50
 .address_size 64
 
@@ -94,72 +97,94 @@ const (
 	.param .u64 reverseX_param_1,
 	.param .u32 reverseX_param_2,
 	.param .u32 reverseX_param_3,
-	.param .u32 reverseX_param_4
+	.param .u32 reverseX_param_4,
+	.param .u32 reverseX_param_5
 )
 {
-	.reg .pred 	%p<6>;
+	.reg .pred 	%p<9>;
 	.reg .f32 	%f<5>;
-	.reg .b32 	%r<24>;
+	.reg .b32 	%r<32>;
 	.reg .b64 	%rd<11>;
 
 
-	ld.param.u64 	%rd1, [reverseX_param_0];
-	ld.param.u64 	%rd2, [reverseX_param_1];
-	ld.param.u32 	%r4, [reverseX_param_2];
+	ld.param.u64 	%rd3, [reverseX_param_0];
+	ld.param.u64 	%rd4, [reverseX_param_1];
 	ld.param.u32 	%r5, [reverseX_param_3];
-	ld.param.u32 	%r6, [reverseX_param_4];
-	mov.u32 	%r7, %ntid.x;
-	mov.u32 	%r8, %ctaid.x;
-	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r8, %r7, %r9;
-	mov.u32 	%r10, %ntid.y;
-	mov.u32 	%r11, %ctaid.y;
-	mov.u32 	%r12, %tid.y;
-	mad.lo.s32 	%r2, %r11, %r10, %r12;
-	mov.u32 	%r13, %ntid.z;
-	mov.u32 	%r14, %ctaid.z;
-	mov.u32 	%r15, %tid.z;
-	mad.lo.s32 	%r3, %r14, %r13, %r15;
-	setp.ge.s32 	%p1, %r1, %r4;
-	setp.ge.s32 	%p2, %r2, %r5;
-	or.pred  	%p3, %p1, %p2;
-	setp.ge.s32 	%p4, %r3, %r6;
-	or.pred  	%p5, %p3, %p4;
-	@%p5 bra 	$L__BB0_2;
+	ld.param.u32 	%r7, [reverseX_param_4];
+	ld.param.u32 	%r6, [reverseX_param_5];
+	ld.param.u32 	%r4, [reverseX_param_2];
+	mov.u32 	%r8, %ntid.x;
+	mov.u32 	%r9, %ctaid.x;
+	mov.u32 	%r10, %tid.x;
+	mad.lo.s32 	%r1, %r9, %r8, %r10;
+	mov.u32 	%r11, %ntid.y;
+	mov.u32 	%r12, %ctaid.y;
+	mov.u32 	%r13, %tid.y;
+	mad.lo.s32 	%r2, %r12, %r11, %r13;
+	mov.u32 	%r14, %ntid.z;
+	mov.u32 	%r15, %ctaid.z;
+	mov.u32 	%r16, %tid.z;
+	mad.lo.s32 	%r3, %r15, %r14, %r16;
+	setp.eq.s32 	%p1, %r6, 1;
+	selp.u32 	%r17, 1, 0, %p1;
+	shr.u32 	%r18, %r4, 31;
+	add.s32 	%r19, %r4, %r18;
+	shr.s32 	%r20, %r19, 1;
+	add.s32 	%r21, %r20, %r17;
+	setp.ge.s32 	%p2, %r1, %r21;
+	setp.ge.s32 	%p3, %r2, %r5;
+	or.pred  	%p4, %p3, %p2;
+	setp.ge.s32 	%p5, %r3, %r7;
+	or.pred  	%p6, %p5, %p4;
+	@%p6 bra 	$L__BB0_4;
 
-	cvta.to.global.u64 	%rd3, %rd1;
-	cvta.to.global.u64 	%rd4, %rd2;
-	shl.b32 	%r16, %r1, 1;
-	shl.b32 	%r17, %r4, 2;
-	sub.s32 	%r18, %r17, %r16;
-	mad.lo.s32 	%r19, %r3, %r5, %r2;
-	mul.lo.s32 	%r20, %r19, %r17;
-	add.s32 	%r21, %r18, %r20;
-	add.s32 	%r22, %r20, %r16;
-	add.s32 	%r23, %r21, -2;
-	mul.wide.s32 	%rd5, %r22, 4;
-	add.s64 	%rd6, %rd4, %rd5;
-	ld.global.nc.f32 	%f1, [%rd6];
-	ld.global.nc.f32 	%f2, [%rd6+4];
-	mul.wide.s32 	%rd7, %r23, 4;
-	add.s64 	%rd8, %rd4, %rd7;
-	ld.global.nc.f32 	%f3, [%rd8];
-	ld.global.nc.f32 	%f4, [%rd8+4];
-	add.s64 	%rd9, %rd3, %rd5;
-	st.global.f32 	[%rd9], %f3;
-	st.global.f32 	[%rd9+4], %f4;
-	add.s64 	%rd10, %rd3, %rd7;
-	st.global.f32 	[%rd10], %f1;
-	st.global.f32 	[%rd10+4], %f2;
+	cvta.to.global.u64 	%rd5, %rd3;
+	cvta.to.global.u64 	%rd6, %rd4;
+	sub.s32 	%r22, %r4, %r1;
+	shl.b32 	%r23, %r22, 1;
+	mad.lo.s32 	%r24, %r3, %r5, %r2;
+	mul.lo.s32 	%r25, %r4, %r24;
+	shl.b32 	%r26, %r25, 1;
+	add.s32 	%r27, %r23, %r26;
+	selp.b32 	%r28, %r4, -1, %p1;
+	shl.b32 	%r29, %r1, 1;
+	add.s32 	%r30, %r26, %r29;
+	add.s32 	%r31, %r27, -2;
+	mul.wide.s32 	%rd7, %r30, 4;
+	add.s64 	%rd8, %rd6, %rd7;
+	ld.global.nc.f32 	%f1, [%rd8];
+	ld.global.nc.f32 	%f2, [%rd8+4];
+	mul.wide.s32 	%rd9, %r31, 4;
+	add.s64 	%rd10, %rd6, %rd9;
+	ld.global.nc.f32 	%f3, [%rd10];
+	ld.global.nc.f32 	%f4, [%rd10+4];
+	setp.eq.s32 	%p8, %r29, %r28;
+	add.s64 	%rd1, %rd5, %rd7;
+	add.s64 	%rd2, %rd5, %rd9;
+	@%p8 bra 	$L__BB0_3;
+	bra.uni 	$L__BB0_2;
+
+$L__BB0_3:
+	st.global.f32 	[%rd1], %f1;
+	st.global.f32 	[%rd1+4], %f2;
+	st.global.f32 	[%rd2], %f3;
+	st.global.f32 	[%rd2+4], %f4;
+	bra.uni 	$L__BB0_4;
 
 $L__BB0_2:
+	st.global.f32 	[%rd1], %f3;
+	st.global.f32 	[%rd1+4], %f4;
+	st.global.f32 	[%rd2], %f1;
+	st.global.f32 	[%rd2+4], %f2;
+
+$L__BB0_4:
 	ret;
 
 }
 
 `
 	reverseX_ptx_52 = `
-.version 8.2
+.version 8.5
 .target sm_52
 .address_size 64
 
@@ -170,72 +195,94 @@ $L__BB0_2:
 	.param .u64 reverseX_param_1,
 	.param .u32 reverseX_param_2,
 	.param .u32 reverseX_param_3,
-	.param .u32 reverseX_param_4
+	.param .u32 reverseX_param_4,
+	.param .u32 reverseX_param_5
 )
 {
-	.reg .pred 	%p<6>;
+	.reg .pred 	%p<9>;
 	.reg .f32 	%f<5>;
-	.reg .b32 	%r<24>;
+	.reg .b32 	%r<32>;
 	.reg .b64 	%rd<11>;
 
 
-	ld.param.u64 	%rd1, [reverseX_param_0];
-	ld.param.u64 	%rd2, [reverseX_param_1];
-	ld.param.u32 	%r4, [reverseX_param_2];
+	ld.param.u64 	%rd3, [reverseX_param_0];
+	ld.param.u64 	%rd4, [reverseX_param_1];
 	ld.param.u32 	%r5, [reverseX_param_3];
-	ld.param.u32 	%r6, [reverseX_param_4];
-	mov.u32 	%r7, %ntid.x;
-	mov.u32 	%r8, %ctaid.x;
-	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r8, %r7, %r9;
-	mov.u32 	%r10, %ntid.y;
-	mov.u32 	%r11, %ctaid.y;
-	mov.u32 	%r12, %tid.y;
-	mad.lo.s32 	%r2, %r11, %r10, %r12;
-	mov.u32 	%r13, %ntid.z;
-	mov.u32 	%r14, %ctaid.z;
-	mov.u32 	%r15, %tid.z;
-	mad.lo.s32 	%r3, %r14, %r13, %r15;
-	setp.ge.s32 	%p1, %r1, %r4;
-	setp.ge.s32 	%p2, %r2, %r5;
-	or.pred  	%p3, %p1, %p2;
-	setp.ge.s32 	%p4, %r3, %r6;
-	or.pred  	%p5, %p3, %p4;
-	@%p5 bra 	$L__BB0_2;
+	ld.param.u32 	%r7, [reverseX_param_4];
+	ld.param.u32 	%r6, [reverseX_param_5];
+	ld.param.u32 	%r4, [reverseX_param_2];
+	mov.u32 	%r8, %ntid.x;
+	mov.u32 	%r9, %ctaid.x;
+	mov.u32 	%r10, %tid.x;
+	mad.lo.s32 	%r1, %r9, %r8, %r10;
+	mov.u32 	%r11, %ntid.y;
+	mov.u32 	%r12, %ctaid.y;
+	mov.u32 	%r13, %tid.y;
+	mad.lo.s32 	%r2, %r12, %r11, %r13;
+	mov.u32 	%r14, %ntid.z;
+	mov.u32 	%r15, %ctaid.z;
+	mov.u32 	%r16, %tid.z;
+	mad.lo.s32 	%r3, %r15, %r14, %r16;
+	setp.eq.s32 	%p1, %r6, 1;
+	selp.u32 	%r17, 1, 0, %p1;
+	shr.u32 	%r18, %r4, 31;
+	add.s32 	%r19, %r4, %r18;
+	shr.s32 	%r20, %r19, 1;
+	add.s32 	%r21, %r20, %r17;
+	setp.ge.s32 	%p2, %r1, %r21;
+	setp.ge.s32 	%p3, %r2, %r5;
+	or.pred  	%p4, %p3, %p2;
+	setp.ge.s32 	%p5, %r3, %r7;
+	or.pred  	%p6, %p5, %p4;
+	@%p6 bra 	$L__BB0_4;
 
-	cvta.to.global.u64 	%rd3, %rd1;
-	cvta.to.global.u64 	%rd4, %rd2;
-	shl.b32 	%r16, %r1, 1;
-	shl.b32 	%r17, %r4, 2;
-	sub.s32 	%r18, %r17, %r16;
-	mad.lo.s32 	%r19, %r3, %r5, %r2;
-	mul.lo.s32 	%r20, %r19, %r17;
-	add.s32 	%r21, %r18, %r20;
-	add.s32 	%r22, %r20, %r16;
-	add.s32 	%r23, %r21, -2;
-	mul.wide.s32 	%rd5, %r22, 4;
-	add.s64 	%rd6, %rd4, %rd5;
-	ld.global.nc.f32 	%f1, [%rd6];
-	ld.global.nc.f32 	%f2, [%rd6+4];
-	mul.wide.s32 	%rd7, %r23, 4;
-	add.s64 	%rd8, %rd4, %rd7;
-	ld.global.nc.f32 	%f3, [%rd8];
-	ld.global.nc.f32 	%f4, [%rd8+4];
-	add.s64 	%rd9, %rd3, %rd5;
-	st.global.f32 	[%rd9], %f3;
-	st.global.f32 	[%rd9+4], %f4;
-	add.s64 	%rd10, %rd3, %rd7;
-	st.global.f32 	[%rd10], %f1;
-	st.global.f32 	[%rd10+4], %f2;
+	cvta.to.global.u64 	%rd5, %rd3;
+	cvta.to.global.u64 	%rd6, %rd4;
+	sub.s32 	%r22, %r4, %r1;
+	shl.b32 	%r23, %r22, 1;
+	mad.lo.s32 	%r24, %r3, %r5, %r2;
+	mul.lo.s32 	%r25, %r4, %r24;
+	shl.b32 	%r26, %r25, 1;
+	add.s32 	%r27, %r23, %r26;
+	selp.b32 	%r28, %r4, -1, %p1;
+	shl.b32 	%r29, %r1, 1;
+	add.s32 	%r30, %r26, %r29;
+	add.s32 	%r31, %r27, -2;
+	mul.wide.s32 	%rd7, %r30, 4;
+	add.s64 	%rd8, %rd6, %rd7;
+	ld.global.nc.f32 	%f1, [%rd8];
+	ld.global.nc.f32 	%f2, [%rd8+4];
+	mul.wide.s32 	%rd9, %r31, 4;
+	add.s64 	%rd10, %rd6, %rd9;
+	ld.global.nc.f32 	%f3, [%rd10];
+	ld.global.nc.f32 	%f4, [%rd10+4];
+	setp.eq.s32 	%p8, %r29, %r28;
+	add.s64 	%rd1, %rd5, %rd7;
+	add.s64 	%rd2, %rd5, %rd9;
+	@%p8 bra 	$L__BB0_3;
+	bra.uni 	$L__BB0_2;
+
+$L__BB0_3:
+	st.global.f32 	[%rd1], %f1;
+	st.global.f32 	[%rd1+4], %f2;
+	st.global.f32 	[%rd2], %f3;
+	st.global.f32 	[%rd2+4], %f4;
+	bra.uni 	$L__BB0_4;
 
 $L__BB0_2:
+	st.global.f32 	[%rd1], %f3;
+	st.global.f32 	[%rd1+4], %f4;
+	st.global.f32 	[%rd2], %f1;
+	st.global.f32 	[%rd2+4], %f2;
+
+$L__BB0_4:
 	ret;
 
 }
 
 `
 	reverseX_ptx_53 = `
-.version 8.2
+.version 8.5
 .target sm_53
 .address_size 64
 
@@ -246,72 +293,94 @@ $L__BB0_2:
 	.param .u64 reverseX_param_1,
 	.param .u32 reverseX_param_2,
 	.param .u32 reverseX_param_3,
-	.param .u32 reverseX_param_4
+	.param .u32 reverseX_param_4,
+	.param .u32 reverseX_param_5
 )
 {
-	.reg .pred 	%p<6>;
+	.reg .pred 	%p<9>;
 	.reg .f32 	%f<5>;
-	.reg .b32 	%r<24>;
+	.reg .b32 	%r<32>;
 	.reg .b64 	%rd<11>;
 
 
-	ld.param.u64 	%rd1, [reverseX_param_0];
-	ld.param.u64 	%rd2, [reverseX_param_1];
-	ld.param.u32 	%r4, [reverseX_param_2];
+	ld.param.u64 	%rd3, [reverseX_param_0];
+	ld.param.u64 	%rd4, [reverseX_param_1];
 	ld.param.u32 	%r5, [reverseX_param_3];
-	ld.param.u32 	%r6, [reverseX_param_4];
-	mov.u32 	%r7, %ntid.x;
-	mov.u32 	%r8, %ctaid.x;
-	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r8, %r7, %r9;
-	mov.u32 	%r10, %ntid.y;
-	mov.u32 	%r11, %ctaid.y;
-	mov.u32 	%r12, %tid.y;
-	mad.lo.s32 	%r2, %r11, %r10, %r12;
-	mov.u32 	%r13, %ntid.z;
-	mov.u32 	%r14, %ctaid.z;
-	mov.u32 	%r15, %tid.z;
-	mad.lo.s32 	%r3, %r14, %r13, %r15;
-	setp.ge.s32 	%p1, %r1, %r4;
-	setp.ge.s32 	%p2, %r2, %r5;
-	or.pred  	%p3, %p1, %p2;
-	setp.ge.s32 	%p4, %r3, %r6;
-	or.pred  	%p5, %p3, %p4;
-	@%p5 bra 	$L__BB0_2;
+	ld.param.u32 	%r7, [reverseX_param_4];
+	ld.param.u32 	%r6, [reverseX_param_5];
+	ld.param.u32 	%r4, [reverseX_param_2];
+	mov.u32 	%r8, %ntid.x;
+	mov.u32 	%r9, %ctaid.x;
+	mov.u32 	%r10, %tid.x;
+	mad.lo.s32 	%r1, %r9, %r8, %r10;
+	mov.u32 	%r11, %ntid.y;
+	mov.u32 	%r12, %ctaid.y;
+	mov.u32 	%r13, %tid.y;
+	mad.lo.s32 	%r2, %r12, %r11, %r13;
+	mov.u32 	%r14, %ntid.z;
+	mov.u32 	%r15, %ctaid.z;
+	mov.u32 	%r16, %tid.z;
+	mad.lo.s32 	%r3, %r15, %r14, %r16;
+	setp.eq.s32 	%p1, %r6, 1;
+	selp.u32 	%r17, 1, 0, %p1;
+	shr.u32 	%r18, %r4, 31;
+	add.s32 	%r19, %r4, %r18;
+	shr.s32 	%r20, %r19, 1;
+	add.s32 	%r21, %r20, %r17;
+	setp.ge.s32 	%p2, %r1, %r21;
+	setp.ge.s32 	%p3, %r2, %r5;
+	or.pred  	%p4, %p3, %p2;
+	setp.ge.s32 	%p5, %r3, %r7;
+	or.pred  	%p6, %p5, %p4;
+	@%p6 bra 	$L__BB0_4;
 
-	cvta.to.global.u64 	%rd3, %rd1;
-	cvta.to.global.u64 	%rd4, %rd2;
-	shl.b32 	%r16, %r1, 1;
-	shl.b32 	%r17, %r4, 2;
-	sub.s32 	%r18, %r17, %r16;
-	mad.lo.s32 	%r19, %r3, %r5, %r2;
-	mul.lo.s32 	%r20, %r19, %r17;
-	add.s32 	%r21, %r18, %r20;
-	add.s32 	%r22, %r20, %r16;
-	add.s32 	%r23, %r21, -2;
-	mul.wide.s32 	%rd5, %r22, 4;
-	add.s64 	%rd6, %rd4, %rd5;
-	ld.global.nc.f32 	%f1, [%rd6];
-	ld.global.nc.f32 	%f2, [%rd6+4];
-	mul.wide.s32 	%rd7, %r23, 4;
-	add.s64 	%rd8, %rd4, %rd7;
-	ld.global.nc.f32 	%f3, [%rd8];
-	ld.global.nc.f32 	%f4, [%rd8+4];
-	add.s64 	%rd9, %rd3, %rd5;
-	st.global.f32 	[%rd9], %f3;
-	st.global.f32 	[%rd9+4], %f4;
-	add.s64 	%rd10, %rd3, %rd7;
-	st.global.f32 	[%rd10], %f1;
-	st.global.f32 	[%rd10+4], %f2;
+	cvta.to.global.u64 	%rd5, %rd3;
+	cvta.to.global.u64 	%rd6, %rd4;
+	sub.s32 	%r22, %r4, %r1;
+	shl.b32 	%r23, %r22, 1;
+	mad.lo.s32 	%r24, %r3, %r5, %r2;
+	mul.lo.s32 	%r25, %r4, %r24;
+	shl.b32 	%r26, %r25, 1;
+	add.s32 	%r27, %r23, %r26;
+	selp.b32 	%r28, %r4, -1, %p1;
+	shl.b32 	%r29, %r1, 1;
+	add.s32 	%r30, %r26, %r29;
+	add.s32 	%r31, %r27, -2;
+	mul.wide.s32 	%rd7, %r30, 4;
+	add.s64 	%rd8, %rd6, %rd7;
+	ld.global.nc.f32 	%f1, [%rd8];
+	ld.global.nc.f32 	%f2, [%rd8+4];
+	mul.wide.s32 	%rd9, %r31, 4;
+	add.s64 	%rd10, %rd6, %rd9;
+	ld.global.nc.f32 	%f3, [%rd10];
+	ld.global.nc.f32 	%f4, [%rd10+4];
+	setp.eq.s32 	%p8, %r29, %r28;
+	add.s64 	%rd1, %rd5, %rd7;
+	add.s64 	%rd2, %rd5, %rd9;
+	@%p8 bra 	$L__BB0_3;
+	bra.uni 	$L__BB0_2;
+
+$L__BB0_3:
+	st.global.f32 	[%rd1], %f1;
+	st.global.f32 	[%rd1+4], %f2;
+	st.global.f32 	[%rd2], %f3;
+	st.global.f32 	[%rd2+4], %f4;
+	bra.uni 	$L__BB0_4;
 
 $L__BB0_2:
+	st.global.f32 	[%rd1], %f3;
+	st.global.f32 	[%rd1+4], %f4;
+	st.global.f32 	[%rd2], %f1;
+	st.global.f32 	[%rd2+4], %f2;
+
+$L__BB0_4:
 	ret;
 
 }
 
 `
 	reverseX_ptx_60 = `
-.version 8.2
+.version 8.5
 .target sm_60
 .address_size 64
 
@@ -322,72 +391,94 @@ $L__BB0_2:
 	.param .u64 reverseX_param_1,
 	.param .u32 reverseX_param_2,
 	.param .u32 reverseX_param_3,
-	.param .u32 reverseX_param_4
+	.param .u32 reverseX_param_4,
+	.param .u32 reverseX_param_5
 )
 {
-	.reg .pred 	%p<6>;
+	.reg .pred 	%p<9>;
 	.reg .f32 	%f<5>;
-	.reg .b32 	%r<24>;
+	.reg .b32 	%r<32>;
 	.reg .b64 	%rd<11>;
 
 
-	ld.param.u64 	%rd1, [reverseX_param_0];
-	ld.param.u64 	%rd2, [reverseX_param_1];
-	ld.param.u32 	%r4, [reverseX_param_2];
+	ld.param.u64 	%rd3, [reverseX_param_0];
+	ld.param.u64 	%rd4, [reverseX_param_1];
 	ld.param.u32 	%r5, [reverseX_param_3];
-	ld.param.u32 	%r6, [reverseX_param_4];
-	mov.u32 	%r7, %ntid.x;
-	mov.u32 	%r8, %ctaid.x;
-	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r8, %r7, %r9;
-	mov.u32 	%r10, %ntid.y;
-	mov.u32 	%r11, %ctaid.y;
-	mov.u32 	%r12, %tid.y;
-	mad.lo.s32 	%r2, %r11, %r10, %r12;
-	mov.u32 	%r13, %ntid.z;
-	mov.u32 	%r14, %ctaid.z;
-	mov.u32 	%r15, %tid.z;
-	mad.lo.s32 	%r3, %r14, %r13, %r15;
-	setp.ge.s32 	%p1, %r1, %r4;
-	setp.ge.s32 	%p2, %r2, %r5;
-	or.pred  	%p3, %p1, %p2;
-	setp.ge.s32 	%p4, %r3, %r6;
-	or.pred  	%p5, %p3, %p4;
-	@%p5 bra 	$L__BB0_2;
+	ld.param.u32 	%r7, [reverseX_param_4];
+	ld.param.u32 	%r6, [reverseX_param_5];
+	ld.param.u32 	%r4, [reverseX_param_2];
+	mov.u32 	%r8, %ntid.x;
+	mov.u32 	%r9, %ctaid.x;
+	mov.u32 	%r10, %tid.x;
+	mad.lo.s32 	%r1, %r9, %r8, %r10;
+	mov.u32 	%r11, %ntid.y;
+	mov.u32 	%r12, %ctaid.y;
+	mov.u32 	%r13, %tid.y;
+	mad.lo.s32 	%r2, %r12, %r11, %r13;
+	mov.u32 	%r14, %ntid.z;
+	mov.u32 	%r15, %ctaid.z;
+	mov.u32 	%r16, %tid.z;
+	mad.lo.s32 	%r3, %r15, %r14, %r16;
+	setp.eq.s32 	%p1, %r6, 1;
+	selp.u32 	%r17, 1, 0, %p1;
+	shr.u32 	%r18, %r4, 31;
+	add.s32 	%r19, %r4, %r18;
+	shr.s32 	%r20, %r19, 1;
+	add.s32 	%r21, %r20, %r17;
+	setp.ge.s32 	%p2, %r1, %r21;
+	setp.ge.s32 	%p3, %r2, %r5;
+	or.pred  	%p4, %p3, %p2;
+	setp.ge.s32 	%p5, %r3, %r7;
+	or.pred  	%p6, %p5, %p4;
+	@%p6 bra 	$L__BB0_4;
 
-	cvta.to.global.u64 	%rd3, %rd1;
-	cvta.to.global.u64 	%rd4, %rd2;
-	shl.b32 	%r16, %r1, 1;
-	shl.b32 	%r17, %r4, 2;
-	sub.s32 	%r18, %r17, %r16;
-	mad.lo.s32 	%r19, %r3, %r5, %r2;
-	mul.lo.s32 	%r20, %r19, %r17;
-	add.s32 	%r21, %r18, %r20;
-	add.s32 	%r22, %r20, %r16;
-	add.s32 	%r23, %r21, -2;
-	mul.wide.s32 	%rd5, %r22, 4;
-	add.s64 	%rd6, %rd4, %rd5;
-	ld.global.nc.f32 	%f1, [%rd6];
-	ld.global.nc.f32 	%f2, [%rd6+4];
-	mul.wide.s32 	%rd7, %r23, 4;
-	add.s64 	%rd8, %rd4, %rd7;
-	ld.global.nc.f32 	%f3, [%rd8];
-	ld.global.nc.f32 	%f4, [%rd8+4];
-	add.s64 	%rd9, %rd3, %rd5;
-	st.global.f32 	[%rd9], %f3;
-	st.global.f32 	[%rd9+4], %f4;
-	add.s64 	%rd10, %rd3, %rd7;
-	st.global.f32 	[%rd10], %f1;
-	st.global.f32 	[%rd10+4], %f2;
+	cvta.to.global.u64 	%rd5, %rd3;
+	cvta.to.global.u64 	%rd6, %rd4;
+	sub.s32 	%r22, %r4, %r1;
+	shl.b32 	%r23, %r22, 1;
+	mad.lo.s32 	%r24, %r3, %r5, %r2;
+	mul.lo.s32 	%r25, %r4, %r24;
+	shl.b32 	%r26, %r25, 1;
+	add.s32 	%r27, %r23, %r26;
+	selp.b32 	%r28, %r4, -1, %p1;
+	shl.b32 	%r29, %r1, 1;
+	add.s32 	%r30, %r26, %r29;
+	add.s32 	%r31, %r27, -2;
+	mul.wide.s32 	%rd7, %r30, 4;
+	add.s64 	%rd8, %rd6, %rd7;
+	ld.global.nc.f32 	%f1, [%rd8];
+	ld.global.nc.f32 	%f2, [%rd8+4];
+	mul.wide.s32 	%rd9, %r31, 4;
+	add.s64 	%rd10, %rd6, %rd9;
+	ld.global.nc.f32 	%f3, [%rd10];
+	ld.global.nc.f32 	%f4, [%rd10+4];
+	setp.eq.s32 	%p8, %r29, %r28;
+	add.s64 	%rd1, %rd5, %rd7;
+	add.s64 	%rd2, %rd5, %rd9;
+	@%p8 bra 	$L__BB0_3;
+	bra.uni 	$L__BB0_2;
+
+$L__BB0_3:
+	st.global.f32 	[%rd1], %f1;
+	st.global.f32 	[%rd1+4], %f2;
+	st.global.f32 	[%rd2], %f3;
+	st.global.f32 	[%rd2+4], %f4;
+	bra.uni 	$L__BB0_4;
 
 $L__BB0_2:
+	st.global.f32 	[%rd1], %f3;
+	st.global.f32 	[%rd1+4], %f4;
+	st.global.f32 	[%rd2], %f1;
+	st.global.f32 	[%rd2+4], %f2;
+
+$L__BB0_4:
 	ret;
 
 }
 
 `
 	reverseX_ptx_61 = `
-.version 8.2
+.version 8.5
 .target sm_61
 .address_size 64
 
@@ -398,72 +489,94 @@ $L__BB0_2:
 	.param .u64 reverseX_param_1,
 	.param .u32 reverseX_param_2,
 	.param .u32 reverseX_param_3,
-	.param .u32 reverseX_param_4
+	.param .u32 reverseX_param_4,
+	.param .u32 reverseX_param_5
 )
 {
-	.reg .pred 	%p<6>;
+	.reg .pred 	%p<9>;
 	.reg .f32 	%f<5>;
-	.reg .b32 	%r<24>;
+	.reg .b32 	%r<32>;
 	.reg .b64 	%rd<11>;
 
 
-	ld.param.u64 	%rd1, [reverseX_param_0];
-	ld.param.u64 	%rd2, [reverseX_param_1];
-	ld.param.u32 	%r4, [reverseX_param_2];
+	ld.param.u64 	%rd3, [reverseX_param_0];
+	ld.param.u64 	%rd4, [reverseX_param_1];
 	ld.param.u32 	%r5, [reverseX_param_3];
-	ld.param.u32 	%r6, [reverseX_param_4];
-	mov.u32 	%r7, %ntid.x;
-	mov.u32 	%r8, %ctaid.x;
-	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r8, %r7, %r9;
-	mov.u32 	%r10, %ntid.y;
-	mov.u32 	%r11, %ctaid.y;
-	mov.u32 	%r12, %tid.y;
-	mad.lo.s32 	%r2, %r11, %r10, %r12;
-	mov.u32 	%r13, %ntid.z;
-	mov.u32 	%r14, %ctaid.z;
-	mov.u32 	%r15, %tid.z;
-	mad.lo.s32 	%r3, %r14, %r13, %r15;
-	setp.ge.s32 	%p1, %r1, %r4;
-	setp.ge.s32 	%p2, %r2, %r5;
-	or.pred  	%p3, %p1, %p2;
-	setp.ge.s32 	%p4, %r3, %r6;
-	or.pred  	%p5, %p3, %p4;
-	@%p5 bra 	$L__BB0_2;
+	ld.param.u32 	%r7, [reverseX_param_4];
+	ld.param.u32 	%r6, [reverseX_param_5];
+	ld.param.u32 	%r4, [reverseX_param_2];
+	mov.u32 	%r8, %ntid.x;
+	mov.u32 	%r9, %ctaid.x;
+	mov.u32 	%r10, %tid.x;
+	mad.lo.s32 	%r1, %r9, %r8, %r10;
+	mov.u32 	%r11, %ntid.y;
+	mov.u32 	%r12, %ctaid.y;
+	mov.u32 	%r13, %tid.y;
+	mad.lo.s32 	%r2, %r12, %r11, %r13;
+	mov.u32 	%r14, %ntid.z;
+	mov.u32 	%r15, %ctaid.z;
+	mov.u32 	%r16, %tid.z;
+	mad.lo.s32 	%r3, %r15, %r14, %r16;
+	setp.eq.s32 	%p1, %r6, 1;
+	selp.u32 	%r17, 1, 0, %p1;
+	shr.u32 	%r18, %r4, 31;
+	add.s32 	%r19, %r4, %r18;
+	shr.s32 	%r20, %r19, 1;
+	add.s32 	%r21, %r20, %r17;
+	setp.ge.s32 	%p2, %r1, %r21;
+	setp.ge.s32 	%p3, %r2, %r5;
+	or.pred  	%p4, %p3, %p2;
+	setp.ge.s32 	%p5, %r3, %r7;
+	or.pred  	%p6, %p5, %p4;
+	@%p6 bra 	$L__BB0_4;
 
-	cvta.to.global.u64 	%rd3, %rd1;
-	cvta.to.global.u64 	%rd4, %rd2;
-	shl.b32 	%r16, %r1, 1;
-	shl.b32 	%r17, %r4, 2;
-	sub.s32 	%r18, %r17, %r16;
-	mad.lo.s32 	%r19, %r3, %r5, %r2;
-	mul.lo.s32 	%r20, %r19, %r17;
-	add.s32 	%r21, %r18, %r20;
-	add.s32 	%r22, %r20, %r16;
-	add.s32 	%r23, %r21, -2;
-	mul.wide.s32 	%rd5, %r22, 4;
-	add.s64 	%rd6, %rd4, %rd5;
-	ld.global.nc.f32 	%f1, [%rd6];
-	ld.global.nc.f32 	%f2, [%rd6+4];
-	mul.wide.s32 	%rd7, %r23, 4;
-	add.s64 	%rd8, %rd4, %rd7;
-	ld.global.nc.f32 	%f3, [%rd8];
-	ld.global.nc.f32 	%f4, [%rd8+4];
-	add.s64 	%rd9, %rd3, %rd5;
-	st.global.f32 	[%rd9], %f3;
-	st.global.f32 	[%rd9+4], %f4;
-	add.s64 	%rd10, %rd3, %rd7;
-	st.global.f32 	[%rd10], %f1;
-	st.global.f32 	[%rd10+4], %f2;
+	cvta.to.global.u64 	%rd5, %rd3;
+	cvta.to.global.u64 	%rd6, %rd4;
+	sub.s32 	%r22, %r4, %r1;
+	shl.b32 	%r23, %r22, 1;
+	mad.lo.s32 	%r24, %r3, %r5, %r2;
+	mul.lo.s32 	%r25, %r4, %r24;
+	shl.b32 	%r26, %r25, 1;
+	add.s32 	%r27, %r23, %r26;
+	selp.b32 	%r28, %r4, -1, %p1;
+	shl.b32 	%r29, %r1, 1;
+	add.s32 	%r30, %r26, %r29;
+	add.s32 	%r31, %r27, -2;
+	mul.wide.s32 	%rd7, %r30, 4;
+	add.s64 	%rd8, %rd6, %rd7;
+	ld.global.nc.f32 	%f1, [%rd8];
+	ld.global.nc.f32 	%f2, [%rd8+4];
+	mul.wide.s32 	%rd9, %r31, 4;
+	add.s64 	%rd10, %rd6, %rd9;
+	ld.global.nc.f32 	%f3, [%rd10];
+	ld.global.nc.f32 	%f4, [%rd10+4];
+	setp.eq.s32 	%p8, %r29, %r28;
+	add.s64 	%rd1, %rd5, %rd7;
+	add.s64 	%rd2, %rd5, %rd9;
+	@%p8 bra 	$L__BB0_3;
+	bra.uni 	$L__BB0_2;
+
+$L__BB0_3:
+	st.global.f32 	[%rd1], %f1;
+	st.global.f32 	[%rd1+4], %f2;
+	st.global.f32 	[%rd2], %f3;
+	st.global.f32 	[%rd2+4], %f4;
+	bra.uni 	$L__BB0_4;
 
 $L__BB0_2:
+	st.global.f32 	[%rd1], %f3;
+	st.global.f32 	[%rd1+4], %f4;
+	st.global.f32 	[%rd2], %f1;
+	st.global.f32 	[%rd2+4], %f2;
+
+$L__BB0_4:
 	ret;
 
 }
 
 `
 	reverseX_ptx_62 = `
-.version 8.2
+.version 8.5
 .target sm_62
 .address_size 64
 
@@ -474,72 +587,94 @@ $L__BB0_2:
 	.param .u64 reverseX_param_1,
 	.param .u32 reverseX_param_2,
 	.param .u32 reverseX_param_3,
-	.param .u32 reverseX_param_4
+	.param .u32 reverseX_param_4,
+	.param .u32 reverseX_param_5
 )
 {
-	.reg .pred 	%p<6>;
+	.reg .pred 	%p<9>;
 	.reg .f32 	%f<5>;
-	.reg .b32 	%r<24>;
+	.reg .b32 	%r<32>;
 	.reg .b64 	%rd<11>;
 
 
-	ld.param.u64 	%rd1, [reverseX_param_0];
-	ld.param.u64 	%rd2, [reverseX_param_1];
-	ld.param.u32 	%r4, [reverseX_param_2];
+	ld.param.u64 	%rd3, [reverseX_param_0];
+	ld.param.u64 	%rd4, [reverseX_param_1];
 	ld.param.u32 	%r5, [reverseX_param_3];
-	ld.param.u32 	%r6, [reverseX_param_4];
-	mov.u32 	%r7, %ntid.x;
-	mov.u32 	%r8, %ctaid.x;
-	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r8, %r7, %r9;
-	mov.u32 	%r10, %ntid.y;
-	mov.u32 	%r11, %ctaid.y;
-	mov.u32 	%r12, %tid.y;
-	mad.lo.s32 	%r2, %r11, %r10, %r12;
-	mov.u32 	%r13, %ntid.z;
-	mov.u32 	%r14, %ctaid.z;
-	mov.u32 	%r15, %tid.z;
-	mad.lo.s32 	%r3, %r14, %r13, %r15;
-	setp.ge.s32 	%p1, %r1, %r4;
-	setp.ge.s32 	%p2, %r2, %r5;
-	or.pred  	%p3, %p1, %p2;
-	setp.ge.s32 	%p4, %r3, %r6;
-	or.pred  	%p5, %p3, %p4;
-	@%p5 bra 	$L__BB0_2;
+	ld.param.u32 	%r7, [reverseX_param_4];
+	ld.param.u32 	%r6, [reverseX_param_5];
+	ld.param.u32 	%r4, [reverseX_param_2];
+	mov.u32 	%r8, %ntid.x;
+	mov.u32 	%r9, %ctaid.x;
+	mov.u32 	%r10, %tid.x;
+	mad.lo.s32 	%r1, %r9, %r8, %r10;
+	mov.u32 	%r11, %ntid.y;
+	mov.u32 	%r12, %ctaid.y;
+	mov.u32 	%r13, %tid.y;
+	mad.lo.s32 	%r2, %r12, %r11, %r13;
+	mov.u32 	%r14, %ntid.z;
+	mov.u32 	%r15, %ctaid.z;
+	mov.u32 	%r16, %tid.z;
+	mad.lo.s32 	%r3, %r15, %r14, %r16;
+	setp.eq.s32 	%p1, %r6, 1;
+	selp.u32 	%r17, 1, 0, %p1;
+	shr.u32 	%r18, %r4, 31;
+	add.s32 	%r19, %r4, %r18;
+	shr.s32 	%r20, %r19, 1;
+	add.s32 	%r21, %r20, %r17;
+	setp.ge.s32 	%p2, %r1, %r21;
+	setp.ge.s32 	%p3, %r2, %r5;
+	or.pred  	%p4, %p3, %p2;
+	setp.ge.s32 	%p5, %r3, %r7;
+	or.pred  	%p6, %p5, %p4;
+	@%p6 bra 	$L__BB0_4;
 
-	cvta.to.global.u64 	%rd3, %rd1;
-	cvta.to.global.u64 	%rd4, %rd2;
-	shl.b32 	%r16, %r1, 1;
-	shl.b32 	%r17, %r4, 2;
-	sub.s32 	%r18, %r17, %r16;
-	mad.lo.s32 	%r19, %r3, %r5, %r2;
-	mul.lo.s32 	%r20, %r19, %r17;
-	add.s32 	%r21, %r18, %r20;
-	add.s32 	%r22, %r20, %r16;
-	add.s32 	%r23, %r21, -2;
-	mul.wide.s32 	%rd5, %r22, 4;
-	add.s64 	%rd6, %rd4, %rd5;
-	ld.global.nc.f32 	%f1, [%rd6];
-	ld.global.nc.f32 	%f2, [%rd6+4];
-	mul.wide.s32 	%rd7, %r23, 4;
-	add.s64 	%rd8, %rd4, %rd7;
-	ld.global.nc.f32 	%f3, [%rd8];
-	ld.global.nc.f32 	%f4, [%rd8+4];
-	add.s64 	%rd9, %rd3, %rd5;
-	st.global.f32 	[%rd9], %f3;
-	st.global.f32 	[%rd9+4], %f4;
-	add.s64 	%rd10, %rd3, %rd7;
-	st.global.f32 	[%rd10], %f1;
-	st.global.f32 	[%rd10+4], %f2;
+	cvta.to.global.u64 	%rd5, %rd3;
+	cvta.to.global.u64 	%rd6, %rd4;
+	sub.s32 	%r22, %r4, %r1;
+	shl.b32 	%r23, %r22, 1;
+	mad.lo.s32 	%r24, %r3, %r5, %r2;
+	mul.lo.s32 	%r25, %r4, %r24;
+	shl.b32 	%r26, %r25, 1;
+	add.s32 	%r27, %r23, %r26;
+	selp.b32 	%r28, %r4, -1, %p1;
+	shl.b32 	%r29, %r1, 1;
+	add.s32 	%r30, %r26, %r29;
+	add.s32 	%r31, %r27, -2;
+	mul.wide.s32 	%rd7, %r30, 4;
+	add.s64 	%rd8, %rd6, %rd7;
+	ld.global.nc.f32 	%f1, [%rd8];
+	ld.global.nc.f32 	%f2, [%rd8+4];
+	mul.wide.s32 	%rd9, %r31, 4;
+	add.s64 	%rd10, %rd6, %rd9;
+	ld.global.nc.f32 	%f3, [%rd10];
+	ld.global.nc.f32 	%f4, [%rd10+4];
+	setp.eq.s32 	%p8, %r29, %r28;
+	add.s64 	%rd1, %rd5, %rd7;
+	add.s64 	%rd2, %rd5, %rd9;
+	@%p8 bra 	$L__BB0_3;
+	bra.uni 	$L__BB0_2;
+
+$L__BB0_3:
+	st.global.f32 	[%rd1], %f1;
+	st.global.f32 	[%rd1+4], %f2;
+	st.global.f32 	[%rd2], %f3;
+	st.global.f32 	[%rd2+4], %f4;
+	bra.uni 	$L__BB0_4;
 
 $L__BB0_2:
+	st.global.f32 	[%rd1], %f3;
+	st.global.f32 	[%rd1+4], %f4;
+	st.global.f32 	[%rd2], %f1;
+	st.global.f32 	[%rd2+4], %f2;
+
+$L__BB0_4:
 	ret;
 
 }
 
 `
 	reverseX_ptx_70 = `
-.version 8.2
+.version 8.5
 .target sm_70
 .address_size 64
 
@@ -550,72 +685,94 @@ $L__BB0_2:
 	.param .u64 reverseX_param_1,
 	.param .u32 reverseX_param_2,
 	.param .u32 reverseX_param_3,
-	.param .u32 reverseX_param_4
+	.param .u32 reverseX_param_4,
+	.param .u32 reverseX_param_5
 )
 {
-	.reg .pred 	%p<6>;
+	.reg .pred 	%p<9>;
 	.reg .f32 	%f<5>;
-	.reg .b32 	%r<24>;
+	.reg .b32 	%r<32>;
 	.reg .b64 	%rd<11>;
 
 
-	ld.param.u64 	%rd1, [reverseX_param_0];
-	ld.param.u64 	%rd2, [reverseX_param_1];
-	ld.param.u32 	%r4, [reverseX_param_2];
+	ld.param.u64 	%rd3, [reverseX_param_0];
+	ld.param.u64 	%rd4, [reverseX_param_1];
 	ld.param.u32 	%r5, [reverseX_param_3];
-	ld.param.u32 	%r6, [reverseX_param_4];
-	mov.u32 	%r7, %ntid.x;
-	mov.u32 	%r8, %ctaid.x;
-	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r8, %r7, %r9;
-	mov.u32 	%r10, %ntid.y;
-	mov.u32 	%r11, %ctaid.y;
-	mov.u32 	%r12, %tid.y;
-	mad.lo.s32 	%r2, %r11, %r10, %r12;
-	mov.u32 	%r13, %ntid.z;
-	mov.u32 	%r14, %ctaid.z;
-	mov.u32 	%r15, %tid.z;
-	mad.lo.s32 	%r3, %r14, %r13, %r15;
-	setp.ge.s32 	%p1, %r1, %r4;
-	setp.ge.s32 	%p2, %r2, %r5;
-	or.pred  	%p3, %p1, %p2;
-	setp.ge.s32 	%p4, %r3, %r6;
-	or.pred  	%p5, %p3, %p4;
-	@%p5 bra 	$L__BB0_2;
+	ld.param.u32 	%r7, [reverseX_param_4];
+	ld.param.u32 	%r6, [reverseX_param_5];
+	ld.param.u32 	%r4, [reverseX_param_2];
+	mov.u32 	%r8, %ntid.x;
+	mov.u32 	%r9, %ctaid.x;
+	mov.u32 	%r10, %tid.x;
+	mad.lo.s32 	%r1, %r9, %r8, %r10;
+	mov.u32 	%r11, %ntid.y;
+	mov.u32 	%r12, %ctaid.y;
+	mov.u32 	%r13, %tid.y;
+	mad.lo.s32 	%r2, %r12, %r11, %r13;
+	mov.u32 	%r14, %ntid.z;
+	mov.u32 	%r15, %ctaid.z;
+	mov.u32 	%r16, %tid.z;
+	mad.lo.s32 	%r3, %r15, %r14, %r16;
+	setp.eq.s32 	%p1, %r6, 1;
+	selp.u32 	%r17, 1, 0, %p1;
+	shr.u32 	%r18, %r4, 31;
+	add.s32 	%r19, %r4, %r18;
+	shr.s32 	%r20, %r19, 1;
+	add.s32 	%r21, %r20, %r17;
+	setp.ge.s32 	%p2, %r1, %r21;
+	setp.ge.s32 	%p3, %r2, %r5;
+	or.pred  	%p4, %p3, %p2;
+	setp.ge.s32 	%p5, %r3, %r7;
+	or.pred  	%p6, %p5, %p4;
+	@%p6 bra 	$L__BB0_4;
 
-	cvta.to.global.u64 	%rd3, %rd1;
-	cvta.to.global.u64 	%rd4, %rd2;
-	shl.b32 	%r16, %r1, 1;
-	shl.b32 	%r17, %r4, 2;
-	sub.s32 	%r18, %r17, %r16;
-	mad.lo.s32 	%r19, %r3, %r5, %r2;
-	mul.lo.s32 	%r20, %r19, %r17;
-	add.s32 	%r21, %r18, %r20;
-	add.s32 	%r22, %r20, %r16;
-	add.s32 	%r23, %r21, -2;
-	mul.wide.s32 	%rd5, %r22, 4;
-	add.s64 	%rd6, %rd4, %rd5;
-	ld.global.nc.f32 	%f1, [%rd6];
-	ld.global.nc.f32 	%f2, [%rd6+4];
-	mul.wide.s32 	%rd7, %r23, 4;
-	add.s64 	%rd8, %rd4, %rd7;
-	ld.global.nc.f32 	%f3, [%rd8];
-	ld.global.nc.f32 	%f4, [%rd8+4];
-	add.s64 	%rd9, %rd3, %rd5;
-	st.global.f32 	[%rd9], %f3;
-	st.global.f32 	[%rd9+4], %f4;
-	add.s64 	%rd10, %rd3, %rd7;
-	st.global.f32 	[%rd10], %f1;
-	st.global.f32 	[%rd10+4], %f2;
+	cvta.to.global.u64 	%rd5, %rd3;
+	cvta.to.global.u64 	%rd6, %rd4;
+	sub.s32 	%r22, %r4, %r1;
+	shl.b32 	%r23, %r22, 1;
+	mad.lo.s32 	%r24, %r3, %r5, %r2;
+	mul.lo.s32 	%r25, %r4, %r24;
+	shl.b32 	%r26, %r25, 1;
+	add.s32 	%r27, %r23, %r26;
+	selp.b32 	%r28, %r4, -1, %p1;
+	shl.b32 	%r29, %r1, 1;
+	add.s32 	%r30, %r26, %r29;
+	add.s32 	%r31, %r27, -2;
+	mul.wide.s32 	%rd7, %r30, 4;
+	add.s64 	%rd8, %rd6, %rd7;
+	ld.global.nc.f32 	%f1, [%rd8];
+	ld.global.nc.f32 	%f2, [%rd8+4];
+	mul.wide.s32 	%rd9, %r31, 4;
+	add.s64 	%rd10, %rd6, %rd9;
+	ld.global.nc.f32 	%f3, [%rd10];
+	ld.global.nc.f32 	%f4, [%rd10+4];
+	setp.eq.s32 	%p8, %r29, %r28;
+	add.s64 	%rd1, %rd5, %rd7;
+	add.s64 	%rd2, %rd5, %rd9;
+	@%p8 bra 	$L__BB0_3;
+	bra.uni 	$L__BB0_2;
+
+$L__BB0_3:
+	st.global.f32 	[%rd1], %f1;
+	st.global.f32 	[%rd1+4], %f2;
+	st.global.f32 	[%rd2], %f3;
+	st.global.f32 	[%rd2+4], %f4;
+	bra.uni 	$L__BB0_4;
 
 $L__BB0_2:
+	st.global.f32 	[%rd1], %f3;
+	st.global.f32 	[%rd1+4], %f4;
+	st.global.f32 	[%rd2], %f1;
+	st.global.f32 	[%rd2+4], %f2;
+
+$L__BB0_4:
 	ret;
 
 }
 
 `
 	reverseX_ptx_72 = `
-.version 8.2
+.version 8.5
 .target sm_72
 .address_size 64
 
@@ -626,72 +783,94 @@ $L__BB0_2:
 	.param .u64 reverseX_param_1,
 	.param .u32 reverseX_param_2,
 	.param .u32 reverseX_param_3,
-	.param .u32 reverseX_param_4
+	.param .u32 reverseX_param_4,
+	.param .u32 reverseX_param_5
 )
 {
-	.reg .pred 	%p<6>;
+	.reg .pred 	%p<9>;
 	.reg .f32 	%f<5>;
-	.reg .b32 	%r<24>;
+	.reg .b32 	%r<32>;
 	.reg .b64 	%rd<11>;
 
 
-	ld.param.u64 	%rd1, [reverseX_param_0];
-	ld.param.u64 	%rd2, [reverseX_param_1];
-	ld.param.u32 	%r4, [reverseX_param_2];
+	ld.param.u64 	%rd3, [reverseX_param_0];
+	ld.param.u64 	%rd4, [reverseX_param_1];
 	ld.param.u32 	%r5, [reverseX_param_3];
-	ld.param.u32 	%r6, [reverseX_param_4];
-	mov.u32 	%r7, %ntid.x;
-	mov.u32 	%r8, %ctaid.x;
-	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r8, %r7, %r9;
-	mov.u32 	%r10, %ntid.y;
-	mov.u32 	%r11, %ctaid.y;
-	mov.u32 	%r12, %tid.y;
-	mad.lo.s32 	%r2, %r11, %r10, %r12;
-	mov.u32 	%r13, %ntid.z;
-	mov.u32 	%r14, %ctaid.z;
-	mov.u32 	%r15, %tid.z;
-	mad.lo.s32 	%r3, %r14, %r13, %r15;
-	setp.ge.s32 	%p1, %r1, %r4;
-	setp.ge.s32 	%p2, %r2, %r5;
-	or.pred  	%p3, %p1, %p2;
-	setp.ge.s32 	%p4, %r3, %r6;
-	or.pred  	%p5, %p3, %p4;
-	@%p5 bra 	$L__BB0_2;
+	ld.param.u32 	%r7, [reverseX_param_4];
+	ld.param.u32 	%r6, [reverseX_param_5];
+	ld.param.u32 	%r4, [reverseX_param_2];
+	mov.u32 	%r8, %ntid.x;
+	mov.u32 	%r9, %ctaid.x;
+	mov.u32 	%r10, %tid.x;
+	mad.lo.s32 	%r1, %r9, %r8, %r10;
+	mov.u32 	%r11, %ntid.y;
+	mov.u32 	%r12, %ctaid.y;
+	mov.u32 	%r13, %tid.y;
+	mad.lo.s32 	%r2, %r12, %r11, %r13;
+	mov.u32 	%r14, %ntid.z;
+	mov.u32 	%r15, %ctaid.z;
+	mov.u32 	%r16, %tid.z;
+	mad.lo.s32 	%r3, %r15, %r14, %r16;
+	setp.eq.s32 	%p1, %r6, 1;
+	selp.u32 	%r17, 1, 0, %p1;
+	shr.u32 	%r18, %r4, 31;
+	add.s32 	%r19, %r4, %r18;
+	shr.s32 	%r20, %r19, 1;
+	add.s32 	%r21, %r20, %r17;
+	setp.ge.s32 	%p2, %r1, %r21;
+	setp.ge.s32 	%p3, %r2, %r5;
+	or.pred  	%p4, %p3, %p2;
+	setp.ge.s32 	%p5, %r3, %r7;
+	or.pred  	%p6, %p5, %p4;
+	@%p6 bra 	$L__BB0_4;
 
-	cvta.to.global.u64 	%rd3, %rd1;
-	cvta.to.global.u64 	%rd4, %rd2;
-	shl.b32 	%r16, %r1, 1;
-	shl.b32 	%r17, %r4, 2;
-	sub.s32 	%r18, %r17, %r16;
-	mad.lo.s32 	%r19, %r3, %r5, %r2;
-	mul.lo.s32 	%r20, %r19, %r17;
-	add.s32 	%r21, %r18, %r20;
-	add.s32 	%r22, %r20, %r16;
-	add.s32 	%r23, %r21, -2;
-	mul.wide.s32 	%rd5, %r22, 4;
-	add.s64 	%rd6, %rd4, %rd5;
-	ld.global.nc.f32 	%f1, [%rd6];
-	ld.global.nc.f32 	%f2, [%rd6+4];
-	mul.wide.s32 	%rd7, %r23, 4;
-	add.s64 	%rd8, %rd4, %rd7;
-	ld.global.nc.f32 	%f3, [%rd8];
-	ld.global.nc.f32 	%f4, [%rd8+4];
-	add.s64 	%rd9, %rd3, %rd5;
-	st.global.f32 	[%rd9], %f3;
-	st.global.f32 	[%rd9+4], %f4;
-	add.s64 	%rd10, %rd3, %rd7;
-	st.global.f32 	[%rd10], %f1;
-	st.global.f32 	[%rd10+4], %f2;
+	cvta.to.global.u64 	%rd5, %rd3;
+	cvta.to.global.u64 	%rd6, %rd4;
+	sub.s32 	%r22, %r4, %r1;
+	shl.b32 	%r23, %r22, 1;
+	mad.lo.s32 	%r24, %r3, %r5, %r2;
+	mul.lo.s32 	%r25, %r4, %r24;
+	shl.b32 	%r26, %r25, 1;
+	add.s32 	%r27, %r23, %r26;
+	selp.b32 	%r28, %r4, -1, %p1;
+	shl.b32 	%r29, %r1, 1;
+	add.s32 	%r30, %r26, %r29;
+	add.s32 	%r31, %r27, -2;
+	mul.wide.s32 	%rd7, %r30, 4;
+	add.s64 	%rd8, %rd6, %rd7;
+	ld.global.nc.f32 	%f1, [%rd8];
+	ld.global.nc.f32 	%f2, [%rd8+4];
+	mul.wide.s32 	%rd9, %r31, 4;
+	add.s64 	%rd10, %rd6, %rd9;
+	ld.global.nc.f32 	%f3, [%rd10];
+	ld.global.nc.f32 	%f4, [%rd10+4];
+	setp.eq.s32 	%p8, %r29, %r28;
+	add.s64 	%rd1, %rd5, %rd7;
+	add.s64 	%rd2, %rd5, %rd9;
+	@%p8 bra 	$L__BB0_3;
+	bra.uni 	$L__BB0_2;
+
+$L__BB0_3:
+	st.global.f32 	[%rd1], %f1;
+	st.global.f32 	[%rd1+4], %f2;
+	st.global.f32 	[%rd2], %f3;
+	st.global.f32 	[%rd2+4], %f4;
+	bra.uni 	$L__BB0_4;
 
 $L__BB0_2:
+	st.global.f32 	[%rd1], %f3;
+	st.global.f32 	[%rd1+4], %f4;
+	st.global.f32 	[%rd2], %f1;
+	st.global.f32 	[%rd2+4], %f2;
+
+$L__BB0_4:
 	ret;
 
 }
 
 `
 	reverseX_ptx_75 = `
-.version 8.2
+.version 8.5
 .target sm_75
 .address_size 64
 
@@ -702,72 +881,94 @@ $L__BB0_2:
 	.param .u64 reverseX_param_1,
 	.param .u32 reverseX_param_2,
 	.param .u32 reverseX_param_3,
-	.param .u32 reverseX_param_4
+	.param .u32 reverseX_param_4,
+	.param .u32 reverseX_param_5
 )
 {
-	.reg .pred 	%p<6>;
+	.reg .pred 	%p<9>;
 	.reg .f32 	%f<5>;
-	.reg .b32 	%r<24>;
+	.reg .b32 	%r<32>;
 	.reg .b64 	%rd<11>;
 
 
-	ld.param.u64 	%rd1, [reverseX_param_0];
-	ld.param.u64 	%rd2, [reverseX_param_1];
-	ld.param.u32 	%r4, [reverseX_param_2];
+	ld.param.u64 	%rd3, [reverseX_param_0];
+	ld.param.u64 	%rd4, [reverseX_param_1];
 	ld.param.u32 	%r5, [reverseX_param_3];
-	ld.param.u32 	%r6, [reverseX_param_4];
-	mov.u32 	%r7, %ntid.x;
-	mov.u32 	%r8, %ctaid.x;
-	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r8, %r7, %r9;
-	mov.u32 	%r10, %ntid.y;
-	mov.u32 	%r11, %ctaid.y;
-	mov.u32 	%r12, %tid.y;
-	mad.lo.s32 	%r2, %r11, %r10, %r12;
-	mov.u32 	%r13, %ntid.z;
-	mov.u32 	%r14, %ctaid.z;
-	mov.u32 	%r15, %tid.z;
-	mad.lo.s32 	%r3, %r14, %r13, %r15;
-	setp.ge.s32 	%p1, %r1, %r4;
-	setp.ge.s32 	%p2, %r2, %r5;
-	or.pred  	%p3, %p1, %p2;
-	setp.ge.s32 	%p4, %r3, %r6;
-	or.pred  	%p5, %p3, %p4;
-	@%p5 bra 	$L__BB0_2;
+	ld.param.u32 	%r7, [reverseX_param_4];
+	ld.param.u32 	%r6, [reverseX_param_5];
+	ld.param.u32 	%r4, [reverseX_param_2];
+	mov.u32 	%r8, %ntid.x;
+	mov.u32 	%r9, %ctaid.x;
+	mov.u32 	%r10, %tid.x;
+	mad.lo.s32 	%r1, %r9, %r8, %r10;
+	mov.u32 	%r11, %ntid.y;
+	mov.u32 	%r12, %ctaid.y;
+	mov.u32 	%r13, %tid.y;
+	mad.lo.s32 	%r2, %r12, %r11, %r13;
+	mov.u32 	%r14, %ntid.z;
+	mov.u32 	%r15, %ctaid.z;
+	mov.u32 	%r16, %tid.z;
+	mad.lo.s32 	%r3, %r15, %r14, %r16;
+	setp.eq.s32 	%p1, %r6, 1;
+	selp.u32 	%r17, 1, 0, %p1;
+	shr.u32 	%r18, %r4, 31;
+	add.s32 	%r19, %r4, %r18;
+	shr.s32 	%r20, %r19, 1;
+	add.s32 	%r21, %r20, %r17;
+	setp.ge.s32 	%p2, %r1, %r21;
+	setp.ge.s32 	%p3, %r2, %r5;
+	or.pred  	%p4, %p3, %p2;
+	setp.ge.s32 	%p5, %r3, %r7;
+	or.pred  	%p6, %p5, %p4;
+	@%p6 bra 	$L__BB0_4;
 
-	cvta.to.global.u64 	%rd3, %rd1;
-	cvta.to.global.u64 	%rd4, %rd2;
-	shl.b32 	%r16, %r1, 1;
-	shl.b32 	%r17, %r4, 2;
-	sub.s32 	%r18, %r17, %r16;
-	mad.lo.s32 	%r19, %r3, %r5, %r2;
-	mul.lo.s32 	%r20, %r19, %r17;
-	add.s32 	%r21, %r18, %r20;
-	add.s32 	%r22, %r20, %r16;
-	add.s32 	%r23, %r21, -2;
-	mul.wide.s32 	%rd5, %r22, 4;
-	add.s64 	%rd6, %rd4, %rd5;
-	ld.global.nc.f32 	%f1, [%rd6];
-	ld.global.nc.f32 	%f2, [%rd6+4];
-	mul.wide.s32 	%rd7, %r23, 4;
-	add.s64 	%rd8, %rd4, %rd7;
-	ld.global.nc.f32 	%f3, [%rd8];
-	ld.global.nc.f32 	%f4, [%rd8+4];
-	add.s64 	%rd9, %rd3, %rd5;
-	st.global.f32 	[%rd9], %f3;
-	st.global.f32 	[%rd9+4], %f4;
-	add.s64 	%rd10, %rd3, %rd7;
-	st.global.f32 	[%rd10], %f1;
-	st.global.f32 	[%rd10+4], %f2;
+	cvta.to.global.u64 	%rd5, %rd3;
+	cvta.to.global.u64 	%rd6, %rd4;
+	sub.s32 	%r22, %r4, %r1;
+	shl.b32 	%r23, %r22, 1;
+	mad.lo.s32 	%r24, %r3, %r5, %r2;
+	mul.lo.s32 	%r25, %r4, %r24;
+	shl.b32 	%r26, %r25, 1;
+	add.s32 	%r27, %r23, %r26;
+	selp.b32 	%r28, %r4, -1, %p1;
+	shl.b32 	%r29, %r1, 1;
+	add.s32 	%r30, %r26, %r29;
+	add.s32 	%r31, %r27, -2;
+	mul.wide.s32 	%rd7, %r30, 4;
+	add.s64 	%rd8, %rd6, %rd7;
+	ld.global.nc.f32 	%f1, [%rd8];
+	ld.global.nc.f32 	%f2, [%rd8+4];
+	mul.wide.s32 	%rd9, %r31, 4;
+	add.s64 	%rd10, %rd6, %rd9;
+	ld.global.nc.f32 	%f3, [%rd10];
+	ld.global.nc.f32 	%f4, [%rd10+4];
+	setp.eq.s32 	%p8, %r29, %r28;
+	add.s64 	%rd1, %rd5, %rd7;
+	add.s64 	%rd2, %rd5, %rd9;
+	@%p8 bra 	$L__BB0_3;
+	bra.uni 	$L__BB0_2;
+
+$L__BB0_3:
+	st.global.f32 	[%rd1], %f1;
+	st.global.f32 	[%rd1+4], %f2;
+	st.global.f32 	[%rd2], %f3;
+	st.global.f32 	[%rd2+4], %f4;
+	bra.uni 	$L__BB0_4;
 
 $L__BB0_2:
+	st.global.f32 	[%rd1], %f3;
+	st.global.f32 	[%rd1+4], %f4;
+	st.global.f32 	[%rd2], %f1;
+	st.global.f32 	[%rd2+4], %f2;
+
+$L__BB0_4:
 	ret;
 
 }
 
 `
 	reverseX_ptx_80 = `
-.version 8.2
+.version 8.5
 .target sm_80
 .address_size 64
 
@@ -778,65 +979,87 @@ $L__BB0_2:
 	.param .u64 reverseX_param_1,
 	.param .u32 reverseX_param_2,
 	.param .u32 reverseX_param_3,
-	.param .u32 reverseX_param_4
+	.param .u32 reverseX_param_4,
+	.param .u32 reverseX_param_5
 )
 {
-	.reg .pred 	%p<6>;
+	.reg .pred 	%p<9>;
 	.reg .f32 	%f<5>;
-	.reg .b32 	%r<24>;
+	.reg .b32 	%r<32>;
 	.reg .b64 	%rd<11>;
 
 
-	ld.param.u64 	%rd1, [reverseX_param_0];
-	ld.param.u64 	%rd2, [reverseX_param_1];
-	ld.param.u32 	%r4, [reverseX_param_2];
+	ld.param.u64 	%rd3, [reverseX_param_0];
+	ld.param.u64 	%rd4, [reverseX_param_1];
 	ld.param.u32 	%r5, [reverseX_param_3];
-	ld.param.u32 	%r6, [reverseX_param_4];
-	mov.u32 	%r7, %ntid.x;
-	mov.u32 	%r8, %ctaid.x;
-	mov.u32 	%r9, %tid.x;
-	mad.lo.s32 	%r1, %r8, %r7, %r9;
-	mov.u32 	%r10, %ntid.y;
-	mov.u32 	%r11, %ctaid.y;
-	mov.u32 	%r12, %tid.y;
-	mad.lo.s32 	%r2, %r11, %r10, %r12;
-	mov.u32 	%r13, %ntid.z;
-	mov.u32 	%r14, %ctaid.z;
-	mov.u32 	%r15, %tid.z;
-	mad.lo.s32 	%r3, %r14, %r13, %r15;
-	setp.ge.s32 	%p1, %r1, %r4;
-	setp.ge.s32 	%p2, %r2, %r5;
-	or.pred  	%p3, %p1, %p2;
-	setp.ge.s32 	%p4, %r3, %r6;
-	or.pred  	%p5, %p3, %p4;
-	@%p5 bra 	$L__BB0_2;
+	ld.param.u32 	%r7, [reverseX_param_4];
+	ld.param.u32 	%r6, [reverseX_param_5];
+	ld.param.u32 	%r4, [reverseX_param_2];
+	mov.u32 	%r8, %ntid.x;
+	mov.u32 	%r9, %ctaid.x;
+	mov.u32 	%r10, %tid.x;
+	mad.lo.s32 	%r1, %r9, %r8, %r10;
+	mov.u32 	%r11, %ntid.y;
+	mov.u32 	%r12, %ctaid.y;
+	mov.u32 	%r13, %tid.y;
+	mad.lo.s32 	%r2, %r12, %r11, %r13;
+	mov.u32 	%r14, %ntid.z;
+	mov.u32 	%r15, %ctaid.z;
+	mov.u32 	%r16, %tid.z;
+	mad.lo.s32 	%r3, %r15, %r14, %r16;
+	setp.eq.s32 	%p1, %r6, 1;
+	selp.u32 	%r17, 1, 0, %p1;
+	shr.u32 	%r18, %r4, 31;
+	add.s32 	%r19, %r4, %r18;
+	shr.s32 	%r20, %r19, 1;
+	add.s32 	%r21, %r20, %r17;
+	setp.ge.s32 	%p2, %r1, %r21;
+	setp.ge.s32 	%p3, %r2, %r5;
+	or.pred  	%p4, %p3, %p2;
+	setp.ge.s32 	%p5, %r3, %r7;
+	or.pred  	%p6, %p5, %p4;
+	@%p6 bra 	$L__BB0_4;
 
-	cvta.to.global.u64 	%rd3, %rd1;
-	cvta.to.global.u64 	%rd4, %rd2;
-	shl.b32 	%r16, %r1, 1;
-	shl.b32 	%r17, %r4, 2;
-	sub.s32 	%r18, %r17, %r16;
-	mad.lo.s32 	%r19, %r3, %r5, %r2;
-	mul.lo.s32 	%r20, %r19, %r17;
-	add.s32 	%r21, %r18, %r20;
-	add.s32 	%r22, %r20, %r16;
-	add.s32 	%r23, %r21, -2;
-	mul.wide.s32 	%rd5, %r22, 4;
-	add.s64 	%rd6, %rd4, %rd5;
-	ld.global.nc.f32 	%f1, [%rd6];
-	ld.global.nc.f32 	%f2, [%rd6+4];
-	mul.wide.s32 	%rd7, %r23, 4;
-	add.s64 	%rd8, %rd4, %rd7;
-	ld.global.nc.f32 	%f3, [%rd8];
-	ld.global.nc.f32 	%f4, [%rd8+4];
-	add.s64 	%rd9, %rd3, %rd5;
-	st.global.f32 	[%rd9], %f3;
-	st.global.f32 	[%rd9+4], %f4;
-	add.s64 	%rd10, %rd3, %rd7;
-	st.global.f32 	[%rd10], %f1;
-	st.global.f32 	[%rd10+4], %f2;
+	cvta.to.global.u64 	%rd5, %rd3;
+	cvta.to.global.u64 	%rd6, %rd4;
+	sub.s32 	%r22, %r4, %r1;
+	shl.b32 	%r23, %r22, 1;
+	mad.lo.s32 	%r24, %r3, %r5, %r2;
+	mul.lo.s32 	%r25, %r4, %r24;
+	shl.b32 	%r26, %r25, 1;
+	add.s32 	%r27, %r23, %r26;
+	selp.b32 	%r28, %r4, -1, %p1;
+	shl.b32 	%r29, %r1, 1;
+	add.s32 	%r30, %r26, %r29;
+	add.s32 	%r31, %r27, -2;
+	mul.wide.s32 	%rd7, %r30, 4;
+	add.s64 	%rd8, %rd6, %rd7;
+	ld.global.nc.f32 	%f1, [%rd8];
+	ld.global.nc.f32 	%f2, [%rd8+4];
+	mul.wide.s32 	%rd9, %r31, 4;
+	add.s64 	%rd10, %rd6, %rd9;
+	ld.global.nc.f32 	%f3, [%rd10];
+	ld.global.nc.f32 	%f4, [%rd10+4];
+	setp.eq.s32 	%p8, %r29, %r28;
+	add.s64 	%rd1, %rd5, %rd7;
+	add.s64 	%rd2, %rd5, %rd9;
+	@%p8 bra 	$L__BB0_3;
+	bra.uni 	$L__BB0_2;
+
+$L__BB0_3:
+	st.global.f32 	[%rd1], %f1;
+	st.global.f32 	[%rd1+4], %f2;
+	st.global.f32 	[%rd2], %f3;
+	st.global.f32 	[%rd2+4], %f4;
+	bra.uni 	$L__BB0_4;
 
 $L__BB0_2:
+	st.global.f32 	[%rd1], %f3;
+	st.global.f32 	[%rd1+4], %f4;
+	st.global.f32 	[%rd2], %f1;
+	st.global.f32 	[%rd2+4], %f2;
+
+$L__BB0_4:
 	ret;
 
 }

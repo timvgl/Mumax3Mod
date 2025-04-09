@@ -359,9 +359,9 @@ func (s *fftOperation4D) Eval() {
 
 	} else {
 		if s.kspace {
-			cuda.FFT_T_Step_MEM_Complex(FFT_T_data, FFT_T_data, dataT, float32(s.minF), float32(s.dF), float32(fftT), fmt.Sprintf("%s_%s", NameOf(s.qOP), FFTType))
+			cuda.FFT_T_Step_MEM_Complex(FFT_T_data, dataT, float32(s.minF), float32(s.dF), float32(fftT), fmt.Sprintf("%s_%s", NameOf(s.qOP), FFTType))
 		} else {
-			cuda.FFT_T_Step_MEM_Real(FFT_T_data, FFT_T_data, dataT, float32(s.minF), float32(s.dF), float32(fftT), fmt.Sprintf("%s_%s", NameOf(s.qOP), FFTType))
+			cuda.FFT_T_Step_MEM_Real(FFT_T_data, dataT, float32(s.minF), float32(s.dF), float32(fftT), fmt.Sprintf("%s_%s", NameOf(s.qOP), FFTType))
 		}
 	}
 	if FFT_T_in_mem {
@@ -407,6 +407,7 @@ func (s *fftOperation4D) SaveResults() {
 		panic("FFT_T data could not be found during export.")
 	}
 	size := FFT_T_data.Size()
+	fmt.Println("size:", size, "LengthF:", FFT_T_data.LengthF)
 	if s.polar {
 		cuda.ComplexToPolar(FFT_T_data, FFT_T_data)
 	}
