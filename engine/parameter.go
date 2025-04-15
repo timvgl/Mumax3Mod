@@ -399,14 +399,14 @@ func NewScalarParam(name, unit, desc string, children ...derived) *RegionwiseSca
 }
 
 func (p *RegionwiseScalar) RenderFunction(equation StringFunction) {
-	util.AssertMsg(strings.ToLower(p.name) != "aex" && strings.ToLower(p.name) != "dind" && strings.ToLower(p.name) != "dmi", "RenderFunction: Not available for exchange and DMI.")
+	util.AssertMsg(strings.ToLower(p.name) != "aex" && strings.ToLower(p.name) != "dind" && strings.ToLower(p.name) != "dmi" && strings.ToLower(p.name) != "temp", "RenderFunction: Not available for exchange, DMI and Temperature.")
 	util.AssertMsg(equation.IsScalar(), "RenderFunction: Need scalar function.")
 	d, timeDep := GenerateSliceFromFunctionStringTimeDep(equation, p.Mesh())
 	SetParam(p.name, ParameterSlice{start: [3]int{0, 0, 0}, end: p.Mesh().Size(), d: d, ncomp: d.NComp(), timedependent: timeDep, stringFct: equation, renderedShape: nil, inversedRenderedShape: nil})
 }
 
 func (p *RegionwiseScalar) RenderFunctionLimit(equation StringFunction, xStart, xEnd, yStart, yEnd, zStart, zEnd int) {
-	util.AssertMsg(strings.ToLower(p.name) != "aex" && strings.ToLower(p.name) != "dind" && strings.ToLower(p.name) != "dmi", "RenderFunction: Not available for exchange and DMI.")
+	util.AssertMsg(strings.ToLower(p.name) != "aex" && strings.ToLower(p.name) != "dind" && strings.ToLower(p.name) != "dmi" && strings.ToLower(p.name) != "temp", "RenderFunction: Not available for exchange and DMI and Temperature.")
 	util.AssertMsg(equation.IsScalar(), "RenderFunction: Need scalar function.")
 	n := MeshOf(p).Size()
 	util.Argument(xStart < xEnd && yStart < yEnd && zStart < zEnd)
@@ -417,7 +417,7 @@ func (p *RegionwiseScalar) RenderFunctionLimit(equation StringFunction, xStart, 
 }
 
 func (p *RegionwiseScalar) RenderFunctionShape(equation StringFunction, s Shape) {
-	util.AssertMsg(strings.ToLower(p.name) != "aex" && strings.ToLower(p.name) != "dind" && strings.ToLower(p.name) != "dmi", "RenderFunction: Not available for exchange and DMI.")
+	util.AssertMsg(strings.ToLower(p.name) != "aex" && strings.ToLower(p.name) != "dind" && strings.ToLower(p.name) != "dmi" && strings.ToLower(p.name) != "temp", "RenderFunction: Not available for exchange and DMI and Temperature.")
 	util.AssertMsg(equation.IsScalar(), "RenderFunction: Need scalar function.")
 	d, timeDep := GenerateSliceFromFunctionStringTimeDep(equation, p.Mesh())
 	dataS, dataSI := RenderShape(s)

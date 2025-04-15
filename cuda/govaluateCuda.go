@@ -689,3 +689,11 @@ func MinGovaluate(val *data.Slice) float64 {
 	}
 	return math.Sqrt(returnFloat)
 }
+
+func NegateGovaluate(dst *data.Slice, left interface{}, right *data.Slice) {
+	size := right.Size()
+	cfg := make1DConf(prod(size))
+	for c := range right.NComp() {
+		k_negateGovaluate_async(right.DevPtr(c), prod(size), cfg)
+	}
+}

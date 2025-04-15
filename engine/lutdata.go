@@ -58,6 +58,10 @@ func (p *lut) gpuLUT1() cuda.LUTPtr {
 
 // all data is 0?
 func (p *lut) isZero() bool {
+	_, ok := mapSetParam.Load(p.name)
+	if ok {
+		return false
+	}
 	v := p.cpuLUT()
 	for c := range v {
 		for i := 0; i < NREGION; i++ {

@@ -21,16 +21,17 @@ import (
 )
 
 var (
-	flag_failfast   = flag.Bool("failfast", false, "If one simulation fails, stop entire batch immediately")
-	flag_test       = flag.Bool("test", false, "Cuda test (internal)")
-	flag_version    = flag.Bool("v", true, "Print version")
-	flag_vet        = flag.Bool("vet", false, "Check input files for errors, but don't run them")
-	flag_template   = flag.Bool("template", false, "use template method from amumax")
-	flag_flat       = flag.Bool("flat", false, "flat structure for template")
-	flag_pipeline   = flag.Int("pipelineLength", 1, "")
-	flag_encapsle   = flag.Bool("encapsle", false, "")
-	flag_example    = flag.Bool("example", false, "")
-	flag_stringCode = flag.String("c", "", "")
+	flag_failfast    = flag.Bool("failfast", false, "If one simulation fails, stop entire batch immediately")
+	flag_test        = flag.Bool("test", false, "Cuda test (internal)")
+	flag_version     = flag.Bool("v", true, "Print version")
+	flag_vet         = flag.Bool("vet", false, "Check input files for errors, but don't run them")
+	flag_template    = flag.Bool("template", false, "use template method from amumax")
+	flag_flat        = flag.Bool("flat", false, "flat structure for template")
+	flag_pipeline    = flag.Int("pipelineLength", 1, "")
+	flag_encapsle    = flag.Bool("encapsle", false, "")
+	flag_example     = flag.Bool("example", false, "")
+	flag_stringCode  = flag.String("c", "", "")
+	flag_GPUTreshold = flag.Int("gputreshold", 100, "")
 	// more flags in engine/gofiles.go
 )
 
@@ -43,8 +44,9 @@ func main() {
 		vet()
 		return
 	}
-
-	cuda.Init(*engine.Flag_gpu)
+	if *flag_template && *flag_example || !*flag_template && !*flag_example {
+		cuda.Init(*engine.Flag_gpu)
+	}
 
 	cuda.Synchronous = *engine.Flag_sync
 	if *flag_version {

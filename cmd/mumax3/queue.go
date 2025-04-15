@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"strconv"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -95,6 +97,41 @@ func (s *stateTab) Finish(j job) {
 	defer s.lock.Unlock()
 	s.jobs[j.uid].port = ""
 }
+func getGPUUsage(gpu int) (int, error) {
+	// Der nvidia-smi Befehl liefert die GPU-Auslastung ohne Header und Einheiten.
+	cmd := exec.Command("nvidia-smi", "--query-gpu=utilization.gpu", "--format=csv,noheader,nounits", "-i", strconv.Itoa(gpu))
+	output, err := cmd.Output()
+	if err != nil {
+		return 0, err
+	}
+	// Entferne etwaige Leerzeichen und Zeilenumbrüche
+	s := strings.TrimSpace(string(output))
+	usage, err := strconv.Atoi(s)
+	if err != nil {
+		return 0, err
+	}
+	return usage, nil
+}
+
+func waitForLowGPUUsage(gpu int) {
+	for {
+		usage, err := getGPUUsage(gpu)
+		if err != nil {
+			fmt.Printf("And error occured during retrieve of GPU load %d: %v\n", gpu, err)
+			// Im Fehlerfall etwas warten, bevor erneut abgefragt wird.
+			time.Sleep(time.Second)
+			continue
+		}
+
+		//fmt.Printf("GPU %d: current volatility: %d%% (Threshold: %d%%)\n", gpu, usage, *flag_GPUTreshold)
+		if usage < *flag_GPUTreshold {
+			// GPU-Nutzung ist nun niedrig genug
+			break
+		}
+		// Kurze Pause, bevor erneut abgefragt wird.
+		time.Sleep(time.Second)
+	}
+}
 
 // Runs all the jobs in stateTab.
 func (s *stateTab) Run() {
@@ -126,6 +163,7 @@ func (s *stateTab) Run() {
 		go func() {
 			run(j.inFile, gpu, j.port)
 			s.Finish(j)
+			waitForLowGPUUsage(gpu)
 			idle <- gpu
 		}()
 	}
@@ -161,7 +199,6 @@ func run(inFile string, gpu int, port string) {
 		flags = append(flags, gpuFlag)
 	}
 	flags = append(flags, inFile)
-
 	cmd := exec.Command(os.Args[0], flags...)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -184,6 +221,7 @@ func initGPUs(nGpu int) chan int {
 	}
 	idle := make(chan int, nGpu)
 	for i := 0; i < nGpu; i++ {
+		waitForLowGPUUsage(i)
 		idle <- i
 	}
 	return idle

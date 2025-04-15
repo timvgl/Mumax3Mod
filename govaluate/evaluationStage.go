@@ -243,7 +243,13 @@ func orStage(left interface{}, right interface{}, parameters Parameters) (interf
 	return boolIface(left.(bool) || right.(bool)), nil
 }
 func negateStage(left interface{}, right interface{}, parameters Parameters) (interface{}, error) {
-	return -right.(float64), nil
+	rightFloat, okRight := right.(float64)
+	gpuRight, gpuRightOk := right.(*data.Slice)
+	if okRight {
+		return -rightFloat, nil
+	} else {
+		return GPUCalc(nil, gpuRight, 0, rightFloat, false, gpuRightOk, nil, nil, cuda.NegateGovaluate), nil
+	}
 }
 func invertStage(left interface{}, right interface{}, parameters Parameters) (interface{}, error) {
 	return boolIface(!right.(bool)), nil

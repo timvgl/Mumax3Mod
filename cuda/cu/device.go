@@ -4,6 +4,10 @@ package cu
 
 //#include <cuda.h>
 import "C"
+import (
+	"os/exec"
+	"strings"
+)
 
 // CUDA Device number.
 type Device int
@@ -49,8 +53,17 @@ func (dev Device) Attribute(attrib DeviceAttribute) int {
 func DeviceGetCount() int {
 	var count C.int
 	err := Result(C.cuDeviceGetCount(&count))
-	if err != SUCCESS {
-		panic(err)
+	if err.String() != "" {
+		output, execErr := exec.Command("nvidia-smi", "--query-gpu=name,memory.total", "--format=csv").CombinedOutput()
+		if execErr != nil {
+			panic(execErr)
+		}
+		outputSlc := strings.Split(string(output), "\n")
+		if len(outputSlc) < 2 {
+			return 0
+		} else {
+			return len(outputSlc[1 : len(outputSlc)-1])
+		}
 	}
 	return int(count)
 }
