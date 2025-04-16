@@ -12,6 +12,8 @@ func (w *World) compile(n ast.Node) Expr {
 		return w.compileStmt(n)
 	case ast.Expr:
 		return w.compileExpr(n)
+	case ast.Decl:
+		return w.compileDecl(n)
 	default:
 		panic(err(n.Pos(), "not allowed"))
 	}

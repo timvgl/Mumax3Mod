@@ -3,7 +3,6 @@ module github.com/mumax/3
 go 1.23.2
 
 require (
-	github.com/Knetic/govaluate v3.0.0+incompatible
 	github.com/fatih/color v1.18.0
 	github.com/google/uuid v1.3.1
 	github.com/gorilla/mux v1.8.0
@@ -13,6 +12,7 @@ require (
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/shirou/gopsutil/v3 v3.24.5
 	github.com/spf13/cobra v1.7.0
+	github.com/traefik/yaegi v0.16.1
 	github.com/vmihailenco/msgpack/v5 v5.4.1
 	golang.org/x/crypto v0.28.0
 	golang.org/x/term v0.25.0

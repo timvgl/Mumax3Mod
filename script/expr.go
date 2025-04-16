@@ -32,5 +32,7 @@ func (w *World) compileExpr(e ast.Expr) Expr {
 		return w.compileExpr(e.X)
 	case *ast.IndexExpr:
 		return w.compileIndexExpr(e)
+	case *ast.FuncLit:
+		return w.compileFuncLit(e)
 	}
 }

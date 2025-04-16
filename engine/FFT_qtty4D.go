@@ -314,6 +314,9 @@ func (s *fftOperation4D) Eval() {
 		}
 	}
 	fftT := Time
+	if interpolate {
+		fftT = float64(s.count) * s.period
+	}
 	if !FFT_T_in_mem {
 		wg := sync.WaitGroup{}
 		for core := range cores {

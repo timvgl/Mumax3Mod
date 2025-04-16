@@ -1,6 +1,7 @@
 package script
 
 import (
+	"fmt"
 	"go/ast"
 	"go/token"
 	"reflect"
@@ -13,7 +14,13 @@ func (w *World) compileAssignStmt(a *ast.AssignStmt) Expr {
 		panic(err(a.Pos(), "multiple assignment not allowed"))
 	}
 	lhs, rhs := a.Lhs[0], a.Rhs[0]
-	r := w.compileExpr(rhs)
+	var r Expr
+	switch rhs := rhs.(type) {
+	default:
+		r = w.compileExpr(rhs)
+	case *ast.FuncLit:
+		r = w.compileFuncLit(rhs)
+	}
 
 	switch a.Tok {
 	default:
@@ -41,6 +48,7 @@ func (w *World) compileDefine(a *ast.AssignStmt, lhs ast.Expr, r Expr) Expr {
 	if !ok {
 		panic(err(a.Pos(), "non-name on left side of :="))
 	}
+	fmt.Println(lhs)
 	addr := reflect.New(r.Type())
 	ok = w.safeDeclare(ident.Name, &reflectLvalue{addr.Elem()})
 	if !ok {
