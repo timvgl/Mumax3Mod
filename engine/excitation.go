@@ -63,7 +63,7 @@ type ExcitationSlice struct {
 	d                     *data.Slice
 	ncomp                 int
 	timedependent         bool
-	stringFct             StringFunction
+	renderers             []*ReadyToRenderFunction
 	renderedShape         *data.Slice
 	inversedRenderedShape *data.Slice
 }
@@ -115,8 +115,12 @@ func (p *Excitation) MSlice() cuda.MSlice {
 
 func (p *Excitation) RenderFunction(equation StringFunction) {
 	util.AssertMsg(!equation.IsScalar(), "RenderFunction: Need vector function.")
-	d, timeDep := GenerateSliceFromFunctionStringTimeDep(equation, p.Mesh())
-	SetExcitation(p.name, ExcitationSlice{start: [3]int{0, 0, 0}, end: p.Mesh().Size(), d: d, timedependent: timeDep, stringFct: equation, renderedShape: nil, inversedRenderedShape: nil})
+	renderers := make([]*ReadyToRenderFunction, 3)
+	for i := range 3 {
+		renderers[i] = RenderStringToReadyToRenderFct(equation.functions[i], p.Mesh())
+	}
+	d, timeDep := GenerateSliceFromReadyToRenderFct(renderers, p.Mesh())
+	SetExcitation(p.name, ExcitationSlice{start: [3]int{0, 0, 0}, end: p.Mesh().Size(), d: d, timedependent: timeDep, renderers: renderers, renderedShape: nil, inversedRenderedShape: nil})
 }
 
 func (p *Excitation) RenderFunctionLimit(equation StringFunction, xStart, xEnd, yStart, yEnd, zStart, zEnd int) {
@@ -125,15 +129,23 @@ func (p *Excitation) RenderFunctionLimit(equation StringFunction, xStart, xEnd, 
 	util.Argument(xStart >= 0 && yStart >= 0 && zStart >= 0)
 	util.Argument(xEnd <= n[X] && yEnd <= n[Y] && zEnd <= n[Z])
 	util.AssertMsg(!equation.IsScalar(), "RenderFunction: Need vector function.")
-	d, timeDep := GenerateSliceFromFunctionStringTimeDep(equation, p.Mesh())
-	SetExcitation(p.name, ExcitationSlice{start: [3]int{xStart, yStart, zStart}, end: [3]int{xEnd, yEnd, zEnd}, d: d, timedependent: timeDep, stringFct: equation, renderedShape: nil, inversedRenderedShape: nil})
+	renderers := make([]*ReadyToRenderFunction, 3)
+	for i := range 3 {
+		renderers[i] = RenderStringToReadyToRenderFct(equation.functions[i], p.Mesh())
+	}
+	d, timeDep := GenerateSliceFromReadyToRenderFct(renderers, p.Mesh())
+	SetExcitation(p.name, ExcitationSlice{start: [3]int{xStart, yStart, zStart}, end: [3]int{xEnd, yEnd, zEnd}, d: d, timedependent: timeDep, renderers: renderers, renderedShape: nil, inversedRenderedShape: nil})
 }
 
 func (p *Excitation) RenderFunctionShape(equation StringFunction, s Shape) {
 	util.AssertMsg(!equation.IsScalar(), "RenderFunction: Need vector function.")
-	d, timeDep := GenerateSliceFromFunctionStringTimeDep(equation, p.Mesh())
+	renderers := make([]*ReadyToRenderFunction, 3)
+	for i := range 3 {
+		renderers[i] = RenderStringToReadyToRenderFct(equation.functions[i], p.Mesh())
+	}
+	d, timeDep := GenerateSliceFromReadyToRenderFct(renderers, p.Mesh())
 	dataS, dataSI := RenderShape(s)
-	SetExcitation(p.name, ExcitationSlice{start: [3]int{0, 0, 0}, end: p.Mesh().Size(), d: d, timedependent: timeDep, stringFct: equation, renderedShape: dataS, inversedRenderedShape: dataSI})
+	SetExcitation(p.name, ExcitationSlice{start: [3]int{0, 0, 0}, end: p.Mesh().Size(), d: d, timedependent: timeDep, renderers: renderers, renderedShape: dataS, inversedRenderedShape: dataSI})
 }
 
 func (p *Excitation) RenderFunctionLimitX(equation StringFunction, xStart, xEnd int) {
@@ -226,7 +238,10 @@ func (e *Excitation) Slice() (*data.Slice, bool) {
 		setExcitations := tmp.(ExcitationSlices)
 		for _, setExcitation := range setExcitations.slc {
 			if setExcitation.timedependent {
-				d := GenerateSliceFromFunctionString(setExcitation.stringFct, e.Mesh())
+				for i := range setExcitation.renderers {
+					setExcitation.renderers[i].Vars["t"] = Time
+				}
+				d, _ := GenerateSliceFromReadyToRenderFct(setExcitation.renderers, e.Mesh())
 				data.Copy(setExcitation.d, d)
 				cuda.Recycle(d)
 			}

@@ -65,7 +65,11 @@ func (m *varVectorField) LoadFileMyDir(fname string) {
 
 func (m *varVectorField) RenderFunction(equation StringFunction) {
 	util.AssertMsg(!equation.IsScalar(), "RenderFunction: Need vector function.")
-	d := GenerateSliceFromFunctionString(equation, m.Mesh())
+	renderers := make([]*ReadyToRenderFunction, 3)
+	for i := range 3 {
+		renderers[i] = RenderStringToReadyToRenderFct(equation.functions[i], m.Mesh())
+	}
+	d, _ := GenerateSliceFromReadyToRenderFct(renderers, m.Mesh())
 	m.SetArray(d)
 	cuda.Recycle(d)
 }

@@ -113,7 +113,17 @@ func (p *lut) EvalTo(dst *data.Slice) {
 		setParams := tmp.(ParameterSlices)
 		for _, setParam := range setParams.slc {
 			if setParam.timedependent {
-				d := GenerateSliceFromFunctionString(setParam.stringFct, Mesh())
+				for i := range setParam.renderers {
+					setParam.renderers[i].Vars["t"] = Time
+				}
+				xEnd := setParam.end[X]
+				yEnd := setParam.end[Y]
+				zEnd := setParam.end[Z]
+				xStart := setParam.start[X]
+				yStart := setParam.start[Y]
+				zStart := setParam.start[Z]
+				mesh := data.NewMesh(xEnd-xStart, yEnd-yStart, zEnd-zStart, MeshOf(p).CellSize()[X], MeshOf(p).CellSize()[Y], MeshOf(p).CellSize()[Z])
+				d, _ := GenerateSliceFromReadyToRenderFct(setParam.renderers, mesh)
 				data.Copy(setParam.d, d)
 				cuda.Recycle(d)
 			}

@@ -850,8 +850,14 @@ func InitializeVars(varNames []string) (map[string]interface{}, error) {
 	return varsMap, nil
 }
 
-func GenerateSliceFromExpr(xDep, yDep, zDep bool, vars map[string]interface{}, cellsize [3]float64, function *Function, areaStart, areaEnd [3]int) *data.Slice {
+func GenerateSliceFromExpr(render *ReadyToRenderFunction, cellsize [3]float64, areaStart, areaEnd [3]int) *data.Slice {
 	size := [3]int{areaEnd[X] - areaStart[X], areaEnd[Y] - areaStart[Y], areaEnd[Z] - areaStart[Z]}
+
+	vars := render.Vars
+	xDep := render.xDep
+	yDep := render.yDep
+	zDep := render.zDep
+	function := render.f
 	if zDep {
 		vars["z_length"] = size[Z]
 		vars["z_factor"] = cellsize[Z]
@@ -1163,8 +1169,18 @@ func extractIndexNumber(s string) int {
 
 	return num
 }
-func GenerateSliceFromFunctionStringTimeDep(functionStr StringFunction, mesh *data.Mesh) (*data.Slice, bool) {
-	indexedVars := extractIndexedVars(functionStr.functions[0])
+
+type ReadyToRenderFunction struct {
+	f       *Function
+	Vars    map[string]interface{}
+	TimeDep bool
+	xDep    bool
+	yDep    bool
+	zDep    bool
+}
+
+func RenderStringToReadyToRenderFct(functionStr string, mesh *data.Mesh) *ReadyToRenderFunction {
+	indexedVars := extractIndexedVars(functionStr)
 	worldVars := World.GetRuntimeVariables()
 	lengthIndexedVars := make([]int, 0)
 	for _, sum := range indexedVars {
@@ -1186,9 +1202,9 @@ func GenerateSliceFromFunctionStringTimeDep(functionStr StringFunction, mesh *da
 			}
 		}
 	}
-	function, vars, err := GenerateExprFromFunctionString(preprocessExpressionExpandSum(preprocessExpressionScientific(functionStr.functions[0]), lengthIndexedVars))
+	function, vars, err := GenerateExprFromFunctionString(preprocessExpressionExpandSum(preprocessExpressionScientific(functionStr), lengthIndexedVars))
 	if err != nil {
-		panic(fmt.Sprintf("Failed to generate function: %v\n%s", err, preprocessExpressionExpandSum(preprocessExpressionScientific(functionStr.functions[0]), lengthIndexedVars)))
+		panic(fmt.Sprintf("Failed to generate function: %v\n%s", err, preprocessExpressionExpandSum(preprocessExpressionScientific(functionStr), lengthIndexedVars)))
 	}
 	var (
 		xDep    = false
@@ -1241,87 +1257,27 @@ func GenerateSliceFromFunctionStringTimeDep(functionStr StringFunction, mesh *da
 			zDep = true
 		}
 	}
+	renderFct := new(ReadyToRenderFunction)
+	renderFct.f = function
+	renderFct.Vars = vars
+	renderFct.xDep = xDep
+	renderFct.yDep = yDep
+	renderFct.zDep = zDep
+	renderFct.TimeDep = TimeDep
+	return renderFct
+}
+
+func GenerateSliceFromReadyToRenderFct(renderers []*ReadyToRenderFunction, mesh *data.Mesh) (*data.Slice, bool) {
 	var dataFused *data.Slice
-	data0 := GenerateSliceFromExpr(xDep, yDep, zDep, vars, mesh.CellSize(), function, [3]int{0, 0, 0}, mesh.Size())
-	if !functionStr.useScalar {
+	TimeDep := renderers[0].TimeDep
+	data0 := GenerateSliceFromExpr(renderers[0], mesh.CellSize(), [3]int{0, 0, 0}, mesh.Size())
+	if len(renderers) == 3 {
 		data123 := make([]*data.Slice, 3)
 		for c := 1; c <= 2; c++ {
-			xDep = false
-			yDep = false
-			zDep = false
-			indexedVars := extractIndexedVars(functionStr.functions[c])
-			lengthIndexedVars := make([]int, 0)
-			for _, sum := range indexedVars {
-				referenceLen := 0
-				for _, vari := range sum {
-					if value, ok := worldVars[strings.ToLower(vari)]; ok {
-						if slice, ok := value.([]float64); ok {
-							if referenceLen == 0 {
-								referenceLen = len(slice)
-								lengthIndexedVars = append(lengthIndexedVars, referenceLen)
-							} else if referenceLen != len(slice) {
-								panic("Indexed variables need to have the same length per sum")
-							}
-						} else {
-							panic("Unsuppported type in indexed variables.")
-						}
-					} else {
-						panic("Could not find variable: " + vari)
-					}
-				}
+			if renderers[c].TimeDep {
+				TimeDep = true
 			}
-			function, vars, err := GenerateExprFromFunctionString(preprocessExpressionExpandSum(preprocessExpressionScientific(functionStr.functions[c]), lengthIndexedVars))
-			if err != nil {
-				panic(fmt.Sprintf("Failed to generate function: %v", err))
-			}
-			var (
-				xDep, yDep, zDep bool
-			)
-			for key := range vars {
-				if key != "x_length" && key != "y_length" && key != "z_length" && key != "x_factor" && key != "y_factor" && key != "z_factor" && key != "t" && math.IsNaN(vars[key].(float64)) {
-					//fmt.Println(key, s.variablesStart[j][key].vector[comp], s.variablesEnd[j][key].vector[comp])
-					foundVal := false
-					for _, sum := range indexedVars {
-						breakLoop := false
-						for _, vari := range sum {
-							if removeIndexStructure(vari, true) == removeIndexStructure(key, false) {
-								if value, ok := worldVars[strings.ToLower(vari)]; ok {
-									if slice, ok := value.([]float64); ok {
-										vars[key] = slice[extractIndexNumber(key)]
-										breakLoop = true
-										foundVal = true
-										break
-									} else {
-										panic("Unsuppported type in indexed variables.")
-									}
-								} else {
-									panic(fmt.Sprintf("Variable %s not defined.", key))
-								}
-							}
-						}
-						if breakLoop {
-							break
-						}
-					}
-					if !foundVal {
-						if value, ok := worldVars[strings.ToLower(key)]; ok {
-							vars[key] = value
-						} else {
-							panic(fmt.Sprintf("Variable %s not defined.", key))
-						}
-					}
-				} else if strings.ToLower(key) == "t" {
-					vars[key] = Time
-					TimeDep = true
-				} else if key == "x_factor" {
-					xDep = true
-				} else if key == "y_factor" {
-					yDep = true
-				} else if key == "z_factor" {
-					zDep = true
-				}
-			}
-			data123[c] = GenerateSliceFromExpr(xDep, yDep, zDep, vars, mesh.CellSize(), function, [3]int{0, 0, 0}, mesh.Size())
+			data123[c] = GenerateSliceFromExpr(renderers[c], mesh.CellSize(), [3]int{0, 0, 0}, mesh.Size())
 		}
 		data123[0] = data0
 		dataFused = data.SliceFromSlices(data123, mesh.Size())
@@ -1330,11 +1286,6 @@ func GenerateSliceFromFunctionStringTimeDep(functionStr StringFunction, mesh *da
 		dataFused = data.SliceFromSlices([]*data.Slice{data0}, mesh.Size())
 	}
 	return dataFused, TimeDep
-}
-
-func GenerateSliceFromFunctionString(functionStr StringFunction, mesh *data.Mesh) *data.Slice {
-	d, _ := GenerateSliceFromFunctionStringTimeDep(functionStr, mesh)
-	return d
 }
 
 func CreateFloatSlice(args ...float64) []float64 {

@@ -71,7 +71,7 @@ type ParameterSlice struct {
 	d                     *data.Slice
 	ncomp                 int
 	timedependent         bool
-	stringFct             StringFunction
+	renderers             []*ReadyToRenderFunction
 	renderedShape         *data.Slice
 	inversedRenderedShape *data.Slice
 }
@@ -401,8 +401,10 @@ func NewScalarParam(name, unit, desc string, children ...derived) *RegionwiseSca
 func (p *RegionwiseScalar) RenderFunction(equation StringFunction) {
 	util.AssertMsg(strings.ToLower(p.name) != "aex" && strings.ToLower(p.name) != "dind" && strings.ToLower(p.name) != "dmi" && strings.ToLower(p.name) != "temp", "RenderFunction: Not available for exchange, DMI and Temperature.")
 	util.AssertMsg(equation.IsScalar(), "RenderFunction: Need scalar function.")
-	d, timeDep := GenerateSliceFromFunctionStringTimeDep(equation, p.Mesh())
-	SetParam(p.name, ParameterSlice{start: [3]int{0, 0, 0}, end: p.Mesh().Size(), d: d, ncomp: d.NComp(), timedependent: timeDep, stringFct: equation, renderedShape: nil, inversedRenderedShape: nil})
+	renderers := make([]*ReadyToRenderFunction, 1)
+	renderers[0] = RenderStringToReadyToRenderFct(equation.functions[0], p.Mesh())
+	d, timeDep := GenerateSliceFromReadyToRenderFct(renderers, p.Mesh())
+	SetParam(p.name, ParameterSlice{start: [3]int{0, 0, 0}, end: p.Mesh().Size(), d: d, ncomp: d.NComp(), timedependent: timeDep, renderers: renderers, renderedShape: nil, inversedRenderedShape: nil})
 }
 
 func (p *RegionwiseScalar) RenderFunctionLimit(equation StringFunction, xStart, xEnd, yStart, yEnd, zStart, zEnd int) {
@@ -412,16 +414,21 @@ func (p *RegionwiseScalar) RenderFunctionLimit(equation StringFunction, xStart, 
 	util.Argument(xStart < xEnd && yStart < yEnd && zStart < zEnd)
 	util.Argument(xStart >= 0 && yStart >= 0 && zStart >= 0)
 	util.Argument(xEnd <= n[X] && yEnd <= n[Y] && zEnd <= n[Z])
-	d, timeDep := GenerateSliceFromFunctionStringTimeDep(equation, p.Mesh())
-	SetParam(p.name, ParameterSlice{start: [3]int{xStart, yStart, zStart}, end: [3]int{xEnd, yEnd, zEnd}, d: d, ncomp: d.NComp(), timedependent: timeDep, stringFct: equation, renderedShape: nil, inversedRenderedShape: nil})
+	renderers := make([]*ReadyToRenderFunction, 1)
+	mesh := data.NewMesh(xEnd-xStart, yEnd-yStart, zEnd-zStart, MeshOf(p).CellSize()[X], MeshOf(p).CellSize()[Y], MeshOf(p).CellSize()[Z])
+	renderers[0] = RenderStringToReadyToRenderFct(equation.functions[0], mesh)
+	d, timeDep := GenerateSliceFromReadyToRenderFct(renderers, mesh)
+	SetParam(p.name, ParameterSlice{start: [3]int{xStart, yStart, zStart}, end: [3]int{xEnd, yEnd, zEnd}, d: d, ncomp: d.NComp(), timedependent: timeDep, renderers: renderers, renderedShape: nil, inversedRenderedShape: nil})
 }
 
 func (p *RegionwiseScalar) RenderFunctionShape(equation StringFunction, s Shape) {
 	util.AssertMsg(strings.ToLower(p.name) != "aex" && strings.ToLower(p.name) != "dind" && strings.ToLower(p.name) != "dmi" && strings.ToLower(p.name) != "temp", "RenderFunction: Not available for exchange and DMI and Temperature.")
 	util.AssertMsg(equation.IsScalar(), "RenderFunction: Need scalar function.")
-	d, timeDep := GenerateSliceFromFunctionStringTimeDep(equation, p.Mesh())
+	renderers := make([]*ReadyToRenderFunction, 1)
+	renderers[0] = RenderStringToReadyToRenderFct(equation.functions[0], p.Mesh())
+	d, timeDep := GenerateSliceFromReadyToRenderFct(renderers, p.Mesh())
 	dataS, dataSI := RenderShape(s)
-	SetParam(p.name, ParameterSlice{start: [3]int{0, 0, 0}, end: p.Mesh().Size(), d: d, ncomp: d.NComp(), timedependent: timeDep, stringFct: equation, renderedShape: dataS, inversedRenderedShape: dataSI})
+	SetParam(p.name, ParameterSlice{start: [3]int{0, 0, 0}, end: p.Mesh().Size(), d: d, ncomp: d.NComp(), timedependent: timeDep, renderers: renderers, renderedShape: dataS, inversedRenderedShape: dataSI})
 }
 
 func (p *RegionwiseScalar) RenderFunctionLimitX(equation StringFunction, xStart, xEnd int) {
@@ -533,8 +540,12 @@ func NewVectorParam(name, unit, desc string) *RegionwiseVector {
 
 func (p *RegionwiseVector) RenderFunction(equation StringFunction) {
 	util.AssertMsg(!equation.IsScalar(), "RenderFunction: Need vector function.")
-	d, timeDep := GenerateSliceFromFunctionStringTimeDep(equation, p.Mesh())
-	SetParam(p.name, ParameterSlice{start: [3]int{0, 0, 0}, end: p.Mesh().Size(), d: d, ncomp: d.NComp(), timedependent: timeDep, stringFct: equation})
+	renderers := make([]*ReadyToRenderFunction, 3)
+	for i := range 3 {
+		renderers[i] = RenderStringToReadyToRenderFct(equation.functions[i], p.Mesh())
+	}
+	d, timeDep := GenerateSliceFromReadyToRenderFct(renderers, p.Mesh())
+	SetParam(p.name, ParameterSlice{start: [3]int{0, 0, 0}, end: p.Mesh().Size(), d: d, ncomp: d.NComp(), timedependent: timeDep, renderers: renderers})
 }
 
 func (p *RegionwiseVector) RenderFunctionLimit(equation StringFunction, xStart, xEnd, yStart, yEnd, zStart, zEnd int) {
@@ -543,8 +554,13 @@ func (p *RegionwiseVector) RenderFunctionLimit(equation StringFunction, xStart, 
 	util.Argument(xStart < xEnd && yStart < yEnd && zStart < zEnd)
 	util.Argument(xStart >= 0 && yStart >= 0 && zStart >= 0)
 	util.Argument(xEnd <= n[X] && yEnd <= n[Y] && zEnd <= n[Z])
-	d, timeDep := GenerateSliceFromFunctionStringTimeDep(equation, p.Mesh())
-	SetParam(p.name, ParameterSlice{start: [3]int{xStart, yStart, zStart}, end: [3]int{xEnd, yEnd, zEnd}, d: d, ncomp: d.NComp(), timedependent: timeDep, stringFct: equation})
+	renderers := make([]*ReadyToRenderFunction, 3)
+	mesh := data.NewMesh(xEnd-xStart, yEnd-yStart, zEnd-zStart, MeshOf(p).CellSize()[X], MeshOf(p).CellSize()[Y], MeshOf(p).CellSize()[Z])
+	for i := range 3 {
+		renderers[i] = RenderStringToReadyToRenderFct(equation.functions[i], mesh)
+	}
+	d, timeDep := GenerateSliceFromReadyToRenderFct(renderers, mesh)
+	SetParam(p.name, ParameterSlice{start: [3]int{xStart, yStart, zStart}, end: [3]int{xEnd, yEnd, zEnd}, d: d, ncomp: d.NComp(), timedependent: timeDep, renderers: renderers})
 }
 
 func (p *RegionwiseVector) RenderFunctionLimitX(equation StringFunction, xStart, xEnd int) {

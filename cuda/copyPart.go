@@ -1,6 +1,11 @@
 package cuda
 
-import "github.com/mumax/3/data"
+import (
+	"fmt"
+
+	"github.com/mumax/3/data"
+	"github.com/mumax/3/util"
+)
 
 func CopyPart(dst, src *data.Slice,
 	xStart_src, xEnd_src,
@@ -9,6 +14,7 @@ func CopyPart(dst, src *data.Slice,
 	fStart_src, fEnd_src,
 	xStart_dst, yStart_dst,
 	zStart_dst, fStart_dst int) {
+	util.AssertMsg(dst.NComp() == src.NComp(), fmt.Sprintf("slice copy: illegal sizes: dst: %vx%v, src: %vx%v", dst.NComp(), dst.Len(), src.NComp(), src.Len()))
 	srcSize := src.Size()
 	dstSize := dst.Size()
 	cfg := make1DConf(prod([3]int{xEnd_src - xStart_src, yEnd_src - yStart_src, zEnd_src - zStart_src}) * (fEnd_src - fStart_src))

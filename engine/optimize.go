@@ -49,7 +49,7 @@ type optimize struct {
 	Trials          int
 	time            float64
 	functions       []StringFunction
-	parsedFunctions [][3]*Function
+	parsedFunctions [][3]*ReadyToRenderFunction
 	bar             *ProgressBar
 }
 
@@ -111,6 +111,15 @@ func (d dummyQuantity) EvalTo(dst *data.Slice) {
 	}
 }
 
+func SliceFromMapKeys(m map[string]interface{}) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys
+}
+
 func ImportOVFAsQuantity(file, name string, i ...int) dummyQuantity {
 	if len(i) != 0 && len(i) != 1 {
 		panic("Either zero or one integer is allowed")
@@ -133,13 +142,17 @@ func (d dummyQuantity) Free() {
 	cuda.Recycle(d.storage)
 }
 
-func (s optimize) generateSliceFromExpr(xDep, yDep, zDep bool, vars map[string]interface{}, cellsize [3]float64, j int, function *Function) *data.Slice {
-	return GenerateSliceFromExpr(xDep, yDep, zDep, vars, cellsize, function, s.areaStart[j], s.areaEnd[j])
+func (s optimize) generateSliceFromExpr(renderer []*ReadyToRenderFunction, cellsize [3]float64, j int) *data.Slice {
+	mesh := data.NewMesh(s.areaEnd[j][X]-s.areaStart[j][X], s.areaEnd[j][Y]-s.areaStart[j][Y], s.areaEnd[j][Z]-s.areaStart[j][Z], cellsize[X], cellsize[Y], cellsize[Z])
+	d, _ := GenerateSliceFromReadyToRenderFct(renderer, mesh)
+	return d
 }
 
-func (s optimize) generateSliceFromFunction(trial goptuna.Trial, q Quantity, j int, cellsize [3]float64, comp int) (*data.Slice, error) {
-	function, vars, err := GenerateExprFromFunctionString(s.functions[j].functions[comp])
-
+func (s optimize) generateRendererFromFunction(trial goptuna.Trial, q Quantity, j int, cellsize [3]float64, comp int) (*ReadyToRenderFunction, error) {
+	function, vars, err := GenerateExprFromFunctionString(preprocessExpressionExpandSum(preprocessExpressionScientific(s.functions[j].functions[comp]), []int{}))
+	if err != nil {
+		panic(fmt.Sprintf("Failed to generate function: %v\n%s", err, preprocessExpressionExpandSum(preprocessExpressionScientific(s.functions[j].functions[comp]), []int{})))
+	}
 	xDep := false
 	yDep := false
 	zDep := false
@@ -174,11 +187,20 @@ func (s optimize) generateSliceFromFunction(trial goptuna.Trial, q Quantity, j i
 	if err != nil {
 		panic(fmt.Sprintf("Failed to create function: %v", err))
 	}
-	s.parsedFunctions[j][comp] = function
+	renderFct := new(ReadyToRenderFunction)
+	renderFct.f = function
+	renderFct.Vars = vars
+	renderFct.xDep = xDep
+	renderFct.yDep = yDep
+	renderFct.zDep = zDep
+	renderFct.TimeDep = false
+	s.parsedFunctions[j][comp] = renderFct
 
-	vector := s.generateSliceFromExpr(xDep, yDep, zDep, vars, cellsize, j, function)
+	//renderers := make([]*ReadyToRenderFunction, 1)
+	//renderers[0] = renderFct
+	//vector := s.generateSliceFromExpr(renderers, cellsize, j)
 
-	return vector, nil
+	return renderFct, nil
 }
 
 func (s optimize) generate_vector_suggest_function(trial goptuna.Trial, q Quantity, j int) (*data.Slice, *data.Slice, *data.Slice, error) {
@@ -189,19 +211,27 @@ func (s optimize) generate_vector_suggest_function(trial goptuna.Trial, q Quanti
 	)
 	cellsize := MeshOf(q).CellSize()
 	var err error
-	vector0, err = s.generateSliceFromFunction(trial, q, j, cellsize, 0)
+	var renderer *ReadyToRenderFunction
+	renderer, err = s.generateRendererFromFunction(trial, q, j, cellsize, 0)
 	if err != nil {
 		return nil, nil, nil, err
 	}
+	renderers := make([]*ReadyToRenderFunction, 1)
+	renderers[0] = renderer
+	vector0 = s.generateSliceFromExpr(renderers, cellsize, j)
 	if !s.functions[j].useScalar {
-		vector1, err = s.generateSliceFromFunction(trial, q, j, cellsize, 1)
+		renderer, err = s.generateRendererFromFunction(trial, q, j, cellsize, 1)
 		if err != nil {
 			return nil, nil, nil, err
 		}
-		vector2, err = s.generateSliceFromFunction(trial, q, j, cellsize, 2)
+		renderers[0] = renderer
+		vector1 = s.generateSliceFromExpr(renderers, cellsize, j)
+		renderer, err = s.generateRendererFromFunction(trial, q, j, cellsize, 2)
 		if err != nil {
 			return nil, nil, nil, err
 		}
+		renderers[0] = renderer
+		vector2 = s.generateSliceFromExpr(renderers, cellsize, j)
 	}
 
 	return vector0, vector1, vector2, nil
@@ -225,13 +255,13 @@ func (s optimize) objective(trial goptuna.Trial) (float64, error) {
 			suggestData[2] = vector2
 			bufGPU := data.SliceFromSlices(suggestData, size)
 			//defer cuda.Recycle(bufGPU)
-			SetExcitation(NameOf(q), ExcitationSlice{s.areaStart[ii], s.areaEnd[ii], bufGPU, q.NComp(), false, s.functions[ii], nil, nil})
+			SetExcitation(NameOf(q), ExcitationSlice{s.areaStart[ii], s.areaEnd[ii], bufGPU, q.NComp(), false, s.parsedFunctions[ii][:], nil, nil})
 		} else {
 			suggestData := make([]*data.Slice, 1)
 			suggestData[0] = vector0
 			bufGPU := data.SliceFromSlices(suggestData, size)
 			//defer cuda.Recycle(bufGPU)
-			SetScalarExcitation(NameOf(q), ScalarExcitationSlice{s.areaStart[ii], s.areaEnd[ii], bufGPU, false, s.functions[ii], nil, nil})
+			SetScalarExcitation(NameOf(q), ScalarExcitationSlice{s.areaStart[ii], s.areaEnd[ii], bufGPU, false, s.parsedFunctions[ii][0:1], nil, nil})
 		}
 	}
 	//t := time.Now()
@@ -341,7 +371,7 @@ func OptimizeQuantity(output Quantity, target dummyQuantity, variables []Quantit
 	} else {
 		bar = NewProgressBar(0., float64(trials), "🧲", false)
 	}
-	optim := optimize{output, target, variables, parametersStart, parametersEnd, areaStart, areaEnd, target.time - reduceTime - Time, studyName, trials, Time, functions, make([][3]*Function, len(variables)), bar}
+	optim := optimize{output, target, variables, parametersStart, parametersEnd, areaStart, areaEnd, target.time - reduceTime - Time, studyName, trials, Time, functions, make([][3]*ReadyToRenderFunction, len(variables)), bar}
 	CreateBackup([]Quantity{output})
 	logFile, err := os.OpenFile(OD()+"/optimization.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
@@ -391,8 +421,7 @@ func OptimizeQuantity(output Quantity, target dummyQuantity, variables []Quantit
 		for k := range variables {
 			if variables[k].NComp() == 3 {
 				for c := range variables[k].NComp() {
-					vars := optim.parsedFunctions[k][c].required
-					sort.Strings(vars)
+					vars := SliceFromMapKeys(optim.parsedFunctions[k][c].Vars)
 					for _, par := range vars {
 						if par != "x" && par != "y" && par != "z" && par != "t" {
 							fprint(optiTable, "\t", NameOf(variables[k])+"_"+par+"_"+string('x'+c))
@@ -400,7 +429,7 @@ func OptimizeQuantity(output Quantity, target dummyQuantity, variables []Quantit
 					}
 				}
 			} else if variables[k].NComp() == 1 {
-				vars := optim.parsedFunctions[k][0].required
+				vars := SliceFromMapKeys(optim.parsedFunctions[k][0].Vars)
 				sort.Strings(vars)
 				for _, par := range vars {
 					if par != "x" && par != "y" && par != "z" && par != "t" {
@@ -431,10 +460,7 @@ func OptimizeQuantity(output Quantity, target dummyQuantity, variables []Quantit
 		varData := make([]*data.Slice, variables[k].NComp())
 		cellsize := MeshOf(variables[k]).CellSize()
 		for c := range variables[k].NComp() {
-			xDep := false
-			yDep := false
-			zDep := false
-			varsSlice := optim.parsedFunctions[k][c].required
+			varsSlice := SliceFromMapKeys(optim.parsedFunctions[k][c].Vars)
 			vars, err := InitializeVars(varsSlice)
 			if err != nil {
 				panic(err)
@@ -448,15 +474,12 @@ func OptimizeQuantity(output Quantity, target dummyQuantity, variables []Quantit
 					}
 					vars[par] = val
 					fprint(optiTable, "\t", val)
-				} else if par == "x_length" {
-					xDep = true
-				} else if par == "y_length" {
-					yDep = true
-				} else if par == "z_length" {
-					zDep = true
 				}
 			}
-			varData[c] = optim.generateSliceFromExpr(xDep, yDep, zDep, vars, cellsize, k, optim.parsedFunctions[k][c])
+			renderers := make([]*ReadyToRenderFunction, 1)
+			renderers[0] = optim.parsedFunctions[k][c]
+			renderers[0].Vars = vars
+			varData[c] = optim.generateSliceFromExpr(renderers, cellsize, k)
 		}
 		bufGPU := data.SliceFromSlices(varData, size)
 		info := data.Meta{Time: target.time - reduceTime, Name: NameOf(variables[k]), Unit: UnitOf(variables[k]), CellSize: cellsize}
@@ -467,10 +490,10 @@ func OptimizeQuantity(output Quantity, target dummyQuantity, variables []Quantit
 		saveAs_sync(OD()+fmt.Sprintf(FilenameFormat, NameOf(variables[k]), idx)+".ovf", bufGPU.HostCopy(), info, outputFormat)
 		SaveCounter[NameOf(variables[k])] = idx + 1
 		if variables[k].NComp() == 3 {
-			SetExcitation(NameOf(variables[k]), ExcitationSlice{optim.areaStart[k], optim.areaEnd[k], bufGPU, variables[k].NComp(), false, optim.functions[k], nil, nil})
+			SetExcitation(NameOf(variables[k]), ExcitationSlice{optim.areaStart[k], optim.areaEnd[k], bufGPU, variables[k].NComp(), false, optim.parsedFunctions[k][:], nil, nil})
 			defer EraseSetExcitation(NameOf(variables[k]))
 		} else {
-			SetScalarExcitation(NameOf(variables[k]), ScalarExcitationSlice{optim.areaStart[k], optim.areaEnd[k], bufGPU, false, optim.functions[k], nil, nil})
+			SetScalarExcitation(NameOf(variables[k]), ScalarExcitationSlice{optim.areaStart[k], optim.areaEnd[k], bufGPU, false, optim.parsedFunctions[k][0:1], nil, nil})
 			defer EraseSetScalarExcitation(NameOf(variables[k]))
 		}
 	}

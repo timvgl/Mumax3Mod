@@ -61,7 +61,7 @@ type ScalarExcitationSlice struct {
 	end                   [3]int
 	d                     *data.Slice
 	timedependent         bool
-	stringFct             StringFunction
+	renderers             []*ReadyToRenderFunction
 	renderedShape         *data.Slice
 	inversedRenderedShape *data.Slice
 }
@@ -96,7 +96,14 @@ func NewScalarExcitation(name, unit, desc string) *ScalarExcitation {
 
 func (p *ScalarExcitation) LoadFile(path string, xOffset, yOffset, zOffset int) {
 	d := LoadFileDSlice(path)
-	SetScalarExcitation(p.name, ScalarExcitationSlice{[3]int{xOffset, yOffset, zOffset}, [3]int{xOffset + d.Size()[X], yOffset + d.Size()[Y], zOffset + d.Size()[Z]}, d, false, StringFunction{[3]string{"", "", ""}, false}, nil, nil})
+	renderers := make([]*ReadyToRenderFunction, 1)
+	renderer := new(ReadyToRenderFunction)
+	renderer.xDep = true
+	renderer.yDep = true
+	renderer.zDep = true
+	renderer.TimeDep = false
+	renderers[0] = renderer
+	SetScalarExcitation(p.name, ScalarExcitationSlice{[3]int{xOffset, yOffset, zOffset}, [3]int{xOffset + d.Size()[X], yOffset + d.Size()[Y], zOffset + d.Size()[Z]}, d, false, renderers, nil, nil})
 
 }
 
@@ -108,8 +115,10 @@ func (p *ScalarExcitation) MSlice() cuda.MSlice {
 
 func (p *ScalarExcitation) RenderFunction(equation StringFunction) {
 	util.AssertMsg(equation.IsScalar(), "RenderFunction: Need scalar function.")
-	d, timeDep := GenerateSliceFromFunctionStringTimeDep(equation, p.Mesh())
-	SetScalarExcitation(p.name, ScalarExcitationSlice{[3]int{0, 0, 0}, p.Mesh().Size(), d, timeDep, equation, nil, nil})
+	renderers := make([]*ReadyToRenderFunction, 1)
+	renderers[0] = RenderStringToReadyToRenderFct(equation.functions[0], p.Mesh())
+	d, timeDep := GenerateSliceFromReadyToRenderFct(renderers, p.Mesh())
+	SetScalarExcitation(p.name, ScalarExcitationSlice{[3]int{0, 0, 0}, p.Mesh().Size(), d, timeDep, renderers, nil, nil})
 }
 
 func (p *ScalarExcitation) RenderFunctionLimit(equation StringFunction, xStart, xEnd, yStart, yEnd, zStart, zEnd int) {
@@ -118,15 +127,20 @@ func (p *ScalarExcitation) RenderFunctionLimit(equation StringFunction, xStart, 
 	util.Argument(xStart < xEnd && yStart < yEnd && zStart < zEnd)
 	util.Argument(xStart >= 0 && yStart >= 0 && zStart >= 0)
 	util.Argument(xEnd <= n[X] && yEnd <= n[Y] && zEnd <= n[Z])
-	d, timeDep := GenerateSliceFromFunctionStringTimeDep(equation, p.Mesh())
-	SetScalarExcitation(p.name, ScalarExcitationSlice{[3]int{xStart, yStart, zStart}, [3]int{xEnd, yEnd, zEnd}, d, timeDep, equation, nil, nil})
+	renderers := make([]*ReadyToRenderFunction, 1)
+	mesh := data.NewMesh(xEnd-xStart, yEnd-yStart, zEnd-zStart, MeshOf(p).CellSize()[X], MeshOf(p).CellSize()[Y], MeshOf(p).CellSize()[Z])
+	renderers[0] = RenderStringToReadyToRenderFct(equation.functions[0], mesh)
+	d, timeDep := GenerateSliceFromReadyToRenderFct(renderers, mesh)
+	SetScalarExcitation(p.name, ScalarExcitationSlice{[3]int{xStart, yStart, zStart}, [3]int{xEnd, yEnd, zEnd}, d, timeDep, renderers, nil, nil})
 }
 
 func (p *ScalarExcitation) RenderFunctionShape(equation StringFunction, s Shape) {
 	util.AssertMsg(equation.IsScalar(), "RenderFunction: Need scalar function.")
-	d, timeDep := GenerateSliceFromFunctionStringTimeDep(equation, p.Mesh())
+	renderers := make([]*ReadyToRenderFunction, 1)
+	renderers[0] = RenderStringToReadyToRenderFct(equation.functions[0], p.Mesh())
+	d, timeDep := GenerateSliceFromReadyToRenderFct(renderers, p.Mesh())
 	dataS, dataSI := RenderShape(s)
-	SetScalarExcitation(p.name, ScalarExcitationSlice{[3]int{0, 0, 0}, p.Mesh().Size(), d, timeDep, equation, dataS, dataSI})
+	SetScalarExcitation(p.name, ScalarExcitationSlice{[3]int{0, 0, 0}, p.Mesh().Size(), d, timeDep, renderers, dataS, dataSI})
 }
 
 func (p *ScalarExcitation) RenderFunctionLimitX(equation StringFunction, xStart, xEnd int) {
@@ -176,7 +190,17 @@ func (e *ScalarExcitation) Slice() (*data.Slice, bool) {
 		setExcitations := tmp.(ScalarExcitationSlices)
 		for _, setExcitation := range setExcitations.slc {
 			if setExcitation.timedependent {
-				d := GenerateSliceFromFunctionString(setExcitation.stringFct, e.Mesh())
+				for i := range setExcitation.renderers {
+					setExcitation.renderers[i].Vars["t"] = Time
+				}
+				xEnd := setExcitation.end[X]
+				yEnd := setExcitation.end[Y]
+				zEnd := setExcitation.end[Z]
+				xStart := setExcitation.start[X]
+				yStart := setExcitation.start[Y]
+				zStart := setExcitation.start[Z]
+				mesh := data.NewMesh(xEnd-xStart, yEnd-yStart, zEnd-zStart, MeshOf(e).CellSize()[X], MeshOf(e).CellSize()[Y], MeshOf(e).CellSize()[Z])
+				d, _ := GenerateSliceFromReadyToRenderFct(setExcitation.renderers, mesh)
 				data.Copy(setExcitation.d, d)
 				cuda.Recycle(d)
 			}
