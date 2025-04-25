@@ -136,6 +136,14 @@ func (this EvaluableExpression) Evaluate(parameters map[string]interface{}) (int
 	return this.Eval(MapParameters(parameters))
 }
 
+func (this EvaluableExpression) EvaluateUntilT(parameters map[string]interface{}) (interface{}, error) {
+
+	if parameters == nil {
+		return this.EvalUntilT(nil)
+	}
+	return this.EvalUntilT(MapParameters(parameters))
+}
+
 /*
 Runs the entire expression using the given [parameters].
 e.g., If the expression contains a reference to the variable "foo", it will be taken from `parameters.Get("foo")`.
@@ -148,6 +156,18 @@ e.g., if the expression is "1 + 1", this will return 2.0.
 e.g., if the expression is "foo + 1" and parameters contains "foo" = 2, this will return 3.0
 */
 func (this EvaluableExpression) Eval(parameters Parameters) (interface{}, error) {
+
+	if this.evaluationStages == nil {
+		return nil, nil
+	}
+
+	if parameters != nil {
+		parameters = &sanitizedParameters{parameters}
+	}
+	return this.evaluateStage(this.evaluationStages, parameters)
+}
+
+func (this EvaluableExpression) EvalUntilT(parameters Parameters) (interface{}, error) {
 
 	if this.evaluationStages == nil {
 		return nil, nil
@@ -223,6 +243,71 @@ func (this EvaluableExpression) evaluateStage(stage *evaluationStage, parameters
 	}
 
 	return stage.operator(left, right, parameters)
+}
+
+func constantFoldStage(
+	stage *evaluationStage,
+	parameters Parameters,
+	excludeVar string,
+) (*evaluationStage, error) {
+	if stage == nil {
+		return nil, nil
+	}
+
+	// 1) Leaf-Fall für Variable
+	if stage.symbol == LITERAL {
+		return stage, nil
+	}
+	if stage.symbol == VARIABLE {
+		name := stage.operator(nil, nil, nil).(string) // oder stage.VariableName
+		if name == excludeVar {
+			// t bleibt unberührt
+			return stage, nil
+		}
+		// alle anderen Variablen sofort ersetzen
+		val, ok := parameters[name]
+		if !ok {
+			return nil, fmt.Errorf("missing parameter %q", name)
+		}
+		return &evaluationStage{
+			symbol:   LITERAL,
+			operator: makeLiteralStage(val),
+		}, nil
+	}
+
+	// 2) Rekursives Falten der Kinder-Stages
+	left, err := constantFoldStage(stage.leftStage, parameters, excludeVar)
+	if err != nil {
+		return nil, err
+	}
+	right, err := constantFoldStage(stage.rightStage, parameters, excludeVar)
+	if err != nil {
+		return nil, err
+	}
+
+	// 3) neuen Knoten clonen und Kinder tauschen
+	folded := *stage
+	folded.leftStage = left
+	folded.rightStage = right
+
+	// 4) Wenn jetzt beides Literale sind und kein Sonderoperator,
+	//    dann sofort ausführen und als Literal zurückgeben.
+	if left.symbol == LITERAL && right.symbol == LITERAL {
+		// manche Operatoren wie IN oder SEPARATE überspringen wir
+		if stage.symbol != IN && stage.symbol != SEPARATE {
+			lv, _ := left.operator(nil, nil, nil)
+			rv, _ := right.operator(nil, nil, nil)
+			res, err := stage.operator(lv, rv, nil)
+			if err == nil {
+				return &evaluationStage{
+					symbol:   LITERAL,
+					operator: makeLiteralStage(res),
+				}, nil
+			}
+		}
+	}
+
+	return &folded, nil
 }
 
 func typeCheck(check stageTypeCheck, value interface{}, symbol OperatorSymbol, format string) error {

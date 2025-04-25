@@ -23,6 +23,8 @@ type ExprEvaluator struct {
 
 func init() {
 	DeclFunc("CreateFloatSlice", CreateFloatSlice, "")
+	DeclFunc("CreateStringMap", CreateStringMap, "")
+	DeclFunc("CreateFloatMap", CreateFloatMap, "")
 	DeclFunc("CreateFloatSliceZero", CreateFloatSliceZero, "")
 	DeclFunc("CreateFloatSliceOne", CreateFloatSliceOne, "")
 	DeclFunc("CreateFloatSliceArb", CreateFloatSliceArb, "")
@@ -30,6 +32,37 @@ func init() {
 }
 func CreateString(name string) string {
 	return name
+}
+
+func CreateStringMap() map[string]interface{} {
+	return make(map[string]interface{})
+}
+
+func CreateFloatMap() map[float64]interface{} {
+	return make(map[float64]interface{})
+}
+
+func WriteStringMap(m map[string]interface{}, name string, value interface{}) map[string]interface{} {
+	m[name] = value
+	return m
+}
+
+func WriteFloatMap(m map[float64]interface{}, name float64, value interface{}) map[float64]interface{} {
+	m[name] = value
+	return m
+}
+
+func ReadStringMap(m map[string]interface{}, name string) interface{} {
+	if v, ok := m[name]; ok {
+		return v
+	}
+	return nil
+}
+func ReadFloatMap(m map[float64]interface{}, name float64) interface{} {
+	if v, ok := m[name]; ok {
+		return v
+	}
+	return nil
 }
 
 // NewExprEvaluator compiles the expression string and prepares the evaluator
@@ -724,6 +757,16 @@ func NewExprEvaluator(expressionStr string) (*ExprEvaluator, error) {
 
 // Evaluate computes the result of the expression given a map of variables
 func (e *ExprEvaluator) Evaluate(vars map[string]interface{}) (interface{}, error) {
+	result, err := e.expression.Evaluate(vars)
+	if err != nil {
+		return 0, fmt.Errorf("error evaluating expression: %w", err)
+	}
+
+	return result, nil
+}
+
+// Evaluate computes the result of the expression given a map of variables
+func (e *ExprEvaluator) EvaluateUntilT(vars map[string]interface{}) (interface{}, error) {
 	result, err := e.expression.Evaluate(vars)
 	if err != nil {
 		return 0, fmt.Errorf("error evaluating expression: %w", err)

@@ -80,7 +80,7 @@ var YnGovaluate1X3_map = map[int]string{0: "",
 // YnGovaluate1X3 PTX code for various compute capabilities.
 const (
 	YnGovaluate1X3_ptx_50 = `
-.version 8.2
+.version 8.5
 .target sm_50
 .address_size 64
 
@@ -1274,6 +1274,7 @@ $L__BB0_171:
 	@%p136 bra 	$L__BB0_174;
 
 	sub.s32 	%r493, %r155, %r496;
+	mov.u32 	%r494, 1;
 	mov.f32 	%f1250, %f47;
 
 $L__BB0_173:
@@ -2419,7 +2420,7 @@ $L__BB0_125:
 
 `
 	YnGovaluate1X3_ptx_52 = `
-.version 8.2
+.version 8.5
 .target sm_52
 .address_size 64
 
@@ -3613,6 +3614,7 @@ $L__BB0_171:
 	@%p136 bra 	$L__BB0_174;
 
 	sub.s32 	%r493, %r155, %r496;
+	mov.u32 	%r494, 1;
 	mov.f32 	%f1250, %f47;
 
 $L__BB0_173:
@@ -4758,7 +4760,7 @@ $L__BB0_125:
 
 `
 	YnGovaluate1X3_ptx_53 = `
-.version 8.2
+.version 8.5
 .target sm_53
 .address_size 64
 
@@ -5952,6 +5954,7 @@ $L__BB0_171:
 	@%p136 bra 	$L__BB0_174;
 
 	sub.s32 	%r493, %r155, %r496;
+	mov.u32 	%r494, 1;
 	mov.f32 	%f1250, %f47;
 
 $L__BB0_173:
@@ -7097,7 +7100,7 @@ $L__BB0_125:
 
 `
 	YnGovaluate1X3_ptx_60 = `
-.version 8.2
+.version 8.5
 .target sm_60
 .address_size 64
 
@@ -8291,6 +8294,7 @@ $L__BB0_171:
 	@%p136 bra 	$L__BB0_174;
 
 	sub.s32 	%r493, %r155, %r496;
+	mov.u32 	%r494, 1;
 	mov.f32 	%f1250, %f47;
 
 $L__BB0_173:
@@ -9436,7 +9440,7 @@ $L__BB0_125:
 
 `
 	YnGovaluate1X3_ptx_61 = `
-.version 8.2
+.version 8.5
 .target sm_61
 .address_size 64
 
@@ -10630,6 +10634,7 @@ $L__BB0_171:
 	@%p136 bra 	$L__BB0_174;
 
 	sub.s32 	%r493, %r155, %r496;
+	mov.u32 	%r494, 1;
 	mov.f32 	%f1250, %f47;
 
 $L__BB0_173:
@@ -11775,7 +11780,7 @@ $L__BB0_125:
 
 `
 	YnGovaluate1X3_ptx_62 = `
-.version 8.2
+.version 8.5
 .target sm_62
 .address_size 64
 
@@ -12969,6 +12974,7 @@ $L__BB0_171:
 	@%p136 bra 	$L__BB0_174;
 
 	sub.s32 	%r493, %r155, %r496;
+	mov.u32 	%r494, 1;
 	mov.f32 	%f1250, %f47;
 
 $L__BB0_173:
@@ -14114,7 +14120,7 @@ $L__BB0_125:
 
 `
 	YnGovaluate1X3_ptx_70 = `
-.version 8.2
+.version 8.5
 .target sm_70
 .address_size 64
 
@@ -15310,6 +15316,7 @@ $L__BB0_171:
 	@%p136 bra 	$L__BB0_174;
 
 	sub.s32 	%r501, %r155, %r504;
+	mov.u32 	%r502, 1;
 	mov.f32 	%f1250, %f47;
 
 $L__BB0_173:
@@ -16461,7 +16468,7 @@ $L__BB0_125:
 
 `
 	YnGovaluate1X3_ptx_72 = `
-.version 8.2
+.version 8.5
 .target sm_72
 .address_size 64
 
@@ -17657,6 +17664,7 @@ $L__BB0_171:
 	@%p136 bra 	$L__BB0_174;
 
 	sub.s32 	%r501, %r155, %r504;
+	mov.u32 	%r502, 1;
 	mov.f32 	%f1250, %f47;
 
 $L__BB0_173:
@@ -18808,7 +18816,7 @@ $L__BB0_125:
 
 `
 	YnGovaluate1X3_ptx_75 = `
-.version 8.2
+.version 8.5
 .target sm_75
 .address_size 64
 
@@ -20004,6 +20012,7 @@ $L__BB0_171:
 	@%p136 bra 	$L__BB0_174;
 
 	sub.s32 	%r501, %r155, %r504;
+	mov.u32 	%r502, 1;
 	mov.f32 	%f1250, %f47;
 
 $L__BB0_173:
@@ -21155,7 +21164,7 @@ $L__BB0_125:
 
 `
 	YnGovaluate1X3_ptx_80 = `
-.version 8.2
+.version 8.5
 .target sm_80
 .address_size 64
 
@@ -22351,6 +22360,7 @@ $L__BB0_171:
 	@%p136 bra 	$L__BB0_174;
 
 	sub.s32 	%r501, %r155, %r504;
+	mov.u32 	%r502, 1;
 	mov.f32 	%f1250, %f47;
 
 $L__BB0_173:
