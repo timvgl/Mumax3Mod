@@ -27,13 +27,15 @@ var (
 	precessRelax             bool    = false
 	relaxTime                float64 = 0.
 	varyTime                 bool    = false
-	usePrefixOutputRelax	 bool	 = true
+	usePrefixOutputRelax     bool    = true
+	useLowEta                bool    = false
 )
 
 func init() {
 	DeclFunc("Relax", Relax, "Try to minimize the total energy")
 	DeclVar("outputRelax", &outputRelax, "")
 	DeclVar("useHighEta", &useHighEta, "")
+	DeclVar("useLowEta", &useLowEta, "")
 	DeclVar("__varyTime__", &varyTime, "")
 	DeclVar("__prefix_relax__", &prefix, "")
 	DeclVar("__usePrefixOutputRelax__", &usePrefixOutputRelax, "")
@@ -206,8 +208,11 @@ func RelaxCoupledOutput() {
 		Time = t_1
 	}()
 
-	if useHighEta == true {
+	if useHighEta {
 		Eta.Set(1e6)
+	}
+	if useLowEta {
+		Eta.Set(0)
 	}
 
 	if relaxTime != 0.0 {
@@ -549,6 +554,9 @@ func RelaxCoupled() {
 
 	if useHighEta == true {
 		Eta.Set(1e6)
+	}
+	if useLowEta == true {
+		Eta.Set(0)
 	}
 
 	if varyTime == false {
