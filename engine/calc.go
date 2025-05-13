@@ -26,7 +26,7 @@ func Calc(q Quantity, Category string) {
 		if !slices.Contains(Categories, Category) && Category != "FFT" {
 			Categories = append(Categories, Category)
 		} else if slices.Contains(Categories, Category) && Category != "FFT" {
-			//pass
+			//do nothing
 		} else {
 			panic("Cannot call FFT3D or FFT3DAs function from within Calc. Call FFT3DAs/FFT3D alone instead.")
 		}
