@@ -42,10 +42,13 @@ func get_sim_index() {
 
 func RunQueue(files []string) {
 	get_sim_index()
+	var wg sync.WaitGroup
+	wg.Add(len(files))
 	s := NewStateTab(files)
 	s.PrintTo(os.Stdout)
 	go s.ListenAndServe(*engine.Flag_port)
-	s.Run()
+	s.Run(&wg) // Run nimmt WG als Parameter
+	wg.Wait()  // hier blockieren, bis alle Done()
 	fmt.Println(numOK.get(), "OK, ", numFailed.get(), "failed")
 	os.Unsetenv(fmt.Sprintf("MumaxQueue_%d", QueueIndex))
 }
@@ -134,7 +137,7 @@ func waitForLowGPUUsage(gpu int) {
 }
 
 // Runs all the jobs in stateTab.
-func (s *stateTab) Run() {
+func (s *stateTab) Run(wg *sync.WaitGroup) {
 	nGPU := cu.DeviceGetCount()
 	idle := initGPUs(nGPU)
 	for {
@@ -161,6 +164,7 @@ func (s *stateTab) Run() {
 			break
 		}
 		go func() {
+			defer wg.Done()
 			run(j.inFile, gpu, j.port)
 			s.Finish(j)
 			waitForLowGPUUsage(gpu)
