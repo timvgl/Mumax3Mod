@@ -1,3 +1,4 @@
+#define __CUDA_NO_MATH_OVERLOAD
 #include <cuda_runtime.h>
 extern "C" __global__ void
 YnGovaluate1X3(float* __restrict__ output, float input2, float* __restrict__ input, int N) {

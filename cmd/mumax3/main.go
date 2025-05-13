@@ -32,6 +32,7 @@ var (
 	flag_example     = flag.Bool("example", false, "")
 	flag_stringCode  = flag.String("c", "", "")
 	flag_GPUTreshold = flag.Int("gputreshold", 100, "")
+	flag_maxPerGPU   = flag.Int("maxPerGPU", 1, "Maximum number of concurrent simulations per GPU")
 	// more flags in engine/gofiles.go
 )
 

@@ -217,12 +217,18 @@ func run(inFile string, gpu int, port string) {
 func initGPUs(nGpu int) chan int {
 	if nGpu == 0 {
 		log.Fatal("no GPUs available")
-		panic(0)
 	}
-	idle := make(chan int, nGpu)
-	for i := 0; i < nGpu; i++ {
-		waitForLowGPUUsage(i)
-		idle <- i
+	maxPerGPU := *flag_maxPerGPU
+	totalSlots := nGpu * maxPerGPU
+	idle := make(chan int, totalSlots)
+
+	// Für jede GPU maxPerGPU-mal einen Slot vergeben
+	for gpu := 0; gpu < nGpu; gpu++ {
+		for slot := 0; slot < maxPerGPU; slot++ {
+			// Optional: vor dem ersten Befüllen sicherstellen, dass GPU frei ist
+			waitForLowGPUUsage(gpu)
+			idle <- gpu
+		}
 	}
 	return idle
 }

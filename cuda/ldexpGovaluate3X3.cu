@@ -1,4 +1,5 @@
 #include "stencil.h"
+#define __CUDA_NO_MATH_OVERLOAD
 #include <cuda_runtime.h>
 // CUDA kernel for 3D addition with support for both broadcast and full-size inputs.
 // Inputs:

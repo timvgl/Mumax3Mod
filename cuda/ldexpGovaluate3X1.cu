@@ -1,3 +1,4 @@
+#define __CUDA_NO_MATH_OVERLOAD
 #include <cuda_runtime.h>
 
 extern "C" __global__ void
