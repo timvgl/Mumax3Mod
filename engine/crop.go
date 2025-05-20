@@ -117,9 +117,16 @@ func CropZ(parent Quantity, z1, z2 int) *cropped {
 
 func Crop(parent Quantity, x1, x2, y1, y2, z1, z2 int) *cropped {
 	n := MeshOf(parent).Size()
-	util.Argument(x1 < x2 && y1 < y2 && z1 < z2)
-	util.Argument(x1 >= 0 && y1 >= 0 && z1 >= 0)
-	util.Argument(x2 <= n[X] && y2 <= n[Y] && z2 <= n[Z])
+	fmt.Println(n)
+	util.AssertMsg(x1 < x2, "lower end of x >= upper end of x")
+	util.AssertMsg(y1 < y2, "lower end of y >= upper end of y")
+	util.AssertMsg(z1 < z2, "lower end of z >= upper end of z")
+	util.AssertMsg(x1 >= 0, "lower end of x out of bounds")
+	util.AssertMsg(y1 >= 0, "lower end of y out of bounds")
+	util.AssertMsg(z1 >= 0, "lower end of z out of bounds")
+	util.AssertMsg(x2 <= n[X], "upper end of x out of bounds")
+	util.AssertMsg(y2 <= n[Y], "upper end of y out of bounds")
+	util.AssertMsg(z2 <= n[Z], "upper end of z out of bounds")
 	name := NameOf(parent)
 	if ignoreCropName == false {
 		name += "_"

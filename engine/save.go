@@ -108,6 +108,14 @@ func SaveAs(q Quantity, fname string) {
 			saveAsFFT_sync(fname, data, info, outputFormat, NxNyNz, startK, endK, transformedAxis, true, true, comment)
 		})
 	} else if s, ok := q.(interface {
+		AxisFFT() ([3]int, [3]float64, [3]float64, []string)
+	}); ok {
+		NxNyNz, startK, endK, transformedAxis := s.AxisFFT()
+		comment := "real+imag"
+		queOutput(func() {
+			saveAsFFT_sync(fname, data, info, outputFormat, NxNyNz, startK, endK, transformedAxis, true, true, comment)
+		})
+	} else if s, ok := q.(interface {
 		Axis() ([3]int, [3]float64, [3]float64, []string)
 	}); ok {
 		NxNyNz, startK, endK, transformedAxis := s.Axis()

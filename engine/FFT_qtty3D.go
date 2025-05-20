@@ -2,7 +2,7 @@ package engine
 
 import (
 	"slices"
-
+	"fmt"
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/data"
 )
@@ -249,7 +249,13 @@ func (d *fftOperation3D) evalIntern() {
 func (d *fftOperation3D) Mesh() *data.Mesh {
 	s := d.FFTOutputSize()
 	c := Mesh().CellSize()
-	return data.NewMesh(s[X]/2, s[Y], s[Z], 1/(c[X]*float64(s[X])), 1/(c[Y]*float64(s[Y])), 1/(c[Z]*float64(s[Z])))
+	s[X] /= 2
+	fmt.Println(fmt.Sprintf("Mesh size: %d, %d and %d", s[X], s[Y], s[Z]))
+	if d.NegativeKX {
+		return data.NewMesh(s[X], s[Y], s[Z], 1/(c[X]*float64(s[X])), 1/(c[Y]*float64(s[Y])), 1/(c[Z]*float64(s[Z])))
+	} else {
+		return data.NewMesh(s[X], s[Y], s[Z], 2/(c[X]*float64(s[X])), 1/(c[Y]*float64(s[Y])), 1/(c[Z]*float64(s[Z])))
+	}
 }
 
 func (d *fftOperation3D) Name() string {

@@ -61,6 +61,8 @@ func init() {
 	DeclFunc("EraseOD", EraseOD, "")
 	DeclVar("Suffix", &Suffix, "")
 	DeclFunc("int", castInt, "")
+	DeclFunc("iceil", func(v float64) int { return int(math.Ceil(v)) }, "")
+	DeclFunc("ifloor", func(v float64) int { return int(math.Floor(v)) }, "")
 	DeclFunc("float", castFloat, "")
 	DeclFunc("string", castString, "")
 	DeclFunc("NUndoneToLog", NUndoneToLog, "")
