@@ -117,7 +117,6 @@ func CropZ(parent Quantity, z1, z2 int) *cropped {
 
 func Crop(parent Quantity, x1, x2, y1, y2, z1, z2 int) *cropped {
 	n := MeshOf(parent).Size()
-	fmt.Println(n)
 	util.AssertMsg(x1 < x2, "lower end of x >= upper end of x")
 	util.AssertMsg(y1 < y2, "lower end of y >= upper end of y")
 	util.AssertMsg(z1 < z2, "lower end of z >= upper end of z")
