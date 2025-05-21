@@ -407,7 +407,6 @@ func (s *fftOperation4D) SaveResults() {
 		panic("FFT_T data could not be found during export.")
 	}
 	size := FFT_T_data.Size()
-	fmt.Println("size:", size, "LengthF:", FFT_T_data.LengthF)
 	if s.polar {
 		cuda.ComplexToPolar(FFT_T_data, FFT_T_data)
 	}
