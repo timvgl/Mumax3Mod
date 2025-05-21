@@ -4,6 +4,7 @@ package engine
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/data"
@@ -25,12 +26,114 @@ func init() {
 	DeclFunc("CropZOperator", CropZOperator, "")
 	DeclFunc("CropOperator", CropOperator, "")
 	DeclFunc("CropLayerOperator", CropLayerOperator, "")
+	DeclFunc("CropK", CropK, "Crops a quantity to k-space ranges [kx1,kx2[, [ky1,ky2[, [kz1,kz2[")
+	DeclFunc("CropKx", CropKx, "Crops a quantity to k-space ranges [kx1,kx2[")
+	DeclFunc("CropKy", CropKy, "Crops a quantity to k-space ranges [ky1,ky2[")
+	DeclFunc("CropKz", CropKz, "Crops a quantity to k-space ranges [kz1,kz2[")
+	DeclFunc("CropKxy", CropKxy, "Crops a quantity to k-space ranges [kx1,kx2[, [ky1,ky2[")
+	DeclFunc("CropKOperator", CropKOperator, "")
+	DeclFunc("CropKxOperator", CropKxOperator, "")
+	DeclFunc("CropKyOperator", CropKyOperator, "")
+	DeclFunc("CropKzOperator", CropKzOperator, "")
+	DeclFunc("CropKxyOperator", CropKxyOperator, "")
 }
 
 type cropped struct {
 	parent                 Quantity
 	name                   string
 	x1, x2, y1, y2, z1, z2 int
+}
+
+func CropK(parent Quantity, kx_start, kx_end, ky_start, ky_end, kz_start, kz_end float64) *cropped {
+	mesh := MeshOf(parent)
+	size := mesh.Size()
+	c := mesh.CellSize()
+	startIndexX := 0.0
+	if NegativeKX {
+		startIndexX = float64(size[X]) / 2
+	}
+	return Crop(parent,
+		int(math.Ceil(startIndexX+kx_start/c[X])), int(math.Floor(startIndexX+kx_end/c[X])),
+		int(math.Ceil(float64(size[Y])/2+ky_start/c[Y])), int(math.Floor(float64(size[Y])/2+ky_end/c[Y])),
+		int(math.Ceil(float64(size[Z])/2+kz_start/c[Z])), int(math.Floor(float64(size[Z])/2+kz_end/c[Z])))
+}
+
+func CropKx(parent Quantity, kx_start, kx_end float64) *cropped {
+	mesh := MeshOf(parent)
+	size := mesh.Size()
+	c := mesh.CellSize()
+	startIndexX := 0.0
+	if NegativeKX {
+		startIndexX = float64(size[X]) / 2
+	}
+	return Crop(parent,
+		int(math.Ceil(startIndexX+kx_start/c[X])), int(math.Floor(startIndexX+kx_end/c[X])),
+		0, size[Y],
+		0, size[Z])
+}
+
+func CropKy(parent Quantity, ky_start, ky_end float64) *cropped {
+	mesh := MeshOf(parent)
+	size := mesh.Size()
+	c := mesh.CellSize()
+	return Crop(parent,
+		0, size[X],
+		int(math.Ceil(float64(size[Y])/2+ky_start/c[Y])), int(math.Floor(float64(size[Y])/2+ky_end/c[Y])),
+		0, size[Z])
+}
+
+func CropKz(parent Quantity, kz_start, kz_end float64) *cropped {
+	mesh := MeshOf(parent)
+	size := mesh.Size()
+	c := mesh.CellSize()
+	return Crop(parent,
+		0, size[X],
+		0, size[Y],
+		int(math.Ceil(float64(size[Z])/2+kz_start/c[Z])), int(math.Floor(float64(size[Z])/2+kz_end/c[Z])))
+}
+
+func CropKxy(parent Quantity, kx_start, kx_end, ky_start, ky_end float64) *cropped {
+	mesh := MeshOf(parent)
+	size := mesh.Size()
+	c := mesh.CellSize()
+	startIndexX := 0.0
+	if NegativeKX {
+		startIndexX = float64(size[X]) / 2
+	}
+	return Crop(parent,
+		int(math.Ceil(startIndexX+kx_start/c[X])), int(math.Floor(startIndexX+kx_end/c[X])),
+		int(math.Ceil(float64(size[Y])/2+ky_start/c[Y])), int(math.Floor(float64(size[Y])/2+ky_end/c[Y])),
+		0, size[Z])
+}
+
+func CropKOperator(kx_start, kx_end, ky_start, ky_end, kz_start, kz_end float64) func(parent Quantity) Quantity {
+	return func(parent Quantity) Quantity {
+		return CropK(parent, kx_start, kx_end, ky_start, ky_end, kz_start, kz_end)
+	}
+}
+
+func CropKxOperator(kx_start, kx_end float64) func(parent Quantity) Quantity {
+	return func(parent Quantity) Quantity {
+		return CropKx(parent, kx_start, kx_end)
+	}
+}
+
+func CropKyOperator(ky_start, ky_end float64) func(parent Quantity) Quantity {
+	return func(parent Quantity) Quantity {
+		return CropKy(parent, ky_start, ky_end)
+	}
+}
+
+func CropKzOperator(kz_start, kz_end float64) func(parent Quantity) Quantity {
+	return func(parent Quantity) Quantity {
+		return CropKz(parent, kz_start, kz_end)
+	}
+}
+
+func CropKxyOperator(kx_start, kx_end, ky_start, ky_end float64) func(parent Quantity) Quantity {
+	return func(parent Quantity) Quantity {
+		return CropKxy(parent, kx_start, kx_end, ky_start, ky_end)
+	}
 }
 
 // Crop quantity to a box enclosing the given region.
@@ -127,7 +230,7 @@ func Crop(parent Quantity, x1, x2, y1, y2, z1, z2 int) *cropped {
 	util.AssertMsg(y2 <= n[Y], "upper end of y out of bounds")
 	util.AssertMsg(z2 <= n[Z], "upper end of z out of bounds")
 	name := NameOf(parent)
-	if ignoreCropName == false {
+	if !ignoreCropName {
 		name += "_"
 		if x1 != 0 || x2 != n[X] {
 			name += "xrange" + rangeStr(x1, x2)
