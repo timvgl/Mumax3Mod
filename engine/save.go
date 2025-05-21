@@ -109,7 +109,7 @@ func SaveAs(q Quantity, fname string) {
 		})
 	} else if s, ok := q.(interface {
 		AxisFFT() ([3]int, [3]float64, [3]float64, []string)
-	}); ok {
+	}); ok && IsFFT3D(q) {
 		NxNyNz, startK, endK, transformedAxis := s.AxisFFT()
 		comment := "real+imag"
 		queOutput(func() {

@@ -44,13 +44,19 @@ type cropped struct {
 	x1, x2, y1, y2, z1, z2 int
 }
 
-func CropK(parent Quantity, kx_start, kx_end, ky_start, ky_end, kz_start, kz_end float64) *cropped {
+func CropK(parent Quantity, kx_start, kx_end, ky_start, ky_end, kz_start, kz_end float64, symmetricX ...bool) *cropped {
 	mesh := MeshOf(parent)
 	size := mesh.Size()
 	c := mesh.CellSize()
 	startIndexX := 0.0
-	if NegativeKX {
-		startIndexX = float64(size[X]) / 2
+	if len(symmetricX) == 0 {
+		if NegativeKX {
+			startIndexX = float64(size[X]) / 2
+		}
+	} else {
+		if symmetricX[0] {
+			startIndexX = float64(size[X]) / 2
+		}
 	}
 	return Crop(parent,
 		int(math.Ceil(startIndexX+kx_start/c[X])), int(math.Floor(startIndexX+kx_end/c[X])),
@@ -58,13 +64,19 @@ func CropK(parent Quantity, kx_start, kx_end, ky_start, ky_end, kz_start, kz_end
 		int(math.Ceil(float64(size[Z])/2+kz_start/c[Z])), int(math.Floor(float64(size[Z])/2+kz_end/c[Z])))
 }
 
-func CropKx(parent Quantity, kx_start, kx_end float64) *cropped {
+func CropKx(parent Quantity, kx_start, kx_end float64, symmetricX ...bool) *cropped {
 	mesh := MeshOf(parent)
 	size := mesh.Size()
 	c := mesh.CellSize()
 	startIndexX := 0.0
-	if NegativeKX {
-		startIndexX = float64(size[X]) / 2
+	if len(symmetricX) == 0 {
+		if NegativeKX {
+			startIndexX = float64(size[X]) / 2
+		}
+	} else {
+		if symmetricX[0] {
+			startIndexX = float64(size[X]) / 2
+		}
 	}
 	return Crop(parent,
 		int(math.Ceil(startIndexX+kx_start/c[X])), int(math.Floor(startIndexX+kx_end/c[X])),
@@ -92,13 +104,19 @@ func CropKz(parent Quantity, kz_start, kz_end float64) *cropped {
 		int(math.Ceil(float64(size[Z])/2+kz_start/c[Z])), int(math.Floor(float64(size[Z])/2+kz_end/c[Z])))
 }
 
-func CropKxy(parent Quantity, kx_start, kx_end, ky_start, ky_end float64) *cropped {
+func CropKxy(parent Quantity, kx_start, kx_end, ky_start, ky_end float64, symmetricX ...bool) *cropped {
 	mesh := MeshOf(parent)
 	size := mesh.Size()
 	c := mesh.CellSize()
 	startIndexX := 0.0
-	if NegativeKX {
-		startIndexX = float64(size[X]) / 2
+	if len(symmetricX) == 0 {
+		if NegativeKX {
+			startIndexX = float64(size[X]) / 2
+		}
+	} else {
+		if symmetricX[0] {
+			startIndexX = float64(size[X]) / 2
+		}
 	}
 	return Crop(parent,
 		int(math.Ceil(startIndexX+kx_start/c[X])), int(math.Floor(startIndexX+kx_end/c[X])),
@@ -108,13 +126,13 @@ func CropKxy(parent Quantity, kx_start, kx_end, ky_start, ky_end float64) *cropp
 
 func CropKOperator(kx_start, kx_end, ky_start, ky_end, kz_start, kz_end float64) func(parent Quantity) Quantity {
 	return func(parent Quantity) Quantity {
-		return CropK(parent, kx_start, kx_end, ky_start, ky_end, kz_start, kz_end)
+		return CropK(parent, kx_start, kx_end, ky_start, ky_end, kz_start, kz_end, NegativeKX)
 	}
 }
 
 func CropKxOperator(kx_start, kx_end float64) func(parent Quantity) Quantity {
 	return func(parent Quantity) Quantity {
-		return CropKx(parent, kx_start, kx_end)
+		return CropKx(parent, kx_start, kx_end, NegativeKX)
 	}
 }
 
@@ -132,7 +150,7 @@ func CropKzOperator(kz_start, kz_end float64) func(parent Quantity) Quantity {
 
 func CropKxyOperator(kx_start, kx_end, ky_start, ky_end float64) func(parent Quantity) Quantity {
 	return func(parent Quantity) Quantity {
-		return CropKxy(parent, kx_start, kx_end, ky_start, ky_end)
+		return CropKxy(parent, kx_start, kx_end, ky_start, ky_end, NegativeKX)
 	}
 }
 
