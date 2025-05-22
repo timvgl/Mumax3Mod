@@ -175,6 +175,9 @@ func (c *DemagConvolution) init(realKern [3][3]*data.Slice) {
 			}
 		}
 	}
+	fftKern.Free()
+	kfull.Free()
+	kCmplx.Free()
 }
 
 func (c *DemagConvolution) Free() {
