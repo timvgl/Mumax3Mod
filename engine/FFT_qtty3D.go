@@ -251,9 +251,9 @@ func (d *fftOperation3D) Mesh() *data.Mesh {
 	c := Mesh().CellSize()
 	s[X] /= 2
 	if d.NegativeKX {
-		return data.NewMesh(s[X], s[Y], s[Z], 1/(c[X]*float64(s[X])), 1/(c[Y]*float64(s[Y])), 1/(c[Z]*float64(s[Z])))
+		return data.NewMesh(s[X], s[Y], s[Z], 1/(c[X]*float64(s[X]-2)), 1/(c[Y]*float64(s[Y])), 1/(c[Z]*float64(s[Z])))
 	} else {
-		return data.NewMesh(s[X], s[Y], s[Z], 2/(c[X]*float64(s[X])), 1/(c[Y]*float64(s[Y])), 1/(c[Z]*float64(s[Z])))
+		return data.NewMesh(s[X], s[Y], s[Z], 2/(c[X]*float64(s[X]-1)), 1/(c[Y]*float64(s[Y])), 1/(c[Z]*float64(s[Z])))
 	}
 }
 
@@ -324,7 +324,11 @@ func (d *fftOperation3DReal) EvalTo(dst *data.Slice) {
 func (d *fftOperation3DReal) Mesh() *data.Mesh {
 	s := d.fftOutputSize()
 	c := Mesh().CellSize()
-	return data.NewMesh(s[X], s[Y], s[Z], 1/(c[X]*float64(s[X])), 1/(c[Y]*float64(s[Y])), 1/(c[Z]*float64(s[Z])))
+	if d.NegativeKX {
+		return data.NewMesh(s[X], s[Y], s[Z], 1/(c[X]*float64(s[X]-2)), 1/(c[Y]*float64(s[Y])), 1/(c[Z]*float64(s[Z])))
+	} else {
+		return data.NewMesh(s[X], s[Y], s[Z], 1/(c[X]*float64(s[X]-1)), 1/(c[Y]*float64(s[Y])), 1/(c[Z]*float64(s[Z])))
+	}
 }
 
 func (d *fftOperation3DReal) Name() string {
@@ -371,7 +375,11 @@ func (d *fftOperation3DImag) EvalTo(dst *data.Slice) {
 func (d *fftOperation3DImag) Mesh() *data.Mesh {
 	s := d.fftOutputSize()
 	c := Mesh().CellSize()
-	return data.NewMesh(s[X], s[Y], s[Z], 1/(c[X]*float64(s[X])), 1/(c[Y]*float64(s[Y])), 1/(c[Z]*float64(s[Z])))
+	if d.NegativeKX {
+		return data.NewMesh(s[X], s[Y], s[Z], 1/(c[X]*float64(s[X]-2)), 1/(c[Y]*float64(s[Y])), 1/(c[Z]*float64(s[Z])))
+	} else {
+		return data.NewMesh(s[X], s[Y], s[Z], 1/(c[X]*float64(s[X]-1)), 1/(c[Y]*float64(s[Y])), 1/(c[Z]*float64(s[Z])))
+	}
 }
 
 func (d *fftOperation3DImag) Name() string {
@@ -425,7 +433,11 @@ func (d *fftOperation3DPhi) EvalTo(dst *data.Slice) {
 func (d *fftOperation3DPhi) Mesh() *data.Mesh {
 	s := d.fftOutputSize()
 	c := Mesh().CellSize()
-	return data.NewMesh(s[X], s[Y], s[Z], 1/(c[X]*float64(s[X])), 1/(c[Y]*float64(s[Y])), 1/(c[Z]*float64(s[Z])))
+	if d.NegativeKX {
+		return data.NewMesh(s[X], s[Y], s[Z], 1/(c[X]*float64(s[X]-2)), 1/(c[Y]*float64(s[Y])), 1/(c[Z]*float64(s[Z])))
+	} else {
+		return data.NewMesh(s[X], s[Y], s[Z], 1/(c[X]*float64(s[X]-1)), 1/(c[Y]*float64(s[Y])), 1/(c[Z]*float64(s[Z])))
+	}
 }
 
 func (d *fftOperation3DPhi) Name() string {
@@ -479,7 +491,11 @@ func (d *fftOperation3DAbs) EvalTo(dst *data.Slice) {
 func (d *fftOperation3DAbs) Mesh() *data.Mesh {
 	s := d.fftOutputSize()
 	c := Mesh().CellSize()
-	return data.NewMesh(s[X], s[Y], s[Z], 1/(c[X]*float64(s[X])), 1/(c[Y]*float64(s[Y])), 1/(c[Z]*float64(s[Z])))
+	if d.NegativeKX {
+		return data.NewMesh(s[X], s[Y], s[Z], 1/(c[X]*float64(s[X]-2)), 1/(c[Y]*float64(s[Y])), 1/(c[Z]*float64(s[Z])))
+	} else {
+		return data.NewMesh(s[X], s[Y], s[Z], 1/(c[X]*float64(s[X]-1)), 1/(c[Y]*float64(s[Y])), 1/(c[Z]*float64(s[Z])))
+	}
 }
 
 func (d *fftOperation3DAbs) Name() string {
