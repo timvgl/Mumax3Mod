@@ -58,10 +58,33 @@ func CropK(parent Quantity, kx_start, kx_end, ky_start, ky_end, kz_start, kz_end
 			startIndexX = float64(size[X]) / 2
 		}
 	}
+	x1 := int(math.Ceil(startIndexX + kx_start/c[X]))
+	var x2 int
+	if kx_end == kx_start {
+		x2 = x1 + 1
+	} else {
+		x2 = int(math.Floor(startIndexX + kx_end/c[X]))
+	}
+	midY := float64(size[Y]) / 2
+	y1 := int(math.Ceil(midY + ky_start/c[Y]))
+	var y2 int
+	if ky_end == ky_start {
+		y2 = y1 + 1
+	} else {
+		y2 = int(math.Floor(midY + ky_end/c[Y]))
+	}
+	midZ := float64(size[Z]) / 2
+	z1 := int(math.Ceil(midZ + kz_start/c[Z]))
+	var z2 int
+	if kz_end == kz_start {
+		z2 = z1 + 1
+	} else {
+		z2 = int(math.Floor(midZ + kz_end/c[Z]))
+	}
 	return Crop(parent,
-		int(math.Ceil(startIndexX+kx_start/c[X])), int(math.Floor(startIndexX+kx_end/c[X])),
-		int(math.Ceil(float64(size[Y])/2+ky_start/c[Y])), int(math.Floor(float64(size[Y])/2+ky_end/c[Y])),
-		int(math.Ceil(float64(size[Z])/2+kz_start/c[Z])), int(math.Floor(float64(size[Z])/2+kz_end/c[Z])))
+		x1, x2,
+		y1, y2,
+		z1, z2)
 }
 
 func CropKx(parent Quantity, kx_start, kx_end float64, symmetricX ...bool) *cropped {
@@ -78,8 +101,15 @@ func CropKx(parent Quantity, kx_start, kx_end float64, symmetricX ...bool) *crop
 			startIndexX = float64(size[X]) / 2
 		}
 	}
+	x1 := int(math.Ceil(startIndexX + kx_start/c[X]))
+	var x2 int
+	if kx_end == kx_start {
+		x2 = x1 + 1
+	} else {
+		x2 = int(math.Floor(startIndexX + kx_end/c[X]))
+	}
 	return Crop(parent,
-		int(math.Ceil(startIndexX+kx_start/c[X])), int(math.Floor(startIndexX+kx_end/c[X])),
+		x1, x2,
 		0, size[Y],
 		0, size[Z])
 }
@@ -88,9 +118,17 @@ func CropKy(parent Quantity, ky_start, ky_end float64) *cropped {
 	mesh := MeshOf(parent)
 	size := mesh.Size()
 	c := mesh.CellSize()
+	midY := float64(size[Y]) / 2
+	y1 := int(math.Ceil(midY + ky_start/c[Y]))
+	var y2 int
+	if ky_end == ky_start {
+		y2 = y1 + 1
+	} else {
+		y2 = int(math.Floor(midY + ky_end/c[Y]))
+	}
 	return Crop(parent,
 		0, size[X],
-		int(math.Ceil(float64(size[Y])/2+ky_start/c[Y])), int(math.Floor(float64(size[Y])/2+ky_end/c[Y])),
+		y1, y2,
 		0, size[Z])
 }
 
@@ -98,10 +136,18 @@ func CropKz(parent Quantity, kz_start, kz_end float64) *cropped {
 	mesh := MeshOf(parent)
 	size := mesh.Size()
 	c := mesh.CellSize()
+	midZ := float64(size[Z]) / 2
+	z1 := int(math.Ceil(midZ + kz_start/c[Z]))
+	var z2 int
+	if kz_end == kz_start {
+		z2 = z1 + 1
+	} else {
+		z2 = int(math.Floor(midZ + kz_end/c[Z]))
+	}
 	return Crop(parent,
 		0, size[X],
 		0, size[Y],
-		int(math.Ceil(float64(size[Z])/2+kz_start/c[Z])), int(math.Floor(float64(size[Z])/2+kz_end/c[Z])))
+		z1, z2)
 }
 
 func CropKxy(parent Quantity, kx_start, kx_end, ky_start, ky_end float64, symmetricX ...bool) *cropped {
@@ -118,9 +164,24 @@ func CropKxy(parent Quantity, kx_start, kx_end, ky_start, ky_end float64, symmet
 			startIndexX = float64(size[X]) / 2
 		}
 	}
+	x1 := int(math.Ceil(startIndexX + kx_start/c[X]))
+	var x2 int
+	if kx_end == kx_start {
+		x2 = x1 + 1
+	} else {
+		x2 = int(math.Floor(startIndexX + kx_end/c[X]))
+	}
+	midY := float64(size[Y]) / 2
+	y1 := int(math.Ceil(midY + ky_start/c[Y]))
+	var y2 int
+	if ky_end == ky_start {
+		y2 = y1 + 1
+	} else {
+		y2 = int(math.Floor(midY + ky_end/c[Y]))
+	}
 	return Crop(parent,
-		int(math.Ceil(startIndexX+kx_start/c[X])), int(math.Floor(startIndexX+kx_end/c[X])),
-		int(math.Ceil(float64(size[Y])/2+ky_start/c[Y])), int(math.Floor(float64(size[Y])/2+ky_end/c[Y])),
+		x1, x2,
+		y1, y2,
 		0, size[Z])
 }
 
