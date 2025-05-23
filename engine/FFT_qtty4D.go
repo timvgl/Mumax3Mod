@@ -419,26 +419,34 @@ func (s *fftOperation4D) SaveResults() {
 					data.CopyPart(polarBuffer, FFT_T_data, 0, size[X], 0, size[Y], 0, size[Z], i, i+1, 0, 0, 0, 0)
 				}
 				if !s.phi && !s.abs {
-					saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, s.label+"_f_polar", i)+".ovf", FFT_T_data.HostCopyPart(0, size[X], 0, size[Y], 0, size[Z], i, i+1), info, outputFormat, axisSize, axisStartK, axisEndK, transformedAxis, true, false, "abs+phi")
+					hostData := FFT_T_data.HostCopyPart(0, size[X], 0, size[Y], 0, size[Z], i, i+1)
+					saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, s.label+"_f_polar", i)+".ovf", hostData, info, outputFormat, axisSize, axisStartK, axisEndK, transformedAxis, true, false, "abs+phi")
+					hostData.Free()
 				} else if s.phi {
 					sizePhi := size
 					sizePhi[0] /= 2
 					phiBuffer := cuda.Buffer(FFT_T_data.NComp(), sizePhi)
 					cuda.Imag(phiBuffer, polarBuffer) //same operation as imag - alternating real and imag or abs and phi
-					saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, s.label+"_f_phi", i)+".ovf", phiBuffer.HostCopy(), info, outputFormat, axisSize, axisStartK, axisEndK, transformedAxis, false, false, "phi")
+					hostData := phiBuffer.HostCopy()
+					saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, s.label+"_f_phi", i)+".ovf", hostData, info, outputFormat, axisSize, axisStartK, axisEndK, transformedAxis, false, false, "phi")
 					cuda.Recycle(phiBuffer)
+					hostData.Free()
 				}
 				if s.abs {
 					sizeAbs := size
 					sizeAbs[0] /= 2
 					absBuffer := cuda.Buffer(FFT_T_data.NComp(), sizeAbs)
 					cuda.Real(absBuffer, polarBuffer) //same operation as imag - alternating real and imag or abs and phi
-					saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, s.label+"_f_abs", i)+".ovf", absBuffer.HostCopy(), info, outputFormat, axisSize, axisStartK, axisEndK, transformedAxis, false, false, "abs")
+					hostData := absBuffer.HostCopy()
+					saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, s.label+"_f_abs", i)+".ovf", hostData, info, outputFormat, axisSize, axisStartK, axisEndK, transformedAxis, false, false, "abs")
 					cuda.Recycle(absBuffer)
+					hostData.Free()
 				}
 				cuda.Recycle(polarBuffer)
 			} else {
-				saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, s.label+"_f", i)+".ovf", FFT_T_data.HostCopyPart(0, size[X], 0, size[Y], 0, size[Z], i, i+1), info, outputFormat, axisSize, axisStartK, axisEndK, transformedAxis, true, false, "real+imag")
+				hostData := FFT_T_data.HostCopyPart(0, size[X], 0, size[Y], 0, size[Z], i, i+1)
+				saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, s.label+"_f", i)+".ovf", hostData, info, outputFormat, axisSize, axisStartK, axisEndK, transformedAxis, true, false, "real+imag")
+				hostData.Free()
 			}
 		} else {
 			info := data.Meta{Freq: s.minF + float64(i)*s.dF, Name: s.label + "_f", Unit: UnitOf(s.qOP), CellSize: MeshOf(s.qOP).CellSize()}
@@ -448,26 +456,34 @@ func (s *fftOperation4D) SaveResults() {
 					data.CopyPart(polarBuffer, FFT_T_data, 0, size[X], 0, size[Y], 0, size[Z], i, i+1, 0, 0, 0, 0)
 				}
 				if !s.phi && !s.abs {
-					saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, s.label+"_f_polar", i)+".ovf", FFT_T_data.HostCopyPart(0, size[X], 0, size[Y], 0, size[Z], i, i+1), info, outputFormat, axisSize, axisStartK, axisEndK, transformedAxis, true, false, "abs+phi")
+					hostData := FFT_T_data.HostCopyPart(0, size[X], 0, size[Y], 0, size[Z], i, i+1)
+					saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, s.label+"_f_polar", i)+".ovf", hostData, info, outputFormat, axisSize, axisStartK, axisEndK, transformedAxis, true, false, "abs+phi")
+					hostData.Free()
 				} else if s.phi {
 					sizePhi := size
 					sizePhi[0] /= 2
 					phiBuffer := cuda.Buffer(FFT_T_data.NComp(), sizePhi)
 					cuda.Imag(phiBuffer, polarBuffer) //same operation as imag - alternating real and imag or abs and phi
-					saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, s.label+"_f_phi", i)+".ovf", phiBuffer.HostCopy(), info, outputFormat, axisSize, axisStartK, axisEndK, transformedAxis, false, false, "phi")
+					hostData := phiBuffer.HostCopy()
+					saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, s.label+"_f_phi", i)+".ovf", hostData, info, outputFormat, axisSize, axisStartK, axisEndK, transformedAxis, false, false, "phi")
 					cuda.Recycle(phiBuffer)
+					hostData.Free()
 				}
 				if s.abs {
 					sizeAbs := size
 					sizeAbs[0] /= 2
 					absBuffer := cuda.Buffer(FFT_T_data.NComp(), sizeAbs)
 					cuda.Real(absBuffer, polarBuffer) //same operation as imag - alternating real and imag or abs and phi
-					saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, s.label+"_f_abs", i)+".ovf", absBuffer.HostCopy(), info, outputFormat, axisSize, axisStartK, axisEndK, transformedAxis, false, false, "abs")
+					hostData := absBuffer.HostCopy()
+					saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, s.label+"_f_abs", i)+".ovf", hostData, info, outputFormat, axisSize, axisStartK, axisEndK, transformedAxis, false, false, "abs")
 					cuda.Recycle(absBuffer)
+					hostData.Free()
 				}
 				cuda.Recycle(polarBuffer)
 			} else {
-				saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, s.label+"_f", i)+".ovf", FFT_T_data.HostCopyPart(0, size[X], 0, size[Y], 0, size[Z], i, i+1), info, outputFormat, axisSize, axisStartK, axisEndK, transformedAxis, true, false, "real+imag")
+				hostData := FFT_T_data.HostCopyPart(0, size[X], 0, size[Y], 0, size[Z], i, i+1)
+				saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, s.label+"_f", i)+".ovf", hostData, info, outputFormat, axisSize, axisStartK, axisEndK, transformedAxis, true, false, "real+imag")
+				hostData.Free()
 			}
 		}
 
