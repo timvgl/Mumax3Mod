@@ -18,14 +18,12 @@ func WriteOVF2(out io.Writer, q *data.Slice, meta data.Meta, dataformat string) 
 	writeOVF2Header(out, q, meta)
 	writeOVF2Data(out, q, dataformat)
 	hdr(out, "End", "Segment")
-	q.Free()
 }
 
 func WriteOVF2FFT(out io.Writer, q *data.Slice, meta data.Meta, dataformat string, NxNyNz [3]int, startK, endK [3]float64, transformedAxes []string, timeSpace bool, comment string) {
 	writeOVF2HeaderFFT(out, q, meta, NxNyNz, startK, endK, transformedAxes, timeSpace, comment)
 	writeOVF2Data(out, q, dataformat)
 	hdr(out, "End", "Segment")
-	q.Free()
 }
 
 func writeOVF2Header(out io.Writer, q *data.Slice, meta data.Meta) {
