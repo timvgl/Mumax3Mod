@@ -106,6 +106,7 @@ func SaveAs(q Quantity, fname string) {
 		}
 		queOutput(func() {
 			saveAsFFT_sync(fname, data, info, outputFormat, NxNyNz, startK, endK, transformedAxis, true, true, comment)
+			data.Free()
 		})
 	} else if s, ok := q.(interface {
 		AxisFFT() ([3]int, [3]float64, [3]float64, []string)
@@ -114,6 +115,7 @@ func SaveAs(q Quantity, fname string) {
 		comment := "real+imag"
 		queOutput(func() {
 			saveAsFFT_sync(fname, data, info, outputFormat, NxNyNz, startK, endK, transformedAxis, true, true, comment)
+			data.Free()
 		})
 	} else if s, ok := q.(interface {
 		Axis() ([3]int, [3]float64, [3]float64, []string)
@@ -121,11 +123,14 @@ func SaveAs(q Quantity, fname string) {
 		NxNyNz, startK, endK, transformedAxis := s.Axis()
 		queOutput(func() {
 			saveAsFFT_sync(fname, data, info, outputFormat, NxNyNz, startK, endK, transformedAxis, false, true, "")
+			data.Free()
 		})
 	} else {
-		queOutput(func() { saveAs_sync(fname, data, info, outputFormat) })
+		queOutput(func() {
+			saveAs_sync(fname, data, info, outputFormat)
+			data.Free()
+		})
 	}
-	data.Free()
 }
 
 func SaveAsAt(q Quantity, fname, dir string) {
@@ -155,6 +160,7 @@ func SaveAsAt(q Quantity, fname, dir string) {
 		}
 		queOutput(func() {
 			saveAsFFT_sync(fname, data, info, outputFormat, NxNyNz, startK, endK, transformedAxis, true, true, comment)
+			data.Free()
 		})
 	} else if s, ok := q.(interface {
 		Axis() ([3]int, [3]float64, [3]float64, []string)
@@ -162,11 +168,14 @@ func SaveAsAt(q Quantity, fname, dir string) {
 		NxNyNz, startK, endK, transformedAxis := s.Axis()
 		queOutput(func() {
 			saveAsFFT_sync(fname, data, info, outputFormat, NxNyNz, startK, endK, transformedAxis, false, true, "")
+			data.Free()
 		})
 	} else {
-		queOutput(func() { saveAs_sync(fname, data, info, outputFormat) })
+		queOutput(func() {
+			saveAs_sync(fname, data, info, outputFormat)
+			data.Free()
+		})
 	}
-	data.Free()
 }
 
 // Save image once, with auto file name
@@ -183,22 +192,28 @@ func Snapshot(q Quantity) {
 		defer cuda.Recycle(buf)
 		s.Real().EvalTo(buf)
 		dataReal := buf.HostCopy()
-		queOutput(func() { snapshot_sync(fnameReal, dataReal) })
-		dataReal.Free()
+		queOutput(func() {
+			snapshot_sync(fnameReal, dataReal)
+			dataReal.Free()
+		})
 
 		fnameImag := fmt.Sprintf(OD()+FilenameFormat+"."+SnapshotFormat, qname+"_imag", autonumSnapshots[qname])
 		cuda.Zero(buf)
 		s.Imag().EvalTo(buf)
 		dataImag := buf.HostCopy()
-		queOutput(func() { snapshot_sync(fnameImag, dataImag) })
-		dataImag.Free()
+		queOutput(func() {
+			snapshot_sync(fnameImag, dataImag)
+			dataImag.Free()
+		})
 	} else {
 		s := ValueOf(q)
 		defer cuda.Recycle(s)
 		data := s.HostCopy() // must be copy (asyncio)
 		fname := fmt.Sprintf(OD()+FilenameFormat+"."+SnapshotFormat, qname, autonumSnapshots[qname])
-		queOutput(func() { snapshot_sync(fname, data) })
-		data.Free()
+		queOutput(func() {
+			snapshot_sync(fname, data, NameOf(q))
+			data.Free()
+		})
 	}
 	autonumSnapshots[qname]++
 }
@@ -217,22 +232,28 @@ func SnapshotPrefix(q Quantity, prefix string) {
 		defer cuda.Recycle(buf)
 		s.Real().EvalTo(buf)
 		dataReal := buf.HostCopy()
-		queOutput(func() { snapshot_sync(fnameReal, dataReal) })
-		dataReal.Free()
+		queOutput(func() {
+			snapshot_sync(fnameReal, dataReal)
+			dataReal.Free()
+		})
 
 		fnameImag := fmt.Sprintf(OD()+FilenameFormat+"."+SnapshotFormat, prefix+"_"+qname+"_imag", autonumSnapshotsPrefix[qname])
 		cuda.Zero(buf)
 		s.Imag().EvalTo(buf)
 		dataImag := buf.HostCopy()
-		queOutput(func() { snapshot_sync(fnameImag, dataImag) })
-		dataImag.Free()
+		queOutput(func() {
+			snapshot_sync(fnameImag, dataImag)
+			dataImag.Free()
+		})
 	} else {
 		s := ValueOf(q)
 		defer cuda.Recycle(s)
 		data := s.HostCopy() // must be copy (asyncio)
 		fname := fmt.Sprintf(OD()+FilenameFormat+"."+SnapshotFormat, prefix+"_"+qname, autonumSnapshotsPrefix[qname])
-		queOutput(func() { snapshot_sync(fname, data) })
-		data.Free()
+		queOutput(func() {
+			snapshot_sync(fname, data)
+			data.Free()
+		})
 	}
 	autonumSnapshotsPrefix[qname]++
 }
@@ -249,22 +270,28 @@ func SnapshotAsOverwrite(q Quantity, name string) {
 		defer cuda.Recycle(buf)
 		s.Real().EvalTo(buf)
 		dataReal := buf.HostCopy()
-		queOutput(func() { snapshot_sync(fnameReal, dataReal) })
-		dataReal.Free()
+		queOutput(func() {
+			snapshot_sync(fnameReal, dataReal)
+			dataReal.Free()
+		})
 
 		fnameImag := fmt.Sprintf(OD()+FilenameFormat+"."+SnapshotFormat, name+"_imag", autonumSnapshotsAs[name])
 		cuda.Zero(buf)
 		s.Imag().EvalTo(buf)
 		dataImag := buf.HostCopy()
-		queOutput(func() { snapshot_sync(fnameImag, dataImag) })
-		dataImag.Free()
+		queOutput(func() {
+			snapshot_sync(fnameImag, dataImag)
+			dataImag.Free()
+		})
 	} else {
 		s := ValueOf(q)
 		defer cuda.Recycle(s)
 		data := s.HostCopy() // must be copy (asyncio)
 		fname := fmt.Sprintf(OD()+FilenameFormat+"."+SnapshotFormat, name, autonumSnapshotsAs[name])
-		queOutput(func() { snapshot_sync(fname, data) })
-		data.Free()
+		queOutput(func() {
+			snapshot_sync(fname, data)
+			data.Free()
+		})
 	}
 	autonumSnapshotsAs[name]++
 }
@@ -281,22 +308,28 @@ func SnapshotAsOverwritePrefix(q Quantity, prefix, name string) {
 		defer cuda.Recycle(buf)
 		s.Real().EvalTo(buf)
 		dataReal := buf.HostCopy()
-		queOutput(func() { snapshot_sync(fnameReal, dataReal) })
-		dataReal.Free()
+		queOutput(func() {
+			snapshot_sync(fnameReal, dataReal)
+			dataReal.Free()
+		})
 
 		fnameImag := fmt.Sprintf(OD()+FilenameFormat+"."+SnapshotFormat, prefix+"_"+name+"_imag", autonumSnapshotsPrefixAs[name])
 		cuda.Zero(buf)
 		s.Imag().EvalTo(buf)
 		dataImag := buf.HostCopy()
-		queOutput(func() { snapshot_sync(fnameImag, dataImag) })
-		dataImag.Free()
+		queOutput(func() {
+			snapshot_sync(fnameImag, dataImag)
+			dataImag.Free()
+		})
 	} else {
 		s := ValueOf(q)
 		defer cuda.Recycle(s)
 		data := s.HostCopy() // must be copy (asyncio)
 		fname := fmt.Sprintf(OD()+FilenameFormat+"."+SnapshotFormat, prefix+"_"+name, autonumSnapshotsPrefixAs[name])
-		queOutput(func() { snapshot_sync(fname, data) })
-		data.Free()
+		queOutput(func() {
+			snapshot_sync(fname, data)
+			data.Free()
+		})
 	}
 	autonumSnapshotsPrefixAs[name]++
 }
@@ -313,27 +346,33 @@ func SnapshotAs(q Quantity, fname string) {
 		defer cuda.Recycle(buf)
 		s.Real().EvalTo(buf)
 		dataReal := buf.HostCopy()
-		queOutput(func() { snapshot_sync(fnameReal, dataReal) })
-		dataReal.Free()
+		queOutput(func() {
+			snapshot_sync(fnameReal, dataReal)
+			dataReal.Free()
+		})
 
 		fnameImag := fmt.Sprintf(OD() + fname + "_imag" + "." + SnapshotFormat)
 		cuda.Zero(buf)
 		s.Imag().EvalTo(buf)
 		dataImag := buf.HostCopy()
-		queOutput(func() { snapshot_sync(fnameImag, dataImag) })
-		dataImag.Free()
+		queOutput(func() {
+			snapshot_sync(fnameImag, dataImag)
+			dataImag.Free()
+		})
 	} else {
 		s := ValueOf(q)
 		defer cuda.Recycle(s)
 		data := s.HostCopy() // must be copy (asyncio)
 		fname := fmt.Sprintf(OD() + fname + "." + SnapshotFormat)
-		queOutput(func() { snapshot_sync(fname, data) })
-		data.Free()
+		queOutput(func() {
+			snapshot_sync(fname, data)
+			data.Free()
+		})
 	}
 }
 
 // synchronous snapshot
-func snapshot_sync(fname string, output *data.Slice) {
+func snapshot_sync(fname string, output *data.Slice, qname ...string) {
 	f, err := httpfs.Create(fname)
 	util.FatalErr(err)
 	defer f.Close()
