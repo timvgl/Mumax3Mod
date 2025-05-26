@@ -12,8 +12,6 @@ import (
 	"github.com/mumax/3/util"
 )
 
-var DataSliceSlice = make([]*Slice, 0)
-
 // Slice is like a [][]float32, but may be stored in GPU or host memory.
 type Slice struct {
 	ptrs    []unsafe.Pointer
@@ -90,7 +88,6 @@ func NewSlice(nComp int, size [3]int) *Slice {
 		ptrs[i] = unsafe.Pointer(&(make([]float32, length)[0]))
 	}
 	slc := SliceFromPtrs(size, CPUMemory, ptrs)
-	DataSliceSlice = append(DataSliceSlice, slc)
 	return slc
 }
 
@@ -130,31 +127,14 @@ func SliceFromSlices(data []*Slice, size [3]int) *Slice {
 		ptrs[i] = data[i].DevPtr(0)
 	}
 	slc := SliceFromPtrs(size, GPUMemory, ptrs)
-	for _, s := range data {
-		idx := 0
-		gotValue := false
-		for i := range DataSliceSlice {
-			if DataSliceSlice[i] == s {
-				idx = i
-				gotValue = true
-				break
-			}
-		}
-		if !gotValue {
-			panic("Could not find buffer in buffer list.")
-		}
-		DataSliceSlice = append(DataSliceSlice[:idx], DataSliceSlice[idx+1:]...)
-	}
 	slc.LengthF = data[0].LengthF
 	slc.memType = data[0].memType
-	DataSliceSlice = append(DataSliceSlice, slc)
 	return slc
 }
 
 // Return a slice without underlying storage. Used to represent a mask containing all 1's.
 func NilSlice(nComp int, size [3]int) *Slice {
 	slc := SliceFromPtrs(size, GPUMemory, make([]unsafe.Pointer, nComp))
-	DataSliceSlice = append(DataSliceSlice, slc)
 	return slc
 }
 
@@ -223,19 +203,6 @@ func (s *Slice) Free() {
 	if s == nil {
 		return
 	}
-	idx := 0
-	gotValue := false
-	for i := range DataSliceSlice {
-		if DataSliceSlice[i] == s {
-			idx = i
-			gotValue = true
-			break
-		}
-	}
-	if !gotValue {
-		panic("Could not find buffer in buffer list.")
-	}
-	DataSliceSlice = append(DataSliceSlice[:idx], DataSliceSlice[idx+1:]...)
 	// free storage
 	switch s.memType {
 	case 0:

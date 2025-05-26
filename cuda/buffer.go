@@ -62,7 +62,6 @@ func Buffer(nComp int, size [3]int) *data.Slice {
 		buf_check[ptrs[i]] = struct{}{} // mark this pointer as ours
 	}
 	slc := data.SliceFromPtrs(size, data.GPUMemory, ptrs)
-	data.DataSliceSlice = append(data.DataSliceSlice, slc)
 	return slc
 }
 
@@ -134,20 +133,6 @@ func BufferFFT_T_F(nComp int, size [3]int, fLength int, key string) *data.Slice 
 func Recycle(s *data.Slice) {
 	if Synchronous {
 		Sync()
-	}
-	idx := 0
-	gotValue := false
-	for i := range data.DataSliceSlice {
-		if data.DataSliceSlice[i] == s {
-			idx = i
-			gotValue = true
-			break
-		}
-	}
-	if !gotValue {
-		fmt.Println("Could not find buffer in buffer list.")
-	} else {
-		data.DataSliceSlice = append(data.DataSliceSlice[:idx], data.DataSliceSlice[idx+1:]...)
 	}
 
 	N := s.Len()
