@@ -236,6 +236,17 @@ The functions have been mainly tested for researching vortices in magnetic syste
   *Args:* fromY, toY (int, in cells)
 - **CropZOperator:** Same as **CropOperator** but only for z dimension
   *Args:* fromZ, toZ (int, in cells)
+## CropK
+- **CropK:** Like Crop, but fromX, toX, fromY, toY, fromZ and toZ are the wave numbers and not the cells of the mesh to be cropped to. This is supposed to be used with the FFT3D function or with the __operatorsKSpace__ variable. Choosing the same value for from* and to* will result in cropping to just this single value instead of a region.
+- **CropKx:** Like CropK, but only for Kx
+- **CropKy:** Like CropK, but only for Ky
+- **CropKz:** Like CropK, but only for Kz
+- **CropKxy:** Like CropK, but only for Kx and Ky
+- **CropKOperator:** Mix between CropK and CropOperator. Can be used to crop FFT in space in FFT4D to certain k-values
+- **CropKxOperator:** Like CropKOperator but only for Kx
+- **CropKyOperator:** Like CropKOperator but only for ky
+- **CropKzOperator:** Like CropKOperator but only for kz
+- **CropKxyOperaotr:** Like CropKOperator but only for kx and ky
 
 ## Expand
 - **ExpandOperator:** Returns a function with the expanding area being defined already but the quantity missing:
@@ -252,6 +263,7 @@ The functions have been mainly tested for researching vortices in magnetic syste
 operator := CropXOperator(0, 32)
 Save(operator(m))
 Save(operator(B_ext))
+Save(CropKxy(FFT3D(m), -1e7, 1e7, 0, 0)) //crops to kx from -1e7 to 1e7, ky = 0 and leaves kz unchanged
 ```
 
 
