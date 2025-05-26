@@ -145,9 +145,10 @@ func Recycle(s *data.Slice) {
 		}
 	}
 	if !gotValue {
-		panic("Could not find buffer in buffer list.")
+		fmt.Println("Could not find buffer in buffer list.")
+	} else {
+		data.DataSliceSlice = append(data.DataSliceSlice[:idx], data.DataSliceSlice[idx+1:]...)
 	}
-	data.DataSliceSlice = append(data.DataSliceSlice[:idx], data.DataSliceSlice[idx+1:]...)
 
 	N := s.Len()
 	var pool []unsafe.Pointer
