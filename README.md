@@ -338,6 +338,14 @@ It can be imported into xarray using mumaxXR. Please do not mix non-FFT data wit
 
 - **RenderFunctionShape:** Same es RenderFunction, but the shape, given as an argument is layed over the result, of the individual function and is being merged with prior defintions.
   *Args:* StringFunction, Shape
+Render Finite Sums: With this you can render finite sums e.g. fourier synthesis. Order of the sum is increased with passing more values to the slice. Multiple sums and indexed variables can be used in one expression. The index of the sum is also available. Note that the index of the sum and of the variable names that you want to use have to match
+```
+a_i := CreateFloatSlice(500e6, 1e9) //Create slice containing floats 500e6 and 1e6
+exx.RenderFunction(CreateFunction("sum_i(sin(2*pi*a_i*t))")) //expands internally to sin(2*pi*500e6*t)+sin(2*pi*1e9*t)
+
+a_i := CreateFloatSliceOne(50) //Create a slice of floats with value one with lengths of 50
+exx.RenderFunction(CreateFunction("1/2 + sum_i(a_i*2/(pi*(2*i+1))*sin(2*pi*(2*i+1)*t))")) // create a rectangle signal up intill the order of 50
+```
 
 ==================================================
 # Queue
