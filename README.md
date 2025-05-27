@@ -14,7 +14,7 @@ The functions have been mainly tested for researching vortices in magnetic syste
 
 ==================================================
 
-![Logo](https://github.com/timvgl/Mumax3Mod/blob/main/logo.png)
+<img src="https://raw.githubusercontent.com/timvgl/Mumax3Mod/main/logo.png" width="35%" height="35%">
 
 ==================================================
 # Extended Extraction Variables
