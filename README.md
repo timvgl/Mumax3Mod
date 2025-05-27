@@ -13,6 +13,10 @@ This repository contains an extended version of Mumax3-ME. The web interface is 
 The functions have been mainly tested for researching vortices in magnetic systems. Below are the key extensions and commands.
 
 ==================================================
+
+![Logo](https://github.com/timvgl/Mumax3Mod/blob/main/logo.png)
+
+==================================================
 # Extended Extraction Variables
 
 ## Space-resolved Variables (ovf files)
