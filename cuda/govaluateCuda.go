@@ -1,8 +1,6 @@
 package cuda
 
 import (
-	"math"
-
 	"github.com/mumax/3/data"
 )
 
@@ -664,30 +662,6 @@ func Pow10Govaluate(val *data.Slice) {
 	for c := range val.NComp() {
 		k_pow10Govaluate_async(val.DevPtr(c), prod(size), cfg)
 	}
-}
-
-func MaxGovaluate(val *data.Slice) float64 {
-	size := val.Size()
-	cfg := make1DConf(prod(size))
-	out := reduceBuf(0)
-	returnFloat := 0.
-	for c := range val.NComp() {
-		k_maxGovaluate_async(val.DevPtr(c), out, 0, prod(size), cfg)
-		returnFloat += math.Pow(float64(copyback(out)), 2)
-	}
-	return math.Sqrt(returnFloat)
-}
-
-func MinGovaluate(val *data.Slice) float64 {
-	size := val.Size()
-	cfg := make1DConf(prod(size))
-	out := reduceBuf(0)
-	returnFloat := 0.
-	for c := range val.NComp() {
-		k_minGovaluate_async(val.DevPtr(c), out, 0, prod(size), cfg)
-		returnFloat += math.Pow(float64(copyback(out)), 2)
-	}
-	return math.Sqrt(returnFloat)
 }
 
 func NegateGovaluate(dst *data.Slice, left interface{}, right *data.Slice) {

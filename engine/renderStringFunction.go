@@ -568,7 +568,27 @@ func NewExprEvaluator(expressionStr string) (*ExprEvaluator, error) {
 			} else {
 				d, ok3 := toDataSlice(args[0])
 				if ok3 {
-					return cuda.MaxGovaluate(d), nil
+					dCPU := d.HostCopy()
+					s := dCPU.Size()
+					tensor := dCPU.Tensors()
+					Nx, Ny, Nz := s[X], s[Y], s[Z]
+
+					max := float32(math.Inf(-1))
+					for c := 0; c < dCPU.NComp(); c++ {
+						for z := 0; z < Nz; z++ {
+							// Avoid the boundaries so the neighbor interpolation can't go out of bounds.
+							for y := 0; y < Ny; y++ {
+								for x := 0; x < Nx; x++ {
+									vee := tensor[c][z][y][x]
+									if vee > max {
+										max = vee
+									}
+								}
+							}
+						}
+					}
+					fmt.Println("max:", max)
+					return float64(max), nil
 				} else {
 					return nil, fmt.Errorf("invalid argument for max(): %v", args[0])
 				}
@@ -588,7 +608,26 @@ func NewExprEvaluator(expressionStr string) (*ExprEvaluator, error) {
 			} else {
 				d, ok3 := toDataSlice(args[0])
 				if ok3 {
-					return cuda.MinGovaluate(d), nil
+					dCPU := d.HostCopy()
+					s := dCPU.Size()
+					tensor := dCPU.Tensors()
+					Nx, Ny, Nz := s[X], s[Y], s[Z]
+
+					min := float32(math.Inf(1))
+					for c := 0; c < dCPU.NComp(); c++ {
+						for z := 0; z < Nz; z++ {
+							// Avoid the boundaries so the neighbor interpolation can't go out of bounds.
+							for y := 0; y < Ny; y++ {
+								for x := 0; x < Nx; x++ {
+									vee := tensor[c][z][y][x]
+									if vee < min {
+										min = vee
+									}
+								}
+							}
+						}
+					}
+					return float64(min), nil
 				} else {
 					return nil, fmt.Errorf("invalid argument for min(): %v", args[0])
 				}

@@ -1,6 +1,7 @@
 package cuda
 
 import (
+	"fmt"
 	"math"
 	"unsafe"
 
@@ -14,6 +15,31 @@ import "C"
 
 // Block size for reduce kernels.
 const REDUCE_BLOCKSIZE = C.REDUCE_BLOCKSIZE
+
+func MaxGovaluate(val *data.Slice) float64 {
+	out := reduceBuf(0)
+	returnFloat := 0.
+	for c := range val.NComp() {
+		k_maxGovaluate_async(val.DevPtr(c), out, 0, val.Len(), reducecfg)
+		returnFloat += math.Pow(float64(copyback(out)), 2)
+	}
+	return math.Sqrt(returnFloat)
+}
+
+func MinGovaluate(val *data.Slice) float64 {
+	out := reduceBuf(0)
+	returnFloat := 0.
+	for c := range val.NComp() {
+		k_minGovaluate_async(val.DevPtr(c), out, 0, val.Len(), reducecfg)
+		valR := float64(copyback(out))
+		fmt.Println("MinGovaluate: ", valR)
+		if val.NComp() == 1 {
+			return valR
+		}
+		returnFloat += math.Pow(valR, 2)
+	}
+	return math.Sqrt(returnFloat)
+}
 
 // Sum of all elements.
 func Sum(in *data.Slice) float32 {
