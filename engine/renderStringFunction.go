@@ -587,7 +587,6 @@ func NewExprEvaluator(expressionStr string) (*ExprEvaluator, error) {
 							}
 						}
 					}
-					fmt.Println("max:", max)
 					return float64(max), nil
 				} else {
 					return nil, fmt.Errorf("invalid argument for max(): %v", args[0])
