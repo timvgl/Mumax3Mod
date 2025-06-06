@@ -271,6 +271,7 @@ func (s *fftOperation4D) Eval() {
 			cuda.IncreaseBufMax(dataT.NComp())
 			cuda.Create_Stream(fmt.Sprintf("%s_%s", NameOf(s.qOP), FFTType))
 			FFT_T_data = cuda.BufferFFT_T_F(dataT.NComp(), size, amountFiles, fmt.Sprintf("%s_%s", NameOf(s.qOP), FFTType))
+			cuda.Zero(FFT_T_data)
 			FFT_T_data_map.Store(fmt.Sprintf("%s_%s", NameOf(s.qOP), FFTType), FFT_T_data)
 		}
 

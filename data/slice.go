@@ -263,7 +263,7 @@ func (s *Slice) NComp() int {
 
 // Len returns the number of elements per component.
 func (s *Slice) Len() int {
-	return prod(s.size)
+	return prod(s.size) * s.LengthF
 }
 
 func (s *Slice) Size() [3]int {
