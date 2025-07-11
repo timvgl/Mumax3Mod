@@ -2,10 +2,10 @@
 #include <cuComplex.h>
 
 // Berechnet exp(z) für komplexe z = z.x + i*z.y.
-__device__ __forceinline__ cuComplex my_cexpf(cuComplex z) {
-    cuComplex res;
-    float t = expf(z.x);
-    sincosf(z.y, &res.y, &res.x); // berechnet cos(z.y) -> res.x und sin(z.y) -> res.y
+__device__ __forceinline__ cuDoubleComplex my_cexp(cuDoubleComplex z) {
+    cuDoubleComplex res;
+    double t = expf(z.x);
+    sincos(z.y, &res.y, &res.x); // berechnet cos(z.y) -> res.x und sin(z.y) -> res.y
     res.x *= t;
     res.y *= t;
     return res;
@@ -29,6 +29,7 @@ FFT_Step_MEM_Complex(
     float minF, float dF, float t)
 {
     // Berechne die Anzahl komplexer Elemente in x.
+    const double pi = 3.14159265358979323846;
     int Nx_c = Nx / 2;
     
     // Berechne die 3D-Raumkoordinaten (für das 3D-Array src)
@@ -43,15 +44,15 @@ FFT_Step_MEM_Complex(
     // Hier liefert das Makro idx(2*x, y, z) den Index für den Realteil,
     // da Nx in idx() die Länge in Floats ist (also 2*Nx_c).
     int srcIndex = idx(2 * x, y, z);  // Realteil an srcIndex, Imag an srcIndex+1
-    cuComplex newData = make_cuComplex(src[srcIndex], src[srcIndex + 1]);
+    cuDoubleComplex newData = make_cuDoubleComplex((double)src[srcIndex], (double)src[srcIndex + 1]);
     // Aktualisiere für jeden Frequenzindex die Summe:
     for (int fi = 0; fi < Nf; fi++) {
         // Berechne den Phasenwinkel für diese Frequenz:
-        float phase = -2.0f * M_PI * (minF + dF * fi) * t;
-        cuComplex expVal = my_cexpf(make_cuComplex(0.0f, phase));
+        double phase = -2.0 * pi * ((double)minF + (double)dF * (double)fi) * (double)t;
+        cuDoubleComplex expVal = my_cexp(make_cuDoubleComplex(0.0, phase));
         
         // Komplexe Multiplikation: Beitrag = newData * expVal
-        cuComplex contribution;
+        cuDoubleComplex contribution;
         contribution.x = newData.x * expVal.x - newData.y * expVal.y;
         contribution.y = newData.x * expVal.y + newData.y * expVal.x;
         
@@ -61,7 +62,7 @@ FFT_Step_MEM_Complex(
         // Wir verwenden idx4D, wobei wir als x-Wert wieder 2*x verwenden, um den Realteil zu adressieren.
         int sumIndex = idx4D(2 * x, y, z, fi);  // Realteil
         // Akkumulieren: addiere den Beitrag zur vorhandenen Summe.
-        sum[sumIndex]     += contribution.x;
-        sum[sumIndex + 1] += contribution.y;
+        sum[sumIndex]     += (float)contribution.x;
+        sum[sumIndex + 1] += (float)contribution.y;
     }
 }

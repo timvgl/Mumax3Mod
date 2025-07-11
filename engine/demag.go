@@ -42,7 +42,6 @@ func SetDemagField(dst *data.Slice) {
 		defer msat.Recycle()
 		if NoDemagSpins.isZero() {
 			// Normal demag, everywhere
-
 			demagConv().Exec(dst, M.Buffer(), Geometry.Gpu(), msat)
 
 		} else {

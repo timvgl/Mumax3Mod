@@ -287,6 +287,7 @@ func (s *Slice) Comp(i int) *Slice {
 	s.EndY = size[Y]
 	s.StartZ = 0
 	s.EndZ = size[Z]
+	sl.LengthF = s.LengthF
 	return sl
 }
 
