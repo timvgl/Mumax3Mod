@@ -399,6 +399,7 @@ func (s *fftOperation4D) SaveResults() {
 		FFTType = "real"
 		axisSize, axisStartK, axisEndK, transformedAxis = AxisOf(s.qOP)
 	}
+	cuda.SyncFFT_T(fmt.Sprintf("%s_%s", NameOf(s.qOP), FFTType))
 
 	tmpVar, ok := FFT_T_data_map.Load(fmt.Sprintf("%s_%s", NameOf(s.qOP), FFTType))
 	var FFT_T_data *data.Slice
