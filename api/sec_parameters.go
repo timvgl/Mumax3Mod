@@ -3,9 +3,9 @@ package api
 import (
 	"net/http"
 
+	"github.com/labstack/echo/v4"
 	"github.com/mumax/3/engine"
 	"github.com/mumax/3/logUI"
-	"github.com/labstack/echo/v4"
 )
 
 type Field struct {
@@ -43,11 +43,19 @@ func (s *ParametersState) Update() {
 func (s *ParametersState) getFields() {
 	fields := make([]Field, 0)
 	for _, param := range engine.Params {
+		changedInterface, ok := engine.QuantityChanged.Load(param.Name)
+		if !ok {
+			changedInterface = false
+		}
+		changed, ok := changedInterface.(bool)
+		if !ok {
+			changed = false
+		}
 		field := Field{
 			Name:        param.Name,
 			Value:       param.Value(s.SelectedRegion),
 			Description: param.Description,
-			Changed:     engine.QuantityChanged[param.Name],
+			Changed:     changed,
 		}
 		fields = append(fields, field)
 	}

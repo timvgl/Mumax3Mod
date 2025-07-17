@@ -31,8 +31,25 @@ func DecreaseBufMax(val int) {
 	buf_max -= val
 }
 
+func PrintAvailableBufNum(size int) {
+	if rawPool, ok := buf_pool.Load(size); ok {
+		pool := rawPool.([]unsafe.Pointer)
+		log.Printf("Available buffers in pool: %d", len(pool))
+	} else {
+		log.Println("No buffers in pool")
+	}
+}
+
+func PrintBufNum() {
+	if len(buf_check) == 0 {
+		log.Println("No buffers in use")
+	} else {
+		log.Printf("Buffers in use: %d", len(buf_check))
+	}
+}
+
 // Returns a GPU slice for temporary use. To be returned to the pool with Recycle.
-func Buffer(nComp int, size [3]int) *data.Slice {
+func Buffer(nComp int, size [3]int, args ...bool) *data.Slice {
 	if Synchronous {
 		Sync()
 	}

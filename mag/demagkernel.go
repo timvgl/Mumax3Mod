@@ -3,12 +3,13 @@ package mag
 import (
 	"bufio"
 	"fmt"
+	"math"
+	"os"
+
 	"github.com/mumax/3/data"
 	"github.com/mumax/3/oommf"
 	"github.com/mumax/3/timer"
 	"github.com/mumax/3/util"
-	"math"
-	"os"
 )
 
 // Obtains the demag kernel either from cacheDir/ or by calculating (and then storing in cacheDir for next time).
@@ -60,7 +61,7 @@ func DemagKernel(inputSize, pbc [3]int, cellsize [3]float64, accuracy float64, c
 	if errLoad != nil {
 		util.Log("//Did not use cached kernel:", errLoad)
 	} else {
-		util.Log("//Using cached kernel:", basename)
+		//util.Log("//Using cached kernel:", basename)
 		return kernel
 	}
 

@@ -9,6 +9,8 @@ var (
 	SecondDerivDisp = NewVectorField("force", "", "Force/volume", calcSecondDerivDisp)
 	C11             = NewScalarParam("C11", "N/m2", "Stiffness constant C11")
 	C12             = NewScalarParam("C12", "N/m2", "Stiffness constant C12")
+	C13             = NewScalarParam("C13", "N/m2", "Stiffness constant C13")
+	C33             = NewScalarParam("C33", "N/m2", "Stiffness constant C33")
 	C44             = NewScalarParam("C44", "N/m2", "Stiffness constant C44")
 )
 

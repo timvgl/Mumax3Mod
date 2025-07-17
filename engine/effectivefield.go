@@ -3,6 +3,8 @@ package engine
 // Effective field
 
 import (
+	"fmt"
+
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/data"
 )
@@ -34,10 +36,16 @@ func SetEffectiveField(dst *data.Slice) {
 }
 
 func SetEffectiveFieldRegion(dst, m, u *data.Slice, useFullSample bool, pbcX, pbcY, pbcZ int) {
+	fmt.Println("##################")
+	cuda.PrintAvailableBufNum(dst.Len())
 	SetDemagFieldRegion(dst, m, useFullSample, pbcX, pbcY, pbcZ) // set to B_demag...
-	AddExchangeFieldRegion(dst, m, useFullSample)                // ...then add other terms
+	cuda.PrintAvailableBufNum(dst.Len())
+	AddExchangeFieldRegion(dst, m, useFullSample) // ...then add other terms
+	cuda.PrintAvailableBufNum(dst.Len())
 	AddAnisotropyFieldRegion(dst, m, useFullSample)
+	cuda.PrintAvailableBufNum(dst.Len())
 	AddMagnetoelasticFieldRegion(dst, m, u, pbcX, pbcY, pbcZ, useFullSample)
+	cuda.PrintAvailableBufNum(dst.Len())
 	dta, succeeded := B_ext.SliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
 	if succeeded {
 		cuda.Add(dst, dst, dta)
@@ -46,4 +54,5 @@ func SetEffectiveFieldRegion(dst, m, u *data.Slice, useFullSample bool, pbcX, pb
 		B_therm.AddToRegion(dst)
 	}
 	AddCustomFieldRegion(dst)
+	cuda.PrintAvailableBufNum(dst.Len())
 }

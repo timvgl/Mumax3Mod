@@ -4,13 +4,15 @@ package engine
 
 import (
 	"reflect"
+	"sync"
 
 	"github.com/mumax/3/httpfs"
 	"github.com/mumax/3/logUI"
 	"github.com/mumax/3/script"
 )
 
-var QuantityChanged = make(map[string]bool)
+// var QuantityChanged = make(map[string]bool)
+var QuantityChanged sync.Map
 
 func CompileFile(fname string) (*script.BlockStmt, error) {
 	bytes, err := httpfs.Read(fname)
@@ -136,7 +138,7 @@ func (w *lValueWrapper) InputType() reflect.Type {
 
 func (w *lValueWrapper) SetValue(val interface{}) {
 	w.LValue.SetValue(val)
-	QuantityChanged[w.name] = true
+	QuantityChanged.Store(w.name, true)
 }
 
 func EvalTryRecover(code string) {

@@ -46,10 +46,8 @@ func AddMagnetoelasticField(dst *data.Slice) {
 	if !haveMel {
 		return
 	}
-
 	enorm := ValueOf(norm_strain.Quantity)
 	defer cuda.Recycle(enorm)
-
 	eshear := ValueOf(shear_strain.Quantity)
 	defer cuda.Recycle(eshear)
 

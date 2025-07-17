@@ -172,7 +172,6 @@ func (rk *RK56) StepRegion(region *SolverRegion) {
 
 	// stage 1
 	torqueFnRegion(k1, m, u, region.PBCx, region.PBCy, region.PBCz)
-
 	// stage 2
 	Time = t0 + (1./6.)*Dt_si
 	cuda.Madd2(m, m, k1, 1, (1./6.)*h) // m = m*1 + k1*h/6
