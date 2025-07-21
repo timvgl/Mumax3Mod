@@ -55,6 +55,38 @@ struct Mat3x3 {
     const float& operator()(int i,int j) const { return e[i][j]; }
 };
 
+
+// Holen eines Feldwertes mit Neumann-BC
+__device__
+inline float fetchU(
+    const float *u,
+    int xi, int yi, int zi,
+    int Nx, int Ny, int Nz,
+    int x, int y, int z
+) {
+    if(xi<0||xi>=Nx || yi<0||yi>=Ny || zi<0||zi>=Nz)
+        return u[idx(x,y,z)];
+    return u[idx(xi,yi,zi)];
+}
+
+// fünf-Punkte-Ableitung mit Richtung (di,dj,dk)
+__device__
+inline float deriv(
+    float *u,
+    int x, int y, int z,
+    int di, int dj, int dk,
+    int Nx, int Ny, int Nz,
+    float dx, float dy, float dz
+) {
+    float delta = (di!=0 ? dx : dj!=0 ? dy : dz);
+    float up2 = fetchU(u, x+2*di, y+2*dj, z+2*dk, Nx,Ny,Nz, x,y,z);
+    float up1 = fetchU(u, x+1*di, y+1*dj, z+1*dk, Nx,Ny,Nz, x,y,z);
+    float um1 = fetchU(u, x-1*di, y-1*dj, z-1*dk, Nx,Ny,Nz, x,y,z);
+    float um2 = fetchU(u, x-2*di, y-2*dj, z-2*dk, Nx,Ny,Nz, x,y,z);
+    return (-up2 + 8.0f*up1 - 8.0f*um1 + um2) / (12.0f * delta);
+}
+
+
 __device__
 Mat3x3 computeStrainNeumann5pt(
     float* __restrict__ ux,
@@ -64,32 +96,18 @@ Mat3x3 computeStrainNeumann5pt(
     int Nx, int Ny, int Nz,
     float dx, float dy, float dz
 ) {
-    // Helper: liefert u(xi,yi,zi) oder bei außerhalb u(x,y,z) für Neumann
-    auto uval = [&](const float* u, int xi,int yi,int zi){
-        if(xi<0||xi>=Nx || yi<0||yi>=Ny || zi<0||zi>=Nz)
-            return u[idx(x,y,z)];
-        return u[idx(xi,yi,zi)];
-    };
-
-    // fünf-Punkte-Ableitung: (−u₂ + 8u₁ − 8u₋₁ + u₋₂)/(12·dx)
-    auto deriv = [&](const float* u, int di,int dj,int dk){
-        float up2 = uval(u, x+2*di, y+2*dj, z+2*dk);
-        float up1 = uval(u, x+1*di, y+1*dj, z+1*dk);
-        float um1 = uval(u, x-1*di, y-1*dj, z-1*dk);
-        float um2 = uval(u, x-2*di, y-2*dj, z-2*dk);
-        float delta = (di != 0) ? dx : (dj != 0) ? dy : dz; // dx, dy, dz je nach Richtung
-        return (-up2 + 8.0f*up1 - 8.0f*um1 + um2) / (12.0f * delta);
-    };
-
     Mat3x3 eps;
     // Diagonal
-    eps(0,0) = deriv(ux, 1,0,0);
-    eps(1,1) = deriv(uy, 0,1,0);
-    eps(2,2) = deriv(uz, 0,0,1);
-    // Off-diagonal (symmetrisch)
-    float du_yx = deriv(ux, 0,1,0), du_xy = deriv(uy, 1,0,0);
-    float du_zx = deriv(ux, 0,0,1), du_xz = deriv(uz, 1,0,0);
-    float du_zy = deriv(uy, 0,0,1), du_yz = deriv(uz, 0,1,0);
+    eps(0,0) = deriv(ux, x,y,z, 1,0,0, Nx,Ny,Nz, dx,dy,dz);
+    eps(1,1) = deriv(uy, x,y,z, 0,1,0, Nx,Ny,Nz, dx,dy,dz);
+    eps(2,2) = deriv(uz, x,y,z, 0,0,1, Nx,Ny,Nz, dx,dy,dz);
+    // Off-Diagonal
+    float du_yx = deriv(ux, x,y,z, 0,1,0, Nx,Ny,Nz, dx,dy,dz);
+    float du_xy = deriv(uy, x,y,z, 1,0,0, Nx,Ny,Nz, dx,dy,dz);
+    float du_zx = deriv(ux, x,y,z, 0,0,1, Nx,Ny,Nz, dx,dy,dz);
+    float du_xz = deriv(uz, x,y,z, 1,0,0, Nx,Ny,Nz, dx,dy,dz);
+    float du_zy = deriv(uy, x,y,z, 0,0,1, Nx,Ny,Nz, dx,dy,dz);
+    float du_yz = deriv(uz, x,y,z, 0,1,0, Nx,Ny,Nz, dx,dy,dz);
 
     eps(0,1) = eps(1,0) = 0.5f*(du_yx + du_xy);
     eps(0,2) = eps(2,0) = 0.5f*(du_zx + du_xz);
