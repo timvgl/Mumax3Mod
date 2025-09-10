@@ -1,3 +1,4 @@
+//go:build ignore
 // +build ignore
 
 // This program generates Go wrappers for cuda sources.
@@ -93,7 +94,7 @@ func typemap(ctype string) string {
 	panic(fmt.Errorf("unsupported cuda type: %v", ctype))
 }
 
-var tm = map[string]string{"float*": "unsafe.Pointer", "float": "float32", "int": "int", "int*": "unsafe.Pointer", "uint8_t*": "unsafe.Pointer", "uint8_t": "byte"}
+var tm = map[string]string{"float*": "unsafe.Pointer", "float": "float32", "int": "int", "int*": "unsafe.Pointer", "uint8_t*": "unsafe.Pointer", "uint8_t": "byte", "bool": "bool", "bool*": "unsafe.Pointer"}
 
 // template data
 type Kernel struct {

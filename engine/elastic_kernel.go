@@ -12,10 +12,17 @@ var (
 	C13             = NewScalarParam("C13", "N/m2", "Stiffness constant C13")
 	C33             = NewScalarParam("C33", "N/m2", "Stiffness constant C33")
 	C44             = NewScalarParam("C44", "N/m2", "Stiffness constant C44")
+	C66             = NewScalarParam("C66", "N/m2", "Stiffness constant C66")
+	mtxElasto       = false
+	cubicElasto     = true
 )
 
+func init() {
+	DeclVar("mtxElasto", &mtxElasto, "calc elastics in matrix")
+}
+
 func calcSecondDerivDisp(dst *data.Slice) {
-	SecondDerivative(dst, U, C11, C12, C44)
+	SecondDerivative(dst, U, M, C11, C12, C44, C13, C33, B1, B2)
 }
 
 func calcSecondDerivDispRegion(dst, u *data.Slice) {
@@ -28,36 +35,59 @@ func calcSecondDerivDispRegion(dst, u *data.Slice) {
 			cuda.Recycle(backupU)
 		}()
 	}
-	SecondDerivativeRegion(dst, u, C11, C12, C44)
+	SecondDerivativeRegion(dst, u, C11, C12, C44, C13, C33)
 }
 
-func SecondDerivative(dst *data.Slice, u displacement, C1, C2, C3 *RegionwiseScalar) {
-	c1 := C1.MSlice()
-	defer c1.Recycle()
+func SecondDerivative(dst *data.Slice, u displacement, m magnetization, C11, C12, C44, C13, C33, B1, B2 *RegionwiseScalar) {
+	c11 := C11.MSlice()
+	defer c11.Recycle()
 
-	c2 := C2.MSlice()
-	defer c2.Recycle()
+	c12 := C12.MSlice()
+	defer c12.Recycle()
 
-	c3 := C3.MSlice()
-	defer c3.Recycle()
-	cuda.SecondDerivative(dst, u.Buffer(), U.Mesh(), c1, c2, c3)
+	c13 := C13.MSlice()
+	defer c13.Recycle()
+
+	c33 := C33.MSlice()
+	defer c33.Recycle()
+
+	c44 := C44.MSlice()
+	defer c44.Recycle()
+
+	b1 := B1.MSlice()
+	defer b1.Recycle()
+
+	b2 := B2.MSlice()
+	defer b2.Recycle()
+	if !mtxElasto {
+		cuda.SecondDerivative(dst, u.Buffer(), U.Mesh(), c11, c12, c44)
+	} else {
+		normStressTmp := cuda.Buffer(3, dst.Size())
+		defer cuda.Recycle(normStressTmp)
+		cuda.Zero(normStressTmp)
+		shearStressTmp := cuda.Buffer(3, dst.Size())
+		defer cuda.Recycle(shearStressTmp)
+		cuda.Zero(shearStressTmp)
+		cuda.StressWurtzitMtx(normStressTmp, shearStressTmp, u.Buffer(), m.Buffer(), c11, c12, c13, c33, c44, b1, b2, U.Mesh(), cubicElasto)
+		cuda.ForceWurtzitMtx(dst, normStressTmp, shearStressTmp, U.Mesh())
+	}
 }
 
-func SecondDerivativeRegion(dst, u *data.Slice, C1, C2, C3 *RegionwiseScalar) {
+func SecondDerivativeRegion(dst, u *data.Slice, C11, C12, C44, C13, C33 *RegionwiseScalar) {
 	if !useFullSample {
-		c1 := C1.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
-		defer c1.Recycle()
+		c11 := C11.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+		defer c11.Recycle()
 
-		c2 := C2.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
-		defer c2.Recycle()
+		c12 := C12.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+		defer c12.Recycle()
 
-		c3 := C3.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
-		defer c3.Recycle()
-		cuda.SecondDerivative(dst, u, Crop(&U, dst.StartX, dst.EndX, dst.StartY, dst.EndY, dst.StartZ, dst.EndZ).Mesh(), c1, c2, c3)
+		c44 := C44.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+		defer c44.Recycle()
+		cuda.SecondDerivative(dst, u, Crop(&U, dst.StartX, dst.EndX, dst.StartY, dst.EndY, dst.StartZ, dst.EndZ).Mesh(), c11, c12, c44)
 	} else {
 		ddU := cuda.Buffer(M.NComp(), M.Buffer().Size())
 		cuda.Zero(ddU)
-		SecondDerivative(ddU, U, C1, C2, C3)
+		SecondDerivative(ddU, U, M, C11, C12, C44, C13, C33, B1, B2)
 		ddUCropped := cuda.Buffer(dst.NComp(), dst.Size())
 		cuda.Crop(ddUCropped, ddU, dst.StartX, dst.StartY, dst.StartZ)
 		cuda.Add(dst, dst, ddUCropped)

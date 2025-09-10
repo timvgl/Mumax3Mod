@@ -1,89 +1,150 @@
 #include "stencil.h"
+#include <stdint.h>
 
-// 3×3‐Matrix‐Container (bleibt unverändert)
-struct Mat3x3 {
-    float e[3][3];
-    __host__ __device__
-    Mat3x3() {
-        #pragma unroll
-        for(int i=0;i<3;i++)
-            #pragma unroll
-            for(int j=0;j<3;j++)
-                e[i][j] = 0.0f;
-    }
-    __host__ __device__
-    float& operator()(int i,int j)       { return e[i][j]; }
-    __host__ __device__
-    const float& operator()(int i,int j) const { return e[i][j]; }
-};
-
-//  ―――――――――――――――――――――――――――――――――――――――
-// Hilfs-Device-Funktion statt Lambda:
-__device__
-Mat3x3 fetchSigma(
-    int xi, int yi, int zi,
-    const float *sigmaxx, const float *sigmayy, const float *sigmazz,
-    const float *sigmaxy, const float *sigmaxz, const float *sigmayz,
-    int Nx, int Ny, int Nz
-) {
-    // Neumann-Randbedingung: ∂σ/∂n = 0 ⇒ außerhalb = 0
-    if (xi < 0 || xi >= Nx ||
-        yi < 0 || yi >= Ny ||
-        zi < 0 || zi >= Nz) {
-        return Mat3x3();
-    }
-    int I = idx(xi, yi, zi);
-    Mat3x3 sigma;
-    sigma(0,0) = sigmaxx[I];
-    sigma(1,1) = sigmayy[I];
-    sigma(2,2) = sigmazz[I];
-    sigma(0,1) = sigma(1,0) = sigmaxy[I];
-    sigma(0,2) = sigma(2,0) = sigmaxz[I];
-    sigma(1,2) = sigma(2,1) = sigmayz[I];
-    return sigma;
+// ========== Index-Helfer (nutzt hclamp*/lclamp*) ============================
+__device__ __forceinline__ int ID3(int ix,int iy,int iz, int Nx,int Ny,int Nz, uint8_t PBC){
+    int cx = hclampx(lclampx(ix));
+    int cy = hclampy(lclampy(iy));
+    int cz = hclampz(lclampz(iz));
+    return idx(cx,cy,cz);
 }
-//  ―――――――――――――――――――――――――――――――――――――――
 
+// ========== 1D-Stencils ======================================================
+// Zentral 5-Punkt (4. Ordnung)
+__device__ __forceinline__
+float d1_central_5pt(const float* u, int I_m2,int I_m1,int I_p1,int I_p2, float h){
+    float um2=u[I_m2], um1=u[I_m1], up1=u[I_p1], up2=u[I_p2];
+    return (-up2 + 8.f*up1 - 8.f*um1 + um2) / (12.f*h);
+}
+// Einseitig links (i=0)
+__device__ __forceinline__
+float d1_one_sided_left_4(const float* u, int I0,int I1,int I2,int I3,int I4, float h){
+    return (-25.f*u[I0] + 48.f*u[I1] - 36.f*u[I2] + 16.f*u[I3] - 3.f*u[I4]) / (12.f*h);
+}
+// Einseitig rechts (i=N-1)
+__device__ __forceinline__
+float d1_one_sided_right_4(const float* u, int I0,int I1,int I2,int I3,int I4, float h){
+    return ( 25.f*u[I0] - 48.f*u[I1] + 36.f*u[I2] - 16.f*u[I3] + 3.f*u[I4]) / (12.f*h);
+}
+
+// ========== 1D-Ableitung mit PBC/Clamping + Randfallbehandlung ==============
+// axis: 0=x, 1=y, 2=z
+// HookLeft/HookRight: optional (0 -> ignorieren)
+__device__ __forceinline__
+float deriv_axis(
+    const float* __restrict__ u,
+    int i,int j,int k,
+    int Nx,int Ny,int Nz,
+    uint8_t PBC,
+    float h, int axis,
+    const float* __restrict__ HookLeft,
+    const float* __restrict__ HookRight)
+{
+    // Bei PBC in der jeweiligen Achse: immer zentraler 5-Punkt (wrap via ID3)
+    const bool pbcAxis = (axis==0 ? PBCx : (axis==1 ? PBCy : PBCz));
+    if (pbcAxis) {
+        if (axis==0) return d1_central_5pt(u, ID3(i-2,j,k,Nx,Ny,Nz,PBC), ID3(i-1,j,k,Nx,Ny,Nz,PBC),
+                                            ID3(i+1,j,k,Nx,Ny,Nz,PBC), ID3(i+2,j,k,Nx,Ny,Nz,PBC), h);
+        if (axis==1) return d1_central_5pt(u, ID3(i,j-2,k,Nx,Ny,Nz,PBC), ID3(i,j-1,k,Nx,Ny,Nz,PBC),
+                                            ID3(i,j+1,k,Nx,Ny,Nz,PBC), ID3(i,j+2,k,Nx,Ny,Nz,PBC), h);
+        // axis==2
+        return d1_central_5pt(u, ID3(i,j,k-2,Nx,Ny,Nz,PBC), ID3(i,j,k-1,Nx,Ny,Nz,PBC),
+                                ID3(i,j,k+1,Nx,Ny,Nz,PBC), ID3(i,j,k+2,Nx,Ny,Nz,PBC), h);
+    }
+
+    // Innen (≥2 vom Rand entfernt) -> zentral 5-Punkt
+    if ((axis==0 && i>=2 && i<=Nx-3) ||
+        (axis==1 && j>=2 && j<=Ny-3) ||
+        (axis==2 && k>=2 && k<=Nz-3)) {
+        if(axis==0) return d1_central_5pt(u, ID3(i-2,j,k,Nx,Ny,Nz,PBC), ID3(i-1,j,k,Nx,Ny,Nz,PBC),
+                                             ID3(i+1,j,k,Nx,Ny,Nz,PBC), ID3(i+2,j,k,Nx,Ny,Nz,PBC), h);
+        if(axis==1) return d1_central_5pt(u, ID3(i,j-2,k,Nx,Ny,Nz,PBC), ID3(i,j-1,k,Nx,Ny,Nz,PBC),
+                                             ID3(i,j+1,k,Nx,Ny,Nz,PBC), ID3(i,j+2,k,Nx,Ny,Nz,PBC), h);
+        // axis==2
+        return d1_central_5pt(u, ID3(i,j,k-2,Nx,Ny,Nz,PBC), ID3(i,j,k-1,Nx,Ny,Nz,PBC),
+                                 ID3(i,j,k+1,Nx,Ny,Nz,PBC), ID3(i,j,k+2,Nx,Ny,Nz,PBC), h);
+    }
+
+    // Linker Rand
+    if((axis==0 && i==0)||(axis==1 && j==0)||(axis==2 && k==0)){
+        if(HookLeft) return HookLeft[idx(i,j,k)];
+        if(axis==0) return d1_one_sided_left_4 (u, ID3(0,j,k,Nx,Ny,Nz,PBC), ID3(1,j,k,Nx,Ny,Nz,PBC),
+                                                   ID3(2,j,k,Nx,Ny,Nz,PBC), ID3(3,j,k,Nx,Ny,Nz,PBC),
+                                                   ID3(4,j,k,Nx,Ny,Nz,PBC), h);
+        if(axis==1) return d1_one_sided_left_4 (u, ID3(i,0,k,Nx,Ny,Nz,PBC), ID3(i,1,k,Nx,Ny,Nz,PBC),
+                                                   ID3(i,2,k,Nx,Ny,Nz,PBC), ID3(i,3,k,Nx,Ny,Nz,PBC),
+                                                   ID3(i,4,k,Nx,Ny,Nz,PBC), h);
+        return          d1_one_sided_left_4 (u, ID3(i,j,0,Nx,Ny,Nz,PBC), ID3(i,j,1,Nx,Ny,Nz,PBC),
+                                                   ID3(i,j,2,Nx,Ny,Nz,PBC), ID3(i,j,3,Nx,Ny,Nz,PBC),
+                                                   ID3(i,j,4,Nx,Ny,Nz,PBC), h);
+    }
+
+    // Rechter Rand
+    if((axis==0 && i==Nx-1)||(axis==1 && j==Ny-1)||(axis==2 && k==Nz-1)){
+        if(HookRight) return HookRight[idx(i,j,k)];
+        if(axis==0) return d1_one_sided_right_4(u, ID3(Nx-1,j,k,Nx,Ny,Nz,PBC), ID3(Nx-2,j,k,Nx,Ny,Nz,PBC),
+                                                   ID3(Nx-3,j,k,Nx,Ny,Nz,PBC), ID3(Nx-4,j,k,Nx,Ny,Nz,PBC),
+                                                   ID3(Nx-5,j,k,Nx,Ny,Nz,PBC), h);
+        if(axis==1) return d1_one_sided_right_4(u, ID3(i,Ny-1,k,Nx,Ny,Nz,PBC), ID3(i,Ny-2,k,Nx,Ny,Nz,PBC),
+                                                   ID3(i,Ny-3,k,Nx,Ny,Nz,PBC), ID3(i,Ny-4,k,Nx,Ny,Nz,PBC),
+                                                   ID3(i,Ny-5,k,Nx,Ny,Nz,PBC), h);
+        return          d1_one_sided_right_4(u, ID3(i,j,Nz-1,Nx,Ny,Nz,PBC), ID3(i,j,Nz-2,Nx,Ny,Nz,PBC),
+                                                   ID3(i,j,Nz-3,Nx,Ny,Nz,PBC), ID3(i,j,Nz-4,Nx,Ny,Nz,PBC),
+                                                   ID3(i,j,Nz-5,Nx,Ny,Nz,PBC), h);
+    }
+
+    // Fallback (2. Ordnung zentral)
+    if(axis==0) return (u[ID3(i+1,j,k,Nx,Ny,Nz,PBC)] - u[ID3(i-1,j,k,Nx,Ny,Nz,PBC)])/(2.f*h);
+    if(axis==1) return (u[ID3(i,j+1,k,Nx,Ny,Nz,PBC)] - u[ID3(i,j-1,k,Nx,Ny,Nz,PBC)])/(2.f*h);
+    return          (u[ID3(i,j,k+1,Nx,Ny,Nz,PBC)] - u[ID3(i,j,k-1,Nx,Ny,Nz,PBC)])/(2.f*h);
+}
+
+// ============================================================================
+// Divergenz stress: f_i = ∑_j ∂_j stress__ij   (4. Ordnung konsistent mit Strain-Kernel)
+// ============================================================================
 extern "C" __global__ void
 divergenceStress(
     float *fx, float *fy, float *fz,
-    float *sigmaxx, float *sigmayy, float *sigmazz,
-    float *sigmaxy, float *sigmaxz, float *sigmayz,
+    float * __restrict__ sigmaxx,
+    float * __restrict__ sigmayy,
+    float * __restrict__ sigmazz,
+    float * __restrict__ sigmaxy, // = stress_xy = stress_yx
+    float * __restrict__ sigmaxz, // = stress_xz = stress_zx
+    float * __restrict__ sigmayz, // = stress_yz = stress_zy
     int Nx, int Ny, int Nz,
-    float dx, float dy, float dz
-) {
-    int x = blockIdx.x * blockDim.x + threadIdx.x;
-    int y = blockIdx.y * blockDim.y + threadIdx.y;
-    int z = blockIdx.z * blockDim.z + threadIdx.z;
-    if (x < 0 || x >= Nx ||
-        y < 0 || y >= Ny ||
-        z < 0 || z >= Nz) return;
+    float dx, float dy, float dz,
+    uint8_t PBC
+){
+    int ix = blockIdx.x * blockDim.x + threadIdx.x;
+    int iy = blockIdx.y * blockDim.y + threadIdx.y;
+    int iz = blockIdx.z * blockDim.z + threadIdx.z;
 
-    int I = idx(x, y, z);
+    // Harte Bounds (wie im Stress-Kernel); innen clamping/wrap via ID3.
+    if ((!PBCx && (ix < 0 || ix >= Nx)) ||
+        (!PBCy && (iy < 0 || iy >= Ny)) ||
+        (!PBCz && (iz < 0 || iz >= Nz))) return;
 
-    // Nachbar-Matrizen holen
-    Mat3x3 s_px = fetchSigma(x+1, y,   z,   sigmaxx, sigmayy, sigmazz, sigmaxy, sigmaxz, sigmayz, Nx, Ny, Nz);
-    Mat3x3 s_mx = fetchSigma(x-1, y,   z,   sigmaxx, sigmayy, sigmazz, sigmaxy, sigmaxz, sigmayz, Nx, Ny, Nz);
-    Mat3x3 s_py = fetchSigma(x,   y+1, z,   sigmaxx, sigmayy, sigmazz, sigmaxy, sigmaxz, sigmayz, Nx, Ny, Nz);
-    Mat3x3 s_my = fetchSigma(x,   y-1, z,   sigmaxx, sigmayy, sigmazz, sigmaxy, sigmaxz, sigmayz, Nx, Ny, Nz);
-    Mat3x3 s_pz = fetchSigma(x,   y,   z+1, sigmaxx, sigmayy, sigmazz, sigmaxy, sigmaxz, sigmayz, Nx, Ny, Nz);
-    Mat3x3 s_mz = fetchSigma(x,   y,   z-1, sigmaxx, sigmayy, sigmazz, sigmaxy, sigmaxz, sigmayz, Nx, Ny, Nz);
+    // Zentrale (geclampte/gewrapte) Zelle
+    int i = hclampx(lclampx(ix));
+    int j = hclampy(lclampy(iy));
+    int k = hclampz(lclampz(iz));
+    int IClamp = idx(i,j,k);
 
-    // zentrale Differenzen (Beispiel: in x-Richtung)
-    float dsxx_dx = (s_px(0,0) - s_mx(0,0)) / (2.0f * dx);
-    float dsxy_dy = (s_py(0,1) - s_my(0,1)) / (2.0f * dy);
-    float dsxz_dz = (s_pz(0,2) - s_mz(0,2)) / (2.0f * dz);
+    // Ableitungen (alle über deriv_axis, gleiche BC-/Stencil-Logik)
+    float dstress_xx_dx = deriv_axis(sigmaxx, i,j,k, Nx,Ny,Nz, PBC, dx, 0, 0, 0);
+    float dstress_xy_dy = deriv_axis(sigmaxy, i,j,k, Nx,Ny,Nz, PBC, dy, 1, 0, 0);
+    float dstress_xz_dz = (Nz > 5 ? deriv_axis(sigmaxz, i,j,k, Nx,Ny,Nz, PBC, dz, 2, 0, 0): 0.0f); // only if enough cells in z
 
-    float dsyx_dx = (s_px(1,0) - s_mx(1,0)) / (2.0f * dx);
-    float dsyy_dy = (s_py(1,1) - s_my(1,1)) / (2.0f * dy);
-    float dsyz_dz = (s_pz(1,2) - s_mz(1,2)) / (2.0f * dz);
+    float dstress_yx_dx = deriv_axis(sigmaxy, i,j,k, Nx,Ny,Nz, PBC, dx, 0, 0, 0);
+    float dstress_yy_dy = deriv_axis(sigmayy, i,j,k, Nx,Ny,Nz, PBC, dy, 1, 0, 0);
+    float dstress_yz_dz = (Nz > 5 ? deriv_axis(sigmayz, i,j,k, Nx,Ny,Nz, PBC, dz, 2, 0, 0): 0.0f); // only if enough cells in z
 
-    float dszx_dx = (s_px(2,0) - s_mx(2,0)) / (2.0f * dx);
-    float dszy_dy = (s_py(2,1) - s_my(2,1)) / (2.0f * dy);
-    float dszz_dz = (s_pz(2,2) - s_mz(2,2)) / (2.0f * dz);
+    float dstress_zx_dx = deriv_axis(sigmaxz, i,j,k, Nx,Ny,Nz, PBC, dx, 0, 0, 0);
+    float dstress_zy_dy = deriv_axis(sigmayz, i,j,k, Nx,Ny,Nz, PBC, dy, 1, 0, 0);
+    float dstress_zz_dz = (Nz > 5 ? deriv_axis(sigmazz, i,j,k, Nx,Ny,Nz, PBC, dz, 2, 0, 0): 0.0f); // only if enough cells in z
 
-    // f_i = ∑_j ∂_j σ_ij
-    fx[I] = dsxx_dx + dsxy_dy + dsxz_dz;
-    fy[I] = dsyx_dx + dsyy_dy + dsyz_dz;
-    fz[I] = dszx_dx + dszy_dy + dszz_dz;
+    // Write auf exakt dieselbe (geclampte) Zelle wie im Stress-Kernel
+    fx[IClamp] = dstress_xx_dx + dstress_xy_dy + dstress_xz_dz;
+    fy[IClamp] = dstress_yx_dx + dstress_yy_dy + dstress_yz_dz;
+    fz[IClamp] = dstress_zx_dx + dstress_zy_dy + dstress_zz_dz;
 }
