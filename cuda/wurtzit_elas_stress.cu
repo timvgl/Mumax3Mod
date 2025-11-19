@@ -1,6 +1,7 @@
 #include "stencil.h"
 #include "amul.h"
 #include <stdint.h>
+#include "deriv_axis.cuh"
 
 // Mat6x6: einfacher Container für eine 6×6-Matrix
 struct Mat6x6 {
@@ -53,123 +54,6 @@ struct Mat3x3 {
     const float& operator()(int i,int j) const { return e[i][j]; }
 };
 
-// ========== Index-Helfer =====================================================
-__device__ __forceinline__ int ID3(int ix,int iy,int iz, int Nx,int Ny,int Nz, uint8_t PBC){
-    int cx = hclampx(lclampx(ix));
-    int cy = hclampy(lclampy(iy));
-    int cz = hclampz(lclampz(iz));
-    return idx(cx,cy,cz);
-}
-
-// ========== 1D-Stencils ======================================================
-__device__ __forceinline__
-float d1_central_5pt(const float* u, int I_m2,int I_m1,int I_p1,int I_p2, float h){
-    float um2=u[I_m2], um1=u[I_m1], up1=u[I_p1], up2=u[I_p2];
-    return (-up2 + 8.f*up1 - 8.f*um1 + um2) / (12.f*h);
-}
-__device__ __forceinline__
-float d1_one_sided_left_4(const float* u, int I0,int I1,int I2,int I3,int I4, float h){
-    return (-25.f*u[I0] + 48.f*u[I1] - 36.f*u[I2] + 16.f*u[I3] - 3.f*u[I4]) / (12.f*h);
-}
-__device__ __forceinline__
-float d1_one_sided_right_4(const float* u, int I0,int I1,int I2,int I3,int I4, float h){
-    return ( 25.f*u[I0] - 48.f*u[I1] + 36.f*u[I2] - 16.f*u[I3] + 3.f*u[I4]) / (12.f*h);
-}
-
-// ========== 1D-Ableitung mit PBC/Clamping + Randfallbehandlung ==============
-__device__ __forceinline__
-float deriv_axis(
-    const float* __restrict__ u,
-    int i,int j,int k,
-    int Nx,int Ny,int Nz,
-    uint8_t PBC,
-    float h, int axis,
-    const float* __restrict__ HookLeft,
-    const float* __restrict__ HookRight)
-{
-    const bool pbcAxis = (axis==0 ? PBCx : (axis==1 ? PBCy : PBCz));
-    if (pbcAxis) {
-        if (axis==0) return d1_central_5pt(u, ID3(i-2,j,k,Nx,Ny,Nz,PBC), ID3(i-1,j,k,Nx,Ny,Nz,PBC),
-                                            ID3(i+1,j,k,Nx,Ny,Nz,PBC), ID3(i+2,j,k,Nx,Ny,Nz,PBC), h);
-        if (axis==1) return d1_central_5pt(u, ID3(i,j-2,k,Nx,Ny,Nz,PBC), ID3(i,j-1,k,Nx,Ny,Nz,PBC),
-                                            ID3(i,j+1,k,Nx,Ny,Nz,PBC), ID3(i,j+2,k,Nx,Ny,Nz,PBC), h);
-        return d1_central_5pt(u, ID3(i,j,k-2,Nx,Ny,Nz,PBC), ID3(i,j,k-1,Nx,Ny,Nz,PBC),
-                                ID3(i,j,k+1,Nx,Ny,Nz,PBC), ID3(i,j,k+2,Nx,Ny,Nz,PBC), h);
-    }
-    // inside sample (≥2 from edge) -> central 5-point
-    if ((axis==0 && i>=2 && i<=Nx-3) ||
-        (axis==1 && j>=2 && j<=Ny-3) ||
-        (axis==2 && k>=2 && k<=Nz-3)) {
-        if(axis==0) return d1_central_5pt(u, ID3(i-2,j,k,Nx,Ny,Nz,PBC), ID3(i-1,j,k,Nx,Ny,Nz,PBC),
-                                             ID3(i+1,j,k,Nx,Ny,Nz,PBC), ID3(i+2,j,k,Nx,Ny,Nz,PBC), h);
-        if(axis==1) return d1_central_5pt(u, ID3(i,j-2,k,Nx,Ny,Nz,PBC), ID3(i,j-1,k,Nx,Ny,Nz,PBC),
-                                             ID3(i,j+1,k,Nx,Ny,Nz,PBC), ID3(i,j+2,k,Nx,Ny,Nz,PBC), h);
-        return d1_central_5pt(u, ID3(i,j,k-2,Nx,Ny,Nz,PBC), ID3(i,j,k-1,Nx,Ny,Nz,PBC),
-                                 ID3(i,j,k+1,Nx,Ny,Nz,PBC), ID3(i,j,k+2,Nx,Ny,Nz,PBC), h);
-    }
-    // edge case: at the boundary of index being zero in at least one of the three directions
-    if((axis==0 && i==0)||(axis==1 && j==0)||(axis==2 && k==0)){
-        if(HookLeft) return HookLeft[idx(i,j,k)];
-        if(axis==0) return d1_one_sided_left_4 (u, ID3(0,j,k,Nx,Ny,Nz,PBC), ID3(1,j,k,Nx,Ny,Nz,PBC),
-                                                   ID3(2,j,k,Nx,Ny,Nz,PBC), ID3(3,j,k,Nx,Ny,Nz,PBC),
-                                                   ID3(4,j,k,Nx,Ny,Nz,PBC), h);
-        if(axis==1) return d1_one_sided_left_4 (u, ID3(i,0,k,Nx,Ny,Nz,PBC), ID3(i,1,k,Nx,Ny,Nz,PBC),
-                                                   ID3(i,2,k,Nx,Ny,Nz,PBC), ID3(i,3,k,Nx,Ny,Nz,PBC),
-                                                   ID3(i,4,k,Nx,Ny,Nz,PBC), h);
-        return             d1_one_sided_left_4 (u, ID3(i,j,0,Nx,Ny,Nz,PBC), ID3(i,j,1,Nx,Ny,Nz,PBC),
-                                                   ID3(i,j,2,Nx,Ny,Nz,PBC), ID3(i,j,3,Nx,Ny,Nz,PBC),
-                                                   ID3(i,j,4,Nx,Ny,Nz,PBC), h);
-    }
-    if((axis==0 && i==1)||(axis==1 && j==1)||(axis==2 && k==1)){
-        if(axis==0){
-            // symmetrisch zu i==Nx-2
-            float u0=u[ID3(0,j,k,Nx,Ny,Nz,PBC)], u1=u[ID3(1,j,k,Nx,Ny,Nz,PBC)];
-            float u2=u[ID3(2,j,k,Nx,Ny,Nz,PBC)], u3=u[ID3(3,j,k,Nx,Ny,Nz,PBC)], u4=u[ID3(4,j,k,Nx,Ny,Nz,PBC)];
-            return (-3.f*u0 -10.f*u1 +18.f*u2 -6.f*u3 +1.f*u4)/(12.f*h);
-        }
-        if(axis==1){
-            float u0=u[ID3(i,0,k,Nx,Ny,Nz,PBC)], u1=u[ID3(i,1,k,Nx,Ny,Nz,PBC)];
-            float u2=u[ID3(i,2,k,Nx,Ny,Nz,PBC)], u3=u[ID3(i,3,k,Nx,Ny,Nz,PBC)], u4=u[ID3(i,4,k,Nx,Ny,Nz,PBC)];
-            return (-3.f*u0 -10.f*u1 +18.f*u2 -6.f*u3 +1.f*u4)/(12.f*h);
-        }
-        // axis==2: bei Nz==1 sowieso thin → hier nie hinein
-    }
-    // edge case: one cell before the boundary of index being max in at least one of the three directions
-    if((axis==0 && i==Nx-2)||(axis==1 && j==Ny-2)||(axis==2 && k==Nz-2)){
-        if(axis==0){
-            float u0=u[ID3(Nx-1,j,k,Nx,Ny,Nz,PBC)], u1=u[ID3(Nx-2,j,k,Nx,Ny,Nz,PBC)];
-            float u2=u[ID3(Nx-3,j,k,Nx,Ny,Nz,PBC)], u3=u[ID3(Nx-4,j,k,Nx,Ny,Nz,PBC)], u4=u[ID3(Nx-5,j,k,Nx,Ny,Nz,PBC)];
-            return (3.f*u0 +10.f*u1 -18.f*u2 +6.f*u3 -1.f*u4)/(12.f*h);
-        }
-        if(axis==1){
-            float u0=u[ID3(i,Ny-1,k,Nx,Ny,Nz,PBC)], u1=u[ID3(i,Ny-2,k,Nx,Ny,Nz,PBC)];
-            float u2=u[ID3(i,Ny-3,k,Nx,Ny,Nz,PBC)], u3=u[ID3(i,Ny-4,k,Nx,Ny,Nz,PBC)], u4=u[ID3(i,Ny-5,k,Nx,Ny,Nz,PBC)];
-            return (3.f*u0 +10.f*u1 -18.f*u2 +6.f*u3 -1.f*u4)/(12.f*h);
-        }
-        float u0=u[ID3(i,j,Nz-1,Nx,Ny,Nz,PBC)], u1=u[ID3(i,j,Nz-2,Nx,Ny,Nz,PBC)];
-        float u2=u[ID3(i,j,Nz-3,Nx,Ny,Nz,PBC)], u3=u[ID3(i,j,Nz-4,Nx,Ny,Nz,PBC)], u4=u[ID3(i,j,Nz-5,Nx,Ny,Nz,PBC)];
-        return (3.f*u0 +10.f*u1 -18.f*u2 +6.f*u3 -1.f*u4)/(12.f*h);
-    }
-    // edge case: at the boundary of index being max in at least one of the three directions
-    if((axis==0 && i==Nx-1)||(axis==1 && j==Ny-1)||(axis==2 && k==Nz-1)){
-        if(HookRight) return HookRight[idx(i,j,k)];
-        if(axis==0) return d1_one_sided_right_4(u, ID3(Nx-1,j,k,Nx,Ny,Nz,PBC), ID3(Nx-2,j,k,Nx,Ny,Nz,PBC),
-                                                   ID3(Nx-3,j,k,Nx,Ny,Nz,PBC), ID3(Nx-4,j,k,Nx,Ny,Nz,PBC),
-                                                   ID3(Nx-5,j,k,Nx,Ny,Nz,PBC), h);
-        if(axis==1) return d1_one_sided_right_4(u, ID3(i,Ny-1,k,Nx,Ny,Nz,PBC), ID3(i,Ny-2,k,Nx,Ny,Nz,PBC),
-                                                   ID3(i,Ny-3,k,Nx,Ny,Nz,PBC), ID3(i,Ny-4,k,Nx,Ny,Nz,PBC),
-                                                   ID3(i,Ny-5,k,Nx,Ny,Nz,PBC), h);
-        return          d1_one_sided_right_4(u, ID3(i,j,Nz-1,Nx,Ny,Nz,PBC), ID3(i,j,Nz-2,Nx,Ny,Nz,PBC),
-                                                   ID3(i,j,Nz-3,Nx,Ny,Nz,PBC), ID3(i,j,Nz-4,Nx,Ny,Nz,PBC),
-                                                   ID3(i,j,Nz-5,Nx,Ny,Nz,PBC), h);
-    }
-    printf("Error in deriv_axis: should never reach here!\n");
-    // Fallback (2. Ordnung)
-    if(axis==0) return (u[ID3(i+1,j,k,Nx,Ny,Nz,PBC)] - u[ID3(i-1,j,k,Nx,Ny,Nz,PBC)])/(2.f*h);
-    if(axis==1) return (u[ID3(i,j+1,k,Nx,Ny,Nz,PBC)] - u[ID3(i,j-1,k,Nx,Ny,Nz,PBC)])/(2.f*h);
-    return          (u[ID3(i,j,k+1,Nx,Ny,Nz,PBC)] - u[ID3(i,j,k-1,Nx,Ny,Nz,PBC)])/(2.f*h);
-}
-
 // ========== Strain aus u mit BC-tauglichen Ableitungen ======================
 __device__
 Mat3x3 computeStrainWithBC(
@@ -179,19 +63,13 @@ Mat3x3 computeStrainWithBC(
     int i, int j, int k,
     int Nx, int Ny, int Nz,
     uint8_t PBC,
-    float dx, float dy, float dz,
-    // Hooks für ∂x ux, ∂x uy (x-Ränder)
-    const float* __restrict__ hxL_ux, const float* __restrict__ hxR_ux,
-    const float* __restrict__ hxL_uy, const float* __restrict__ hxR_uy,
-    // Hooks für ∂y ux, ∂y uy (y-Ränder)
-    const float* __restrict__ hyL_ux, const float* __restrict__ hyR_ux,
-    const float* __restrict__ hyL_uy, const float* __restrict__ hyR_uy )
+    float dx, float dy, float dz)
 {
     Mat3x3 eps;
     // Normal
-    eps(0,0) = deriv_axis(ux,i,j,k,Nx,Ny,Nz,PBC,dx,0,hxL,hxR); // ∂x ux
-    eps(1,1) = deriv_axis(uy,i,j,k,Nx,Ny,Nz,PBC,dy,1,hyL,hyR); // ∂y uy
-    eps(2,2) = (Nz > 5 ? deriv_axis(uz,i,j,k,Nx,Ny,Nz,PBC,dz,2,hzL,hzR): 0.0f); // ∂z uz
+    eps(0,0) = deriv_axis(ux,i,j,k,Nx,Ny,Nz,PBC,dx,0,0,0); // ∂x ux
+    eps(1,1) = deriv_axis(uy,i,j,k,Nx,Ny,Nz,PBC,dy,1,0,0); // ∂y uy
+    eps(2,2) = (Nz > 5 ? deriv_axis(uz,i,j,k,Nx,Ny,Nz,PBC,dz,2,0,0): 0.0f); // ∂z uz
     // Scher (symmetrisiert)
     float du_yx = deriv_axis(ux,i,j,k,Nx,Ny,Nz,PBC,dy,1,0,0);
     float du_xy = deriv_axis(uy,i,j,k,Nx,Ny,Nz,PBC,dx,0,0,0);
@@ -199,9 +77,9 @@ Mat3x3 computeStrainWithBC(
     float du_xz = (Nz > 5 ? deriv_axis(uz,i,j,k,Nx,Ny,Nz,PBC,dx,0,0,0): 0.0f); // only if enough cells in z
     float du_zy = (Nz > 5 ? deriv_axis(uy,i,j,k,Nx,Ny,Nz,PBC,dz,2,0,0): 0.0f); // only if enough cells in z
     float du_yz = (Nz > 5 ? deriv_axis(uz,i,j,k,Nx,Ny,Nz,PBC,dy,1,0,0): 0.0f); // only if enough cells in z
-    eps(0,1) = eps(1,0) = 0.5f*(du_yx + du_xy);
-    eps(0,2) = eps(2,0) = 0.5f*(du_zx + du_xz);
-    eps(1,2) = eps(2,1) = 0.5f*(du_zy + du_yz);
+    eps(0,1) = du_yx; eps(1,0) = du_xy;
+    eps(0,2) = du_zx; eps(2,0) = du_xz;
+    eps(1,2) = du_zy; eps(2,1) = du_yz;
     return eps;
 }
 
@@ -215,9 +93,9 @@ Mat3x3 computeStress(
     eps_v[0] = eps(0,0);
     eps_v[1] = eps(1,1);
     eps_v[2] = eps(2,2);
-    eps_v[3] = 2.0f*eps(1,2);
-    eps_v[4] = 2.0f*eps(0,2);
-    eps_v[5] = 2.0f*eps(0,1);
+    eps_v[3] = eps(1,2)+eps(2,1);
+    eps_v[4] = eps(0,2)+eps(2,0);
+    eps_v[5] = eps(0,1)+eps(1,0);
 
     float sigma_v[6] = {0,0,0,0,0,0};
     #pragma unroll
@@ -278,8 +156,8 @@ __device__ inline void eps_m_from_sigma_m_hex_cubic(
     ev[2] = S02*sx + S02*sy + S22*sz;  // εzz^m
 
     // Shears (engineering: ev[3]=2εyz, ...)
-    ev[3] = (Nz > 5 ? sv[3] / (C44 + eps): 0.0f);  // 2εyz
-    ev[4] = (Nz > 5 ? sv[4] / (C44 + eps): 0.0f);  // 2εzx
+    ev[3] = sv[3] / (C44 + eps);  // 2εyz
+    ev[4] = sv[4] / (C44 + eps);  // 2εzx
     ev[5] = sv[5] / (C66 + eps);  // 2εxy
 }
 
@@ -295,8 +173,10 @@ __device__ inline void voigt6_to_mat3x3_strain(const float ev[6], Mat3x3& E){
 // Stress mit magnetostriktiver Eigen-Dehnung, konsistente Indizes
 // ============================================================================
 extern "C" __global__ void
-stressWurtzit(  float *sigmaxx, float *sigmayy, float *sigmazz,
-                float *sigmaxy, float *sigmaxz, float *sigmayz,
+stressWurtzit(  float *stressxx, float *stressyy, float *stresszz,
+                float *stressxy, float *stressxz, float *stressyz,
+                float *epsilonxx, float *epsilonyy, float *epsilonzz,
+                float *epsilonxy, float *epsilonxz, float *epsilonyz,
                 float *ux, float *uy, float *uz,
                 float *mx, float *my, float *mz,
                 float* __restrict__  C11_, float  C11_mul,
@@ -342,6 +222,7 @@ stressWurtzit(  float *sigmaxx, float *sigmayy, float *sigmazz,
 
     // --- 3) Mechanische Dehnung ε(u) mit denselben Indizes/BC
     Mat3x3 eps = computeStrainWithBC(ux, uy, uz, i, j, k, Nx, Ny, Nz, PBC, dx, dy, dz);
+    Mat3x3 sigma = computeStress(C, eps);
 
     // --- 4) Magnetostriktive Eigen-Dehnung ε^m aus B1,B2,m (gleiche Zelle)
     float B1 = amul(B1_, B1_mul, IClamp);
@@ -349,36 +230,31 @@ stressWurtzit(  float *sigmaxx, float *sigmayy, float *sigmazz,
     float sv[6];
     sigma_m_from_B(B1, B2, mx[IClamp], my[IClamp], mz[IClamp], sv);
 
-    float ev[6];
-    eps_m_from_sigma_m_hex_cubic(c11, c12, c13, c33, c44, c66, sv, ev, Nz);
+    //float ev[6];
+    //eps_m_from_sigma_m_hex_cubic(c11, c12, c13, c33, c44, c66, sv, ev, Nz);
 
-    Mat3x3 epsm;
-    voigt6_to_mat3x3_strain(ev, epsm);
-
-    // --- 5) Effektive Dehnung ε_eff = ε - ε^m
-    if (Nz <= 5) { // if not enough cells calc ezz from condition of zero normal stress in z-direction
-        eps(2, 2) = epsm(2, 2) - c13/c33*((eps(0,0)-epsm(0,0))+(eps(1,1)-epsm(1,1))); // only normal strain zz
-        eps(0, 2) = epsm(0, 2); // set to zero, since it cannot be calculated properly
-        eps(1, 2) = epsm(1, 2); // set
-        eps(2, 0) = epsm(2, 0);
-        eps(2, 1) = epsm(2, 1);
-        //eps(2, 2) = 0.0f; // set to zero, since it cannot be calculated properly
-    }
-    Mat3x3 epseff;
+    Mat3x3 sigmam;
+    voigt6_to_mat3x3_strain(sv, sigmam);
+    Mat3x3 sigmaeff;
     #pragma unroll
     for(int a=0;a<3;a++)
         #pragma unroll
         for(int b=0;b<3;b++)
-            epseff(a,b) = eps(a,b) - epsm(a,b);
+            sigmaeff(a,b) = sigma(a,b) - sigmam(a,b);
 
     // --- 6) Spannung: stress_ = C : (ε - ε^m)
-    Mat3x3 sigma = computeStress(C, epseff);
-
+    
     // --- 7) Output: exakt dieselbe (geclampte) Zelle
-    sigmaxx[IClamp] = sigma(0,0);
-    sigmayy[IClamp] = sigma(1,1);
-    sigmazz[IClamp] = sigma(2,2);
-    sigmaxy[IClamp] = sigma(0,1);
-    sigmaxz[IClamp] = sigma(0,2);
-    sigmayz[IClamp] = sigma(1,2);
+    stressxx[IClamp] = sigmaeff(0,0);
+    stressyy[IClamp] = sigmaeff(1,1);
+    stresszz[IClamp] = sigmaeff(2,2);
+    stressxy[IClamp] = sigmaeff(0,1);
+    stressxz[IClamp] = sigmaeff(0,2);
+    stressyz[IClamp] = sigmaeff(1,2);
+    epsilonxx[IClamp] = eps(0,0);
+    epsilonyy[IClamp] = eps(1,1);
+    epsilonzz[IClamp] = eps(2,2);
+    epsilonxy[IClamp] = eps(0,1)+eps(1,0);
+    epsilonxz[IClamp] = eps(0,2)+eps(2,0);
+    epsilonyz[IClamp] = eps(1,2)+eps(2,1);
 }

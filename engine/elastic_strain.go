@@ -40,7 +40,11 @@ func setNormStrain(dst *data.Slice) {
 		defer Ezz.Recycle()
 		cuda.ScalarToVec(dst, Exx, Eyy, Ezz, Mesh())
 	} else if !loadNormStrain && !loadNormStrainConfig {
-		NormStrain(dst, U, C11)
+		if !mtxElasto {
+			NormStrain(dst, U, C11)
+		} else {
+			NormStrainMtx(dst, U, M, C11, C12, C44, C13, C33)
+		}
 	} else {
 		panic("Cannot load file for normStrain and set configuration for normStrain in parallel.")
 	}
@@ -67,7 +71,11 @@ func setShearStrain(dst *data.Slice) {
 
 		cuda.ScalarToVec(dst, Exy, Eyz, Exz, Mesh())
 	} else if !loadShearStrain && !loadShearStrainConfig {
-		ShearStrain(dst, U, C11)
+		if !mtxElasto {
+			ShearStrain(dst, U, C11)
+		} else {
+			ShearStrainMtx(dst, U, M, C11, C12, C44, C13, C33)
+		}
 	} else {
 		panic("Cannot load file for shearStrain and set configuration for shearStrain in parallel.")
 	}
@@ -80,10 +88,76 @@ func NormStrain(dst *data.Slice, u displacement, C11 *RegionwiseScalar) {
 	cuda.NormStrain(dst, u.Buffer(), U.Mesh(), c1)
 }
 
+func NormStrainMtx(dst *data.Slice, u displacement, m magnetization, C11, C12, C44, C13, C33 *RegionwiseScalar) {
+	c11 := C11.MSlice()
+	defer c11.Recycle()
+
+	c12 := C12.MSlice()
+	defer c12.Recycle()
+
+	c13 := C13.MSlice()
+	defer c13.Recycle()
+
+	c33 := C33.MSlice()
+	defer c33.Recycle()
+
+	c44 := C44.MSlice()
+	defer c44.Recycle()
+
+	b1 := B1.MSlice()
+	defer b1.Recycle()
+
+	b2 := B2.MSlice()
+	defer b2.Recycle()
+	normStressTmp := cuda.Buffer(3, dst.Size())
+	defer cuda.Recycle(normStressTmp)
+	cuda.Zero(normStressTmp)
+	shearStressTmp := cuda.Buffer(3, dst.Size())
+	defer cuda.Recycle(shearStressTmp)
+	cuda.Zero(shearStressTmp)
+	shearStrainTmp := cuda.Buffer(3, dst.Size())
+	defer cuda.Recycle(shearStrainTmp)
+	cuda.Zero(shearStrainTmp)
+	cuda.StressWurtzitMtx(normStressTmp, shearStressTmp, dst, shearStrainTmp, u.Buffer(), m.Buffer(), c11, c12, c13, c33, c44, b1, b2, U.Mesh(), cubicElasto)
+}
+
 func ShearStrain(dst *data.Slice, u displacement, C11 *RegionwiseScalar) {
 	c1 := C11.MSlice()
 	defer c1.Recycle()
 	cuda.ShearStrain(dst, u.Buffer(), U.Mesh(), c1)
+}
+
+func ShearStrainMtx(dst *data.Slice, u displacement, m magnetization, C11, C12, C44, C13, C33 *RegionwiseScalar) {
+	c11 := C11.MSlice()
+	defer c11.Recycle()
+
+	c12 := C12.MSlice()
+	defer c12.Recycle()
+
+	c13 := C13.MSlice()
+	defer c13.Recycle()
+
+	c33 := C33.MSlice()
+	defer c33.Recycle()
+
+	c44 := C44.MSlice()
+	defer c44.Recycle()
+
+	b1 := B1.MSlice()
+	defer b1.Recycle()
+
+	b2 := B2.MSlice()
+	defer b2.Recycle()
+	normStressTmp := cuda.Buffer(3, dst.Size())
+	defer cuda.Recycle(normStressTmp)
+	cuda.Zero(normStressTmp)
+	shearStressTmp := cuda.Buffer(3, dst.Size())
+	defer cuda.Recycle(shearStressTmp)
+	cuda.Zero(shearStressTmp)
+	normStrainTmp := cuda.Buffer(3, dst.Size())
+	defer cuda.Recycle(normStrainTmp)
+	cuda.Zero(normStrainTmp)
+	cuda.StressWurtzitMtx(normStressTmp, shearStressTmp, normStrainTmp, dst, u.Buffer(), m.Buffer(), c11, c12, c13, c33, c44, b1, b2, U.Mesh(), cubicElasto)
 }
 
 func SetTime(fname string) {

@@ -42,12 +42,30 @@ func SecondDerivative(dst, u *data.Slice, mesh *data.Mesh, c1, c2, c3 MSlice) {
 	// pbc, cfg)
 }
 
-func StressWurtzitMtx(dst1, dst2, u, m *data.Slice, C11, C12, C13, C33, C44, B1, B2 MSlice, mesh *data.Mesh, cubic bool) {
+func StressWurtzitMtx(dst1, dst2, dst3, dst4, u, m *data.Slice, C11, C12, C13, C33, C44, B1, B2 MSlice, mesh *data.Mesh, cubic bool) {
 	Nx, Ny, Nz := mesh.Size()[0], mesh.Size()[1], mesh.Size()[2]
 	dx, dy, dz := mesh.CellSize()[0], mesh.CellSize()[1], mesh.CellSize()[2]
-	cfg := make3DConf(mesh.Size())
+	cfg1D := make1DConf(Nx*Ny*2 + Ny*Nz*2 + Nz*Nx*2)
+	k_adaptUNeumannBndry_async(u.DevPtr(X), u.DevPtr(Y), u.DevPtr(Z),
+		m.DevPtr(X), m.DevPtr(Y), m.DevPtr(Z),
+		C11.DevPtr(0), C11.Mul(0),
+		C12.DevPtr(0), C12.Mul(0),
+		C13.DevPtr(0), C13.Mul(0),
+		C33.DevPtr(0), C33.Mul(0),
+		C44.DevPtr(0), C44.Mul(0),
+		B1.DevPtr(0), B1.Mul(0),
+		B2.DevPtr(0), B2.Mul(0),
+		float32(dx), float32(dy), float32(dz),
+		Nx, Ny, Nz,
+		mesh.PBC_code(),
+		cubic,
+		cfg1D)
+	Sync()
+	cfg3D := make3DConf(mesh.Size())
 	k_stressWurtzit_async(dst1.DevPtr(X), dst1.DevPtr(Y), dst1.DevPtr(Z),
 		dst2.DevPtr(X), dst2.DevPtr(Y), dst2.DevPtr(Z),
+		dst3.DevPtr(X), dst3.DevPtr(Y), dst3.DevPtr(Z),
+		dst4.DevPtr(X), dst4.DevPtr(Y), dst4.DevPtr(Z),
 		u.DevPtr(X), u.DevPtr(Y), u.DevPtr(Z),
 		m.DevPtr(X), m.DevPtr(Y), m.DevPtr(Z),
 		C11.DevPtr(0), C11.Mul(0),
@@ -61,7 +79,7 @@ func StressWurtzitMtx(dst1, dst2, u, m *data.Slice, C11, C12, C13, C33, C44, B1,
 		Nx, Ny, Nz,
 		mesh.PBC_code(),
 		cubic,
-		cfg)
+		cfg3D)
 }
 
 func ForceWurtzitMtx(dst, normStress, shearStress *data.Slice, mesh *data.Mesh) {

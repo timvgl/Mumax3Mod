@@ -68,7 +68,13 @@ func SecondDerivative(dst *data.Slice, u displacement, m magnetization, C11, C12
 		shearStressTmp := cuda.Buffer(3, dst.Size())
 		defer cuda.Recycle(shearStressTmp)
 		cuda.Zero(shearStressTmp)
-		cuda.StressWurtzitMtx(normStressTmp, shearStressTmp, u.Buffer(), m.Buffer(), c11, c12, c13, c33, c44, b1, b2, U.Mesh(), cubicElasto)
+		normStrainTmp := cuda.Buffer(3, dst.Size())
+		defer cuda.Recycle(normStrainTmp)
+		cuda.Zero(normStrainTmp)
+		shearStrainTmp := cuda.Buffer(3, dst.Size())
+		defer cuda.Recycle(shearStrainTmp)
+		cuda.Zero(shearStrainTmp)
+		cuda.StressWurtzitMtx(normStressTmp, shearStressTmp, normStrainTmp, shearStrainTmp, u.Buffer(), m.Buffer(), c11, c12, c13, c33, c44, b1, b2, U.Mesh(), cubicElasto)
 		cuda.ForceWurtzitMtx(dst, normStressTmp, shearStressTmp, U.Mesh())
 	}
 }
