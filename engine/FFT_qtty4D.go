@@ -409,19 +409,15 @@ func (s *fftOperation4D) SaveResults() {
 		panic("FFT_T data could not be found during export.")
 	}
 	size := FFT_T_data.Size()
-	if s.polar {
-		cuda.ComplexToPolar(FFT_T_data, FFT_T_data)
-	}
 	for i := range FFT_T_data.LengthF {
 		if s.kspace {
 			info := data.Meta{Freq: s.minF + float64(i)*s.dF, Name: s.label + "_f", Unit: UnitOf(s.qOP), CellSize: MeshOf(s.qOP).CellSize()}
 			if s.polar {
 				polarBuffer := cuda.Buffer(FFT_T_data.NComp(), size)
-				if s.phi || s.abs {
-					data.CopyPart(polarBuffer, FFT_T_data, 0, size[X], 0, size[Y], 0, size[Z], i, i+1, 0, 0, 0, 0)
-				}
+				data.CopyPart(polarBuffer, FFT_T_data, 0, size[X], 0, size[Y], 0, size[Z], i, i+1, 0, 0, 0, 0)
+				cuda.ComplexToPolar(polarBuffer, polarBuffer)
 				if !s.phi && !s.abs {
-					hostData := FFT_T_data.HostCopyPart(0, size[X], 0, size[Y], 0, size[Z], i, i+1)
+					hostData := polarBuffer.HostCopy()
 					queOutput(func() {
 						saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, s.label+"_f_polar", i)+".ovf", hostData, info, outputFormat, axisSize, axisStartK, axisEndK, transformedAxis, true, false, "abs+phi")
 						hostData.Free()
@@ -462,11 +458,10 @@ func (s *fftOperation4D) SaveResults() {
 			info := data.Meta{Freq: s.minF + float64(i)*s.dF, Name: s.label + "_f", Unit: UnitOf(s.qOP), CellSize: MeshOf(s.qOP).CellSize()}
 			if s.polar {
 				polarBuffer := cuda.Buffer(FFT_T_data.NComp(), size)
-				if s.phi || s.abs {
-					data.CopyPart(polarBuffer, FFT_T_data, 0, size[X], 0, size[Y], 0, size[Z], i, i+1, 0, 0, 0, 0)
-				}
+				data.CopyPart(polarBuffer, FFT_T_data, 0, size[X], 0, size[Y], 0, size[Z], i, i+1, 0, 0, 0, 0)
+				cuda.ComplexToPolar(polarBuffer, polarBuffer)
 				if !s.phi && !s.abs {
-					hostData := FFT_T_data.HostCopyPart(0, size[X], 0, size[Y], 0, size[Z], i, i+1)
+					hostData := polarBuffer.HostCopy()
 					queOutput(func() {
 						saveAsFFT_sync(OD()+fmt.Sprintf(FilenameFormat, s.label+"_f_polar", i)+".ovf", hostData, info, outputFormat, axisSize, axisStartK, axisEndK, transformedAxis, true, false, "abs+phi")
 						hostData.Free()
