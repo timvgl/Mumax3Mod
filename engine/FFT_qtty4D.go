@@ -280,6 +280,7 @@ func (s *fftOperation4D) Eval() {
 		bufsGPUIP_map.Store(fmt.Sprintf("%s_%s", NameOf(s.qOP), FFTType), bufsGPUIP)
 		bufsGPUOP_map.Store(fmt.Sprintf("%s_%s", NameOf(s.qOP), FFTType), bufsGPUOP)
 	}
+	fftT := Time
 	mu.Lock()
 	FFT_T_OPDataCopied[s] = true
 	condDataCopied.Broadcast()
@@ -315,7 +316,6 @@ func (s *fftOperation4D) Eval() {
 			}
 		}
 	}
-	fftT := Time
 	if interpolate {
 		fftT = float64(s.count) * s.period
 	}
