@@ -26,7 +26,7 @@ FFT_Step_MEM_Complex(
     float* __restrict__ src,   // 3D neue Daten (in interleaved Complex)
     int Nx, int Ny, int Nz,     // Nx: Länge in Floats, also x enthält Nx/2 komplexe Werte
     int Nf,
-    float minF, float dF, float t)
+    float minF, float dF, float t, float deltaT)
 {
     // Berechne die Anzahl komplexer Elemente in x.
     int Nx_c = Nx / 2;
@@ -61,7 +61,7 @@ FFT_Step_MEM_Complex(
         // Wir verwenden idx4D, wobei wir als x-Wert wieder 2*x verwenden, um den Realteil zu adressieren.
         int sumIndex = idx4D(2 * x, y, z, fi);  // Realteil
         // Akkumulieren: addiere den Beitrag zur vorhandenen Summe.
-        sum[sumIndex]     += contribution.x;
-        sum[sumIndex + 1] += contribution.y;
+        sum[sumIndex]     += contribution.x * deltaT;
+        sum[sumIndex + 1] += contribution.y * deltaT;
     }
 }

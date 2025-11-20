@@ -71,6 +71,7 @@ type fftOperation4D struct {
 	operatorsKSpace [](func(q Quantity) Quantity)
 	preData         *data.Slice
 	interpolate     bool
+	oldTime         float64
 }
 
 func MergeOperators(fs ...func(q Quantity) Quantity) [](func(q Quantity) Quantity) {
@@ -125,7 +126,7 @@ func FFT4D(q Quantity, period float64) *fftOperation4D {
 
 	var dataT *data.Slice
 	var dataTPre *data.Slice
-	FFT_T_OP_Obj := fftOperation4D{fieldOp{q, q, q.NComp()}, q, dFrequency, maxFrequency, minFrequency, Time, period, -1, false, qOP, QTTYName, true, dataT, false, false, false, operatorsKSpace, dataTPre, interpolate}
+	FFT_T_OP_Obj := fftOperation4D{fieldOp{q, q, q.NComp()}, q, dFrequency, maxFrequency, minFrequency, Time, period, -1, false, qOP, QTTYName, true, dataT, false, false, false, operatorsKSpace, dataTPre, interpolate, math.NaN()}
 	FFT_T_OP = append(FFT_T_OP, &FFT_T_OP_Obj)
 	FFT_T_OPRunning[&FFT_T_OP_Obj] = false
 	FFT_T_OPDataCopied[&FFT_T_OP_Obj] = false
@@ -141,7 +142,7 @@ func FFT_T(q Quantity, period float64) *fftOperation4D {
 	}
 	var dataT *data.Slice
 	var dataTPre *data.Slice
-	FFT_T_OP_Obj := fftOperation4D{fieldOp{q, q, q.NComp()}, q, dFrequency, maxFrequency, minFrequency, Time, period, -1, false, q, QTTYName, false, dataT, false, false, false, [](func(q Quantity) Quantity){func(q Quantity) Quantity { return q }}, dataTPre, interpolate}
+	FFT_T_OP_Obj := fftOperation4D{fieldOp{q, q, q.NComp()}, q, dFrequency, maxFrequency, minFrequency, Time, period, -1, false, q, QTTYName, false, dataT, false, false, false, [](func(q Quantity) Quantity){func(q Quantity) Quantity { return q }}, dataTPre, interpolate, math.NaN()}
 	FFT_T_OP = append(FFT_T_OP, &FFT_T_OP_Obj)
 	FFT_T_OPRunning[&FFT_T_OP_Obj] = false
 	FFT_T_OPDataCopied[&FFT_T_OP_Obj] = false
@@ -315,6 +316,23 @@ func (s *fftOperation4D) Eval() {
 		}
 	}
 	fftT := Time
+	if interpolate {
+		fftT = float64(s.count) * s.period
+	}
+	deltaT := math.NaN()
+	if math.IsNaN(s.oldTime) {
+		s.oldTime = fftT
+		if FFT_T_in_mem {
+			FFT_T_data_map.Store(fmt.Sprintf("%s_%s", NameOf(s.qOP), FFTType), FFT_T_data)
+		}
+		mu.Lock()
+		FFT_T_OPRunning[s] = false
+		condCalcComplete.Broadcast()
+		mu.Unlock()
+		return
+	} else {
+		deltaT = fftT - s.oldTime
+	}
 	if !FFT_T_in_mem {
 		wg := sync.WaitGroup{}
 		for core := range cores {
@@ -360,7 +378,7 @@ func (s *fftOperation4D) Eval() {
 
 	} else {
 		if s.kspace {
-			cuda.FFT_T_Step_MEM_Complex(FFT_T_data, dataT, float32(s.minF), float32(s.dF), float32(fftT), fmt.Sprintf("%s_%s", NameOf(s.qOP), FFTType))
+			cuda.FFT_T_Step_MEM_Complex(FFT_T_data, dataT, float32(s.minF), float32(s.dF), float32(fftT), float32(deltaT), fmt.Sprintf("%s_%s", NameOf(s.qOP), FFTType))
 		} else {
 			cuda.FFT_T_Step_MEM_Real(FFT_T_data, dataT, float32(s.minF), float32(s.dF), float32(fftT), fmt.Sprintf("%s_%s", NameOf(s.qOP), FFTType))
 		}

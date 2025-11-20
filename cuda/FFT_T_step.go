@@ -5,7 +5,7 @@ import (
 	"github.com/mumax/3/util"
 )
 
-func FFT_T_Step_MEM_Complex(dst, src2 *data.Slice, minF, dF, fftT float32, key string) {
+func FFT_T_Step_MEM_Complex(dst, src2 *data.Slice, minF, dF, fftT, deltaT float32, key string) {
 	size := dst.Size()
 	util.Assert(src2.NComp() == dst.NComp())
 	util.Assert(src2.Size() == dst.Size())
@@ -14,7 +14,7 @@ func FFT_T_Step_MEM_Complex(dst, src2 *data.Slice, minF, dF, fftT float32, key s
 	cfg := make3DConf(size)
 	size[X] *= 2
 	for c := range dst.NComp() {
-		k_FFT_Step_MEM_Complex_async(dst.DevPtr(c), src2.DevPtr(c), size[X], size[Y], size[Z], dst.LengthF, minF, dF, fftT, key, cfg)
+		k_FFT_Step_MEM_Complex_async(dst.DevPtr(c), src2.DevPtr(c), size[X], size[Y], size[Z], dst.LengthF, minF, dF, fftT, deltaT, key, cfg)
 	}
 	//SyncFFT_T(key)
 }
