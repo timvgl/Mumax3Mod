@@ -3,6 +3,7 @@ package engine
 import (
 	"math"
 	"math/rand"
+	"sync"
 )
 
 func init() {
@@ -23,7 +24,7 @@ type tesselation struct {
 	grainsize float64
 	tilesize  float64
 	maxRegion int
-	cache     map[int2][]center
+	cache     sync.Map //map[int2][]center
 	seed      int64
 	rnd       *rand.Rand
 }
@@ -42,7 +43,7 @@ func newTesselation(grainsize float64, nRegion int, seed int64) *tesselation {
 	return &tesselation{grainsize,
 		float64(float32(grainsize * TILE)), // expect 4 grains/block, 36 per 3x3 blocks = safe, relatively round number
 		nRegion,
-		make(map[int2][]center),
+		sync.Map{},
 		seed,
 		rand.New(rand.NewSource(0))}
 }
@@ -79,8 +80,8 @@ func (t *tesselation) RegionOf(x, y, z float64) int {
 // Returns the list of Voronoi centers in tile(ix, iy), using only ix,iy to seed the random generator
 func (t *tesselation) centersInTile(tx, ty int) []center {
 	pos := int2{tx, ty}
-	if c, ok := t.cache[pos]; ok {
-		return c
+	if c, ok := t.cache.Load(pos); ok {
+		return c.([]center)
 	} else {
 		// tile-specific seed that works for positive and negative tx, ty
 		seed := (int64(ty)+(1<<24))*(1<<24) + (int64(tx) + (1 << 24))
@@ -97,7 +98,7 @@ func (t *tesselation) centersInTile(tx, ty int) []center {
 			c[i].y = y0 + t.rnd.Float64()*t.tilesize
 			c[i].region = byte(t.rnd.Intn(t.maxRegion))
 		}
-		t.cache[pos] = c
+		t.cache.Store(pos, c)
 		return c
 	}
 }
