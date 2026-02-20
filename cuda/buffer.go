@@ -22,7 +22,7 @@ var (
 	buf_check = make(map[unsafe.Pointer]struct{}) // checks if pointer originates here to avoid unintended recycle
 )
 
-var buf_max = 120 // maximum number of buffers to allocate (detect memory leak early)
+var buf_max = 250 // maximum number of buffers to allocate (detect memory leak early)
 
 func IncreaseBufMax(val int) {
 	buf_max += val
@@ -63,6 +63,10 @@ func Buffer(nComp int, size [3]int) *data.Slice {
 	}
 	slc := data.SliceFromPtrs(size, data.GPUMemory, ptrs)
 	return slc
+}
+
+func PrintBufLength() {
+	fmt.Println("Buffer pool lengths:", len(buf_check))
 }
 
 func BufferFFT_T(nComp int, size [3]int, key string) *data.Slice {

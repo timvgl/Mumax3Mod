@@ -53,7 +53,7 @@ func DefSolverRegionX(startX, endX, solver int) SolverRegion {
 }
 
 func DefSolverRegionY(startY, endY, startZ, endZ, solver int) SolverRegion {
-	return DefSolverRegion(0, Ny, startY, endY, 0, Ny, solver)
+	return DefSolverRegion(0, Nx, startY, endY, 0, Nz, solver)
 }
 
 func DefSolverRegionZ(startZ, endZ, solver int) SolverRegion {
@@ -132,11 +132,16 @@ func (s *SolverRegionsStruct) Run(seconds float64) {
 	mBuf := cuda.Buffer(VECTOR, M.Buffer().Size())
 	uBuf := cuda.Buffer(VECTOR, U.Buffer().Size())
 	duBuf := cuda.Buffer(VECTOR, DU.Buffer().Size())
+	defer cuda.Recycle(mBuf)
+	defer cuda.Recycle(uBuf)
+	defer cuda.Recycle(duBuf)
 	for (Time < stop) && !Pause {
 		ProgressBar.Update(Time)
 		data.Copy(mBuf, M.Buffer())
 		data.Copy(uBuf, U.Buffer())
 		data.Copy(duBuf, DU.Buffer())
+		fmt.Printf("HEree\n")
+		cuda.PrintBufLength()
 		if FixDtPre == 0 {
 			Time0 := Time
 			for i := range stepperSlice {
@@ -145,6 +150,9 @@ func (s *SolverRegionsStruct) Run(seconds float64) {
 					stepperSlice[i].StepRegion(&s.reg[i])
 				}
 				Time = Time0
+				data.Copy(M.Buffer(), mBuf)
+				data.Copy(U.Buffer(), uBuf)
+				data.Copy(DU.Buffer(), duBuf)
 			}
 			minSiDt := math.Inf(1)
 			for i := range s.reg {
@@ -154,6 +162,7 @@ func (s *SolverRegionsStruct) Run(seconds float64) {
 			}
 			FixDt = minSiDt
 		}
+		cuda.PrintBufLength()
 		//Do step for region, set store result of region, reset back to state from before, evolve next region, etc
 		for i := range stepperSlice {
 			UseExcitation = overlappingElastic[i]
@@ -165,6 +174,7 @@ func (s *SolverRegionsStruct) Run(seconds float64) {
 			data.Copy(U.Buffer(), uBuf)
 			data.Copy(DU.Buffer(), duBuf)
 		}
+		cuda.PrintBufLength()
 		for i := range stepperSlice {
 			data.CopyPart(M.Buffer(), regionsData[i][0], 0, regionsData[i][0].Size()[X], 0, regionsData[i][0].Size()[Y], 0, regionsData[i][0].Size()[Z], 0, 1, s.reg[i].StartX, s.reg[i].StartY, s.reg[i].StartZ, 0)
 			data.CopyPart(U.Buffer(), regionsData[i][1], 0, regionsData[i][0].Size()[X], 0, regionsData[i][0].Size()[Y], 0, regionsData[i][0].Size()[Z], 0, 1, s.reg[i].StartX, s.reg[i].StartY, s.reg[i].StartZ, 0)
@@ -196,15 +206,15 @@ func (r *SolverRegion) Overlaps(other *SolverRegion) bool {
 	return Overlaps(r.StartX, r.EndX, r.StartY, r.EndY, r.StartZ, r.EndZ, other.StartX, other.EndX, other.StartY, other.EndY, other.StartZ, other.EndZ)
 }
 
-func Overlaps(StartX1, EndX1, StartY1, EndY1, StartZ1, EndZ1, StartX2, EndX2, StartY2, EndY2, StartZ2, EndZ2 int) bool {
-	// Check for separation along each axis.
-	if EndX1 < StartX2 || StartX1 > EndX2 {
+func Overlaps(StartX1, EndX1, StartY1, EndY1, StartZ1, EndZ1,
+	StartX2, EndX2, StartY2, EndY2, StartZ2, EndZ2 int) bool {
+	if EndX1 <= StartX2 || EndX2 <= StartX1 {
 		return false
 	}
-	if EndY1 < StartY2 || StartY1 > EndY2 {
+	if EndY1 <= StartY2 || EndY2 <= StartY1 {
 		return false
 	}
-	if EndZ1 < StartZ2 || StartZ1 > EndZ2 {
+	if EndZ1 <= StartZ2 || EndZ2 <= StartZ1 {
 		return false
 	}
 	return true

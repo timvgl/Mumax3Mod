@@ -398,6 +398,13 @@ func NewScalarParam(name, unit, desc string, children ...derived) *RegionwiseSca
 	return p
 }
 
+func (p *RegionwiseScalar) RenderDataSlice(d *data.Slice) {
+	util.AssertMsg(strings.ToLower(p.name) != "aex" && strings.ToLower(p.name) != "dind" && strings.ToLower(p.name) != "dmi" && strings.ToLower(p.name) != "temp", "RenderDataSlice: Not available for exchange, DMI and Temperature.")
+	util.AssertMsg(d.NComp() == 1, "RenderDataSlice: Need scalar function.")
+	renderers := make([]*ReadyToRenderFunction, 1)
+	SetParam(p.name, ParameterSlice{start: [3]int{0, 0, 0}, end: p.Mesh().Size(), d: d, ncomp: d.NComp(), timedependent: false, renderers: renderers, renderedShape: nil, inversedRenderedShape: nil})
+}
+
 func (p *RegionwiseScalar) RenderFunction(equation StringFunction) {
 	util.AssertMsg(strings.ToLower(p.name) != "aex" && strings.ToLower(p.name) != "dind" && strings.ToLower(p.name) != "dmi" && strings.ToLower(p.name) != "temp", "RenderFunction: Not available for exchange, DMI and Temperature.")
 	util.AssertMsg(equation.IsScalar(), "RenderFunction: Need scalar function.")
@@ -536,6 +543,12 @@ func NewVectorParam(name, unit, desc string) *RegionwiseVector {
 		DeclLValue(name, p, cat(desc, unit))
 	}
 	return p
+}
+
+func (p *RegionwiseVector) RenderDataSlice(d *data.Slice) {
+	util.AssertMsg(d.NComp() == 3, "RenderDataSlice: Need vector function.")
+	renderers := make([]*ReadyToRenderFunction, 1)
+	SetParam(p.name, ParameterSlice{start: [3]int{0, 0, 0}, end: p.Mesh().Size(), d: d, ncomp: d.NComp(), timedependent: false, renderers: renderers, renderedShape: nil, inversedRenderedShape: nil})
 }
 
 func (p *RegionwiseVector) RenderFunction(equation StringFunction) {

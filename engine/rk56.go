@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/mumax/3/cuda"
@@ -119,6 +120,8 @@ func (rk *RK56) Step() {
 }
 
 func (rk *RK56) StepRegion(region *SolverRegion) {
+	fmt.Println("RK56 StepRegion called")
+	cuda.PrintBufLength()
 	u := cuda.Buffer(M.NComp(), region.Size())
 	cuda.Zero(u)
 	cuda.Recycle(u)
@@ -171,7 +174,9 @@ func (rk *RK56) StepRegion(region *SolverRegion) {
 	h := float32(Dt_si * GammaLL) // internal time step = Dt * gammaLL
 
 	// stage 1
+	cuda.PrintBufLength()
 	torqueFnRegion(k1, m, u, region.PBCx, region.PBCy, region.PBCz)
+	cuda.PrintBufLength()
 
 	// stage 2
 	Time = t0 + (1./6.)*Dt_si
@@ -229,6 +234,7 @@ func (rk *RK56) StepRegion(region *SolverRegion) {
 
 	// determine error
 	err := cuda.MaxVecNorm(Err) * float64(h)
+	fmt.Println("End")
 
 	// adjust next time step
 	if err < MaxErr || Dt_si <= MinDt || FixDt != 0 { // mindt check to avoid infinite loop

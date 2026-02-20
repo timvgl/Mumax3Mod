@@ -74,7 +74,7 @@ var gammaGovaluate_map = map[int]string{0: "",
 // gammaGovaluate PTX code for various compute capabilities.
 const (
 	gammaGovaluate_ptx_50 = `
-.version 8.5
+.version 8.2
 .target sm_50
 .address_size 64
 
@@ -101,7 +101,7 @@ const (
 	mov.u32 	%r10, %tid.x;
 	mad.lo.s32 	%r1, %r8, %r9, %r10;
 	setp.ge.s32 	%p2, %r1, %r4;
-	@%p2 bra 	$L__BB0_14;
+	@%p2 bra 	$L__BB0_15;
 
 	cvta.to.global.u64 	%rd3, %rd2;
 	mul.wide.s32 	%rd4, %r1, 4;
@@ -145,9 +145,7 @@ $L__BB0_9:
 	mov.f32 	%f172, 0f00000000;
 	fma.rn.f32 	%f173, %f171, %f156, %f172;
 	fma.rn.f32 	%f174, %f173, %f178, %f156;
-	div.approx.f32 	%f180, %f154, %f174;
-	setp.geu.f32 	%p15, %f1, 0f00000000;
-	@%p15 bra 	$L__BB0_13;
+	div.approx.f32 	%f179, %f154, %f174;
 	bra.uni 	$L__BB0_10;
 
 $L__BB0_2:
@@ -318,39 +316,42 @@ $L__BB0_6:
 	fma.rn.f32 	%f149, %f5, %f144, %f148;
 	mul.f32 	%f150, %f149, 0f3F000000;
 	mul.f32 	%f151, %f150, 0f27800000;
-	selp.f32 	%f180, %f151, %f150, %p7;
+	selp.f32 	%f179, %f151, %f150, %p7;
+	bra.uni 	$L__BB0_10;
+
+$L__BB0_3:
+	fma.rn.f32 	%f179, %f6, %f5, %f5;
 
 $L__BB0_10:
-	mov.f32 	%f17, %f180;
+	setp.geu.f32 	%p15, %f1, 0f00000000;
+	mov.f32 	%f180, %f179;
+	@%p15 bra 	$L__BB0_14;
+
 	cvt.rzi.f32.f32 	%f176, %f1;
 	setp.eq.f32 	%p16, %f176, %f1;
 	mov.f32 	%f180, 0f7FFFFFFF;
-	@%p16 bra 	$L__BB0_13;
+	@%p16 bra 	$L__BB0_14;
 
 	setp.geu.f32 	%p17, %f1, 0fC2246666;
-	mov.f32 	%f180, %f17;
-	@%p17 bra 	$L__BB0_13;
+	mov.f32 	%f180, %f179;
+	@%p17 bra 	$L__BB0_14;
 
 	cvt.rzi.s32.f32 	%r21, %f1;
 	and.b32  	%r22, %r21, 1;
 	setp.eq.b32 	%p18, %r22, 1;
-	selp.f32 	%f180, 0f00000000, %f17, %p18;
-	bra.uni 	$L__BB0_13;
-
-$L__BB0_3:
-	fma.rn.f32 	%f180, %f6, %f5, %f5;
-
-$L__BB0_13:
-	st.global.f32 	[%rd1], %f180;
+	selp.f32 	%f180, 0f00000000, %f179, %p18;
 
 $L__BB0_14:
+	st.global.f32 	[%rd1], %f180;
+
+$L__BB0_15:
 	ret;
 
 }
 
 `
 	gammaGovaluate_ptx_52 = `
-.version 8.5
+.version 8.2
 .target sm_52
 .address_size 64
 
@@ -377,7 +378,7 @@ $L__BB0_14:
 	mov.u32 	%r10, %tid.x;
 	mad.lo.s32 	%r1, %r8, %r9, %r10;
 	setp.ge.s32 	%p2, %r1, %r4;
-	@%p2 bra 	$L__BB0_14;
+	@%p2 bra 	$L__BB0_15;
 
 	cvta.to.global.u64 	%rd3, %rd2;
 	mul.wide.s32 	%rd4, %r1, 4;
@@ -421,9 +422,7 @@ $L__BB0_9:
 	mov.f32 	%f172, 0f00000000;
 	fma.rn.f32 	%f173, %f171, %f156, %f172;
 	fma.rn.f32 	%f174, %f173, %f178, %f156;
-	div.approx.f32 	%f180, %f154, %f174;
-	setp.geu.f32 	%p15, %f1, 0f00000000;
-	@%p15 bra 	$L__BB0_13;
+	div.approx.f32 	%f179, %f154, %f174;
 	bra.uni 	$L__BB0_10;
 
 $L__BB0_2:
@@ -594,39 +593,42 @@ $L__BB0_6:
 	fma.rn.f32 	%f149, %f5, %f144, %f148;
 	mul.f32 	%f150, %f149, 0f3F000000;
 	mul.f32 	%f151, %f150, 0f27800000;
-	selp.f32 	%f180, %f151, %f150, %p7;
+	selp.f32 	%f179, %f151, %f150, %p7;
+	bra.uni 	$L__BB0_10;
+
+$L__BB0_3:
+	fma.rn.f32 	%f179, %f6, %f5, %f5;
 
 $L__BB0_10:
-	mov.f32 	%f17, %f180;
+	setp.geu.f32 	%p15, %f1, 0f00000000;
+	mov.f32 	%f180, %f179;
+	@%p15 bra 	$L__BB0_14;
+
 	cvt.rzi.f32.f32 	%f176, %f1;
 	setp.eq.f32 	%p16, %f176, %f1;
 	mov.f32 	%f180, 0f7FFFFFFF;
-	@%p16 bra 	$L__BB0_13;
+	@%p16 bra 	$L__BB0_14;
 
 	setp.geu.f32 	%p17, %f1, 0fC2246666;
-	mov.f32 	%f180, %f17;
-	@%p17 bra 	$L__BB0_13;
+	mov.f32 	%f180, %f179;
+	@%p17 bra 	$L__BB0_14;
 
 	cvt.rzi.s32.f32 	%r21, %f1;
 	and.b32  	%r22, %r21, 1;
 	setp.eq.b32 	%p18, %r22, 1;
-	selp.f32 	%f180, 0f00000000, %f17, %p18;
-	bra.uni 	$L__BB0_13;
-
-$L__BB0_3:
-	fma.rn.f32 	%f180, %f6, %f5, %f5;
-
-$L__BB0_13:
-	st.global.f32 	[%rd1], %f180;
+	selp.f32 	%f180, 0f00000000, %f179, %p18;
 
 $L__BB0_14:
+	st.global.f32 	[%rd1], %f180;
+
+$L__BB0_15:
 	ret;
 
 }
 
 `
 	gammaGovaluate_ptx_53 = `
-.version 8.5
+.version 8.2
 .target sm_53
 .address_size 64
 
@@ -653,7 +655,7 @@ $L__BB0_14:
 	mov.u32 	%r10, %tid.x;
 	mad.lo.s32 	%r1, %r8, %r9, %r10;
 	setp.ge.s32 	%p2, %r1, %r4;
-	@%p2 bra 	$L__BB0_14;
+	@%p2 bra 	$L__BB0_15;
 
 	cvta.to.global.u64 	%rd3, %rd2;
 	mul.wide.s32 	%rd4, %r1, 4;
@@ -697,9 +699,7 @@ $L__BB0_9:
 	mov.f32 	%f172, 0f00000000;
 	fma.rn.f32 	%f173, %f171, %f156, %f172;
 	fma.rn.f32 	%f174, %f173, %f178, %f156;
-	div.approx.f32 	%f180, %f154, %f174;
-	setp.geu.f32 	%p15, %f1, 0f00000000;
-	@%p15 bra 	$L__BB0_13;
+	div.approx.f32 	%f179, %f154, %f174;
 	bra.uni 	$L__BB0_10;
 
 $L__BB0_2:
@@ -870,39 +870,42 @@ $L__BB0_6:
 	fma.rn.f32 	%f149, %f5, %f144, %f148;
 	mul.f32 	%f150, %f149, 0f3F000000;
 	mul.f32 	%f151, %f150, 0f27800000;
-	selp.f32 	%f180, %f151, %f150, %p7;
+	selp.f32 	%f179, %f151, %f150, %p7;
+	bra.uni 	$L__BB0_10;
+
+$L__BB0_3:
+	fma.rn.f32 	%f179, %f6, %f5, %f5;
 
 $L__BB0_10:
-	mov.f32 	%f17, %f180;
+	setp.geu.f32 	%p15, %f1, 0f00000000;
+	mov.f32 	%f180, %f179;
+	@%p15 bra 	$L__BB0_14;
+
 	cvt.rzi.f32.f32 	%f176, %f1;
 	setp.eq.f32 	%p16, %f176, %f1;
 	mov.f32 	%f180, 0f7FFFFFFF;
-	@%p16 bra 	$L__BB0_13;
+	@%p16 bra 	$L__BB0_14;
 
 	setp.geu.f32 	%p17, %f1, 0fC2246666;
-	mov.f32 	%f180, %f17;
-	@%p17 bra 	$L__BB0_13;
+	mov.f32 	%f180, %f179;
+	@%p17 bra 	$L__BB0_14;
 
 	cvt.rzi.s32.f32 	%r21, %f1;
 	and.b32  	%r22, %r21, 1;
 	setp.eq.b32 	%p18, %r22, 1;
-	selp.f32 	%f180, 0f00000000, %f17, %p18;
-	bra.uni 	$L__BB0_13;
-
-$L__BB0_3:
-	fma.rn.f32 	%f180, %f6, %f5, %f5;
-
-$L__BB0_13:
-	st.global.f32 	[%rd1], %f180;
+	selp.f32 	%f180, 0f00000000, %f179, %p18;
 
 $L__BB0_14:
+	st.global.f32 	[%rd1], %f180;
+
+$L__BB0_15:
 	ret;
 
 }
 
 `
 	gammaGovaluate_ptx_60 = `
-.version 8.5
+.version 8.2
 .target sm_60
 .address_size 64
 
@@ -929,7 +932,7 @@ $L__BB0_14:
 	mov.u32 	%r10, %tid.x;
 	mad.lo.s32 	%r1, %r8, %r9, %r10;
 	setp.ge.s32 	%p2, %r1, %r4;
-	@%p2 bra 	$L__BB0_14;
+	@%p2 bra 	$L__BB0_15;
 
 	cvta.to.global.u64 	%rd3, %rd2;
 	mul.wide.s32 	%rd4, %r1, 4;
@@ -973,9 +976,7 @@ $L__BB0_9:
 	mov.f32 	%f172, 0f00000000;
 	fma.rn.f32 	%f173, %f171, %f156, %f172;
 	fma.rn.f32 	%f174, %f173, %f178, %f156;
-	div.approx.f32 	%f180, %f154, %f174;
-	setp.geu.f32 	%p15, %f1, 0f00000000;
-	@%p15 bra 	$L__BB0_13;
+	div.approx.f32 	%f179, %f154, %f174;
 	bra.uni 	$L__BB0_10;
 
 $L__BB0_2:
@@ -1146,39 +1147,42 @@ $L__BB0_6:
 	fma.rn.f32 	%f149, %f5, %f144, %f148;
 	mul.f32 	%f150, %f149, 0f3F000000;
 	mul.f32 	%f151, %f150, 0f27800000;
-	selp.f32 	%f180, %f151, %f150, %p7;
+	selp.f32 	%f179, %f151, %f150, %p7;
+	bra.uni 	$L__BB0_10;
+
+$L__BB0_3:
+	fma.rn.f32 	%f179, %f6, %f5, %f5;
 
 $L__BB0_10:
-	mov.f32 	%f17, %f180;
+	setp.geu.f32 	%p15, %f1, 0f00000000;
+	mov.f32 	%f180, %f179;
+	@%p15 bra 	$L__BB0_14;
+
 	cvt.rzi.f32.f32 	%f176, %f1;
 	setp.eq.f32 	%p16, %f176, %f1;
 	mov.f32 	%f180, 0f7FFFFFFF;
-	@%p16 bra 	$L__BB0_13;
+	@%p16 bra 	$L__BB0_14;
 
 	setp.geu.f32 	%p17, %f1, 0fC2246666;
-	mov.f32 	%f180, %f17;
-	@%p17 bra 	$L__BB0_13;
+	mov.f32 	%f180, %f179;
+	@%p17 bra 	$L__BB0_14;
 
 	cvt.rzi.s32.f32 	%r21, %f1;
 	and.b32  	%r22, %r21, 1;
 	setp.eq.b32 	%p18, %r22, 1;
-	selp.f32 	%f180, 0f00000000, %f17, %p18;
-	bra.uni 	$L__BB0_13;
-
-$L__BB0_3:
-	fma.rn.f32 	%f180, %f6, %f5, %f5;
-
-$L__BB0_13:
-	st.global.f32 	[%rd1], %f180;
+	selp.f32 	%f180, 0f00000000, %f179, %p18;
 
 $L__BB0_14:
+	st.global.f32 	[%rd1], %f180;
+
+$L__BB0_15:
 	ret;
 
 }
 
 `
 	gammaGovaluate_ptx_61 = `
-.version 8.5
+.version 8.2
 .target sm_61
 .address_size 64
 
@@ -1205,7 +1209,7 @@ $L__BB0_14:
 	mov.u32 	%r10, %tid.x;
 	mad.lo.s32 	%r1, %r8, %r9, %r10;
 	setp.ge.s32 	%p2, %r1, %r4;
-	@%p2 bra 	$L__BB0_14;
+	@%p2 bra 	$L__BB0_15;
 
 	cvta.to.global.u64 	%rd3, %rd2;
 	mul.wide.s32 	%rd4, %r1, 4;
@@ -1249,9 +1253,7 @@ $L__BB0_9:
 	mov.f32 	%f172, 0f00000000;
 	fma.rn.f32 	%f173, %f171, %f156, %f172;
 	fma.rn.f32 	%f174, %f173, %f178, %f156;
-	div.approx.f32 	%f180, %f154, %f174;
-	setp.geu.f32 	%p15, %f1, 0f00000000;
-	@%p15 bra 	$L__BB0_13;
+	div.approx.f32 	%f179, %f154, %f174;
 	bra.uni 	$L__BB0_10;
 
 $L__BB0_2:
@@ -1422,39 +1424,42 @@ $L__BB0_6:
 	fma.rn.f32 	%f149, %f5, %f144, %f148;
 	mul.f32 	%f150, %f149, 0f3F000000;
 	mul.f32 	%f151, %f150, 0f27800000;
-	selp.f32 	%f180, %f151, %f150, %p7;
+	selp.f32 	%f179, %f151, %f150, %p7;
+	bra.uni 	$L__BB0_10;
+
+$L__BB0_3:
+	fma.rn.f32 	%f179, %f6, %f5, %f5;
 
 $L__BB0_10:
-	mov.f32 	%f17, %f180;
+	setp.geu.f32 	%p15, %f1, 0f00000000;
+	mov.f32 	%f180, %f179;
+	@%p15 bra 	$L__BB0_14;
+
 	cvt.rzi.f32.f32 	%f176, %f1;
 	setp.eq.f32 	%p16, %f176, %f1;
 	mov.f32 	%f180, 0f7FFFFFFF;
-	@%p16 bra 	$L__BB0_13;
+	@%p16 bra 	$L__BB0_14;
 
 	setp.geu.f32 	%p17, %f1, 0fC2246666;
-	mov.f32 	%f180, %f17;
-	@%p17 bra 	$L__BB0_13;
+	mov.f32 	%f180, %f179;
+	@%p17 bra 	$L__BB0_14;
 
 	cvt.rzi.s32.f32 	%r21, %f1;
 	and.b32  	%r22, %r21, 1;
 	setp.eq.b32 	%p18, %r22, 1;
-	selp.f32 	%f180, 0f00000000, %f17, %p18;
-	bra.uni 	$L__BB0_13;
-
-$L__BB0_3:
-	fma.rn.f32 	%f180, %f6, %f5, %f5;
-
-$L__BB0_13:
-	st.global.f32 	[%rd1], %f180;
+	selp.f32 	%f180, 0f00000000, %f179, %p18;
 
 $L__BB0_14:
+	st.global.f32 	[%rd1], %f180;
+
+$L__BB0_15:
 	ret;
 
 }
 
 `
 	gammaGovaluate_ptx_62 = `
-.version 8.5
+.version 8.2
 .target sm_62
 .address_size 64
 
@@ -1481,7 +1486,7 @@ $L__BB0_14:
 	mov.u32 	%r10, %tid.x;
 	mad.lo.s32 	%r1, %r8, %r9, %r10;
 	setp.ge.s32 	%p2, %r1, %r4;
-	@%p2 bra 	$L__BB0_14;
+	@%p2 bra 	$L__BB0_15;
 
 	cvta.to.global.u64 	%rd3, %rd2;
 	mul.wide.s32 	%rd4, %r1, 4;
@@ -1525,9 +1530,7 @@ $L__BB0_9:
 	mov.f32 	%f172, 0f00000000;
 	fma.rn.f32 	%f173, %f171, %f156, %f172;
 	fma.rn.f32 	%f174, %f173, %f178, %f156;
-	div.approx.f32 	%f180, %f154, %f174;
-	setp.geu.f32 	%p15, %f1, 0f00000000;
-	@%p15 bra 	$L__BB0_13;
+	div.approx.f32 	%f179, %f154, %f174;
 	bra.uni 	$L__BB0_10;
 
 $L__BB0_2:
@@ -1698,39 +1701,42 @@ $L__BB0_6:
 	fma.rn.f32 	%f149, %f5, %f144, %f148;
 	mul.f32 	%f150, %f149, 0f3F000000;
 	mul.f32 	%f151, %f150, 0f27800000;
-	selp.f32 	%f180, %f151, %f150, %p7;
+	selp.f32 	%f179, %f151, %f150, %p7;
+	bra.uni 	$L__BB0_10;
+
+$L__BB0_3:
+	fma.rn.f32 	%f179, %f6, %f5, %f5;
 
 $L__BB0_10:
-	mov.f32 	%f17, %f180;
+	setp.geu.f32 	%p15, %f1, 0f00000000;
+	mov.f32 	%f180, %f179;
+	@%p15 bra 	$L__BB0_14;
+
 	cvt.rzi.f32.f32 	%f176, %f1;
 	setp.eq.f32 	%p16, %f176, %f1;
 	mov.f32 	%f180, 0f7FFFFFFF;
-	@%p16 bra 	$L__BB0_13;
+	@%p16 bra 	$L__BB0_14;
 
 	setp.geu.f32 	%p17, %f1, 0fC2246666;
-	mov.f32 	%f180, %f17;
-	@%p17 bra 	$L__BB0_13;
+	mov.f32 	%f180, %f179;
+	@%p17 bra 	$L__BB0_14;
 
 	cvt.rzi.s32.f32 	%r21, %f1;
 	and.b32  	%r22, %r21, 1;
 	setp.eq.b32 	%p18, %r22, 1;
-	selp.f32 	%f180, 0f00000000, %f17, %p18;
-	bra.uni 	$L__BB0_13;
-
-$L__BB0_3:
-	fma.rn.f32 	%f180, %f6, %f5, %f5;
-
-$L__BB0_13:
-	st.global.f32 	[%rd1], %f180;
+	selp.f32 	%f180, 0f00000000, %f179, %p18;
 
 $L__BB0_14:
+	st.global.f32 	[%rd1], %f180;
+
+$L__BB0_15:
 	ret;
 
 }
 
 `
 	gammaGovaluate_ptx_70 = `
-.version 8.5
+.version 8.2
 .target sm_70
 .address_size 64
 
@@ -1757,7 +1763,7 @@ $L__BB0_14:
 	mov.u32 	%r10, %tid.x;
 	mad.lo.s32 	%r1, %r8, %r9, %r10;
 	setp.ge.s32 	%p2, %r1, %r4;
-	@%p2 bra 	$L__BB0_14;
+	@%p2 bra 	$L__BB0_15;
 
 	cvta.to.global.u64 	%rd3, %rd2;
 	mul.wide.s32 	%rd4, %r1, 4;
@@ -1801,9 +1807,7 @@ $L__BB0_9:
 	mov.f32 	%f172, 0f00000000;
 	fma.rn.f32 	%f173, %f171, %f156, %f172;
 	fma.rn.f32 	%f174, %f173, %f178, %f156;
-	div.approx.f32 	%f180, %f154, %f174;
-	setp.geu.f32 	%p15, %f1, 0f00000000;
-	@%p15 bra 	$L__BB0_13;
+	div.approx.f32 	%f179, %f154, %f174;
 	bra.uni 	$L__BB0_10;
 
 $L__BB0_2:
@@ -1974,39 +1978,42 @@ $L__BB0_6:
 	fma.rn.f32 	%f149, %f5, %f144, %f148;
 	mul.f32 	%f150, %f149, 0f3F000000;
 	mul.f32 	%f151, %f150, 0f27800000;
-	selp.f32 	%f180, %f151, %f150, %p7;
+	selp.f32 	%f179, %f151, %f150, %p7;
+	bra.uni 	$L__BB0_10;
+
+$L__BB0_3:
+	fma.rn.f32 	%f179, %f6, %f5, %f5;
 
 $L__BB0_10:
-	mov.f32 	%f17, %f180;
+	setp.geu.f32 	%p15, %f1, 0f00000000;
+	mov.f32 	%f180, %f179;
+	@%p15 bra 	$L__BB0_14;
+
 	cvt.rzi.f32.f32 	%f176, %f1;
 	setp.eq.f32 	%p16, %f176, %f1;
 	mov.f32 	%f180, 0f7FFFFFFF;
-	@%p16 bra 	$L__BB0_13;
+	@%p16 bra 	$L__BB0_14;
 
 	setp.geu.f32 	%p17, %f1, 0fC2246666;
-	mov.f32 	%f180, %f17;
-	@%p17 bra 	$L__BB0_13;
+	mov.f32 	%f180, %f179;
+	@%p17 bra 	$L__BB0_14;
 
 	cvt.rzi.s32.f32 	%r21, %f1;
 	and.b32  	%r22, %r21, 1;
 	setp.eq.b32 	%p18, %r22, 1;
-	selp.f32 	%f180, 0f00000000, %f17, %p18;
-	bra.uni 	$L__BB0_13;
-
-$L__BB0_3:
-	fma.rn.f32 	%f180, %f6, %f5, %f5;
-
-$L__BB0_13:
-	st.global.f32 	[%rd1], %f180;
+	selp.f32 	%f180, 0f00000000, %f179, %p18;
 
 $L__BB0_14:
+	st.global.f32 	[%rd1], %f180;
+
+$L__BB0_15:
 	ret;
 
 }
 
 `
 	gammaGovaluate_ptx_72 = `
-.version 8.5
+.version 8.2
 .target sm_72
 .address_size 64
 
@@ -2033,7 +2040,7 @@ $L__BB0_14:
 	mov.u32 	%r10, %tid.x;
 	mad.lo.s32 	%r1, %r8, %r9, %r10;
 	setp.ge.s32 	%p2, %r1, %r4;
-	@%p2 bra 	$L__BB0_14;
+	@%p2 bra 	$L__BB0_15;
 
 	cvta.to.global.u64 	%rd3, %rd2;
 	mul.wide.s32 	%rd4, %r1, 4;
@@ -2077,9 +2084,7 @@ $L__BB0_9:
 	mov.f32 	%f172, 0f00000000;
 	fma.rn.f32 	%f173, %f171, %f156, %f172;
 	fma.rn.f32 	%f174, %f173, %f178, %f156;
-	div.approx.f32 	%f180, %f154, %f174;
-	setp.geu.f32 	%p15, %f1, 0f00000000;
-	@%p15 bra 	$L__BB0_13;
+	div.approx.f32 	%f179, %f154, %f174;
 	bra.uni 	$L__BB0_10;
 
 $L__BB0_2:
@@ -2250,39 +2255,42 @@ $L__BB0_6:
 	fma.rn.f32 	%f149, %f5, %f144, %f148;
 	mul.f32 	%f150, %f149, 0f3F000000;
 	mul.f32 	%f151, %f150, 0f27800000;
-	selp.f32 	%f180, %f151, %f150, %p7;
+	selp.f32 	%f179, %f151, %f150, %p7;
+	bra.uni 	$L__BB0_10;
+
+$L__BB0_3:
+	fma.rn.f32 	%f179, %f6, %f5, %f5;
 
 $L__BB0_10:
-	mov.f32 	%f17, %f180;
+	setp.geu.f32 	%p15, %f1, 0f00000000;
+	mov.f32 	%f180, %f179;
+	@%p15 bra 	$L__BB0_14;
+
 	cvt.rzi.f32.f32 	%f176, %f1;
 	setp.eq.f32 	%p16, %f176, %f1;
 	mov.f32 	%f180, 0f7FFFFFFF;
-	@%p16 bra 	$L__BB0_13;
+	@%p16 bra 	$L__BB0_14;
 
 	setp.geu.f32 	%p17, %f1, 0fC2246666;
-	mov.f32 	%f180, %f17;
-	@%p17 bra 	$L__BB0_13;
+	mov.f32 	%f180, %f179;
+	@%p17 bra 	$L__BB0_14;
 
 	cvt.rzi.s32.f32 	%r21, %f1;
 	and.b32  	%r22, %r21, 1;
 	setp.eq.b32 	%p18, %r22, 1;
-	selp.f32 	%f180, 0f00000000, %f17, %p18;
-	bra.uni 	$L__BB0_13;
-
-$L__BB0_3:
-	fma.rn.f32 	%f180, %f6, %f5, %f5;
-
-$L__BB0_13:
-	st.global.f32 	[%rd1], %f180;
+	selp.f32 	%f180, 0f00000000, %f179, %p18;
 
 $L__BB0_14:
+	st.global.f32 	[%rd1], %f180;
+
+$L__BB0_15:
 	ret;
 
 }
 
 `
 	gammaGovaluate_ptx_75 = `
-.version 8.5
+.version 8.2
 .target sm_75
 .address_size 64
 
@@ -2309,7 +2317,7 @@ $L__BB0_14:
 	mov.u32 	%r10, %tid.x;
 	mad.lo.s32 	%r1, %r8, %r9, %r10;
 	setp.ge.s32 	%p2, %r1, %r4;
-	@%p2 bra 	$L__BB0_14;
+	@%p2 bra 	$L__BB0_15;
 
 	cvta.to.global.u64 	%rd3, %rd2;
 	mul.wide.s32 	%rd4, %r1, 4;
@@ -2353,9 +2361,7 @@ $L__BB0_9:
 	mov.f32 	%f172, 0f00000000;
 	fma.rn.f32 	%f173, %f171, %f156, %f172;
 	fma.rn.f32 	%f174, %f173, %f178, %f156;
-	div.approx.f32 	%f180, %f154, %f174;
-	setp.geu.f32 	%p15, %f1, 0f00000000;
-	@%p15 bra 	$L__BB0_13;
+	div.approx.f32 	%f179, %f154, %f174;
 	bra.uni 	$L__BB0_10;
 
 $L__BB0_2:
@@ -2526,39 +2532,42 @@ $L__BB0_6:
 	fma.rn.f32 	%f149, %f5, %f144, %f148;
 	mul.f32 	%f150, %f149, 0f3F000000;
 	mul.f32 	%f151, %f150, 0f27800000;
-	selp.f32 	%f180, %f151, %f150, %p7;
+	selp.f32 	%f179, %f151, %f150, %p7;
+	bra.uni 	$L__BB0_10;
+
+$L__BB0_3:
+	fma.rn.f32 	%f179, %f6, %f5, %f5;
 
 $L__BB0_10:
-	mov.f32 	%f17, %f180;
+	setp.geu.f32 	%p15, %f1, 0f00000000;
+	mov.f32 	%f180, %f179;
+	@%p15 bra 	$L__BB0_14;
+
 	cvt.rzi.f32.f32 	%f176, %f1;
 	setp.eq.f32 	%p16, %f176, %f1;
 	mov.f32 	%f180, 0f7FFFFFFF;
-	@%p16 bra 	$L__BB0_13;
+	@%p16 bra 	$L__BB0_14;
 
 	setp.geu.f32 	%p17, %f1, 0fC2246666;
-	mov.f32 	%f180, %f17;
-	@%p17 bra 	$L__BB0_13;
+	mov.f32 	%f180, %f179;
+	@%p17 bra 	$L__BB0_14;
 
 	cvt.rzi.s32.f32 	%r21, %f1;
 	and.b32  	%r22, %r21, 1;
 	setp.eq.b32 	%p18, %r22, 1;
-	selp.f32 	%f180, 0f00000000, %f17, %p18;
-	bra.uni 	$L__BB0_13;
-
-$L__BB0_3:
-	fma.rn.f32 	%f180, %f6, %f5, %f5;
-
-$L__BB0_13:
-	st.global.f32 	[%rd1], %f180;
+	selp.f32 	%f180, 0f00000000, %f179, %p18;
 
 $L__BB0_14:
+	st.global.f32 	[%rd1], %f180;
+
+$L__BB0_15:
 	ret;
 
 }
 
 `
 	gammaGovaluate_ptx_80 = `
-.version 8.5
+.version 8.2
 .target sm_80
 .address_size 64
 
@@ -2585,7 +2594,7 @@ $L__BB0_14:
 	mov.u32 	%r10, %tid.x;
 	mad.lo.s32 	%r1, %r8, %r9, %r10;
 	setp.ge.s32 	%p2, %r1, %r4;
-	@%p2 bra 	$L__BB0_14;
+	@%p2 bra 	$L__BB0_15;
 
 	cvta.to.global.u64 	%rd3, %rd2;
 	mul.wide.s32 	%rd4, %r1, 4;
@@ -2629,9 +2638,7 @@ $L__BB0_9:
 	mov.f32 	%f172, 0f00000000;
 	fma.rn.f32 	%f173, %f171, %f156, %f172;
 	fma.rn.f32 	%f174, %f173, %f178, %f156;
-	div.approx.f32 	%f180, %f154, %f174;
-	setp.geu.f32 	%p15, %f1, 0f00000000;
-	@%p15 bra 	$L__BB0_13;
+	div.approx.f32 	%f179, %f154, %f174;
 	bra.uni 	$L__BB0_10;
 
 $L__BB0_2:
@@ -2802,32 +2809,35 @@ $L__BB0_6:
 	fma.rn.f32 	%f149, %f5, %f144, %f148;
 	mul.f32 	%f150, %f149, 0f3F000000;
 	mul.f32 	%f151, %f150, 0f27800000;
-	selp.f32 	%f180, %f151, %f150, %p7;
+	selp.f32 	%f179, %f151, %f150, %p7;
+	bra.uni 	$L__BB0_10;
+
+$L__BB0_3:
+	fma.rn.f32 	%f179, %f6, %f5, %f5;
 
 $L__BB0_10:
-	mov.f32 	%f17, %f180;
+	setp.geu.f32 	%p15, %f1, 0f00000000;
+	mov.f32 	%f180, %f179;
+	@%p15 bra 	$L__BB0_14;
+
 	cvt.rzi.f32.f32 	%f176, %f1;
 	setp.eq.f32 	%p16, %f176, %f1;
 	mov.f32 	%f180, 0f7FFFFFFF;
-	@%p16 bra 	$L__BB0_13;
+	@%p16 bra 	$L__BB0_14;
 
 	setp.geu.f32 	%p17, %f1, 0fC2246666;
-	mov.f32 	%f180, %f17;
-	@%p17 bra 	$L__BB0_13;
+	mov.f32 	%f180, %f179;
+	@%p17 bra 	$L__BB0_14;
 
 	cvt.rzi.s32.f32 	%r21, %f1;
 	and.b32  	%r22, %r21, 1;
 	setp.eq.b32 	%p18, %r22, 1;
-	selp.f32 	%f180, 0f00000000, %f17, %p18;
-	bra.uni 	$L__BB0_13;
-
-$L__BB0_3:
-	fma.rn.f32 	%f180, %f6, %f5, %f5;
-
-$L__BB0_13:
-	st.global.f32 	[%rd1], %f180;
+	selp.f32 	%f180, 0f00000000, %f179, %p18;
 
 $L__BB0_14:
+	st.global.f32 	[%rd1], %f180;
+
+$L__BB0_15:
 	ret;
 
 }

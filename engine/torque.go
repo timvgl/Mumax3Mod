@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"fmt"
 	"reflect"
 
 	"math"
@@ -60,9 +61,14 @@ func SetTorqueRegion(dst, m, u *data.Slice, useFullSample bool, pbcX, pbcY, pbcZ
 			cuda.Recycle(backupM)
 		}()
 	}
+	fmt.Println("SetTorqueRegion called")
+	cuda.PrintBufLength()
 	SetLLTorqueRegion(dst, m, u, useFullSample, pbcX, pbcY, pbcZ)
+	cuda.PrintBufLength()
 	AddSTTorqueRegion(dst, m, useFullSample)
+	cuda.PrintBufLength()
 	FreezeSpinsRegion(dst)
+	cuda.PrintBufLength()
 }
 
 // Sets dst to the current Landau-Lifshitz torque
@@ -78,14 +84,19 @@ func SetLLTorque(dst *data.Slice) {
 }
 
 func SetLLTorqueRegion(dst, m, u *data.Slice, useFullSample bool, pbcX, pbcY, pbcZ int) {
+	fmt.Println("SetLLTorqueRegion called")
+	cuda.PrintBufLength()
 	SetEffectiveFieldRegion(dst, m, u, useFullSample, pbcX, pbcY, pbcZ) // calc and store B_eff
+	cuda.PrintBufLength()
 	alpha := Alpha.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+	cuda.PrintBufLength()
 	defer alpha.Recycle()
 	if Precess {
 		cuda.LLTorque(dst, m, dst, alpha) // overwrite dst with torque
 	} else {
 		cuda.LLNoPrecess(dst, m, dst)
 	}
+	cuda.PrintBufLength()
 }
 
 // Adds the current spin transfer torque to dst
