@@ -1,3 +1,4 @@
+package cu
 /*
 #include <cuda.h>
 
