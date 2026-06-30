@@ -1,9 +1,17 @@
-package cu
+/*
+#include <cuda.h>
 
-// This file implements CUDA driver context management
-
-//#include <cuda.h>
+static CUresult mumaxCuCtxCreate(CUcontext *ctx, unsigned int flags, CUdevice dev) {
+#if CUDA_VERSION >= 13000
+	CUctxCreateParams params = {0};
+	return cuCtxCreate(ctx, &params, flags, dev);
+#else
+	return cuCtxCreate(ctx, flags, dev);
+#endif
+}
+*/
 import "C"
+
 import "unsafe"
 
 // CUDA context.
@@ -12,10 +20,12 @@ type Context uintptr
 // Create a CUDA context.
 func CtxCreate(flags uint, dev Device) Context {
 	var ctx C.CUcontext
-	err := Result(C.cuCtxCreate(&ctx, C.uint(flags), C.CUdevice(dev)))
+
+	err := Result(C.mumaxCuCtxCreate(&ctx, C.uint(flags), C.CUdevice(dev)))
 	if err != SUCCESS {
 		panic(err)
 	}
+
 	return Context(uintptr(unsafe.Pointer(ctx)))
 }
 
