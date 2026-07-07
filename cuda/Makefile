@@ -43,7 +43,7 @@ ifeq ($(CUDA_HOME),)
 else 
 	NVCC = $(CUDA_HOME)/bin/nvcc
 endif
-
+NVCC = nvcc
 # If CUDA_CC is not defined, default to compute capability 3.0.
 ifeq ($(CUDA_CC),)
 	CUDA_CC = 30

@@ -3,24 +3,25 @@ package mag
 import (
 	"bufio"
 	"fmt"
+	"math"
+	"os"
+
 	"github.com/mumax/3/data"
 	"github.com/mumax/3/oommf"
 	"github.com/mumax/3/timer"
 	"github.com/mumax/3/util"
-	"math"
-	"os"
 )
 
 // Obtains the demag kernel either from cacheDir/ or by calculating (and then storing in cacheDir for next time).
 // Empty cacheDir disables caching.
-func DemagKernel(inputSize, pbc [3]int, cellsize [3]float64, accuracy float64, cacheDir string) (kernel [3][3]*data.Slice) {
+func DemagKernel(inputSize, pbc [3]int, cellsize [3]float64, accuracy float64, cacheDir string, bypassSanityRatioCheck bool) (kernel [3][3]*data.Slice) {
 	timer.Start("kernel_init")
 	timer.Stop("kernel_init") // warm-up
 
 	timer.Start("kernel_init")
 	defer timer.Stop("kernel_init")
 
-	sanityCheck(cellsize, pbc)
+	sanityCheck(cellsize, pbc, bypassSanityRatioCheck)
 	// Cache disabled
 	if cacheDir == "" {
 		util.Log(`//Not using kernel cache (-cache="")`)
@@ -381,7 +382,7 @@ func wrap(number, max int) int {
 
 const maxAspect = 100.0 // maximum sane cell aspect ratio
 
-func sanityCheck(cellsize [3]float64, pbc [3]int) {
+func sanityCheck(cellsize [3]float64, pbc [3]int, bypassSanityRatioCheck bool) {
 	a3 := cellsize[X] / cellsize[Y]
 	a2 := cellsize[Y] / cellsize[Z]
 	a1 := cellsize[Z] / cellsize[X]
@@ -389,7 +390,7 @@ func sanityCheck(cellsize [3]float64, pbc [3]int) {
 	aMax := math.Max(a1, math.Max(a2, a3))
 	aMin := math.Min(a1, math.Min(a2, a3))
 
-	if aMax > maxAspect || aMin < 1./maxAspect {
+	if (aMax > maxAspect || aMin < 1./maxAspect) && !bypassSanityRatioCheck {
 		util.Fatal("Unrealistic cell aspect ratio:", cellsize)
 	}
 }

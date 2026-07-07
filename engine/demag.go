@@ -19,9 +19,10 @@ var (
 	EnableDemag  = true // enable/disable global demag field
 	NoDemagSpins = NewScalarParam("NoDemagSpins", "", "Disable magnetostatic interaction per region (default=0, set to 1 to disable). "+
 		"E.g.: NoDemagSpins.SetRegion(5, 1) disables the magnetostatic interaction in region 5.")
-	conv_         *cuda.DemagConvolution // does the heavy lifting
-	DemagAccuracy = 6.0                  // Demag accuracy (divide cubes in at most N^3 points)
-	regionConv_   = make(map[data.Mesh]*cuda.DemagConvolution)
+	conv_                  *cuda.DemagConvolution // does the heavy lifting
+	DemagAccuracy          = 6.0                  // Demag accuracy (divide cubes in at most N^3 points)
+	regionConv_            = make(map[data.Mesh]*cuda.DemagConvolution)
+	BypassSanityRatioCheck = false
 )
 
 var AddEdens_demag = makeEdensAdder(&B_demag, -0.5)
@@ -29,6 +30,7 @@ var AddEdens_demag = makeEdensAdder(&B_demag, -0.5)
 func init() {
 
 	DeclVar("EnableDemag", &EnableDemag, "Enables/disables demag (default=true)")
+	DeclVar("BypassSanityRatioCheck", &BypassSanityRatioCheck, "Bypasses sanity check for demag ratio (default=false)")
 	DeclVar("DemagAccuracy", &DemagAccuracy, "Controls accuracy of demag kernel")
 	registerEnergy(GetDemagEnergy, AddEdens_demag)
 }
@@ -161,7 +163,7 @@ func demagConv() *cuda.DemagConvolution {
 	if conv_ == nil || conv_.Size() != Mesh().Size() {
 		SetBusy(true)
 		defer SetBusy(false)
-		kernel := mag.DemagKernel(Mesh().Size(), Mesh().PBC(), Mesh().CellSize(), DemagAccuracy, *Flag_cachedir)
+		kernel := mag.DemagKernel(Mesh().Size(), Mesh().PBC(), Mesh().CellSize(), DemagAccuracy, *Flag_cachedir, BypassSanityRatioCheck)
 		conv_ = cuda.NewDemag(Mesh().Size(), Mesh().PBC(), kernel, *Flag_selftest)
 	}
 	return conv_
@@ -173,7 +175,7 @@ func demagConvRegion(mesh *data.Mesh) *cuda.DemagConvolution {
 	if !ok {
 		SetBusy(true)
 		defer SetBusy(false)
-		kernel := mag.DemagKernel(mesh.Size(), mesh.PBC(), mesh.CellSize(), DemagAccuracy, *Flag_cachedir)
+		kernel := mag.DemagKernel(mesh.Size(), mesh.PBC(), mesh.CellSize(), DemagAccuracy, *Flag_cachedir, BypassSanityRatioCheck)
 		conv_ = cuda.NewDemag(mesh.Size(), mesh.PBC(), kernel, *Flag_selftest)
 		regionConv_[*mesh] = conv_
 	}
