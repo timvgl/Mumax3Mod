@@ -89,7 +89,7 @@ func (s *magelasNPRKF45) Step() {
 	t0 := Time
 
 	// enforce Dirichlet displacement values before evaluating anything
-	SetFreezeDisp()
+	melasNPApplyDirichlet()
 
 	// backups
 	m0, u0, v0 := cuda.Buffer(3, size), cuda.Buffer(3, size), cuda.Buffer(3, size)
@@ -116,7 +116,7 @@ func (s *magelasNPRKF45) Step() {
 		if !fixM {
 			M.normalize()
 		}
-		SetFreezeDisp()
+		melasNPApplyDirichlet()
 	}
 
 	// stage 1
@@ -189,7 +189,7 @@ func (s *magelasNPRKF45) Step() {
 		if !fixM {
 			M.normalize()
 		}
-		SetFreezeDisp()
+		melasNPApplyDirichlet()
 		NSteps++
 		setLastErr(nrm)
 		adaptDt(math.Pow(1./math.Max(nrm, 1e-30), 1./5.))

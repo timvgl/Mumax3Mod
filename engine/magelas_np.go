@@ -42,6 +42,14 @@ var (
 	// (homogeneous Neumann / free surface). Sampled at the boundary cells.
 	TractionNP = NewExcitation("tractionNP", "N/m2", "Traction (sigma-sigma_m).n at outer non-periodic boundaries (NP solver)")
 
+	// Space- and time-dependent Dirichlet displacement values [m], applied at cells with
+	// frozenDispLoc != 0 when UseDirichletExcNP is true (use RenderFunctionLimit* to define
+	// e.g. an eigenmode injection profile). Otherwise frozenDispVal (per region) is used.
+	DirichletNP = NewExcitation("dirichletNP", "m", "Dirichlet displacement values at frozenDispLoc cells (NP solver, with UseDirichletExcNP)")
+
+	// use the dirichletNP excitation instead of frozenDispVal for the Dirichlet values
+	UseDirichletExcNP bool = false
+
 	// boundary_nodes of magnum.np: 1 = forward, 2 = midpoint, 3 = three-point (default,
 	// favors correctness for SAW problems).
 	BoundaryNodesNP int = 3
@@ -81,6 +89,7 @@ func init() {
 	ElasticMaskNP.Set(1)
 
 	DeclFunc("UseMagnumNPSolver", UseMagnumNPSolver, "Enable (true) or disable (false) the magnum.np-style fully coupled magnetoelastic solver")
+	DeclVar("UseDirichletExcNP", &UseDirichletExcNP, "Use the dirichletNP excitation (space/time-dependent) instead of frozenDispVal for Dirichlet displacement values")
 	DeclVar("BoundaryNodesNP", &BoundaryNodesNP, "Boundary node scheme of the NP solver: 1 forward, 2 midpoint, 3 three-point (default 3)")
 	DeclVar("IterationDepthNP", &IterationDepthNP, "Iteration depth for the strain jump conditions of the NP solver (default 1)")
 	DeclVar("EnforceCFLNP", &EnforceCFLNP, "Clamp the time step of the NP solver to the elastic CFL estimate")

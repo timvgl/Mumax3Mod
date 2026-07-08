@@ -142,6 +142,27 @@ func melasNPForce(dst *data.Slice, flds *melasNPFields, m, u, du *data.Slice, ou
 		eta, rho, mask, frozen, BoundaryNodesNP, outMode, mesh)
 }
 
+// melasNPApplyDirichlet enforces the Dirichlet displacement values at frozenDispLoc cells:
+// per-region frozenDispVal by default, or the space/time-dependent dirichletNP excitation
+// when UseDirichletExcNP is set (magnum.np callable BC condition). Must be called after
+// Time has been set to the stage time.
+func melasNPApplyDirichlet() {
+	if !UseDirichletExcNP {
+		SetFreezeDisp()
+		return
+	}
+	if FrozenDispLoc.isZero() {
+		return
+	}
+	val, rec := DirichletNP.Slice()
+	if rec {
+		defer cuda.Recycle(val)
+	}
+	frozen := FrozenDispLoc.MSlice()
+	defer frozen.Recycle()
+	cuda.MelasDirichletNP(U.Buffer(), val, frozen, Mesh())
+}
+
 // stress cache: during one RHS evaluation of the stepper, the magnetoelastic field term
 // reuses the stress computed for the elastic force instead of recomputing the pipeline.
 var melasNPCache struct {

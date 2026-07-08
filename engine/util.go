@@ -242,6 +242,8 @@ func castFloat(val interface{}) float64 {
 		} else {
 			panic("Got non-castable string.")
 		}
+	case int:
+		return float64(v)
 	case int32:
 		return float64(v)
 	case float32:
@@ -249,7 +251,7 @@ func castFloat(val interface{}) float64 {
 	case float64:
 		return v
 	default:
-		panic(fmt.Sprintf("Type not recognized for %v", v))
+		panic(fmt.Sprintf("Type not recognized: %T with value %v", v, v))
 	}
 }
 

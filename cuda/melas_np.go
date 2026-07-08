@@ -244,6 +244,17 @@ func MelasDudNP(dst, du *data.Slice, mask, frozen MSlice, mesh *data.Mesh) {
 		N[X], N[Y], N[Z], cfg)
 }
 
+// Applies u = val where the Dirichlet mask is nonzero (space/time-dependent Dirichlet BC).
+func MelasDirichletNP(u, val *data.Slice, frozen MSlice, mesh *data.Mesh) {
+	N := mesh.Size()
+	cfg := make3DConf(N)
+	k_MelasDirichletNP_async(
+		u.DevPtr(X), u.DevPtr(Y), u.DevPtr(Z),
+		val.DevPtr(X), val.DevPtr(Y), val.DevPtr(Z),
+		frozen.DevPtr(0), frozen.Mul(0),
+		N[X], N[Y], N[Z], cfg)
+}
+
 // Gilbert dissipation density factor Ms*alpha/(1+alpha^2)*|m x B|^2.
 func MelasGilbertNP(dst, m, b *data.Slice, alpha, Ms MSlice, mesh *data.Mesh) {
 	N := mesh.Size()
