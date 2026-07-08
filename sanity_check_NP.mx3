@@ -1,0 +1,110 @@
+// ============================================================================
+// SANITY CHECK for the magnum.np-style fully coupled magnetoelastic solver.
+//
+// Scaled-down translation of NiStripesRelaxed_dyn.py (magnum.np): a Ni stripe
+// on a Si substrate with an airbox above, periodic in y, Dirichlet u=0 at the
+// bottom and at both x ends, natural (free) boundaries elsewhere.
+//
+// THIS IS A SANITY CHECK, NOT THE PRODUCTION VALIDATION: the mesh is ~100x
+// smaller than the heavy magnum.np run and the simulated time is short.
+// It verifies that the solver runs, is stable, and produces finite, plausible
+// u/du/F_elNP/B_melNP and energies. Quantitative validation requires the
+// full-scale setups described in IMPLEMENTATION_REPORT_MAGELAS_NP.md.
+// ============================================================================
+
+nx := 128
+nz := 32
+c  := 4e-9
+
+SetGridSize(nx, 1, nz)
+SetCellSize(c, c, c)
+SetPBC(0, 1, 0) // periodic in y only (like the magnum.np example)
+
+// ---------------- regions ----------------
+// 0: air (stiffness 0, elastically masked)
+// 1: Si substrate
+// 2: Ni stripe (magnetic)
+// 3: Dirichlet cells (bottom layer + x-end columns, elastically Si)
+
+zAir    := 8                  // air layers on top
+zSub    := nz - zAir          // substrate thickness in cells
+MxCells := 12                 // stripe width (cells)
+MzCells := 2                  // stripe height (cells)
+
+// substrate: everything below the air region
+DefRegion(1, ZRange(-inf, (float64(zSub)-float64(nz)/2)*c))
+
+// Ni stripe: sits on top of the substrate, inside the air region
+stripe := Cuboid(float64(MxCells)*c, inf, float64(MzCells)*c).Transl(0, 0, (float64(zSub)-float64(nz)/2+float64(MzCells)/2)*c)
+DefRegion(2, stripe)
+
+// Dirichlet cells: bottom z layer and both x-end columns (within the substrate)
+DefRegion(3, ZRange(-inf, (1-float64(nz)/2)*c))
+DefRegion(3, XRange(-inf, (1-float64(nx)/2)*c).Intersect(ZRange(-inf, (float64(zSub)-float64(nz)/2)*c)))
+DefRegion(3, XRange((float64(nx)/2-1)*c, inf).Intersect(ZRange(-inf, (float64(zSub)-float64(nz)/2)*c)))
+
+// ---------------- material parameters ----------------
+// Si substrate (cubic), also in the Dirichlet cells (region 3)
+SetStiffnessCubicRegionNP(1, 166e9, 64e9, 79.6e9)
+SetStiffnessCubicRegionNP(3, 166e9, 64e9, 79.6e9)
+rho.SetRegion(1, 2329)
+rho.SetRegion(3, 2329)
+
+// Ni stripe (isotropic elasticity, E = 218 GPa, nu = 0.3)
+SetStiffnessIsotropicRegionNP(2, 218e9, 0.3)
+rho.SetRegion(2, 8900)
+Msat.SetRegion(2, 408e3)
+Aex.SetRegion(2, 7.7e-12)
+alpha.SetRegion(2, 0.05)
+lambda100.SetRegion(2, -4.6e-5)
+lambda111.SetRegion(2, -2.4e-5)
+
+// air: stiffness stays 0 (default); mask it out of the elastic update
+elasticMaskNP.SetRegion(0, 0)
+rho.SetRegion(0, 0)
+
+// phenomenological elastic damping (mumax convention: force = -eta*du,
+// eta_mumax = eta_magnumnp * rho; magnum.np example: eta = 1e6 1/s)
+eta = 2.3e9
+
+// Dirichlet displacement u = 0 in region 3
+frozenDispLoc.SetRegion(3, 1)
+frozenDispVal.SetRegion(3, vector(0, 0, 0))
+
+// ---------------- solver ----------------
+UseMagnumNPSolver(true) // = SetSolver(13)
+BoundaryNodesNP = 3
+IterationDepthNP = 1
+// magnetic window: the stripe (x cells and z cells, end exclusive)
+SetMagneticWindowNP((nx-MxCells)/2, (nx+MxCells)/2, -1, -1, zSub-MzCells, zSub)
+
+EnableDemag = false // keep the sanity check cheap; enable for physics runs
+
+// bias field along (1,1,0)/sqrt(2), ~64 mT
+m = Uniform(1, 1, 0)
+B_ext = vector(0.0455, 0.0455, 0)
+
+// ---------------- run ----------------
+TableAdd(E_total)
+TableAdd(U_elNP)
+TableAdd(T_elNP)
+TableAdd(E_melNP)
+TableAdd(GilbertDissNP)
+TableAutoSave(5e-12)
+
+AutoSave(u, 5e-11)
+AutoSave(du, 5e-11)
+AutoSave(F_elNP, 5e-11)
+AutoSave(B_melNP, 5e-11)
+
+// short dynamic run; the adaptive RKF45 controls dt (CFL estimate is logged)
+Run(2e-10)
+
+// expected qualitative outcome:
+//  - magnetostriction of the stripe deforms the substrate (u != 0 near the stripe)
+//  - traction-free behavior at the air interface (airbox, C=0 + iteration)
+//  - U_elNP settles towards a static value, du decays via eta
+Save(u)
+Save(du)
+Save(normStressNP)
+Save(shearStressNP)

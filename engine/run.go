@@ -109,6 +109,7 @@ const (
 	ELAS_LEAPFROG                = 10
 	ELAS_YOSH                    = 11
 	MAGELAS_RUNGEKUTTA_VARY_TIME = 12
+	MAGELAS_RKF45_NP             = 13 // magnum.np-style fully coupled solver (RKF45)
 )
 
 func SetSolver(typ int) {
@@ -150,6 +151,9 @@ func SetSolver(typ int) {
 		UseExcitation = false
 	case MAGELAS_RUNGEKUTTA_VARY_TIME:
 		stepper = new(magelasRK4_vary_time)
+		UseExcitation = false
+	case MAGELAS_RKF45_NP:
+		stepper = new(magelasNPRKF45)
 		UseExcitation = false
 	}
 	Solvertype = typ

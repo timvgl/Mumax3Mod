@@ -219,7 +219,11 @@ func RelaxCoupledOutput() {
 		Time = relaxTime
 	}
 
-	if varyTime == false {
+	if prevType == MAGELAS_RKF45_NP {
+		// keep the magnum.np-style solver selected by the user
+		// (magnum.np relaxes the same system with alpha = 1 and a high eta)
+		SetSolver(MAGELAS_RKF45_NP)
+	} else if varyTime == false {
 		SetSolver(MAGELAS_RUNGEKUTTA)
 	} else {
 		SetSolver(MAGELAS_RUNGEKUTTA_VARY_TIME)

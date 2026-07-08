@@ -116,3 +116,4 @@ cuda/*.ptx.a
 cmd/mumax3/script.mx3
 cmd/mumax3/script.out/log.txt
 cmd/mumax3/script.out/references.bib
+cuda/*.f_wrapper.go
