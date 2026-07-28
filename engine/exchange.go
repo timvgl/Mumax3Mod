@@ -14,12 +14,14 @@ import (
 )
 
 var (
-	Aex    = NewScalarParam("Aex", "J/m", "Exchange stiffness", &lex2)
-	Dind   = NewScalarParam("Dind", "J/m2", "Interfacial Dzyaloshinskii-Moriya strength", &din2)
-	Dbulk  = NewScalarParam("Dbulk", "J/m2", "Bulk Dzyaloshinskii-Moriya strength", &dbulk2)
-	lex2   exchParam // inter-cell Aex
-	din2   exchParam // inter-cell Dind
-	dbulk2 exchParam // inter-cell Dbulk
+	E          = NewExcitation("E", "V/m", "Electric field")
+	Aex        = NewScalarParam("Aex", "J/m", "Exchange stiffness", &lex2)
+	Dind       = NewScalarParam("Dind", "J/m2", "Interfacial Dzyaloshinskii-Moriya strength", &din2)
+	Dbulk      = NewScalarParam("Dbulk", "J/m2", "Bulk Dzyaloshinskii-Moriya strength", &dbulk2)
+	lex2       exchParam // inter-cell Aex
+	din2       exchParam // inter-cell Dind
+	dbulk2     exchParam // inter-cell Dbulk
+	ACExchange = false   // if true, use the AC exchange kernel (experimental)
 
 	B_exch     = NewVectorField("B_exch", "T", "Exchange field", AddExchangeField)
 	E_exch     = NewScalarValue("E_exch", "J", "Total exchange energy (including the DMI energy)", GetExchangeEnergy)
@@ -28,6 +30,8 @@ var (
 	// Average exchange coupling with neighbors. Useful to debug inter-region exchange
 	ExchCoupling = NewScalarField("ExchCoupling", "arb.", "Average exchange coupling with neighbors", exchangeDecode)
 	DindCoupling = NewScalarField("DindCoupling", "arb.", "Average DMI coupling with neighbors", dindDecode)
+
+	quantizationAxisMagnon = NewVectorParam("quantizationAxisMagnon", "arb.", "Quantization axis for magnonic calculations (default: 1,0,0)")
 
 	OpenBC = false
 )
@@ -41,6 +45,7 @@ func init() {
 	DeclFunc("ext_ScaleDind", ScaleInterDind, "Re-scales Dind coupling between two regions.")
 	DeclFunc("ext_InterDind", InterDind, "Sets Dind coupling between two regions.")
 	DeclVar("OpenBC", &OpenBC, "Use open boundary conditions (default=false)")
+	DeclVar("ACExchange", &ACExchange, "Use AC exchange kernel (experimental, default=false)")
 	lex2.init(Aex)
 	din2.init(Dind)
 	dbulk2.init(Dbulk)
@@ -51,10 +56,18 @@ func AddExchangeField(dst *data.Slice) {
 	inter := !Dind.isZero()
 	bulk := !Dbulk.isZero()
 	ms := Msat.MSlice()
+	E_field, _ := E.Slice()
+	QuantizationAxis := quantizationAxisMagnon.MSlice()
+	defer QuantizationAxis.Recycle()
 	defer ms.Recycle()
+	defer cuda.Recycle(E_field)
 	switch {
 	case !inter && !bulk:
-		cuda.AddExchange(dst, M.Buffer(), lex2.Gpu(), ms, regions.Gpu(), M.Mesh())
+		if ACExchange {
+			cuda.AddExchangeAC(dst, M.Buffer(), E_field, lex2.Gpu(), ms, QuantizationAxis, regions.Gpu(), M.Mesh(), float32(GammaLL/(math.Pow(299792458.0, 2))))
+		} else {
+			cuda.AddExchange(dst, M.Buffer(), lex2.Gpu(), ms, regions.Gpu(), M.Mesh())
+		}
 	case inter && !bulk:
 		Refer("mulkers2017")
 		cuda.AddDMI(dst, M.Buffer(), lex2.Gpu(), din2.Gpu(), ms, regions.Gpu(), M.Mesh(), OpenBC) // dmi+exchange
@@ -71,11 +84,19 @@ func AddExchangeFieldRegion(dst, m *data.Slice, useFullSample bool) {
 		inter := !Dind.isZero()
 		bulk := !Dbulk.isZero()
 		ms := Msat.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+		E_field, _ := E.SliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+		QuantizationAxis := quantizationAxisMagnon.MSliceRegion(dst.RegionSize(), dst.StartX, dst.StartY, dst.StartZ)
+		defer QuantizationAxis.Recycle()
 		defer ms.Recycle()
+		defer cuda.Recycle(E_field)
 		mesh := Crop(&M.varVectorField, dst.StartX, dst.EndX, dst.StartY, dst.EndY, dst.StartZ, dst.EndZ).Mesh()
 		switch {
 		case !inter && !bulk:
-			cuda.AddExchange(dst, m, lex2.Gpu(), ms, regions.Gpu(), mesh)
+			if ACExchange {
+				cuda.AddExchangeAC(dst, m, E_field, lex2.Gpu(), ms, QuantizationAxis, regions.Gpu(), mesh, float32(GammaLL/(math.Pow(299792458.0, 2))))
+			} else {
+				cuda.AddExchange(dst, m, lex2.Gpu(), ms, regions.Gpu(), mesh)
+			}
 		case inter && !bulk:
 			Refer("mulkers2017")
 			cuda.AddDMI(dst, m, lex2.Gpu(), din2.Gpu(), ms, regions.Gpu(), mesh, OpenBC) // dmi+exchange
