@@ -14,7 +14,6 @@ import (
 )
 
 var (
-	E          = NewExcitation("E", "V/m", "Electric field")
 	Aex        = NewScalarParam("Aex", "J/m", "Exchange stiffness", &lex2)
 	Dind       = NewScalarParam("Dind", "J/m2", "Interfacial Dzyaloshinskii-Moriya strength", &din2)
 	Dbulk      = NewScalarParam("Dbulk", "J/m2", "Bulk Dzyaloshinskii-Moriya strength", &dbulk2)

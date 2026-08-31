@@ -20,6 +20,7 @@ func SetEffectiveField(dst *data.Slice) {
 
 	AddExchangeField(dst) // ...then add other terms
 	AddAnisotropyField(dst)
+	AddAharonovCasherField(dst)
 	AddMagnetoelasticField(dst)
 	AddMagnetoelasticFieldNP(dst) // NP solver only (no-op otherwise)
 	dta, succeeded := B_ext.Slice()
@@ -44,6 +45,8 @@ func SetEffectiveFieldRegion(dst, m, u *data.Slice, useFullSample bool, pbcX, pb
 	AddExchangeFieldRegion(dst, m, useFullSample) // ...then add other terms
 	cuda.PrintBufLength()
 	AddAnisotropyFieldRegion(dst, m, useFullSample)
+	cuda.PrintBufLength()
+	AddAharonovCasherFieldRegion(dst, m, useFullSample)
 	cuda.PrintBufLength()
 	AddMagnetoelasticFieldRegion(dst, m, u, pbcX, pbcY, pbcZ, useFullSample)
 	cuda.PrintBufLength()
